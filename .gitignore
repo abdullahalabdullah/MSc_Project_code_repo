@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Environments
+.env
+.venv/
+venv/
+
+# HuggingFace model cache (large, not for git)
+hf_cache/
+*.safetensors
+*.bin
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Explicitly keep all pipeline outputs
+!MVP/outputs/
+!MVP/outputs/**
+!MVP/monitor_outputs/
+!MVP/monitor_outputs/**
+!MVP/analysis/
+!MVP/analysis/**
+!MVP/plots/
+!MVP/plots/**
+!MVP/data/
+!MVP/data/**
