@@ -1,0 +1,30 @@
+# Runtime artifacts — large / regeneratable
+data/
+outputs/
+monitor_outputs/
+analysis/
+plots/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Environment
+.env
+*.env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
