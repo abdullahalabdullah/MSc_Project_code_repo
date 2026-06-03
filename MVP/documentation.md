@@ -112,3 +112,97 @@ python scripts/06_extract_qualitative.py
 - **HAR denominator**: Computed only over hint-following runs within S; assertion guards against zero-denominator.
 - **Monitor**: GPT-4o at temperature=0 for determinism; exponential backoff (up to 5 retries) for rate-limit resilience.
 - **Prompt byte-for-byte consistency**: A single `build_user_content(item, include_hint)` function with an `include_hint` flag ensures hinted/unhinted prompts differ only in the inserted hint line.
+
+
+
+
+
+
+
+
+1. Provision the Pod on RunPod
+
+- GPU: A40 (48 GB)
+- Container disk: 30 GB
+- Volume disk: 30 GB
+- Template: any PyTorch/CUDA image (e.g. runpod/pytorch:2.1.0-py3.10-cuda11.8.0)
+
+---
+2. First-Time Setup (run once after the pod starts)
+
+# Pin HuggingFace cache to the persistent volume
+export HF_HOME=/workspace/hf_cache
+export OPENAI_API_KEY="sk-..."   # your OpenAI key for step 3
+
+# Clone your repo
+cd /workspace
+git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git
+cd YOUR_REPO/MVP
+
+# Install dependencies
+pip install -r requirements.txt
+
+Add both exports to ~/.bashrc so they survive a pod restart:
+echo 'export HF_HOME=/workspace/hf_cache' >> ~/.bashrc
+echo 'export OPENAI_API_KEY="sk-..."' >> ~/.bashrc
+
+---
+3. Prepare the Dataset (run once)
+
+python scripts/01_prepare_dataset.py
+
+Produces data/dataset_index.json — 200 MMLU instances with hint assignments.
+
+---
+4. Inference + Monitor — repeat for each of the 4 models
+
+Run this block once per model, in order. After each model finishes inference, delete its weights before downloading the next one (keeps volume under 30 GB).
+
+Model 1
+
+python scripts/02_run_inference.py --model tulu_sft_no_safety
+python scripts/03_run_monitor.py --model tulu_sft_no_safety
+rm -rf /workspace/hf_cache/hub/models--allenai--Llama-3.1-Tulu-3-8B-SFT-no-safety-data
+
+Model 2
+
+python scripts/02_run_inference.py --model tulu_sft_full
+python scripts/03_run_monitor.py --model tulu_sft_full
+rm -rf /workspace/hf_cache/hub/models--allenai--Llama-3.1-Tulu-3-8B-SFT
+
+Model 3
+
+python scripts/02_run_inference.py --model tulu_dpo
+python scripts/03_run_monitor.py --model tulu_dpo
+rm -rf /workspace/hf_cache/hub/models--allenai--Llama-3.1-Tulu-3-8B-DPO
+
+Model 4
+
+python scripts/02_run_inference.py --model tulu_final
+python scripts/03_run_monitor.py --model tulu_final
+rm -rf /workspace/hf_cache/hub/models--allenai--Llama-3.1-Tulu-3-8B
+
+▎ Step 03 calls GPT-4o via API — no GPU needed for it. Step 02 is the GPU-heavy step (~1–2 hours per model).
+
+---
+5. Metrics and Analysis (run once, after all 4 models are done)
+
+python scripts/04_compute_metrics.py
+python scripts/05_analyze.py
+python scripts/06_extract_qualitative.py
+
+---
+6. Save Your Outputs Before Deleting the Pod
+
+Your results live in /workspace/YOUR_REPO/MVP/outputs/, monitor_outputs/, analysis/, and plots/. Copy them off before terminating:
+
+# Option A — push to GitHub
+git add outputs/ monitor_outputs/ analysis/ plots/
+git commit -m "Add MVP results"
+git push
+
+# Option B — copy to your local machine (run this on your laptop, not the pod)
+scp -r root@<POD_IP>:/workspace/YOUR_REPO/MVP/outputs/ ./
+scp -r root@<POD_IP>:/workspace/YOUR_REPO/MVP/analysis/ ./
+
+Then terminate the pod on RunPod.

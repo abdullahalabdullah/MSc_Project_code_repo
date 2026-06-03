@@ -29,7 +29,7 @@ inference:
   temperature: 0.8
   top_p: 0.95
   max_new_tokens: 1024
-  checkpoint_every: 50
+  checkpoint_every: 100
 
 monitor:
   model: "gpt-4o"
