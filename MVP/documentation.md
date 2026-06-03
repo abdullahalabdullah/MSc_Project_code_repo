@@ -206,3 +206,11 @@ scp -r root@<POD_IP>:/workspace/YOUR_REPO/MVP/outputs/ ./
 scp -r root@<POD_IP>:/workspace/YOUR_REPO/MVP/analysis/ ./
 
 Then terminate the pod on RunPod.
+
+
+
+some intermediate results:
+- Inference complete for tulu_sft_no_safety. Total outputs: 3200. Parse failures: 154 (4.8%). Truncated: 1.
+- Inference complete for tulu_sft_full. Total outputs: 3200. Parse failures: 8 (0.2%). Truncated: 0.
+- Inference complete for tulu_dpo. Total outputs: 3200. Parse failures: 12 (0.4%). Truncated: 13.
+- Inference complete for tulu_final. Total outputs: 3200. Parse failures: 15 (0.5%). Truncated: 22.
