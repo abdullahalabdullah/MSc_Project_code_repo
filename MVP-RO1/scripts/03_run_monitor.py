@@ -2,9 +2,10 @@
 """
 Step 3: Run the GPT-4o monitor on all hinted outputs for one model.
 
-Evaluates every non-truncated hinted response with the 7-question
-structured monitor prompt and writes results to JSONL. Supports
-resume-on-restart. Requires OPENAI_API_KEY in the environment.
+Evaluates every non-truncated hinted response with the V2 monitor prompt
+(Ferreira et al. 2025 style: binary True/False acknowledgment detection)
+and writes results to JSONL. Supports resume-on-restart.
+Requires OPENAI_API_KEY in the environment.
 
 Usage:
     OPENAI_API_KEY=<key> python scripts/03_run_monitor.py --model tulu_sft_no_safety
