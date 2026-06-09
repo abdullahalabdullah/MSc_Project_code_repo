@@ -30,6 +30,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import yaml
 from openai import OpenAI
+from tqdm import tqdm
 from src.monitor import classify
 from src.metrics import load_jsonl
 
@@ -75,57 +76,57 @@ def main():
         print(f"Resuming: {len(done_keys)} monitor calls already done.")
 
     hinted_records = load_jsonl(hinted_path)
-    print(f"Loaded {len(hinted_records)} hinted records for {model_name}.")
+    pending = [
+        r for r in hinted_records
+        if (r["instance_id"], r["sample_idx"]) not in done_keys
+        and not r.get("truncated", False)
+        and r.get("parsed_answer") is not None
+    ]
+    print(f"Loaded {len(hinted_records)} hinted records for {model_name} "
+          f"({len(done_keys)} already done, {len(pending)} remaining).")
 
     failure_count = 0
     total = 0
 
     with open(out_path, "a", encoding="utf-8") as out_f:
-        for record in hinted_records:
-            key = (record["instance_id"], record["sample_idx"])
+        with tqdm(total=len(pending), unit="call", desc=model_name, dynamic_ncols=True) as pbar:
+            for record in pending:
+                result = classify(
+                    model_response=record["raw_output"],
+                    hint_answer=record["hint_target"],
+                    client=client,
+                    model=mon_cfg["model"],
+                    temperature=mon_cfg["temperature"],
+                    max_retries=mon_cfg.get("max_retries", 5),
+                    backoff_factor=mon_cfg.get("backoff_factor", 2.0),
+                    timeout=mon_cfg.get("timeout", 60),
+                )
 
-            if key in done_keys:
-                continue
+                output = {
+                    "instance_id": record["instance_id"],
+                    "sample_idx": record["sample_idx"],
+                    "hint_target": record["hint_target"],
+                    "followed_hint": record.get("followed_hint", False),
+                    "no_cot": record.get("no_cot", False),
+                    **{k: v for k, v in result.items() if k != "raw_response"},
+                    "raw_response": result.get("raw_response", ""),
+                }
+                out_f.write(json.dumps(output, ensure_ascii=False) + "\n")
+                out_f.flush()
 
-            # Skip unusable records
-            if record.get("truncated", False) or record.get("parsed_answer") is None:
-                continue
+                done_keys.add((record["instance_id"], record["sample_idx"]))
+                total += 1
 
-            result = classify(
-                full_cued_prompt=record["full_prompt"],
-                model_response=record["raw_output"],
-                hint_answer=record["hint_target"],
-                client=client,
-                model=mon_cfg["model"],
-                temperature=mon_cfg["temperature"],
-                max_retries=mon_cfg.get("max_retries", 5),
-                backoff_factor=mon_cfg.get("backoff_factor", 2.0),
-                timeout=mon_cfg.get("timeout", 60),
-            )
+                if result.get("parse_failure"):
+                    failure_count += 1
+                    tqdm.write(f"  Parse failure: instance {record['instance_id']}, sample {record['sample_idx']}")
 
-            output = {
-                "instance_id": record["instance_id"],
-                "sample_idx": record["sample_idx"],
-                "hint_target": record["hint_target"],
-                "followed_hint": record.get("followed_hint", False),
-                "no_cot": record.get("no_cot", False),
-                **{k: v for k, v in result.items() if k != "raw_response"},
-                "raw_response": result.get("raw_response", ""),
-            }
-            out_f.write(json.dumps(output, ensure_ascii=False) + "\n")
-            out_f.flush()
+                pbar.set_postfix(failures=failure_count)
+                pbar.update(1)
 
-            done_keys.add(key)
-            total += 1
-
-            if result.get("parse_failure"):
-                failure_count += 1
-                print(f"  Monitor parse failure: instance {record['instance_id']}, sample {record['sample_idx']}")
-
-            if total % 50 == 0:
-                with open(progress_path, "w") as pf:
-                    json.dump({"done_keys": [list(k) for k in done_keys]}, pf)
-                print(f"  Progress: {total} calls, {failure_count} parse failures.")
+                if total % 50 == 0:
+                    with open(progress_path, "w") as pf:
+                        json.dump({"done_keys": [list(k) for k in done_keys]}, pf)
 
     # Final progress save
     with open(progress_path, "w") as pf:
