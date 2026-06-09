@@ -1,11 +1,15 @@
 # Deep learning
-torch>=2.1.0
-transformers>=4.45.0
+# torch must be pinned to 2.4.x (cu121) — vLLM 0.6.3 breaks with 2.5+ on CUDA 12.8 hosts
+# install torch separately first:
+#   pip install torch==2.4.0 --index-url https://download.pytorch.org/whl/cu121
+torch==2.4.0
+# transformers must be <4.47 — newer versions use torch.float8_e8m0fnu which requires torch>=2.5
+transformers==4.46.3
 accelerate>=0.26.0
 sentencepiece>=0.1.99
 
 # Inference engine
-vllm>=0.6.0
+vllm==0.6.3
 
 # Dataset loading
 datasets>=2.18.0
