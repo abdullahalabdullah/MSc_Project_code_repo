@@ -4,7 +4,7 @@ dataset:
   split: "test"
   n_examples: 200
   max_per_subject: 5
-  random_seed: 42
+  random_seed: 7
 
 models:
   - name: "tulu_sft_no_safety"

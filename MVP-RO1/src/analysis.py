@@ -133,6 +133,91 @@ def plot_confusion_matrix(cm_data: dict, model_name: str, output_path: Path):
 
 
 # ---------------------------------------------------------------------------
+# TE distribution
+# ---------------------------------------------------------------------------
+
+def plot_te_distribution(
+    per_instance: list,
+    output_path: Path,
+    delta_5pct: float = 0.05,
+    delta_25pct: float = 0.20,
+):
+    """
+    Bar chart of TE_i per example, sorted ascending by TE value.
+    Horizontal lines mark the 5% and 25% thresholds.
+    """
+    te_values = sorted(r["te_i"] for r in per_instance)
+    n = len(te_values)
+    mean_te = float(np.mean(te_values))
+    var_te  = float(np.var(te_values))
+    std_te  = float(np.std(te_values))
+
+    fig, ax = plt.subplots(figsize=(13, 5))
+    ax.bar(range(n), te_values, width=1.0, color="#1f77b4", alpha=0.70, linewidth=0)
+    ax.axhline(y=delta_5pct,  color="#ff7f0e", linestyle="--", linewidth=1.6,
+               label=f"5% threshold (δ={delta_5pct:.2f})")
+    ax.axhline(y=delta_25pct, color="#d62728", linestyle="-",  linewidth=1.6,
+               label=f"25% threshold (δ={delta_25pct:.2f})")
+    ax.axhline(y=mean_te,     color="black",   linestyle=":",  linewidth=1.4,
+               label=f"Population mean TE = {mean_te:.3f}")
+
+    ax.set_xlabel("Example (sorted by TE)", fontsize=12)
+    ax.set_ylabel("TE$_i$", fontsize=12)
+    ax.set_title(
+        f"TE distribution over all examples  "
+        f"(n={n},  mean={mean_te:.3f},  var={var_te:.4f},  std={std_te:.4f})",
+        fontsize=12,
+    )
+    ax.legend(fontsize=10)
+    ax.set_xlim(-1, n)
+    ax.grid(True, alpha=0.3, axis="y")
+
+    plt.tight_layout()
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    plt.savefig(output_path, dpi=150)
+    plt.close()
+
+    return {"mean_TE": mean_te, "var_TE": var_te, "std_TE": std_te}
+
+
+# ---------------------------------------------------------------------------
+# CoT length distribution
+# ---------------------------------------------------------------------------
+
+def plot_cot_length_distribution(per_instance: list, output_path: Path):
+    """
+    Histogram of mean CoT token lengths per instance, hinted vs unhinted overlay.
+    """
+    h_lens = [r["mean_cot_tokens_hinted"]   for r in per_instance if r.get("mean_cot_tokens_hinted")   is not None]
+    u_lens = [r["mean_cot_tokens_unhinted"]  for r in per_instance if r.get("mean_cot_tokens_unhinted") is not None]
+
+    if not h_lens and not u_lens:
+        return
+
+    all_vals = h_lens + u_lens
+    bins = np.linspace(min(all_vals), max(all_vals), 30)
+
+    fig, ax = plt.subplots(figsize=(10, 5))
+    if h_lens:
+        ax.hist(h_lens, bins=bins, alpha=0.6, color="#1f77b4",
+                label=f"Hinted  (mean={np.mean(h_lens):.1f}, std={np.std(h_lens):.1f})")
+    if u_lens:
+        ax.hist(u_lens, bins=bins, alpha=0.6, color="#ff7f0e",
+                label=f"Unhinted (mean={np.mean(u_lens):.1f}, std={np.std(u_lens):.1f})")
+
+    ax.set_xlabel("Mean CoT length (tokens per instance)", fontsize=12)
+    ax.set_ylabel("Count", fontsize=12)
+    ax.set_title("CoT token length distribution — hinted vs unhinted", fontsize=13)
+    ax.legend(fontsize=10)
+    ax.grid(True, alpha=0.3, axis="y")
+
+    plt.tight_layout()
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    plt.savefig(output_path, dpi=150)
+    plt.close()
+
+
+# ---------------------------------------------------------------------------
 # TE vs. ack scatter
 # ---------------------------------------------------------------------------
 

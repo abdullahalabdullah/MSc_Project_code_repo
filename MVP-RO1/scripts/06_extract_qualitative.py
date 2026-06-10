@@ -118,10 +118,7 @@ def main():
                 "raw_output": rec["raw_output"],
                 "parsed_answer": rec["parsed_answer"],
                 "monitor_label": mon.get("label", "N/A"),
-                "monitor_summary": mon.get("summary", "N/A"),
-                "monitor_q_answers": {
-                    f"q{i}": mon.get(f"q{i}") for i in range(1, 8)
-                },
+                "monitor_reasoning": mon.get("reasoning", "N/A"),
             })
 
             if len(candidates) >= args.n:
@@ -145,8 +142,7 @@ def main():
                 f.write(f"Hint target : {ex['hint_target']}\n")
                 f.write(f"Model answer: {ex['parsed_answer']}\n")
                 f.write(f"Monitor verdict: {ex['monitor_label']}\n")
-                f.write(f"Monitor Q answers: {ex['monitor_q_answers']}\n")
-                f.write(f"Monitor summary: {ex['monitor_summary']}\n\n")
+                f.write(f"Monitor reasoning: {ex['monitor_reasoning']}\n\n")
                 f.write("--- FULL PROMPT ---\n")
                 f.write(ex["full_prompt"])
                 f.write("\n\n--- MODEL RESPONSE ---\n")
