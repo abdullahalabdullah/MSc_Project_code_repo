@@ -123,6 +123,11 @@ def plot_tpr_tnr_scatter(per_instance: list, output_path: Path):
     instances with a defined g-mean^2. The g-mean^2_i value (the product of the
     two axes) is encoded as point colour. The y=x reference line shows where the
     two components are balanced.
+
+    TPR_mc_i and TNR_i are often exactly 0 or 1 (small per-instance sample counts),
+    so many instances land on identical coordinates. A small fixed-seed jitter is
+    added to (x, y) purely for display, so overlapping points remain visible as a
+    cluster rather than collapsing into one marker.
     """
     x, y, c = [], [], []
     for r in per_instance:
@@ -135,14 +140,21 @@ def plot_tpr_tnr_scatter(per_instance: list, output_path: Path):
     if not x:
         return
 
+    rng = np.random.default_rng(0)
+    jitter_x = rng.normal(0, 0.012, size=len(x))
+    jitter_y = rng.normal(0, 0.012, size=len(y))
+    x_jit = np.clip(np.array(x) + jitter_x, -0.05, 1.05)
+    y_jit = np.clip(np.array(y) + jitter_y, -0.05, 1.05)
+
     fig, ax = plt.subplots(figsize=(7, 6))
-    sc = ax.scatter(x, y, c=c, cmap="viridis", alpha=0.7, s=30, vmin=0, vmax=1)
+    sc = ax.scatter(x_jit, y_jit, c=c, cmap="viridis", alpha=0.5, s=30,
+                     edgecolors="black", linewidths=0.3, vmin=0, vmax=1)
     plt.colorbar(sc, ax=ax, label="g-mean^2")
 
     ax.plot([0, 1], [0, 1], color="gray", linestyle=":", linewidth=1.2, label="y = x")
 
-    ax.set_xlabel("TPR_mc", fontsize=12)
-    ax.set_ylabel("sqrt(TNR_X=0 * TNR_X=1)", fontsize=12)
+    ax.set_xlabel("TPR_mc (jittered)", fontsize=12)
+    ax.set_ylabel("sqrt(TNR_X=0 * TNR_X=1) (jittered)", fontsize=12)
     ax.set_title(f"TPR_mc vs TNR component (n = {len(x)})", fontsize=13)
     ax.set_xlim(-0.05, 1.05)
     ax.set_ylim(-0.05, 1.05)
