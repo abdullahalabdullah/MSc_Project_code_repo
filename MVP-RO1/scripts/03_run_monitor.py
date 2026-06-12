@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 """
-Step 3: Run the GPT-4o monitor on all hinted outputs for one model.
+Step 3: Run the monitor on all hinted AND unhinted outputs for one model.
 
-Evaluates every non-truncated hinted response with the V2 monitor prompt
-(Ferreira et al. 2025 style: binary True/False acknowledgment detection)
-and writes results to JSONL. Supports resume-on-restart.
+For the g-mean^2 metric, the monitor must be run on both arms:
+  - hinted.jsonl   (X=1, intervention) — arm="hinted"
+  - unhinted.jsonl (X=0, control)      — arm="unhinted"
+
+using the same prompt template (_MONITOR_PROMPT_TEMPLATE_2, see src/monitor.py).
+The monitor is always told the instance's hint_target, even for unhinted
+responses, so that TNR_X=0 / TNR_X=1 are comparable. Supports resume-on-restart.
 Requires OPENAI_API_KEY in the environment.
 
 Usage:
@@ -15,6 +19,7 @@ Usage:
 
 Input:
     outputs/{model_name}/hinted.jsonl
+    outputs/{model_name}/unhinted.jsonl
 
 Output:
     monitor_outputs/{model_name}/monitor_results.jsonl
@@ -33,11 +38,11 @@ import yaml
 from openai import OpenAI
 from tqdm import tqdm
 from src.monitor import classify
-from src.metrics import load_jsonl
+from src.gmean2_metrics import load_jsonl
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Run GPT-4o monitor for one model.")
+    parser = argparse.ArgumentParser(description="Run monitor (both arms) for one model.")
     parser.add_argument("--model", required=True,
                         help="Model name as defined in config (e.g. tulu_sft_no_safety)")
     parser.add_argument("--config", default="config/mvp_config.yaml")
@@ -58,9 +63,11 @@ def main():
     mon_cfg = config["monitor"]
     model_name = args.model
 
-    hinted_path = root / config["paths"]["outputs_dir"] / model_name / "hinted.jsonl"
-    if not hinted_path.exists():
-        print(f"ERROR: {hinted_path} not found. Run 02_run_inference.py first.")
+    out_dir = root / config["paths"]["outputs_dir"] / model_name
+    hinted_path = out_dir / "hinted.jsonl"
+    unhinted_path = out_dir / "unhinted.jsonl"
+    if not hinted_path.exists() or not unhinted_path.exists():
+        print(f"ERROR: {hinted_path} or {unhinted_path} not found. Run 02_run_inference.py first.")
         sys.exit(1)
 
     mon_dir = root / config["paths"]["monitor_outputs_dir"] / model_name
@@ -68,7 +75,7 @@ def main():
     out_path = mon_dir / "monitor_results.jsonl"
     progress_path = mon_dir / "monitor_progress.json"
 
-    # Resume: load already-processed (instance_id, sample_idx) pairs
+    # Resume: load already-processed (instance_id, sample_idx, arm) triples
     done_keys: set = set()
     if progress_path.exists():
         with open(progress_path) as f:
@@ -77,14 +84,17 @@ def main():
         print(f"Resuming: {len(done_keys)} monitor calls already done.")
 
     hinted_records = load_jsonl(hinted_path)
+    unhinted_records = load_jsonl(unhinted_path)
+    all_records = hinted_records + unhinted_records
+
     pending = [
-        r for r in hinted_records
-        if (r["instance_id"], r["sample_idx"]) not in done_keys
+        r for r in all_records
+        if (r["instance_id"], r["sample_idx"], r["arm"]) not in done_keys
         and not r.get("truncated", False)
         and r.get("parsed_answer") is not None
     ]
-    print(f"Loaded {len(hinted_records)} hinted records for {model_name} "
-          f"({len(done_keys)} already done, {len(pending)} remaining).")
+    print(f"Loaded {len(hinted_records)} hinted + {len(unhinted_records)} unhinted records "
+          f"for {model_name} ({len(done_keys)} already done, {len(pending)} remaining).")
 
     failure_count = 0
     total = 0
@@ -106,6 +116,7 @@ def main():
                 output = {
                     "instance_id": record["instance_id"],
                     "sample_idx": record["sample_idx"],
+                    "arm": record["arm"],
                     "hint_target": record["hint_target"],
                     "followed_hint": record.get("followed_hint", False),
                     "no_cot": record.get("no_cot", False),
@@ -115,12 +126,13 @@ def main():
                 out_f.write(json.dumps(output, ensure_ascii=False) + "\n")
                 out_f.flush()
 
-                done_keys.add((record["instance_id"], record["sample_idx"]))
+                done_keys.add((record["instance_id"], record["sample_idx"], record["arm"]))
                 total += 1
 
                 if result.get("parse_failure"):
                     failure_count += 1
-                    tqdm.write(f"  Parse failure: instance {record['instance_id']}, sample {record['sample_idx']}")
+                    tqdm.write(f"  Parse failure: instance {record['instance_id']}, "
+                               f"sample {record['sample_idx']}, arm {record['arm']}")
 
                 pbar.set_postfix(failures=failure_count)
                 pbar.update(1)
