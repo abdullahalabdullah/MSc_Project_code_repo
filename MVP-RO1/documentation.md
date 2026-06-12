@@ -52,6 +52,7 @@ MVP-RO1/
 │   ├── 03_run_monitor.py         Writes monitor_outputs/{model}/*.jsonl (both arms)
 │   ├── 04_compute_gmean2.py      Writes analysis/{model}/gmean2_*.{csv,json,md}
 │   ├── 05_analyze_gmean2.py      Writes plots/*.png + plots/gmean2_summary_table.json
+│   ├── 06_export_excel.py        Writes analysis/qualitative_export.xlsx (per-instance records)
 │   └── 07_estimate_accuracy.py   Writes analysis/{model}/accuracy_runs.jsonl + accuracy_summary.json
 ├── old-scripts/                  Archived pre-g-mean² pipeline (TE/HAR/δ-threshold)
 ├── data/                          gitignored — dataset_index.json lives here
@@ -703,6 +704,58 @@ Combined output:
 
 ---
 
+### `06_export_excel.py`
+
+**Run after `02_run_inference.py` (and, optionally, `03_run_monitor.py`).**
+Does not require `04_compute_gmean2.py` to have been run first — it calls
+`compute_gmean2` internally to get the per-example metrics.
+
+```bash
+python scripts/06_export_excel.py                              # all models, one workbook
+python scripts/06_export_excel.py --model tulu_sft_no_safety   # single model
+python scripts/06_export_excel.py --output analysis/my_export.xlsx
+```
+
+Builds one row per generated sample (every row of `hinted.jsonl` and
+`unhinted.jsonl`, across all models unless `--model` is given) and writes a
+multi-sheet `.xlsx` workbook for qualitative review. Each row combines:
+
+- the dataset item (`question`, `choice_A`–`choice_D`, `correct_answer`, `hint_target`)
+- the model's response (`arm`, `sample_idx`, `seed`, `raw_output`, `cot`,
+  `parsed_answer`, `followed_hint`, `no_cot`, `truncated`, `token_count`)
+- the monitor's verdict for that exact sample (`monitor_acknowledged`,
+  `monitor_label`, `monitor_reasoning`, `monitor_raw_response`,
+  `monitor_parse_failure`) — blank if `monitor_results.jsonl` doesn't exist
+- the **per-example** g-mean² metrics (`te_i`, `r_effect_i`, `p1_i`, `p0_i`,
+  `tpr_mc_i`, `tnr_x0_i`, `tnr_x1_i`, `gmean2_i`, `acc_u_i`, `level1_pass`, ...)
+  — these are constant per `instance_id` and are **repeated on every sample
+  row of that instance**, since they are defined at the example level, not
+  the per-sample level (see `src/gmean2_metrics.compute_gmean2`).
+
+Each row is tagged with a `category`, which determines which sheet(s) it
+appears in (in addition to `All_Records`):
+
+| Category | Meaning |
+|---|---|
+| `Hinted_Followed_Verbalised` | X=1, hint followed, monitor said Z=1 (hint use acknowledged in CoT) |
+| `Hinted_Followed_NotVerbalised` | X=1, hint followed, monitor said Z=0 (hint use *not* acknowledged) |
+| `Hinted_Followed_MonitorMissing` | X=1, hint followed, no monitor verdict available |
+| `Hinted_Hint_Not_Followed` | X=1, hint not followed (resisted) |
+| `Unhinted_Control` | X=0 (control arm) |
+| `Invalid_Truncated` | Truncated or unparseable response (excluded from g-mean² calc) |
+
+Output workbook sheets:
+- `All_Records` — every sample row, all models
+- One sheet per category above (filtered subset of `All_Records`)
+- `Per_Example_Summary` — one row per `(model, instance_id)` with the dataset
+  item and all per-example g-mean² metrics, for a quick cross-instance view
+
+Output path: `analysis/qualitative_export.xlsx` (all models), or
+`analysis/{model}/qualitative_export.xlsx` with `--model`, or a custom path
+via `--output`.
+
+---
+
 ### `07_estimate_accuracy.py`
 
 **Run independently (requires GPU / vLLM). Can be run alongside or after step 02.**
@@ -764,6 +817,11 @@ cais/mmlu (HuggingFace)
         |
    plots/{model}_gmean2_*.png
    plots/gmean2_summary_table.json
+
+   06_export_excel.py  (reads outputs/ + monitor_outputs/ + dataset_index.json;
+                         calls compute_gmean2 directly, independent of 04/05)
+        |
+   analysis/qualitative_export.xlsx
 
    07_estimate_accuracy.py  [× 4 models, GPU, independent of steps 03–05]
         |
@@ -836,11 +894,12 @@ rm -rf $HF_HOME/hub/models--allenai--Llama-3.1-Tulu-3-8B
 Step 02 is GPU-bound (~1–2 hours per model on A40).
 Step 03 is API-bound (~40–80 minutes per model, both arms).
 
-### 5. Metrics and plots
+### 5. Metrics, plots, and qualitative export
 
 ```bash
 python scripts/04_compute_gmean2.py
 python scripts/05_analyze_gmean2.py
+python scripts/06_export_excel.py
 ```
 
 ### 6. (Optional) Accuracy diagnostic
@@ -879,7 +938,12 @@ regenerated locally without GPU or `OPENAI_API_KEY`:
 cd MVP-RO1
 python scripts/04_compute_gmean2.py
 python scripts/05_analyze_gmean2.py
+python scripts/06_export_excel.py
 ```
+
+`06_export_excel.py` only needs `outputs/{model}/*.jsonl`,
+`monitor_outputs/{model}/monitor_results.jsonl`, and `data/dataset_index.json` —
+it can also be run on its own (e.g. after only some models have monitor results).
 
 ---
 

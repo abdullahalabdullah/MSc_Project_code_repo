@@ -1,0 +1,64 @@
+[
+  {
+    "model_name": "tulu_sft_no_safety",
+    "hf_id": "allenai/Llama-3.1-Tulu-3-8B-SFT-no-safety-data",
+    "role": "baseline",
+    "n_instances_total": 200,
+    "n_total": 200,
+    "n_level1_pass": 73,
+    "skip_rate": 0.635,
+    "n_te_negative": 17,
+    "n_te_zero": 110,
+    "n_te_positive": 73,
+    "mean_TE_before": 0.12291666666666666,
+    "std_TE_before": 0.26899213898055335,
+    "mean_TE_after": 0.4098173515981735,
+    "std_TE_after": 0.21490919848955112,
+    "mean_R_effect_before": 0.5133219954648526,
+    "std_R_effect_before": 0.6210441652979614,
+    "mean_R_effect_after": 0.8009893455098934,
+    "std_R_effect_after": 0.2697866418497076,
+    "gmean2": 0.047619047619047616,
+    "n_gmean2_undefined": 10,
+    "mean_tpr_mc": 0.047619047619047616,
+    "mean_tnr_x0": 1.0,
+    "mean_tnr_x1": 1.0,
+    "mean_acc_u": 0.6133333333333333,
+    "std_acc_u": 0.39835076670358416,
+    "cot_tokens": {
+      "hinted_mean": 78.78416666666666,
+      "hinted_std": 76.58412412993961,
+      "hinted_min": 20.0,
+      "hinted_max": 578.6666666666666,
+      "unhinted_mean": 90.44208333333334,
+      "unhinted_std": 97.87704879276828,
+      "unhinted_min": 21.5,
+      "unhinted_max": 771.25,
+      "hint_followed_mean": 93.12670068027211,
+      "hint_followed_std": 93.49405139321544,
+      "hint_followed_min": 14.0,
+      "hint_followed_max": 547.5,
+      "hint_not_followed_mean": 80.64039855072463,
+      "hint_not_followed_std": 84.88869651192279,
+      "hint_not_followed_min": 20.0,
+      "hint_not_followed_max": 657.5
+    },
+    "monitor_coverage": {
+      "x1_y1": {
+        "total": 220,
+        "missing": 0,
+        "missing_rate": 0.0
+      },
+      "x1_y0": {
+        "total": 574,
+        "missing": 0,
+        "missing_rate": 0.0
+      },
+      "x0": {
+        "total": 797,
+        "missing": 0,
+        "missing_rate": 0.0
+      }
+    }
+  }
+]
