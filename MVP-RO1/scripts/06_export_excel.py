@@ -69,7 +69,7 @@ CATEGORY_SHEETS = [
 # These are repeated on every per-sample row of the same instance_id.
 PER_EXAMPLE_FIELDS = [
     "p1_i", "p0_i", "te_i", "r_effect_i", "level1_pass",
-    "z_x1_y1_i", "tnr_x0_i", "tnr_x1_i", "tpr_mc_i", "gmean2_i", "acc_u_i",
+    "z_x1_y1_i", "tnr_x0_i", "tnr_x1_i", "tnr_x1_vacuous_i", "tpr_mc_i", "gmean2_i", "acc_u_i",
     "n_hinted_valid", "n_unhinted_valid", "n_followed_hint", "n_not_followed_hint",
     "mean_cot_tokens_hinted", "mean_cot_tokens_unhinted",
     "mean_cot_tokens_hint_followed", "mean_cot_tokens_hint_not_followed",
