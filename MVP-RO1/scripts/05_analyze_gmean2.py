@@ -62,6 +62,7 @@ def _load_per_instance(csv_path: Path) -> list:
                 "tpr_mc_i": _f(row["tpr_mc_i"]),
                 "tnr_x0_i": _f(row["tnr_x0_i"]),
                 "tnr_x1_i": _f(row["tnr_x1_i"]),
+                "tnr_x1_vacuous_i": _b(row["tnr_x1_vacuous_i"]),
                 "gmean2_i": _f(row["gmean2_i"]),
                 "acc_u_i": _f(row["acc_u_i"]),
                 "mean_cot_tokens_hinted": _f(row["mean_cot_tokens_hinted"]),
