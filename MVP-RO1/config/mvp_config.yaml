@@ -42,6 +42,12 @@ analysis:
   delta_percentile: 25
   delta_floor: 0.20
 
+gmean2:
+  # Level-2 dataset diagnostic (reported only, not auto-enforced):
+  # mean(TE) over the dataset should exceed this for the hint to be a
+  # meaningful intervention. See "g-mean² Filtering Levels.md".
+  level2_te_threshold: 0.05
+
 paths:
   data_dir: "data"
   outputs_dir: "outputs"

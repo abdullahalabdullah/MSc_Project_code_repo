@@ -36,7 +36,8 @@ MVP-RO1/
 │   ├── 03_run_monitor.py        Writes monitor_outputs/{model}/*.jsonl
 │   ├── 04_compute_metrics.py    Writes analysis/{model}/*.csv + *.json
 │   ├── 05_analyze.py            Writes plots/*.png + plots/summary_table.json
-│   └── 06_extract_qualitative.py Writes plots/{model}_qualitative.txt
+│   ├── 06_extract_qualitative.py Writes plots/{model}_qualitative.txt
+│   └── 07_estimate_accuracy.py  Writes analysis/{model}/accuracy_runs.jsonl + accuracy_summary.json
 ├── data/                        gitignored — dataset_index.json lives here
 ├── outputs/                     gitignored — raw JSONL generations
 ├── monitor_outputs/             gitignored — raw monitor API responses
@@ -714,6 +715,35 @@ the scatter is a visual guide only.
 python scripts/06_extract_qualitative.py [--n 15]
 ```
 
+---
+
+### `07_estimate_accuracy.py`
+
+**Run independently (requires GPU / vLLM). Can be run alongside or after step 02.**
+
+```bash
+python scripts/07_estimate_accuracy.py --model tulu_sft_no_safety
+python scripts/07_estimate_accuracy.py --model tulu_sft_no_safety --n 32 --seed 2000
+```
+
+Runs the unhinted prompt `--n` times (default 32) for every instance and records:
+- **Per instance:** the parsed answer letter from each run (null if unparseable),
+  the number of valid (non-truncated, parseable) runs, the number correct, and
+  per-instance accuracy = `n_correct / n_valid`.
+- **Dataset level:** macro accuracy (mean of per-instance accuracies, each instance
+  weighted equally) and micro/pooled accuracy (all valid runs pooled).
+
+Uses `base_seed=2000` by default, distinct from the main inference runs (`base_seed=42`),
+so the 32 accuracy runs are independent samples. Supports resume: completed instances
+are recorded in `accuracy_progress.json` and skipped on restart.
+
+Output:
+- `analysis/{model}/accuracy_runs.jsonl` — one record per instance; fields:
+  `instance_id`, `question_id`, `correct_answer`, `answers` (list of N letters),
+  `n_total`, `n_valid`, `n_correct`, `accuracy`
+- `analysis/{model}/accuracy_summary.json` — dataset-level summary with
+  `mean_accuracy` (macro), `pooled_accuracy` (micro), run counts, and seed info
+
 Finds up to `--n` instances in S where the model followed the hint but was **not**
 acknowledged (the covert failure mode). Outputs one example per instance (to avoid
 multiple samples for the same question overwhelming the report). Sorts by TE_i
@@ -752,6 +782,11 @@ cais/mmlu (HuggingFace)
    05_analyze.py  +  06_extract_qualitative.py
         |
    plots/
+
+   07_estimate_accuracy.py  [× 4 models, GPU, independent of steps 03–06]
+        |
+   analysis/{model}/accuracy_runs.jsonl
+   analysis/{model}/accuracy_summary.json
 ```
 
 ---

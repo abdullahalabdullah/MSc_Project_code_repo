@@ -133,51 +133,113 @@ def plot_confusion_matrix(cm_data: dict, model_name: str, output_path: Path):
 
 
 # ---------------------------------------------------------------------------
-# TE distribution
+# TE binned histogram (fixed-width bins)
 # ---------------------------------------------------------------------------
 
-def plot_te_distribution(
+def plot_te_binned_histogram(
     per_instance: list,
     output_path: Path,
-    delta_5pct: float = 0.05,
-    delta_25pct: float = 0.20,
+    bin_width: float = 0.2,
+    deltas: tuple = (0.05, 0.20),
 ):
     """
-    Bar chart of TE_i per example, sorted ascending by TE value.
-    Horizontal lines mark the 5% and 25% thresholds.
+    Histogram of per-instance TE values using fixed-width bins (default 0.2).
+
+    Bins span from -1.0 to 1.0 in steps of `bin_width`. Bars are coloured
+    red for bins whose centre is negative (hint-repelled) and blue otherwise.
+    Each bar is annotated with its count. Vertical dashed lines mark the
+    same delta thresholds as the ECDF figure for visual consistency.
     """
-    te_values = sorted(r["te_i"] for r in per_instance)
-    n = len(te_values)
-    mean_te = float(np.mean(te_values))
-    var_te  = float(np.var(te_values))
-    std_te  = float(np.std(te_values))
+    te = np.array([r["te_i"] for r in per_instance])
+    n = len(te)
 
-    fig, ax = plt.subplots(figsize=(13, 5))
-    ax.bar(range(n), te_values, width=1.0, color="#1f77b4", alpha=0.70, linewidth=0)
-    ax.axhline(y=delta_5pct,  color="#ff7f0e", linestyle="--", linewidth=1.6,
-               label=f"5% threshold (δ={delta_5pct:.2f})")
-    ax.axhline(y=delta_25pct, color="#d62728", linestyle="-",  linewidth=1.6,
-               label=f"25% threshold (δ={delta_25pct:.2f})")
-    ax.axhline(y=mean_te,     color="black",   linestyle=":",  linewidth=1.4,
-               label=f"Population mean TE = {mean_te:.3f}")
+    # Build bin edges covering [-1, 1] with clean multiples of bin_width.
+    # Add a small epsilon so np.arange reliably includes the 1.0 + bin_width endpoint
+    # despite floating-point truncation (np.arange(-1.0, 1.2, 0.2) may stop at 1.0).
+    edges = np.arange(-1.0, 1.0 + bin_width + 1e-9, bin_width)
+    counts, edges = np.histogram(te, bins=edges)
+    centers = (edges[:-1] + edges[1:]) / 2
 
-    ax.set_xlabel("Example (sorted by TE)", fontsize=12)
-    ax.set_ylabel("TE$_i$", fontsize=12)
-    ax.set_title(
-        f"TE distribution over all examples  "
-        f"(n={n},  mean={mean_te:.3f},  var={var_te:.4f},  std={std_te:.4f})",
-        fontsize=12,
+    # Per-bin mean ack_i (only for TE >= 0 bins)
+    bin_indices = np.digitize(te, edges) - 1  # bin index for each instance
+    bin_indices = np.clip(bin_indices, 0, len(counts) - 1)
+    bin_mean_har = {}
+    for bi, center in enumerate(centers):
+        if center < 0:
+            continue
+        ack_vals = [
+            r["ack_i"] for r, idx in zip(per_instance, bin_indices)
+            if idx == bi and r.get("ack_i") is not None
+        ]
+        bin_mean_har[bi] = float(np.mean(ack_vals)) if ack_vals else None
+
+    colors = ["#d62728" if c < 0 else "#1f77b4" for c in centers]
+
+    fig, ax = plt.subplots(figsize=(11, 5))
+    bars = ax.bar(centers, counts, width=bin_width * 0.88,
+                  color=colors, alpha=0.80, linewidth=0.5, edgecolor="white")
+
+    # Annotate each non-zero bar with its count (above bar) and mean HAR (inside bar, TE>=0 only)
+    for bi, (bar, count) in enumerate(zip(bars, counts)):
+        if count == 0:
+            continue
+        # Count label above the bar
+        ax.text(
+            bar.get_x() + bar.get_width() / 2,
+            bar.get_height() + 0.5,
+            str(count),
+            ha="center", va="bottom", fontsize=9,
+        )
+        # Mean HAR label inside the bar, TE >= 0 bins only
+        if bi in bin_mean_har and bin_mean_har[bi] is not None:
+            ax.text(
+                bar.get_x() + bar.get_width() / 2,
+                bar.get_height() / 2,
+                f"HAR={bin_mean_har[bi]:.3f}",
+                ha="center", va="center", fontsize=8.5,
+                color="black", fontweight="bold",
+            )
+
+    # Twin y-axis for fraction
+    ax2 = ax.twinx()
+    ax2.set_ylim(ax.get_ylim()[0] / n, ax.get_ylim()[1] / n)
+    ax2.set_ylabel("Fraction of instances", fontsize=11)
+
+    # Delta reference lines — same colours as ECDF figure
+    delta_colors = ["#ff7f0e", "#d62728"]
+    for delta, color in zip(deltas, delta_colors):
+        n_selected = int((te >= delta).sum())
+        pct = 100 * n_selected / n
+        ax.axvline(x=delta, color=color, linestyle="--", linewidth=1.5,
+                   label=f"δ = {delta:.2f}  ({pct:.1f}% of instances)")
+
+    # Legend patches for bar colours
+    import matplotlib.patches as mpatches
+    ax.legend(
+        handles=[
+            mpatches.Patch(color="#d62728", alpha=0.80, label="TE < 0  (hint-repelled)"),
+            mpatches.Patch(color="#1f77b4", alpha=0.80, label="TE ≥ 0"),
+            *[ax.get_legend_handles_labels()[0][i] for i in range(len(deltas))],
+        ],
+        fontsize=9,
     )
-    ax.legend(fontsize=10)
-    ax.set_xlim(-1, n)
+
+    ax.set_xlabel("TE per instance", fontsize=12)
+    ax.set_ylabel("Number of instances", fontsize=12)
+    ax.set_title(
+        f"Distribution of per-instance treatment effects  "
+        f"(n = {n},  bin width = {bin_width})",
+        fontsize=13,
+    )
+    ax.set_xlim(edges[0] - bin_width * 0.5, edges[-1] + bin_width * 0.5)
+    ax.set_xticks(edges)
+    ax.set_xticklabels([f"{e:.1f}" for e in edges], fontsize=8, rotation=45, ha="right")
     ax.grid(True, alpha=0.3, axis="y")
 
     plt.tight_layout()
     output_path.parent.mkdir(parents=True, exist_ok=True)
     plt.savefig(output_path, dpi=150)
     plt.close()
-
-    return {"mean_TE": mean_te, "var_TE": var_te, "std_TE": std_te}
 
 
 # ---------------------------------------------------------------------------

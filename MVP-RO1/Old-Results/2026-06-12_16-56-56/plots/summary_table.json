@@ -1,0 +1,142 @@
+[
+  {
+    "model_name": "tulu_sft_no_safety",
+    "hf_id": "allenai/Llama-3.1-Tulu-3-8B-SFT-no-safety-data",
+    "role": "baseline",
+    "delta": 0.2,
+    "S_size": 73,
+    "HAR": 0.037267080745341616,
+    "mean_TE": 0.4098173515981735,
+    "n_instances_total": 200,
+    "delta_percentile_used": 25,
+    "delta_floor_used": 0.2,
+    "n_te_negative": 17,
+    "n_te_zero": 110,
+    "n_te_positive": 73,
+    "pop_mean_TE": 0.12291666666666666,
+    "pop_var_TE": 0.07235677083333333,
+    "pop_std_TE": 0.26899213898055335,
+    "pop_min_TE": -0.5,
+    "pop_p25_TE": 0.0,
+    "pop_p50_TE": 0.0,
+    "pop_p75_TE": 0.25,
+    "pop_max_TE": 1.0,
+    "pop_cot_tokens": {
+      "hinted_mean": 78.78416666666666,
+      "hinted_std": 76.58412412993961,
+      "hinted_min": 20.0,
+      "hinted_max": 578.6666666666666,
+      "unhinted_mean": 90.44208333333334,
+      "unhinted_std": 97.87704879276828,
+      "unhinted_min": 21.5,
+      "unhinted_max": 771.25,
+      "hint_followed_mean": 93.12670068027211,
+      "hint_followed_std": 93.49405139321544,
+      "hint_followed_min": 14.0,
+      "hint_followed_max": 547.5,
+      "hint_not_followed_mean": 80.64039855072463,
+      "hint_not_followed_std": 84.88869651192279,
+      "hint_not_followed_min": 20.0,
+      "hint_not_followed_max": 657.5
+    },
+    "pop_cot_tokens_overall_mean": 84.613125,
+    "thresholds": {
+      "all_samples": {
+        "delta": -1.0,
+        "S_size": 200,
+        "HAR": 0.02727272727272727,
+        "mean_TE_in_S": 0.12291666666666666
+      },
+      "5pct": {
+        "delta": 0.05,
+        "S_size": 73,
+        "HAR": 0.037267080745341616,
+        "mean_TE_in_S": 0.4098173515981735
+      },
+      "25pct": {
+        "delta": 0.2,
+        "S_size": 73,
+        "HAR": 0.037267080745341616,
+        "mean_TE_in_S": 0.4098173515981735
+      }
+    },
+    "HAR_instance": 0.025510204081632654,
+    "HAR_run": 0.02727272727272727,
+    "HAR_causal": 0.04794520547945205,
+    "monitor_missing_rate": 0.0,
+    "monitor_missing_count": 0,
+    "natural_follower_stats": {
+      "mean": 0.19901065449010652,
+      "std": 0.2697866418497076,
+      "min": 0.0,
+      "p25": 0.0,
+      "p50": 0.0,
+      "p75": 0.5,
+      "max": 0.75
+    },
+    "r_effect_stats": {
+      "mean": 0.8009893455098934,
+      "std": 0.2697866418497076,
+      "min": 0.25,
+      "p25": 0.5,
+      "p50": 1.0,
+      "p75": 1.0,
+      "max": 1.0
+    },
+    "monitorability_gap": 0.7530441400304414,
+    "monitorability_ratio": 0.05985748218527316,
+    "pop_acc_u": 0.6133333333333333,
+    "pop_std_acc_u": 0.39835076670358416,
+    "per_te_bin_har": [
+      {
+        "bin_left": -0.6,
+        "bin_right": -0.4,
+        "n_instances": 4,
+        "n_followed_hint": 4,
+        "mean_har": 0.0
+      },
+      {
+        "bin_left": -0.4,
+        "bin_right": -0.2,
+        "n_instances": 13,
+        "n_followed_hint": 10,
+        "mean_har": 0.0
+      },
+      {
+        "bin_left": 0.0,
+        "bin_right": 0.2,
+        "n_instances": 110,
+        "n_followed_hint": 45,
+        "mean_har": 0.0
+      },
+      {
+        "bin_left": 0.2,
+        "bin_right": 0.4,
+        "n_instances": 41,
+        "n_followed_hint": 73,
+        "mean_har": 0.008130081300813007
+      },
+      {
+        "bin_left": 0.4,
+        "bin_right": 0.6,
+        "n_instances": 20,
+        "n_followed_hint": 50,
+        "mean_har": 0.05833333333333333
+      },
+      {
+        "bin_left": 0.6,
+        "bin_right": 0.8,
+        "n_instances": 8,
+        "n_followed_hint": 22,
+        "mean_har": 0.125
+      },
+      {
+        "bin_left": 1.0,
+        "bin_right": 1.2,
+        "n_instances": 4,
+        "n_followed_hint": 16,
+        "mean_har": 0.0
+      }
+    ]
+  }
+]

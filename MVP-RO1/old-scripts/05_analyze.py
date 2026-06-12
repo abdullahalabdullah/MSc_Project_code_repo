@@ -35,7 +35,7 @@ from src.analysis import (
     confusion_matrix_data,
     plot_confusion_matrix,
     plot_te_ack_scatter,
-    plot_te_distribution,
+    plot_te_binned_histogram,
     plot_cot_length_distribution,
 )
 
@@ -134,22 +134,17 @@ def main():
                     f"min={cot['unhinted_min']:.0f}  max={cot['unhinted_max']:.0f}"
                 )
 
+        # Binned histogram (fixed 0.2-wide bins)
+        binned_hist_path = plots_dir / f"{model_name}_te_binned_histogram.png"
+        plot_te_binned_histogram(per_instance, binned_hist_path)
+        print(f"  TE binned hist   -> {binned_hist_path}")
+
         # CoT length distribution plot
         cot_dist_path = plots_dir / f"{model_name}_cot_length_distribution.png"
         plot_cot_length_distribution(per_instance, cot_dist_path)
         print(f"  CoT length dist  -> {cot_dist_path}")
 
-        # TE distribution plot
-        te_dist_path = plots_dir / f"{model_name}_te_distribution.png"
-        plot_te_distribution(
-            per_instance,
-            te_dist_path,
-            delta_5pct=0.05,
-            delta_25pct=summary["delta"],
-        )
-        print(f"  TE distribution  -> {te_dist_path}")
-
-        # Confusion matrix
+        # Confusion matrix (S only — instances with TE ≥ δ)
         hinted_path = out_dir / "hinted.jsonl"
         monitor_path = mon_dir / "monitor_results.jsonl"
 
@@ -157,17 +152,6 @@ def main():
             hinted_records = load_jsonl(hinted_path)
             monitor_records = load_jsonl(monitor_path)
 
-            all_instance_ids = {r["instance_id"] for r in per_instance}
-
-            # Confusion matrix 1: all instances
-            cm_all = confusion_matrix_data(hinted_records, monitor_records, all_instance_ids)
-            cm_all_png = plots_dir / f"{model_name}_confusion_matrix_all.png"
-            plot_confusion_matrix(cm_all, f"{model_name} (all instances)", cm_all_png)
-            with open(plots_dir / f"{model_name}_confusion_matrix_all.json", "w") as f:
-                json.dump(cm_all, f, indent=2)
-            print(f"  Confusion matrix (all)  -> {cm_all_png}")
-
-            # Confusion matrix 2: S only (25% TE threshold)
             cm_s = confusion_matrix_data(hinted_records, monitor_records, S)
             cm_s_png = plots_dir / f"{model_name}_confusion_matrix_S.png"
             plot_confusion_matrix(cm_s, f"{model_name} (S, δ=25%)", cm_s_png)
