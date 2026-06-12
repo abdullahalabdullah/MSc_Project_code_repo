@@ -82,13 +82,34 @@ Mean number of output tokens in the chain-of-thought, averaged per instance then
 
 ---
 
-Some ideas:
- The hint works, but the monitor doesn't catch it.
-  - Level-2 passes (mean TE = 0.123 > 0.05) — the hint has a real, non-trivial population effect.
-  - Among the 73 instances where it actually moves the needle (Level-1 pass), the effect is large: mean R_effect = 0.80, meaning when the hint
-  changes behaviour, it accounts for ~80% of the model's hint-following rate in X=1.
-  - Yet g-mean² = 0.0476, driven almost entirely by mean TPR_mc = 0.0476. So in the ~80%-attributable cases, the monitor flags hint-influence in
-  the CoT only ~5% of the time. That's a strong "hidden influence" result — exactly the kind of finding this pipeline is designed to surface
-  for the no-safety baseline.
-  
-  
+Some observations:
+
+**The g-mean² of 0.0411 is very low**
+
+This means the model is almost entirely unmonitorable — when it follows the hint, the monitor almost never detects it in the CoT. Looking at the component means: TPR_mc = 0.0411, TNR_X=0 = 1.0000, TNR_X=1 = 1.0000. So the TNR is perfect — the monitor never false-alarms on vanilla or hint-resisting responses. The entire problem is TPR: the model follows the hint covertly without acknowledging it in almost every case.
+
+**The Level-1 skip rate is high but expected**
+
+55% of instances have TE = 0, meaning on those problems the model either never follows the hint or follows it at the same rate with and without the hint. Only 36.5% pass Level-1. This is consistent with an 8B SFT model that has strong enough baseline knowledge to resist most hints — the hints only meaningfully shift behaviour on a third of problems. This is not a failure of your setup; it is informative about the model's hint susceptibility profile and is exactly why the inclusion test exists.
+
+**The 10 vacuous-truth cases are worth watching**
+
+10 out of 73 instances have p1 = 1, meaning the model followed the hint on every single hinted run. These are cases where the model is maximally susceptible. Their contribution to g-mean² is driven entirely by TPR_mc, and if TPR_mc is near zero on these too, they're pulling the average down.
+
+**CoT length is short**
+
+Mean CoT length of ~79-90 tokens is very short for a reasoning task. This may partly explain the low TPR — there simply isn't much reasoning in the CoT for the monitor to find acknowledgment in. The model appears to be producing brief responses rather than extended reasoning traces, which could be a property of this specific SFT checkpoint without safety data.
+
+**The key question for your dissertation**
+
+A baseline g-mean² of 0.04 gives you a lot of room to observe upward movement under DPO conditions. But it also raises the question of whether the low score reflects genuine covert hint-following or simply that the model produces CoTs too sparse to contain acknowledgment regardless of intent. The CoT length data suggests this is worth investigating — you may want to check whether the 10 high-susceptibility instances (p1=1) have longer or shorter CoTs than average, as a proxy for whether verbosity mediates acknowledgment.
+
+---
+
+**From reading the CoTs:**
+Verbalized cases are short and transparent: the model explicitly cites "the professor thinks X" as its justification, sometimes even after
+  stating a different answer it believes is correct — the hint's influence is plainly visible in the text, making it trivial for a monitor to
+  catch. Non-verbalized cases are the opposite: the model produces fluent, confident, domain-specific reasoning that arrives at the same hinted
+  answer with no mention of the hint at all — the stated reasoning is a plausible-looking confabulation rather than the true cause of the
+  answer. The first is an honest (if sycophantic) CoT; the second is an unfaithful one that actively conceals the hint's influence behind
+  seemingly-legitimate reasoning — which is why it's the harder and more concerning failure mode for monitoring.
