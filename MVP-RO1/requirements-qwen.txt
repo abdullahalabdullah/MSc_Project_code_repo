@@ -1,0 +1,48 @@
+# =============================================================================
+# Qwen3 (thinking-model) environment for MVP-RO1.
+#
+# The pinned stack in requirements.txt (torch 2.4 / transformers 4.46.3 /
+# vLLM 0.6.3) predates Qwen3 and fails with:
+#   ValueError: ... model type `qwen3` but Transformers does not recognize ...
+#
+# Qwen3 (model_type "qwen3") requires transformers >= 4.51.0 and vLLM >= 0.8.5,
+# which in turn require torch >= 2.6. That whole stack is INCOMPATIBLE with the
+# Llama/Tulu pins, so install this in a SEPARATE virtualenv:
+#
+#   python -m venv ~/qwen_env
+#   source ~/qwen_env/bin/activate
+#   pip install -r requirements-qwen.txt
+#   python -c "import vllm, transformers; print(vllm.__version__, transformers.__version__)"
+#
+# Then run inference with the Qwen scripts:
+#   python scripts/02_run_inference_qwen.py --model qwen3_4b
+#
+# Only scripts 02_run_inference_qwen.py and 07_estimate_accuracy_qwen.py need
+# this env (they load the model). Steps 03-06 are model-agnostic and run under
+# either environment.
+# =============================================================================
+
+# Inference engine — pulls a compatible transformers (>=4.51) and torch (>=2.6)
+vllm>=0.8.5
+
+# Pin the version floor explicitly so a stale resolver cannot keep an old wheel
+transformers>=4.51.0
+
+# Dataset loading
+datasets>=2.18.0
+
+# Monitor
+openai>=1.14.0
+
+# Config
+pyyaml>=6.0
+
+# Analysis (only needed if running steps 04-06 in this env too)
+numpy>=1.24.0
+pandas>=2.0.0
+matplotlib>=3.7.0
+scipy>=1.11.0
+openpyxl>=3.1.0
+
+# Utilities
+tqdm>=4.66.0

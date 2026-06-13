@@ -1334,8 +1334,40 @@ repetition/degradation — so the Llama default (`temp 0.7`) is not reused.
 close to the Llama runs.) `max_new_tokens` is raised to 8192 because the reasoning trace is
 generated inline; at 2048 most thinking outputs truncate before reaching the
 answer line (which would drop them from g-mean² via the truncation filter).
-Requires a `transformers`/`vllm` recent enough to accept `enable_thinking` in
-`apply_chat_template` (Qwen3 era; mid-2025+).
+
+### Environment / version requirements (important)
+
+The pinned stack in `requirements.txt` (`torch==2.4.0`, `transformers==4.46.3`,
+`vllm==0.6.3`) was chosen for the Llama/Tulu 8B runs and **predates Qwen3**.
+Running the Qwen scripts under it fails at model load with:
+
+```
+ValueError: The checkpoint you are trying to load has model type `qwen3`
+but Transformers does not recognize this architecture.
+```
+
+Qwen3 (`model_type: "qwen3"`) requires:
+
+| Package | Minimum | Why |
+|---|---|---|
+| `transformers` | **≥ 4.51.0** | first release with the Qwen3 architecture + the `enable_thinking` chat-template flag |
+| `vllm` | **≥ 0.8.5** | first release with Qwen3 model support |
+| `torch` | **≥ 2.6** | required transitively (the old pin capped `transformers < 4.47` precisely because newer versions need `torch ≥ 2.5`) |
+
+Because that stack is **incompatible** with the Llama/Tulu pins, install it in a
+**separate virtualenv** from `requirements-qwen.txt` rather than upgrading the
+existing one:
+
+```bash
+python -m venv ~/qwen_env
+source ~/qwen_env/bin/activate
+pip install -r requirements-qwen.txt
+python -c "import vllm, transformers; print(vllm.__version__, transformers.__version__)"
+```
+
+Only the two model-loading scripts (`02_run_inference_qwen.py`,
+`07_estimate_accuracy_qwen.py`) need this env. Steps 03–06 are model-agnostic and
+run under either environment.
 
 ### JSONL schema delta
 
