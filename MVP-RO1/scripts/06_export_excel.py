@@ -24,13 +24,13 @@ Each row is also tagged with a `category`, used to split rows across sheets:
   - Invalid_Truncated                truncated or unparseable response
 
 Usage:
-    python scripts/06_export_excel.py                              # all models, one workbook
+    python scripts/06_export_excel.py                              # all models, one workbook each
     python scripts/06_export_excel.py --model tulu_sft_no_safety   # single model
 
     Options:
       --config  path to config YAML (default: config/mvp_config.yaml)
-      --output  output .xlsx path (default: analysis/qualitative_export.xlsx,
-                 or analysis/{model}/qualitative_export.xlsx with --model)
+      --output  output .xlsx path (only valid with --model; default:
+                 analysis/{model}/qualitative_export.xlsx)
 
 Input:
     data/dataset_index.json
@@ -183,9 +183,13 @@ def main():
                         help="Model name (default: all models in config, combined into one workbook)")
     parser.add_argument("--config", default="config/mvp_config.yaml")
     parser.add_argument("--output", default=None,
-                        help="Output .xlsx path (default: analysis/qualitative_export.xlsx, "
-                             "or analysis/{model}/qualitative_export.xlsx with --model)")
+                        help="Output .xlsx path (only valid with --model; default: "
+                             "analysis/{model}/qualitative_export.xlsx)")
     args = parser.parse_args()
+
+    if args.output and not args.model:
+        print("ERROR: --output requires --model (each model gets its own workbook).")
+        sys.exit(1)
 
     root = Path(__file__).parent.parent
     config_path = root / args.config
@@ -207,9 +211,6 @@ def main():
     with open(dataset_path, encoding="utf-8") as f:
         dataset_index = json.load(f)
     dataset_by_id = {d["instance_id"]: d for d in dataset_index}
-
-    all_rows = []
-    all_summary_rows = []
 
     for model_cfg in models:
         model_name = model_cfg["name"]
@@ -233,35 +234,26 @@ def main():
         per_instance = result["per_instance"]
 
         rows = build_rows(model_name, dataset_by_id, hinted, unhinted, monitor, per_instance)
-        all_rows.extend(rows)
-        all_summary_rows.extend(build_summary_rows(model_name, dataset_by_id, per_instance))
+        summary_rows = build_summary_rows(model_name, dataset_by_id, per_instance)
 
-        print(f"  {model_name}: {len(rows)} records, {len(per_instance)} examples")
+        df = pd.DataFrame(rows, columns=COLUMNS)
+        summary_df = pd.DataFrame(summary_rows, columns=SUMMARY_COLUMNS)
 
-    if not all_rows:
-        print("No data found. Exiting.")
-        sys.exit(1)
+        if args.output:
+            out_path = root / args.output
+        else:
+            out_path = root / config["paths"]["analysis_dir"] / model_name / "qualitative_export.xlsx"
 
-    df = pd.DataFrame(all_rows, columns=COLUMNS)
-    summary_df = pd.DataFrame(all_summary_rows, columns=SUMMARY_COLUMNS)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
 
-    if args.output:
-        out_path = root / args.output
-    elif args.model:
-        out_path = root / config["paths"]["analysis_dir"] / args.model / "qualitative_export.xlsx"
-    else:
-        out_path = root / config["paths"]["analysis_dir"] / "qualitative_export.xlsx"
+        with pd.ExcelWriter(out_path, engine="openpyxl") as writer:
+            df.to_excel(writer, sheet_name="All_Records", index=False)
+            for cat in CATEGORY_SHEETS:
+                cat_df = df[df["category"] == cat]
+                cat_df.to_excel(writer, sheet_name=cat[:31], index=False)
+            summary_df.to_excel(writer, sheet_name="Per_Example_Summary", index=False)
 
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-
-    with pd.ExcelWriter(out_path, engine="openpyxl") as writer:
-        df.to_excel(writer, sheet_name="All_Records", index=False)
-        for cat in CATEGORY_SHEETS:
-            cat_df = df[df["category"] == cat]
-            cat_df.to_excel(writer, sheet_name=cat[:31], index=False)
-        summary_df.to_excel(writer, sheet_name="Per_Example_Summary", index=False)
-
-    print(f"\nWritten: {out_path}  ({len(df)} records across {len(summary_df)} examples)")
+        print(f"  {model_name}: {len(rows)} records, {len(per_instance)} examples -> {out_path}")
 
 
 if __name__ == "__main__":
