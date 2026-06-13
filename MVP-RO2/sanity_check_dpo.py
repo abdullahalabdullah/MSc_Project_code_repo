@@ -1,5 +1,5 @@
 """
-RO2 MVP — DPO sanity check (100-example dry run).
+RO2 MVP — DPO sanity check (60-example dry run).
 
 A SEPARATE entry point from `train_dpo.py` (not a flag bolted onto it), driven
 by `configs/harmlessness_sanity.yaml` overlaid on `configs/harmlessness.yaml`.

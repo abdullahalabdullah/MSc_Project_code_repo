@@ -16,7 +16,7 @@ built and how to run it.
 | File | Purpose |
 |---|---|
 | `configs/harmlessness.yaml` | Full training config — the whole run is described by this file. |
-| `configs/harmlessness_sanity.yaml` | Overrides for the 100-example dry run (merged on top of the full config). |
+| `configs/harmlessness_sanity.yaml` | Overrides for the 60-example dry run (merged on top of the full config). |
 | `train_dpo.py` | Main training script. All logic lives in importable functions; `__main__` is a thin wrapper. |
 | `sanity_check_dpo.py` | Separate entry point that reuses `train_dpo.py`'s functions on a tiny slice and runs the spec's inspection checks. |
 | `train_harmlessness.sh` | SLURM batch script for the full run. |
@@ -130,7 +130,7 @@ if it is broken (e.g. an Unsloth/TRL incompatibility), this script fails here,
 cheaply and loudly, instead of hours into the real job.
 
 It loads `harmlessness.yaml` overlaid with `harmlessness_sanity.yaml`
-(subsample 120, val 20, `max_steps=50`, `eval_steps=20`), runs the **same**
+(subsample 60, val 10, `max_steps=50`, `eval_steps=20`), runs the **same**
 `run_training()` path, pushes to the **throwaway** repo (`sanity_hub_model_id`),
 then asserts the programmatic subset of the spec's 8 checks and prints
 `PASS / FAIL / MANUAL` for each:

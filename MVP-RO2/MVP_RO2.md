@@ -174,7 +174,7 @@ trainer = DPOTrainer(
 )
 ```
 
-**Why these hyperparameters:** All values above (5 epochs, effective batch size 16, AdamW, `learning_rate=5e-6`, cosine scheduler with 10% warmup, `weight_decay=0.01`, `beta=0.1`, and LoRA `r=16`/`lora_alpha=32` (= 2×r)/`lora_dropout=0.05`) are taken directly from Ferreira et al. (2025), Appendix B.2 ("Truthful or Fabricated?", `papers/TruthfulOrFabricated - Ferreira et al.md`), which trains DPO models with TRL + LoRA on a closely related CoT-faithfulness setup. Reusing a validated hyperparameter set removes the need to guess values for the MVP — an earlier draft used `learning_rate=5e-5` and `num_train_epochs=1`, both of which deviated from this precedent without justification. During the 100-example sanity check (below), still inspect the training loss curve over the first 50 steps as a basic sanity check.
+**Why these hyperparameters:** All values above (5 epochs, effective batch size 16, AdamW, `learning_rate=5e-6`, cosine scheduler with 10% warmup, `weight_decay=0.01`, `beta=0.1`, and LoRA `r=16`/`lora_alpha=32` (= 2×r)/`lora_dropout=0.05`) are taken directly from Ferreira et al. (2025), Appendix B.2 ("Truthful or Fabricated?", `papers/TruthfulOrFabricated - Ferreira et al.md`), which trains DPO models with TRL + LoRA on a closely related CoT-faithfulness setup. Reusing a validated hyperparameter set removes the need to guess values for the MVP — an earlier draft used `learning_rate=5e-5` and `num_train_epochs=1`, both of which deviated from this precedent without justification. During the 60-example sanity check (below), still inspect the training loss curve over the first 50 steps as a basic sanity check.
 
 **Why `max_seq_length=2048`:** The Tulu base model supports 32k context, but DPO backward pass memory scales quadratically with sequence length. Cap at 2048 for the MVP; increase to 4096 only if the training data has many examples that are truncated at 2048 (check truncation rate in the training log). See also the prompt-length check above — if `max_prompt_length` is raised to 1024, raise `max_length` correspondingly.
 
@@ -192,15 +192,15 @@ trainer = DPOTrainer(
 
 ---
 
-## Sanity Check Before Full Training (100-example dry run)
+## Sanity Check Before Full Training (60-example dry run)
 
 Before submitting the full training job, write a **separate script, `sanity_check_dpo.py`**, that runs the **entire pipeline end-to-end on a tiny slice of data**, to catch formatting, OOM, and config errors cheaply. Do not implement this as a `--sanity_check` flag bolted onto `train_dpo.py` — keep it as its own file driven by its own config (`configs/harmlessness_sanity.yaml`), so the sanity-check code path is never accidentally left active (or accidentally broken) in the script used for the real run. `sanity_check_dpo.py` should import and reuse the shared data-loading/formatting/training/selection/push functions from `train_dpo.py` (factor these into importable functions rather than inlining them in a `__main__` block) rather than duplicating logic. This is not optional — a config or formatting bug discovered hours into the full training run wastes the GPU allocation and the eval pipeline downstream.
 
 **Sanity-check config (`configs/harmlessness_sanity.yaml`, overrides relative to `configs/harmlessness.yaml`):**
 
 ```yaml
-subsample_size: 120        # total examples drawn from the filtered pool (down from 1,500)
-val_size: 20                # validation examples (down from 150)
+subsample_size: 60         # total examples drawn from the filtered pool (down from 1,500)
+val_size: 10                # validation examples (down from 150)
 num_train_epochs: 1
 max_steps: 50               # stop after 50 optimizer steps regardless of epoch count
 eval_steps: 20              # small enough to trigger at least 2 intermediate evals within 50 steps
@@ -208,9 +208,9 @@ save_steps: 20
 logging_steps: 5
 ```
 
-(`subsample_size: 120` with `val_size: 20` gives ~100 training examples, matching the "100-example dry run" framing of this section. All other keys not listed here — `filtered_pool_size`, `subsample_seed`, `random_seed`, LoRA settings, `hub_model_id`, etc. — are inherited unchanged from `configs/harmlessness.yaml`.)
+(`subsample_size: 60` with `val_size: 10` gives 50 training examples, matching the "60-example dry run" framing of this section. All other keys not listed here — `filtered_pool_size`, `subsample_seed`, `random_seed`, LoRA settings, `hub_model_id`, etc. — are inherited unchanged from `configs/harmlessness.yaml`.)
 
-Effective batch size stays at 16 (`per_device_train_batch_size=2` × `gradient_accumulation_steps=8`), so 50 steps ≈ 800 examples seen — enough for several passes over the 100-example sanity set.
+Effective batch size stays at 16 (`per_device_train_batch_size=2` × `gradient_accumulation_steps=8`), so 50 steps ≈ 800 examples seen — enough for many passes over the 50-example sanity set.
 
 **What to inspect after the sanity run, before launching the full job:**
 
@@ -360,7 +360,7 @@ The output is a results file for the harmlessness checkpoint in the same format 
 ro2_mvp/
 ├── configs/
 │   ├── harmlessness.yaml
-│   └── harmlessness_sanity.yaml     # 100-example sanity-check config
+│   └── harmlessness_sanity.yaml     # 60-example sanity-check config
 ├── checkpoints/                     # scratch only — TRL's intermediate checkpoints during training
 │   └── harmlessness_dpo/
 │       ├── checkpoint-100/
@@ -388,7 +388,7 @@ ro2_mvp/
 ├── capability_check.json
 ├── slurm-<jobid>.out
 ├── train_dpo.py
-└── sanity_check_dpo.py              # separate entry point for the 100-example dry run
+└── sanity_check_dpo.py              # separate entry point for the 60-example dry run
 ```
 
 ---
