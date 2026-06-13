@@ -44,6 +44,7 @@ MVP-RO1/
 │   ├── dataset.py                MMLU sampling and hint assignment
 │   ├── inference.py              vLLM generation, prompt formatting, answer parsing (Llama/Tulu)
 │   ├── inference_qwen.py         Qwen3 thinking-mode variant (<think> handling)
+│   ├── inference_deepseek.py     DeepSeek-R1-Distill variant (no system prompt, forced <think>)
 │   ├── monitor.py                GPT-4.1 binary hint-influence classifier (both arms)
 │   ├── gmean2_metrics.py         TE / R_effect / TPR_mc / TNR / g-mean² computation
 │   └── gmean2_analysis.py        Plotting (TE dist, g-mean² dist, TPR/TNR scatter, CoT length)
@@ -51,12 +52,14 @@ MVP-RO1/
 │   ├── 01_prepare_dataset.py     Writes data/dataset_index.json
 │   ├── 02_run_inference.py       Writes outputs/{model}/*.jsonl (Llama/Tulu)
 │   ├── 02_run_inference_qwen.py  Same, for Qwen3 thinking models
+│   ├── 02_run_inference_deepseek.py  Same, for DeepSeek-R1-Distill reasoning models
 │   ├── 03_run_monitor.py         Writes monitor_outputs/{model}/*.jsonl (both arms)
 │   ├── 04_compute_gmean2.py      Writes analysis/{model}/gmean2_*.{csv,json,md}
 │   ├── 05_analyze_gmean2.py      Writes plots/*.png + plots/gmean2_summary_table.json
 │   ├── 06_export_excel.py        Writes analysis/qualitative_export.xlsx (per-instance records)
 │   ├── 07_estimate_accuracy.py   Writes analysis/{model}/accuracy_runs.jsonl + accuracy_summary.json
-│   └── 07_estimate_accuracy_qwen.py  Same, for Qwen3 thinking models
+│   ├── 07_estimate_accuracy_qwen.py  Same, for Qwen3 thinking models
+│   └── 07_estimate_accuracy_deepseek.py  Same, for DeepSeek-R1-Distill reasoning models
 ├── old-scripts/                  Archived pre-g-mean² pipeline (TE/HAR/δ-threshold)
 ├── data/                          gitignored — dataset_index.json lives here
 ├── outputs/                       gitignored — raw JSONL generations
@@ -1409,6 +1412,128 @@ python scripts/07_estimate_accuracy_qwen.py --model qwen3_4b # optional diagnost
 > needed (an `HF_TOKEN` is still fine to have set). If `max_new_tokens: 8192`
 > produces non-trivial truncation for this checkpoint, raise it and re-run; check
 > the truncation count printed at the end of `02_run_inference_qwen.py`.
+
+---
+
+## Running on DeepSeek-R1-Distill-Qwen-1.5B (and other DeepSeek-R1 distilled models)
+
+`deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B` is a **reasoning model** distilled from
+DeepSeek-R1 onto a Qwen2.5-1.5B base (paper: arXiv:2501.12948). Like Qwen3 thinking
+mode, it emits its chain-of-thought inside a `<think>...</think>` block before the
+visible answer, so the `<think>`-handling logic is shared with the Qwen path. But it
+has three template-level differences from **both** the Llama/Tulu pipeline and the
+Qwen3 pipeline, which is why it gets its own parallel inference path rather than
+reusing `src/inference_qwen.py`:
+
+1. **No system prompt.** The DeepSeek-R1 model card explicitly recommends putting all
+   instructions in the *user* turn and using no system prompt. Both `src/inference.py`
+   and `src/inference_qwen.py` prepend `_SYSTEM_PROMPT = "You are a helpful assistant."`;
+   the DeepSeek path sends only the user turn.
+2. **Forced opening `<think>` tag.** The R1 distilled models sometimes skip the opening
+   `<think>` and start answering directly, which degrades reasoning and breaks CoT
+   extraction. The model card recommends enforcing the response to begin with `<think>`.
+   `format_prompt_deepseek` appends `<think>\n` to the prompt (unless the chat template
+   already opened the block). Because that tag then lives in the *prompt*, the model's
+   completion starts *inside* the block — so the stored `raw_output` has the tag
+   prepended back, making it self-contained (`<think>...</think>`) exactly like the Qwen
+   records, so the monitor reads the full reasoning.
+3. **No `enable_thinking` flag.** That kwarg is Qwen3-specific; the DeepSeek chat template
+   does not accept it.
+
+Steps 03–06 are model-agnostic and unchanged.
+
+### What is shared vs. DeepSeek-specific
+
+| Stage | Script | DeepSeek-R1-Distill |
+|---|---|---|
+| 01 prepare dataset | `01_prepare_dataset.py` | **same** (model-agnostic) |
+| 02 inference | `02_run_inference.py` | **use `02_run_inference_deepseek.py`** |
+| 03 monitor | `03_run_monitor.py` | **same** (reads `raw_output`) |
+| 04 metrics | `04_compute_gmean2.py` | **same** |
+| 05 analysis | `05_analyze_gmean2.py` | **same** |
+| 06 excel | `06_export_excel.py` | **same** |
+| 07 accuracy | `07_estimate_accuracy.py` | **use `07_estimate_accuracy_deepseek.py`** |
+
+### New files
+
+- **`src/inference_deepseek.py`** — DeepSeek inference module, parallel to
+  `src/inference.py` / `src/inference_qwen.py`.
+  - **Reuses unchanged** from `src/inference.py`: `build_user_content` (the question
+    block and Stanford-professor hint line are byte-for-byte identical across models).
+  - **Reuses unchanged** from `src/inference_qwen.py`: `split_thinking`,
+    `extract_cot_qwen`, `parse_answer_qwen`, `_THINK_OPEN` — the `<think>`-block
+    handling is identical to Qwen3.
+  - **`format_prompt_deepseek(item, include_hint, tokenizer)`** — user-only messages
+    (no system prompt) + forced opening `<think>` tag. No `enable_thinking` kwarg.
+  - **`run_inference_deepseek(config, model_cfg, dataset, base_seed=42)`** — mirrors
+    `run_inference_qwen` but reads `config["deepseek_inference"]` and prepends the
+    forced `<think>` tag onto `raw_output` so the record is self-contained.
+- **`scripts/02_run_inference_deepseek.py`** — thin wrapper, same CLI as
+  `02_run_inference.py` (`--model`, `--config`, `--seed`).
+- **`scripts/07_estimate_accuracy_deepseek.py`** — DeepSeek variant of the accuracy
+  diagnostic (same thinking regime / no system prompt as inference).
+
+### Config: the `deepseek_inference:` block
+
+```yaml
+deepseek_inference:
+  n_samples: 4
+  temperature: 0.6       # DeepSeek-R1 recommended (do NOT use greedy decoding)
+  top_p: 0.95
+  max_new_tokens: 16384  # distilled 1.5B produces long <think> traces; 8192 truncates many
+  checkpoint_every: 100
+```
+
+And the model entry:
+
+```yaml
+  - name: "deepseek_r1_distill_qwen_1_5b"
+    hf_id: "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
+    role: "standalone"
+```
+
+**Why these values:** the DeepSeek-R1 model card recommends `temperature` in the
+0.5–0.7 range (0.6 used here), `top_p=0.95`, no system prompt, and a forced opening
+`<think>`. `max_new_tokens` is raised to 16384 (vs. Qwen's 8192) because the 1.5B
+distilled model is the chattiest reasoner in this study and frequently does not reach
+the answer line within 8192 tokens — truncated outputs are dropped by the g-mean²
+truncation filter, so under-sizing this directly shrinks the valid sample. There is
+no `enable_thinking` key: thinking is always on and is *forced* via the prompt.
+
+### Environment / version requirements
+
+DeepSeek-R1-Distill-**Qwen**-1.5B uses the **Qwen2** architecture (`model_type: qwen2`),
+which is already supported by the Llama/Tulu pinned stack (`transformers==4.46.3`,
+`vllm==0.6.3`) — so unlike Qwen3, it does **not** require the newer
+`requirements-qwen.txt` environment. Either environment works; the model is small
+(1.5B, bf16 ≈ 3.5 GB) and fits trivially on the A40. `<think>`/`</think>` are ordinary
+tokens in this model's vocabulary, so no special-token handling is needed. The model is
+not gated (an `HF_TOKEN` is still fine to have set).
+
+### JSONL schema
+
+Identical to the Qwen path — every field the Llama pipeline writes, plus `thinking`
+(see "Running on Qwen3-4B" § JSONL schema delta). `raw_output` includes the full
+`<think>...</think>` block (the forced opening tag is prepended back after generation),
+so `03_run_monitor.py` and the rest of the pipeline consume DeepSeek records with no
+changes.
+
+### Run order for DeepSeek-R1-Distill-Qwen-1.5B
+
+```bash
+python scripts/01_prepare_dataset.py                                      # once, shared
+python scripts/02_run_inference_deepseek.py --model deepseek_r1_distill_qwen_1_5b   # GPU
+OPENAI_API_KEY=$OPENAI_API_KEY python scripts/03_run_monitor.py --model deepseek_r1_distill_qwen_1_5b
+python scripts/04_compute_gmean2.py  --model deepseek_r1_distill_qwen_1_5b
+python scripts/05_analyze_gmean2.py  --model deepseek_r1_distill_qwen_1_5b
+python scripts/06_export_excel.py    --model deepseek_r1_distill_qwen_1_5b
+python scripts/07_estimate_accuracy_deepseek.py --model deepseek_r1_distill_qwen_1_5b   # optional
+```
+
+> **Truncation watch:** check the truncation count printed at the end of
+> `02_run_inference_deepseek.py`. If it is non-trivial (> ~5%), raise
+> `deepseek_inference.max_new_tokens` and re-run — reasoning traces from this model
+> can be very long, and any truncated sample is dropped from the g-mean² computation.
 
 ---
 
