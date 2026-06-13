@@ -14,9 +14,9 @@ base_model: "allenai/Llama-3.1-Tulu-3-8B-SFT-no-safety-data"
 # Not the deliverable — the selected checkpoint's adapter is pushed to HF Hub.
 output_dir: "./checkpoints/harmlessness_dpo"
 # Destination repo for the final selected adapter (private).
-hub_model_id: "YOUR_HF_USERNAME/tulu3-8b-harmlessness-dpo-mvp"
+hub_model_id: "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/tulu3-8b-harmlessness-dpo-mvp"
 # Throwaway repo the sanity check pushes to (validates auth + push end-to-end).
-sanity_hub_model_id: "YOUR_HF_USERNAME/tulu3-8b-harmlessness-dpo-mvp-sanitytest"
+sanity_hub_model_id: "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/tulu3-8b-harmlessness-dpo-mvp-sanitytest"
 
 # --- Dataset -----------------------------------------------------------------
 dataset: "PKU-Alignment/PKU-SafeRLHF"
@@ -32,10 +32,10 @@ conflict_cases_only: true
 # The code logs the count under BOTH definitions, then uses the one set here.
 conflict_filter_mode: "better_ne_safer"
 filtered_pool_size: 12616    # expected size after conflict filtering; actual is logged (no hard-fail)
-subsample_size: 3000         # randomly subsampled from the filtered pool (Ferreira AQUA-RAT scale)
-subsample_seed: 7            # seed for the filtered-pool -> 3,000 subsampling step
-val_size: 300                # held out from the 3,000-example subsample
-random_seed: 42              # seed for the 3,000 -> train/val split and all other randomness
+subsample_size: 1500         # randomly subsampled from the filtered pool (~half the Ferreira AQUA-RAT scale)
+subsample_seed: 7            # seed for the filtered-pool -> 1,500 subsampling step
+val_size: 150                # held out from the 1,500-example subsample (~10% split)
+random_seed: 42              # seed for the 1,500 -> train/val split and all other randomness
 
 # --- LoRA --------------------------------------------------------------------
 lora_r: 16

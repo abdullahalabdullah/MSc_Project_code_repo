@@ -93,9 +93,9 @@ echo $CUDA_VISIBLE_DEVICES  # confirm GPU index
 
 **Target size:** ~12,616 examples after filtering conflict cases. If the filtered set differs slightly, use whatever the filter yields and log the exact count.
 
-**Subsampling to 3,000 examples:** Randomly subsample **3,000 examples** (`subsample_seed=7`) from the ~12,616 filtered conflict cases for the actual training run. This matches the training-set scale used by Ferreira et al. (2025) for the 'Math Book' (AQUA-RAT) setting (3,000 training examples) — the borrowed hyperparameters (5 epochs, effective batch size 16, `learning_rate=5e-6`, etc.) were validated at this scale, and training on the full ~12,616 examples would mean ~4× more optimizer steps per epoch than the hyperparameters were tuned for. Log both the full filtered-pool count and the 3,000-example subsample.
+**Subsampling to 1,500 examples:** Randomly subsample **1,500 examples** (`subsample_seed=7`) from the ~12,616 filtered conflict cases for the actual training run. This is about half the training-set scale used by Ferreira et al. (2025) for the 'Math Book' (AQUA-RAT) setting (3,000 training examples); the borrowed hyperparameters (5 epochs, effective batch size 16, `learning_rate=5e-6`, etc.) were validated at the AQUA-RAT scale, and training on the full ~12,616 examples would mean ~8× more optimizer steps per epoch than the hyperparameters were tuned for. Log both the full filtered-pool count and the 1,500-example subsample.
 
-**Train/validation split:** From the 3,000-example subsample, hold out **300 examples** as a validation set (random, `random_seed=42`); the remaining **~2,700** form the training set (a ~10% validation split, comparable in proportion to the AQUA-RAT val/train ratio in Ferreira et al.). The validation set is used during training for checkpoint selection (see "DPO Training Configuration" below) — following Ferreira et al. (2025), Appendix B.2.
+**Train/validation split:** From the 1,500-example subsample, hold out **150 examples** as a validation set (random, `random_seed=42`); the remaining **~1,350** form the training set (a ~10% validation split, comparable in proportion to the AQUA-RAT val/train ratio in Ferreira et al.). The validation set is used during training for checkpoint selection (see "DPO Training Configuration" below) — following Ferreira et al. (2025), Appendix B.2.
 
 **Format:** Each example must be converted to the DPO `(prompt, chosen, rejected)` format:
 - `prompt`: the user turn (the question or instruction)
@@ -106,7 +106,7 @@ echo $CUDA_VISIBLE_DEVICES  # confirm GPU index
 
 **Manual format check (do before launching training):** PKU-SafeRLHF was not constructed with the Llama/Tulu chat template in mind — its prompts are raw single/multi-turn text, not pre-templated conversations. After running `apply_chat_template()`, manually inspect 5–10 formatted `(prompt, chosen, rejected)` triples to confirm: the prompt ends at the correct assistant-turn boundary, `chosen`/`rejected` contain only the response text (no leaked template tokens or role markers), and the special tokens match what the base model expects. A silent formatting error here would train on malformed triples, producing capability effects that could be mistaken for monitorability changes.
 
-**Prompt length check (do before launching training):** Tokenize the 3,000-example subsample's prompts with the chat-templated format and plot the length distribution before committing to `max_prompt_length=512`. If a non-trivial fraction of prompts exceed 512 tokens, they will be silently truncated, meaning the model trains on incomplete context. If truncation is widespread, raise `max_prompt_length` to 1024 (and correspondingly `max_length` to ~2560–3072) — gradient checkpointing on the A6000 should still keep this within the ~35–37 GB VRAM budget.
+**Prompt length check (do before launching training):** Tokenize the 1,500-example subsample's prompts with the chat-templated format and plot the length distribution before committing to `max_prompt_length=512`. If a non-trivial fraction of prompts exceed 512 tokens, they will be silently truncated, meaning the model trains on incomplete context. If truncation is widespread, raise `max_prompt_length` to 1024 (and correspondingly `max_length` to ~2560–3072) — gradient checkpointing on the A6000 should still keep this within the ~35–37 GB VRAM budget.
 
 <!-- **Decontamination check:** Verify no PKU-SafeRLHF examples overlap with the 200 MMLU questions in `dataset_index.json` before training. A simple string match on question text is sufficient for the MVP. -->
 
@@ -166,13 +166,13 @@ dpo_config = DPOConfig(
 
 **Why `max_seq_length=2048`:** The Tulu base model supports 32k context, but DPO backward pass memory scales quadratically with sequence length. Cap at 2048 for the MVP; increase to 4096 only if the training data has many examples that are truncated at 2048 (check truncation rate in the training log). See also the prompt-length check above — if `max_prompt_length` is raised to 1024, raise `max_length` correspondingly.
 
-**Checkpoint selection (validation-based, per Ferreira et al. B.2, with automatic tie-break):** With `eval_strategy="steps"` and `eval_steps=100` over the held-out 300-example validation split, TRL's `DPOTrainer` reports `eval_rewards/accuracies` (the fraction of validation pairs where the chosen response has a higher implicit reward than the rejected response) and `eval_loss` at each evaluation point, appended to `trainer.state.log_history`.
+**Checkpoint selection (validation-based, per Ferreira et al. B.2, with automatic tie-break):** With `eval_strategy="steps"` and `eval_steps=100` over the held-out 150-example validation split, TRL's `DPOTrainer` reports `eval_rewards/accuracies` (the fraction of validation pairs where the chosen response has a higher implicit reward than the rejected response) and `eval_loss` at each evaluation point, appended to `trainer.state.log_history`.
 
 `load_best_model_at_end` is **not** used, because it only supports a single `metric_for_best_model` and cannot apply the paper's tie-break rule. Instead, `train_dpo.py` must implement the paper's exact two-stage selection automatically after training completes:
 
 1. Parse `trainer.state.log_history` and collect all entries containing `eval_rewards/accuracies` and `eval_loss`, keyed by checkpoint step.
 2. Find the maximum `eval_rewards/accuracies` across all evaluated checkpoints.
-3. Among checkpoints that achieve this maximum (within floating-point tolerance, e.g. `abs(diff) < 1e-9`, since exact ties are likely with a 300-example validation set), select the one with the **lowest `eval_loss`**.
+3. Among checkpoints that achieve this maximum (within floating-point tolerance, e.g. `abs(diff) < 1e-9`, since exact ties are likely with a 150-example validation set), select the one with the **lowest `eval_loss`**.
 4. If there is still a tie after both criteria, select the checkpoint with the **highest step number** (latest, most-trained).
 5. Log the full selection table (step, `eval_rewards/accuracies`, `eval_loss`, selected: yes/no) to the training log for auditability.
 
@@ -187,8 +187,8 @@ Before submitting the full training job, write a **separate script, `sanity_chec
 **Sanity-check config (`configs/harmlessness_sanity.yaml`, overrides relative to `configs/harmlessness.yaml`):**
 
 ```yaml
-subsample_size: 120        # total examples drawn from the filtered pool (down from 3,000)
-val_size: 20                # validation examples (down from 300)
+subsample_size: 120        # total examples drawn from the filtered pool (down from 1,500)
+val_size: 20                # validation examples (down from 150)
 num_train_epochs: 1
 max_steps: 50               # stop after 50 optimizer steps regardless of epoch count
 eval_steps: 20              # small enough to trigger at least 2 intermediate evals within 50 steps
@@ -203,7 +203,7 @@ Effective batch size stays at 16 (`per_device_train_batch_size=2` × `gradient_a
 **What to inspect after the sanity run, before launching the full job:**
 
 1. **Chat-template formatting (5–10 examples):** Print the fully templated `(prompt, chosen, rejected)` triples for a handful of sanity-set examples. Confirm the prompt ends at the correct assistant-turn boundary, `chosen`/`rejected` contain only response text (no leaked role markers or special tokens), and the tokens match what the base Tulu/Llama 3.1 model expects (per the "Manual format check" requirement above).
-2. **Prompt length distribution:** Confirm `max_prompt_length=512` is not silently truncating a large fraction of the sanity examples (and, by extension, the 3,000-example training subsample — run this check on that subsample too, as already specified above).
+2. **Prompt length distribution:** Confirm `max_prompt_length=512` is not silently truncating a large fraction of the sanity examples (and, by extension, the 1,500-example training subsample — run this check on that subsample too, as already specified above).
 3. **Training loss curve (first 50 steps):** Loss should be noisy but trend downward or flat — not flat-zero (sign of a frozen/disconnected LoRA adapter or a data-loading bug) and not exploding/NaN (sign of `learning_rate=5e-6` being too aggressive for this setup, or a formatting bug producing degenerate chosen/rejected pairs).
 4. **Intermediate eval fires correctly:** With `eval_steps=20`, confirm at least 2 evaluation events appear in the log, each reporting both `eval_loss` and `eval_rewards/accuracies`. Confirm `eval_rewards/accuracies` is a value in `[0, 1]` (not NaN, not stuck at exactly 0.0 or 1.0 across all eval points, which would indicate the reference-model-via-disabled-adapters trick in Unsloth isn't working).
 5. **`eval_loss` vs `rewards/accuracies` sanity:** `eval_loss` should be finite and roughly stable or decreasing; `eval_rewards/accuracies` should not be identical across all eval points (if it is, the model isn't differentiating chosen/rejected — check the DPO loss is actually backpropagating into the LoRA params).
@@ -261,10 +261,10 @@ dataset: "PKU-Alignment/PKU-SafeRLHF"
 dataset_split: "train"
 conflict_cases_only: true
 filtered_pool_size: 12616   # expected size after conflict-case filtering; log the actual count
-subsample_size: 3000        # randomly subsampled from the filtered pool, matching Ferreira et al.'s AQUA-RAT scale
-subsample_seed: 7            # seed for the 12,616 -> 3,000 subsampling step
-val_size: 300                # held out from the 3000-example subsample
-random_seed: 42              # seed for the 3,000 -> train/val split (and any other randomness)
+subsample_size: 1500        # randomly subsampled from the filtered pool (~half Ferreira et al.'s AQUA-RAT scale)
+subsample_seed: 7            # seed for the 12,616 -> 1,500 subsampling step
+val_size: 150                # held out from the 1500-example subsample
+random_seed: 42              # seed for the 1,500 -> train/val split (and any other randomness)
 
 # LoRA
 lora_r: 16
@@ -527,7 +527,7 @@ Fail fast and loudly if either variable is missing — check `os.environ` (or th
 
 | Step | Estimate |
 |---|---|
-| DPO training (5 epochs, ~2,700 train + 300 val examples, Unsloth) | ~3–6 hours on A6000 |
+| DPO training (5 epochs, ~1,350 train + 150 val examples, Unsloth) | ~1.5–3 hours on A6000 |
 | g-mean² inference (200 instances × 2 arms × 4 samples) | ~15 minutes on A6000 |
 | Monitor calls (1,600 GPT-4o calls × ~700 tokens avg) | ~1.1M tokens; check OpenAI quota |
 | MMLU capability check (greedy, 200 examples) | ~5 minutes |

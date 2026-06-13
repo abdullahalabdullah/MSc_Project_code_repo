@@ -11,8 +11,8 @@
 # max_steps=50 means ~800 examples seen — several passes over the sanity set.
 # =============================================================================
 
-subsample_size: 120     # total examples drawn from the filtered pool (down from 3,000)
-val_size: 20            # validation examples (down from 300)
+subsample_size: 120     # total examples drawn from the filtered pool (down from 1,500)
+val_size: 20            # validation examples (down from 150)
 num_train_epochs: 1
 max_steps: 50           # stop after 50 optimizer steps regardless of epoch count
 eval_steps: 20          # small enough to trigger >=2 intermediate evals within 50 steps

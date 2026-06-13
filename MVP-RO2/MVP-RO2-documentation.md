@@ -69,7 +69,7 @@ run_training(cfg, hub_id, logger)
   **not** hard-fail if it differs (per spec). Look at the two logged counts after
   the sanity run to confirm which definition lands near 12,616 and adjust
   `conflict_filter_mode` if needed.
-- **Subsample** the filtered pool to `subsample_size` (3,000) with
+- **Subsample** the filtered pool to `subsample_size` (1,500) with
   `subsample_seed` (7).
 - **Format** each row to TRL DPO `(prompt, chosen, rejected)`:
   - `prompt` = user turn via `tokenizer.apply_chat_template(..., add_generation_prompt=True)`.
