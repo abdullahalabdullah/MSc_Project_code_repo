@@ -1,0 +1,20 @@
+# =============================================================================
+# RO2 MVP — Sanity-check overrides (100-example dry run)
+# =============================================================================
+# These keys OVERRIDE configs/harmlessness.yaml. Everything not listed here
+# (base_model, hub ids, seeds, LoRA settings, learning_rate, beta, etc.) is
+# inherited unchanged. sanity_check_dpo.py loads harmlessness.yaml first and
+# then deep-merges this file on top.
+#
+# subsample_size 120 with val_size 20 gives ~100 training examples, matching
+# the "100-example dry run" framing. Effective batch size stays 16, so
+# max_steps=50 means ~800 examples seen — several passes over the sanity set.
+# =============================================================================
+
+subsample_size: 120     # total examples drawn from the filtered pool (down from 3,000)
+val_size: 20            # validation examples (down from 300)
+num_train_epochs: 1
+max_steps: 50           # stop after 50 optimizer steps regardless of epoch count
+eval_steps: 20          # small enough to trigger >=2 intermediate evals within 50 steps
+save_steps: 20
+logging_steps: 5

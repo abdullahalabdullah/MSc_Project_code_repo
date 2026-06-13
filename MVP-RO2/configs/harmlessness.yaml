@@ -1,0 +1,67 @@
+# =============================================================================
+# RO2 MVP — Harmlessness DPO training config
+# =============================================================================
+# The full training run is described by this single file. The sanity-check
+# config (configs/harmlessness_sanity.yaml) only overrides a handful of keys.
+#
+# IMPORTANT: replace YOUR_HF_USERNAME below with your real Hugging Face
+# username before running (both hub_model_id and sanity_hub_model_id).
+# =============================================================================
+
+# --- Model -------------------------------------------------------------------
+base_model: "allenai/Llama-3.1-Tulu-3-8B-SFT-no-safety-data"
+# Scratch dir for TRL's intermediate checkpoints during training only.
+# Not the deliverable — the selected checkpoint's adapter is pushed to HF Hub.
+output_dir: "./checkpoints/harmlessness_dpo"
+# Destination repo for the final selected adapter (private).
+hub_model_id: "YOUR_HF_USERNAME/tulu3-8b-harmlessness-dpo-mvp"
+# Throwaway repo the sanity check pushes to (validates auth + push end-to-end).
+sanity_hub_model_id: "YOUR_HF_USERNAME/tulu3-8b-harmlessness-dpo-mvp-sanitytest"
+
+# --- Dataset -----------------------------------------------------------------
+dataset: "PKU-Alignment/PKU-SafeRLHF"
+dataset_split: "train"
+conflict_cases_only: true
+# Conflict-case definition:
+#   "better_ne_safer" — safer response is NOT the more helpful one
+#                       (better_response_id != safer_response_id). This matches
+#                       the spec's PROSE intent and cleanly isolates harmlessness.
+#   "safe_xor"        — exactly one response is safe
+#                       (is_response_0_safe != is_response_1_safe). The spec's
+#                       literal field suggestion.
+# The code logs the count under BOTH definitions, then uses the one set here.
+conflict_filter_mode: "better_ne_safer"
+filtered_pool_size: 12616    # expected size after conflict filtering; actual is logged (no hard-fail)
+subsample_size: 3000         # randomly subsampled from the filtered pool (Ferreira AQUA-RAT scale)
+subsample_seed: 7            # seed for the filtered-pool -> 3,000 subsampling step
+val_size: 300                # held out from the 3,000-example subsample
+random_seed: 42              # seed for the 3,000 -> train/val split and all other randomness
+
+# --- LoRA --------------------------------------------------------------------
+lora_r: 16
+lora_alpha: 32
+lora_dropout: 0.05
+target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+
+# --- Training (Ferreira et al. 2025, Appendix B.2) ---------------------------
+num_train_epochs: 5
+per_device_train_batch_size: 2
+gradient_accumulation_steps: 8        # effective batch size = 16
+per_device_eval_batch_size: 2
+learning_rate: 5.0e-6
+lr_scheduler_type: "cosine"
+warmup_ratio: 0.1
+weight_decay: 0.01
+optim: "paged_adamw_32bit"            # paged AdamW, fp32 optimizer states (spec: Precision strategy)
+bf16: true
+gradient_checkpointing: true
+max_length: 2048                      # cap to bound backward-pass memory
+max_prompt_length: 512
+beta: 0.1                             # DPO KL penalty coefficient
+eval_strategy: "steps"
+eval_steps: 100
+save_strategy: "steps"
+save_steps: 100
+save_total_limit: null                # keep all checkpoints; custom selection picks the best
+logging_steps: 10
+# max_steps: -1                        # (full run uses epochs; sanity config sets a real cap)

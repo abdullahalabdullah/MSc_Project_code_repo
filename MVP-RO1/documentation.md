@@ -865,6 +865,51 @@ echo 'export HF_HOME=/workspace/hf_cache' >> ~/.bashrc
 echo 'export OPENAI_API_KEY="sk-..."' >> ~/.bashrc
 ```
 
+#### Hugging Face authentication (required for gated models)
+
+The Tulu checkpoints are public, but some models in `config/mvp_config.yaml` are
+**gated** — e.g. `meta-llama/Llama-3.2-3B-Instruct`. Gated models require both a
+license acceptance and an authentication token, or vLLM/`transformers` will fail
+the download with a 401/403.
+
+**On the Hugging Face side (once per account):**
+
+1. Sign in at <https://huggingface.co>.
+2. Open the model page (e.g. <https://huggingface.co/meta-llama/Llama-3.2-3B-Instruct>),
+   fill in the "agree to share contact information" form, and accept the license.
+   For Llama 3.2 this is normally auto-approved within seconds; wait until the page
+   shows "You have been granted access."
+3. Create a token at <https://huggingface.co/settings/tokens> with **Read** scope
+   (a fine-grained token also works if it has "Read access to gated repos"). The
+   token must belong to the **same account** that was granted access.
+
+**On the machine (save the token permanently):**
+
+Either authenticate via the CLI (recommended — stores the token in
+`~/.cache/huggingface/token`, which persists across all sessions and is picked up
+automatically by `transformers` and `vllm`):
+
+```bash
+pip install -U "huggingface_hub[cli]"   # if not already installed
+hf auth login        # paste the Read token (older CLI: huggingface-cli login)
+hf auth whoami       # verify
+```
+
+Or persist it as an environment variable (handy for scripted/headless runs — both
+`transformers` and `vllm` read `HF_TOKEN`):
+
+```bash
+echo 'export HF_TOKEN="hf_..."' >> ~/.bashrc   # use ~/.zshrc on local macOS/zsh
+source ~/.bashrc
+```
+
+You only need one of the two methods. Do not commit the token or any file
+containing it. Quick check that access works before launching a full run:
+
+```bash
+hf download meta-llama/Llama-3.2-3B-Instruct config.json --quiet && echo "ACCESS OK"
+```
+
 ### 3. Prepare dataset (run once)
 
 ```bash

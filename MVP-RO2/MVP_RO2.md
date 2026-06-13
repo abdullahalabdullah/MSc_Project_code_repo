@@ -172,7 +172,7 @@ dpo_config = DPOConfig(
 
 1. Parse `trainer.state.log_history` and collect all entries containing `eval_rewards/accuracies` and `eval_loss`, keyed by checkpoint step.
 2. Find the maximum `eval_rewards/accuracies` across all evaluated checkpoints.
-3. Among checkpoints that achieve this maximum (within floating-point tolerance, e.g. `abs(diff) < 1e-9`, since exact ties are likely with a 500-example validation set), select the one with the **lowest `eval_loss`**.
+3. Among checkpoints that achieve this maximum (within floating-point tolerance, e.g. `abs(diff) < 1e-9`, since exact ties are likely with a 300-example validation set), select the one with the **lowest `eval_loss`**.
 4. If there is still a tie after both criteria, select the checkpoint with the **highest step number** (latest, most-trained).
 5. Log the full selection table (step, `eval_rewards/accuracies`, `eval_loss`, selected: yes/no) to the training log for auditability.
 
@@ -187,8 +187,8 @@ Before submitting the full training job, write a **separate script, `sanity_chec
 **Sanity-check config (`configs/harmlessness_sanity.yaml`, overrides relative to `configs/harmlessness.yaml`):**
 
 ```yaml
-max_examples: 100          # training examples (down from ~12,116)
-val_size: 20                # validation examples (down from ~500)
+subsample_size: 120        # total examples drawn from the filtered pool (down from 3,000)
+val_size: 20                # validation examples (down from 300)
 num_train_epochs: 1
 max_steps: 50               # stop after 50 optimizer steps regardless of epoch count
 eval_steps: 20              # small enough to trigger at least 2 intermediate evals within 50 steps
@@ -196,18 +196,20 @@ save_steps: 20
 logging_steps: 5
 ```
 
+(`subsample_size: 120` with `val_size: 20` gives ~100 training examples, matching the "100-example dry run" framing of this section. All other keys not listed here — `filtered_pool_size`, `subsample_seed`, `random_seed`, LoRA settings, `hub_model_id`, etc. — are inherited unchanged from `configs/harmlessness.yaml`.)
+
 Effective batch size stays at 16 (`per_device_train_batch_size=2` × `gradient_accumulation_steps=8`), so 50 steps ≈ 800 examples seen — enough for several passes over the 100-example sanity set.
 
 **What to inspect after the sanity run, before launching the full job:**
 
 1. **Chat-template formatting (5–10 examples):** Print the fully templated `(prompt, chosen, rejected)` triples for a handful of sanity-set examples. Confirm the prompt ends at the correct assistant-turn boundary, `chosen`/`rejected` contain only response text (no leaked role markers or special tokens), and the tokens match what the base Tulu/Llama 3.1 model expects (per the "Manual format check" requirement above).
-2. **Prompt length distribution:** Confirm `max_prompt_length=512` is not silently truncating a large fraction of the sanity examples (and, by extension, the full filtered dataset — run this check on the full ~12,616 filtered set too, as already specified above).
+2. **Prompt length distribution:** Confirm `max_prompt_length=512` is not silently truncating a large fraction of the sanity examples (and, by extension, the 3,000-example training subsample — run this check on that subsample too, as already specified above).
 3. **Training loss curve (first 50 steps):** Loss should be noisy but trend downward or flat — not flat-zero (sign of a frozen/disconnected LoRA adapter or a data-loading bug) and not exploding/NaN (sign of `learning_rate=5e-6` being too aggressive for this setup, or a formatting bug producing degenerate chosen/rejected pairs).
 4. **Intermediate eval fires correctly:** With `eval_steps=20`, confirm at least 2 evaluation events appear in the log, each reporting both `eval_loss` and `eval_rewards/accuracies`. Confirm `eval_rewards/accuracies` is a value in `[0, 1]` (not NaN, not stuck at exactly 0.0 or 1.0 across all eval points, which would indicate the reference-model-via-disabled-adapters trick in Unsloth isn't working).
 5. **`eval_loss` vs `rewards/accuracies` sanity:** `eval_loss` should be finite and roughly stable or decreasing; `eval_rewards/accuracies` should not be identical across all eval points (if it is, the model isn't differentiating chosen/rejected — check the DPO loss is actually backpropagating into the LoRA params).
 6. **Checkpoint selection logic runs without error:** Run the post-training selection step (see "Checkpoint selection" above) on the 2+ sanity checkpoints and confirm it picks a checkpoint and logs the selection table correctly — this validates the tie-break logic before it matters on the full 8-checkpoint run.
 7. **GPU memory:** Check `nvidia-smi` peak usage during the sanity run stays comfortably under the ~35–37 GB estimate, with headroom for the full run (sequence lengths may be longer on average across the full dataset).
-8. **Hub push works end-to-end:** Run the final "load selected checkpoint → push to HF Hub" step (see below) against a throwaway/test repo to confirm authentication, `push_to_hub` permissions, and the adapter+tokenizer upload all work before relying on it at the end of the real ~24-hour run.
+8. **Hub push works end-to-end:** Run the final "load selected checkpoint → push to HF Hub" step (see below) against a throwaway/test repo to confirm authentication, `push_to_hub` permissions, and the adapter+tokenizer upload all work before relying on it at the end of the real ~3–6 hour run.
 
 Only proceed to `sbatch train_harmlessness.sh` (full config) once all 8 checks pass.
 
@@ -349,8 +351,8 @@ ro2_mvp/
 │   └── harmlessness_sanity.yaml     # 100-example sanity-check config
 ├── checkpoints/                     # scratch only — TRL's intermediate checkpoints during training
 │   └── harmlessness_dpo/
-│       ├── checkpoint-500/
-│       ├── checkpoint-1000/
+│       ├── checkpoint-100/
+│       ├── checkpoint-200/
 │       └── ...                      # best checkpoint selected from these, then pushed to HF Hub (not kept locally)
 ├── results/
 │   ├── baseline/                    # from RO1 — already computed
