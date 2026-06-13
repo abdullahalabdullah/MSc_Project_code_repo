@@ -42,18 +42,21 @@ MVP-RO1/
 ├── src/
 │   ├── __init__.py
 │   ├── dataset.py                MMLU sampling and hint assignment
-│   ├── inference.py              vLLM generation, prompt formatting, answer parsing
+│   ├── inference.py              vLLM generation, prompt formatting, answer parsing (Llama/Tulu)
+│   ├── inference_qwen.py         Qwen3 thinking-mode variant (<think> handling)
 │   ├── monitor.py                GPT-4.1 binary hint-influence classifier (both arms)
 │   ├── gmean2_metrics.py         TE / R_effect / TPR_mc / TNR / g-mean² computation
 │   └── gmean2_analysis.py        Plotting (TE dist, g-mean² dist, TPR/TNR scatter, CoT length)
 ├── scripts/
 │   ├── 01_prepare_dataset.py     Writes data/dataset_index.json
-│   ├── 02_run_inference.py       Writes outputs/{model}/*.jsonl
+│   ├── 02_run_inference.py       Writes outputs/{model}/*.jsonl (Llama/Tulu)
+│   ├── 02_run_inference_qwen.py  Same, for Qwen3 thinking models
 │   ├── 03_run_monitor.py         Writes monitor_outputs/{model}/*.jsonl (both arms)
 │   ├── 04_compute_gmean2.py      Writes analysis/{model}/gmean2_*.{csv,json,md}
 │   ├── 05_analyze_gmean2.py      Writes plots/*.png + plots/gmean2_summary_table.json
 │   ├── 06_export_excel.py        Writes analysis/qualitative_export.xlsx (per-instance records)
-│   └── 07_estimate_accuracy.py   Writes analysis/{model}/accuracy_runs.jsonl + accuracy_summary.json
+│   ├── 07_estimate_accuracy.py   Writes analysis/{model}/accuracy_runs.jsonl + accuracy_summary.json
+│   └── 07_estimate_accuracy_qwen.py  Same, for Qwen3 thinking models
 ├── old-scripts/                  Archived pre-g-mean² pipeline (TE/HAR/δ-threshold)
 ├── data/                          gitignored — dataset_index.json lives here
 ├── outputs/                       gitignored — raw JSONL generations
@@ -1241,6 +1244,139 @@ four models incomparable. The script guards against accidental overwrite.
   and its components across seeds cannot be reported.
 - Monitor not yet validated with human annotations (Ferreira reported F1 scores).
   Planned post-run annotation pass of ≥ 80 examples across both arms.
+
+---
+
+## Running on Qwen3-4B (and other "thinking" models)
+
+`Qwen/Qwen3-4B` is a **hybrid reasoning model**: with `enable_thinking=True` (the
+default) it emits its chain-of-thought inside a `<think>...</think>` block before
+the visible answer. It also uses a different chat template (ChatML,
+`<|im_start|>/<|im_end|>`) and different recommended sampling than the Llama/Tulu
+checkpoints. These differences contradict assumptions baked into `src/inference.py`,
+so rather than modifying the existing (Llama) pipeline, Qwen3 is run through a
+**parallel inference path**. Steps 03–06 are model-agnostic and unchanged.
+
+### What is shared vs. Qwen-specific
+
+| Stage | Script | Qwen3 |
+|---|---|---|
+| 01 prepare dataset | `01_prepare_dataset.py` | **same** (model-agnostic) |
+| 02 inference | `02_run_inference.py` | **use `02_run_inference_qwen.py`** |
+| 03 monitor | `03_run_monitor.py` | **same** (reads `raw_output`) |
+| 04 metrics | `04_compute_gmean2.py` | **same** |
+| 05 analysis | `05_analyze_gmean2.py` | **same** |
+| 06 excel | `06_export_excel.py` | **same** |
+| 07 accuracy | `07_estimate_accuracy.py` | **use `07_estimate_accuracy_qwen.py`** |
+
+Only the two scripts that actually load and generate from the model have Qwen
+variants; everything downstream consumes the JSONL and is identical.
+
+### New files
+
+- **`src/inference_qwen.py`** — Qwen3 inference module, parallel to `src/inference.py`.
+  - **Reuses unchanged** from `src/inference.py`: `_SYSTEM_PROMPT`,
+    `build_user_content` (the prompt text and the Stanford-professor hint line are
+    byte-for-byte identical across models), the OLMES answer parser, and the
+    anchor-based CoT splitter (as fallbacks).
+  - **`format_prompt_qwen(item, include_hint, tokenizer, enable_thinking=True)`** —
+    applies Qwen3's chat template with `enable_thinking` passed through to
+    `apply_chat_template`. The system/user content is identical to the Llama arm;
+    the only cross-model difference is the template itself.
+  - **`split_thinking(raw_output) -> (thinking_text, post_think_text)`** — splits a
+    completion at `</think>`. Robust to: a normal `<think>…</think>\n\nanswer`
+    output; an output that starts *inside* the block (some template/vLLM versions
+    emit the opening `<think>` as part of the prompt); a truncated output that
+    never closes the tag (→ all thinking); and a non-thinking output (→ no thinking).
+  - **`extract_cot_qwen(raw_output)`** — the chain-of-thought is the `<think>` block
+    content (tags stripped). Falls back to the Llama anchor-based splitter when
+    there is no thinking block.
+  - **`parse_answer_qwen(raw_output)`** — parses the answer from the post-`</think>`
+    text **first**, falling back to the whole output. This prevents a candidate
+    answer rehearsed inside the reasoning (e.g. "maybe the answer is (A)?") from
+    overriding the model's actual post-think conclusion.
+  - **`run_inference_qwen(config, model_cfg, dataset, base_seed=42)`** — mirrors
+    `run_inference` but reads sampling from `config["qwen_inference"]` and writes
+    one extra field per record.
+- **`scripts/02_run_inference_qwen.py`** — thin wrapper, same CLI as
+  `02_run_inference.py` (`--model`, `--config`, `--seed`).
+- **`scripts/07_estimate_accuracy_qwen.py`** — Qwen variant of the accuracy
+  diagnostic, so accuracy is measured under the same thinking regime as inference.
+
+### Config: the `qwen_inference:` block
+
+Qwen sampling lives in a separate block so the Llama pipeline is untouched. The
+`inference:` block still drives `src/inference.py`; `src/inference_qwen.py` reads
+`qwen_inference:` instead.
+
+```yaml
+qwen_inference:
+  enable_thinking: true
+  n_samples: 4
+  temperature: 0.6      # Qwen3 thinking-mode recommended (do NOT use greedy)
+  top_p: 0.95
+  max_new_tokens: 8192  # <think> traces are long; 2048 truncates heavily
+  checkpoint_every: 100
+```
+
+And the model entry:
+
+```yaml
+  - name: "qwen3_4b"
+    hf_id: "Qwen/Qwen3-4B"
+    role: "standalone"
+```
+
+**Why these values:** Qwen3's model card recommends `temperature=0.6, top_p=0.95`
+for thinking mode and explicitly warns that greedy decoding causes
+repetition/degradation — so the Llama default (`temp 0.7`) is not reused.
+(`top_k`/`min_p` are left at vLLM defaults, i.e. disabled, so Qwen sampling stays
+close to the Llama runs.) `max_new_tokens` is raised to 8192 because the reasoning trace is
+generated inline; at 2048 most thinking outputs truncate before reaching the
+answer line (which would drop them from g-mean² via the truncation filter).
+Requires a `transformers`/`vllm` recent enough to accept `enable_thinking` in
+`apply_chat_template` (Qwen3 era; mid-2025+).
+
+### JSONL schema delta
+
+Qwen records contain **every field the Llama pipeline writes, plus `thinking`**:
+
+| Field | Qwen3 behaviour |
+|---|---|
+| `raw_output` | Verbatim model output **including the `<think>...</think>` tags** — so the monitor reads the full reasoning exactly as produced |
+| `thinking` | **New.** Content of the `<think>` block, tags stripped (empty if no/unclosed block) |
+| `cot` | The `<think>` block content (not the anchor-split text) when a block exists; otherwise the anchor-based fallback |
+| `parsed_answer` | Parsed from the post-`</think>` text first (see `parse_answer_qwen`) |
+
+Because these are a **superset** of the Llama fields, `03_run_monitor.py`,
+`04_compute_gmean2.py`, `05_analyze_gmean2.py`, and `06_export_excel.py` consume
+them with no changes; the extra `thinking` field is simply ignored by readers that
+don't use it.
+
+### Monitor note
+
+The monitor receives `raw_output`, which for Qwen3 includes the `<think>...</think>`
+block. This is intentional and is exactly the CoT-monitorability signal we want:
+the monitor judges whether the hint's influence is visible in the model's
+reasoning. No monitor-side change is required.
+
+### Run order for Qwen3-4B
+
+```bash
+python scripts/01_prepare_dataset.py                         # once, shared
+python scripts/02_run_inference_qwen.py --model qwen3_4b     # GPU
+OPENAI_API_KEY=$OPENAI_API_KEY python scripts/03_run_monitor.py --model qwen3_4b
+python scripts/04_compute_gmean2.py  --model qwen3_4b
+python scripts/05_analyze_gmean2.py  --model qwen3_4b
+python scripts/06_export_excel.py    --model qwen3_4b
+python scripts/07_estimate_accuracy_qwen.py --model qwen3_4b # optional diagnostic
+```
+
+> **Provisioning:** `Qwen/Qwen3-4B` in bf16 fits comfortably on the same A40
+> (48 GB) used for the 8B Llama runs. It is not gated, so no license acceptance is
+> needed (an `HF_TOKEN` is still fine to have set). If `max_new_tokens: 8192`
+> produces non-trivial truncation for this checkpoint, raise it and re-run; check
+> the truncation count printed at the end of `02_run_inference_qwen.py`.
 
 ---
 

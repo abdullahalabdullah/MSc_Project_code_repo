@@ -25,6 +25,9 @@ models:
   - name: "llama31_8b_instruct"
     hf_id: "meta-llama/Llama-3.1-8B-Instruct"
     role: "standalone"
+  - name: "qwen3_4b"
+    hf_id: "Qwen/Qwen3-4B"
+    role: "standalone"          # thinking model — run with scripts/02_run_inference_qwen.py
 
 hint:
   type: "stanford_professor"
@@ -35,6 +38,20 @@ inference:
   temperature: 0.7
   top_p: 0.95
   max_new_tokens: 2048
+  checkpoint_every: 100
+
+# Sampling for Qwen3 (and other "thinking" models). Used ONLY by
+# src/inference_qwen.py (scripts 02_run_inference_qwen.py / 07_estimate_accuracy_qwen.py).
+# The Llama/Tulu pipeline (src/inference.py) ignores this block and reads `inference:`.
+# Values follow Qwen3's thinking-mode recommendation (temp 0.6, top_p 0.95; do NOT use
+# greedy decoding). max_new_tokens is large because the <think> trace is generated
+# inline and 2048 truncates it heavily.
+qwen_inference:
+  enable_thinking: true
+  n_samples: 4
+  temperature: 0.6
+  top_p: 0.95
+  max_new_tokens: 8192
   checkpoint_every: 100
 
 monitor:
