@@ -20,13 +20,40 @@
 # Only scripts 02_run_inference_qwen.py and 07_estimate_accuracy_qwen.py need
 # this env (they load the model). Steps 03-06 are model-agnostic and run under
 # either environment.
+#
+# -----------------------------------------------------------------------------
+# IMPORTANT — versions are PINNED EXACTLY, not floored. An unbounded floor
+# (vllm>=0.8.5) lets the resolver pull the newest wheels, which broke on a
+# CUDA-12.8 machine (driver 570.x). The failures, in order, were:
+#
+#   1. vLLM 0.23.0 bundled a torch built for CUDA 12.9+  ->
+#        RuntimeError: The NVIDIA driver on your system is too old (12080)
+#   2. A leftover too-new transformers dropped a tokenizer attribute vLLM uses ->
+#        AttributeError: Qwen2Tokenizer has no attribute all_special_tokens_extended
+#   3. A leftover flashinfer/.so built against a different torch ABI ->
+#        OSError: undefined symbol _ZNK3c106Device3str... (c10::Device::str)
+#
+# The combination below is the known-good pairing for a CUDA-12.8 driver:
+#   vLLM 0.8.5  ->  torch 2.6.0 (cu124, runs on a 12.8 driver)
+#   transformers 4.51.3  (matches vLLM 0.8.5's tokenizer API; supports qwen3)
+#
+# Do NOT install flashinfer in this env. vLLM 0.8.5 does not need it (it falls
+# back to the torch-native top-k/top-p sampler). If a previous install left it
+# behind, remove it before running:
+#   pip uninstall -y flashinfer flashinfer-python tvm-ffi tvm_ffi torch_c_dlpack_ext
+#
+# Always install into a FRESH venv. Downgrading an existing newer-vLLM env in
+# place leaves mismatched leftovers (torch/transformers/flashinfer) that surface
+# one error at a time. A fresh venv needs ~8-10 GB free for the torch+CUDA stack.
 # =============================================================================
 
-# Inference engine — pulls a compatible transformers (>=4.51) and torch (>=2.6)
-vllm>=0.8.5
+# Inference engine — pinned exactly; pulls torch 2.6.0 (cu124), runs on a
+# CUDA-12.8 driver. Newer vLLM bundles torch for CUDA 12.9+ and will NOT load.
+vllm==0.8.5
 
-# Pin the version floor explicitly so a stale resolver cannot keep an old wheel
-transformers>=4.51.0
+# Pinned exactly to vLLM 0.8.5's matching tokenizer API. Newer transformers
+# removed all_special_tokens_extended and breaks vLLM 0.8.5's tokenizer cache.
+transformers==4.51.3
 
 # Dataset loading
 datasets>=2.18.0
