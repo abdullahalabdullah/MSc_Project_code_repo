@@ -24,41 +24,56 @@ def plot_te_distribution(per_instance: list, output_path: Path, bin_width: float
     """
     Histogram of per-instance TE values using fixed-width bins (default 0.2).
 
-    Bins span [-1, 1]. Bars are coloured red for TE <= 0 (fails Level-1) and
-    blue for TE > 0 (passes the TE part of Level-1). A vertical dashed line
-    marks TE = 0, the Level-1 boundary (instances also need p1_i > 0 to pass).
+    Bins span [-1, 1]. Bars are coloured red for TE < 0 (fails Level-1) and
+    blue for TE > 0 (passes the TE part of Level-1). Instances with TE exactly
+    0 also fail Level-1, so they are pulled out of the histogram into a separate
+    black column centred on TE = 0. A vertical dashed line marks TE = 0, the
+    Level-1 boundary (instances also need p1_i > 0 to pass).
     """
     te = np.array([r["te_i"] for r in per_instance])
     n = len(te)
 
+    # Exact-zero TE fails Level-1; show it as its own column rather than
+    # letting it fall into the adjacent [0, bin_width) "TE > 0" bin.
+    zero_mask = np.isclose(te, 0.0, atol=1e-9)
+    n_zero = int(zero_mask.sum())
+    te_nonzero = te[~zero_mask]
+
     edges = np.arange(-1.0, 1.0 + bin_width + 1e-9, bin_width)
-    counts, edges = np.histogram(te, bins=edges)
+    counts, edges = np.histogram(te_nonzero, bins=edges)
     centers = (edges[:-1] + edges[1:]) / 2
 
-    colors = ["#d62728" if c <= 0 else "#1f77b4" for c in centers]
+    colors = ["#d62728" if c < 0 else "#1f77b4" for c in centers]
 
     fig, ax = plt.subplots(figsize=(11, 5))
     bars = ax.bar(centers, counts, width=bin_width * 0.88,
                    color=colors, alpha=0.80, linewidth=0.5, edgecolor="white")
 
-    for bar, count in zip(bars, counts):
+    # Dedicated black column for TE == 0, sitting on the boundary.
+    zero_bar = ax.bar([0.0], [n_zero], width=bin_width * 0.5,
+                      color="black", alpha=0.90, linewidth=0.5,
+                      edgecolor="white", zorder=5)
+
+    for bar, count in zip(list(bars) + list(zero_bar),
+                          list(counts) + [n_zero]):
         if count == 0:
             continue
         ax.text(
             bar.get_x() + bar.get_width() / 2,
             bar.get_height() + 0.5,
             str(count),
-            ha="center", va="bottom", fontsize=9,
+            ha="center", va="bottom", fontsize=9, zorder=6,
         )
 
     n_level1 = int((te > 0).sum())
-    ax.axvline(x=0, color="black", linestyle="--", linewidth=1.5,
+    ax.axvline(x=0, color="black", linestyle="--", linewidth=1.5, zorder=1,
                 label=f"Level-1 boundary (TE = 0)  —  {n_level1}/{n} instances have TE > 0")
 
     import matplotlib.patches as mpatches
     ax.legend(
         handles=[
-            mpatches.Patch(color="#d62728", alpha=0.80, label="TE <= 0 (fails Level-1)"),
+            mpatches.Patch(color="#d62728", alpha=0.80, label="TE < 0 (fails Level-1)"),
+            mpatches.Patch(color="black", alpha=0.90, label="TE = 0 (fails Level-1)"),
             mpatches.Patch(color="#1f77b4", alpha=0.80, label="TE > 0"),
             ax.get_legend_handles_labels()[0][0],
         ],
