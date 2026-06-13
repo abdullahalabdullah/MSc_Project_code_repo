@@ -1,5 +1,5 @@
 """
-RO2 MVP — DPO harmlessness training (TRL 0.9.6 + Unsloth, bf16 LoRA).
+RO2 MVP — DPO harmlessness training (TRL 0.8.x + Unsloth, bf16 LoRA).
 
 Trains one DPO LoRA adapter on PKU-SafeRLHF conflict cases, starting from
 `allenai/Llama-3.1-Tulu-3-8B-SFT-no-safety-data`, selects the best checkpoint
@@ -14,7 +14,7 @@ Run the full training:
     python train_dpo.py --config configs/harmlessness.yaml
 
 Strict Unsloth: there is no non-Unsloth fallback. If the pinned environment
-(trl==0.9.6, transformers==4.44.0, peft==0.12.0, unsloth) is incompatible, the
+(trl==0.8.6, transformers==4.44.0, peft==0.12.0, unsloth) is incompatible, the
 import below fails loudly. Use `sanity_check_dpo.py` first to confirm the
 environment works before committing the GPU allocation to a multi-hour run.
 """
@@ -42,7 +42,8 @@ import yaml
 from dotenv import load_dotenv
 from huggingface_hub import HfApi, login
 from datasets import load_dataset, Dataset, DatasetDict
-from trl import DPOConfig, DPOTrainer
+from transformers import TrainingArguments
+from trl import DPOTrainer  # TRL 0.8.x: DPO params are DPOTrainer kwargs, not a DPOConfig
 
 
 # =============================================================================
@@ -361,14 +362,18 @@ def load_model_and_tokenizer(cfg: dict, logger: logging.Logger):
 # Trainer
 # =============================================================================
 def build_trainer(cfg, model, tokenizer, train_ds, eval_ds, logger: logging.Logger):
-    """Construct the TRL 0.9.6 DPOTrainer (DPO params live in DPOConfig).
+    """Construct the TRL 0.8.x DPOTrainer.
+
+    On TRL 0.8.x there is no DPOConfig: standard training args go into a
+    transformers.TrainingArguments, while the DPO-specific knobs (beta,
+    max_length, max_prompt_length) are passed directly to DPOTrainer.
 
     PatchDPOTrainer() is called first so Unsloth's reference-model-via-disabled-
     adapters trick is active (this is what lets us use ref_model=None).
     """
     PatchDPOTrainer()
 
-    dpo_config = DPOConfig(
+    training_args = TrainingArguments(
         output_dir=cfg["output_dir"],
         num_train_epochs=cfg["num_train_epochs"],
         per_device_train_batch_size=cfg["per_device_train_batch_size"],
@@ -381,9 +386,6 @@ def build_trainer(cfg, model, tokenizer, train_ds, eval_ds, logger: logging.Logg
         optim=cfg["optim"],
         bf16=cfg["bf16"],
         gradient_checkpointing=cfg["gradient_checkpointing"],
-        max_length=cfg["max_length"],
-        max_prompt_length=cfg["max_prompt_length"],
-        beta=cfg["beta"],
         logging_steps=cfg["logging_steps"],
         eval_strategy=cfg["eval_strategy"],
         eval_steps=cfg["eval_steps"],
@@ -398,21 +400,24 @@ def build_trainer(cfg, model, tokenizer, train_ds, eval_ds, logger: logging.Logg
     )
 
     logger.info(
-        "DPOConfig: epochs=%s max_steps=%s eff_batch=%d lr=%s beta=%s "
+        "TrainingArguments: epochs=%s max_steps=%s eff_batch=%d lr=%s beta=%s "
         "eval_steps=%d save_steps=%d",
-        dpo_config.num_train_epochs, dpo_config.max_steps,
+        training_args.num_train_epochs, training_args.max_steps,
         cfg["per_device_train_batch_size"] * cfg["gradient_accumulation_steps"],
-        dpo_config.learning_rate, dpo_config.beta,
-        dpo_config.eval_steps, dpo_config.save_steps,
+        training_args.learning_rate, cfg["beta"],
+        training_args.eval_steps, training_args.save_steps,
     )
 
     trainer = DPOTrainer(
         model,
         ref_model=None,             # Unsloth handles the reference model internally
-        args=dpo_config,
+        args=training_args,
+        beta=cfg["beta"],                       # TRL 0.8.x: DPO knobs are DPOTrainer kwargs
+        max_length=cfg["max_length"],
+        max_prompt_length=cfg["max_prompt_length"],
         train_dataset=train_ds,
         eval_dataset=eval_ds,
-        tokenizer=tokenizer,        # TRL 0.9.6 uses `tokenizer=` (not processing_class)
+        tokenizer=tokenizer,
     )
     return trainer
 

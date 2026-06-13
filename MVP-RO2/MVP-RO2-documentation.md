@@ -47,7 +47,7 @@ run_training(cfg, hub_id, logger)
   ├─ load_and_prepare_dataset(cfg, tok)     # PKU-SafeRLHF -> conflict -> subsample -> (prompt,chosen,rejected) -> split
   ├─ inspect_formatting(train, n=8)         # print templated triples (manual format check)
   ├─ check_prompt_lengths(train, tok, 512)  # length distribution vs max_prompt_length
-  ├─ build_trainer(...)                      # PatchDPOTrainer() + DPOConfig + DPOTrainer(ref_model=None)
+  ├─ build_trainer(...)                      # PatchDPOTrainer() + TrainingArguments + DPOTrainer(ref_model=None)
   ├─ trainer.train()
   ├─ select_best_checkpoint(log_history)    # max acc -> min loss -> max step
   └─ push_selected_adapter(...)             # reload selected adapter, push (adapter-only) + model card
@@ -75,10 +75,10 @@ run_training(cfg, hub_id, logger)
   - `prompt` = user turn via `tokenizer.apply_chat_template(..., add_generation_prompt=True)`.
   - `chosen` = the **safer** response (`response_{safer_response_id}`), raw text only.
   - `rejected` = the other response, raw text only.
-  - No EOS is appended manually — TRL 0.9.6's `DPOTrainer.tokenize_row` adds it,
+  - No EOS is appended manually — TRL 0.8.x's `DPOTrainer.tokenize_row` adds it,
     and keeping the strings role-marker-free is exactly what the spec's format
     check requires.
-- **Split** into train / `val_size` (300) validation with `random_seed` (42).
+- **Split** into train / `val_size` (150) validation with `random_seed` (42).
 
 ### Model (`load_model_and_tokenizer`)
 - `unsloth` is imported **first** in `train_dpo.py` (before transformers/trl/peft)
@@ -91,7 +91,9 @@ run_training(cfg, hub_id, logger)
 ### Trainer (`build_trainer`)
 - `PatchDPOTrainer()` is called before constructing the trainer (enables the
   Unsloth reference-model trick → `ref_model=None`, saving ~16 GB).
-- All DPO hyperparameters live in `DPOConfig` (TRL 0.9.6 API). `DPOTrainer`
+- Standard training args live in a `transformers.TrainingArguments`; the DPO
+  knobs (`beta`, `max_length`, `max_prompt_length`) are passed directly to
+  `DPOTrainer` (TRL 0.8.x API — there is no `DPOConfig`). `DPOTrainer` also
   receives `tokenizer=` (not the newer `processing_class=`), the model (already
   PEFT, so no `peft_config`), and `ref_model=None`.
 - `save_total_limit=None` keeps every checkpoint; `load_best_model_at_end=False`
@@ -122,7 +124,7 @@ The full selection table (step, accuracy, loss, selected y/n) is logged.
 
 ## 3. The sanity check (`sanity_check_dpo.py`)
 
-This is the **gate** before the multi-hour run. The pinned stack (trl 0.9.6,
+This is the **gate** before the multi-hour run. The pinned stack (trl 0.8.6,
 transformers 4.44.0, peft 0.12.0, unsloth) is **not yet proven** on the cluster;
 if it is broken (e.g. an Unsloth/TRL incompatibility), this script fails here,
 cheaply and loudly, instead of hours into the real job.
@@ -233,10 +235,13 @@ pushed commit hash.
 - **Strict Unsloth, no fallback** — per your instruction. The sanity check is the
   environment gate.
 - **Adapter-only push** — per your instruction; you merge manually later.
-- **TRL 0.9.6 API targeted** (not the newer API in the Ferreira reference repo):
-  DPO params in `DPOConfig`, `DPOTrainer(tokenizer=...)`, `eval_strategy` (valid
-  in transformers 4.44). Only *patterns* were reused from the reference repo
-  (tie-break, chosen/rejected selection), not its code verbatim.
+- **TRL 0.8.x API targeted** (the Unsloth build that resolves under transformers
+  4.44 hardcodes `trl<0.9.0`, so there is no `DPOConfig`): standard args in a
+  `transformers.TrainingArguments`, DPO knobs (`beta`, `max_length`,
+  `max_prompt_length`) as `DPOTrainer` kwargs, `DPOTrainer(tokenizer=...)`,
+  `eval_strategy` (valid in transformers 4.44). Only *patterns* were reused from
+  the Ferreira reference repo (tie-break, chosen/rejected selection), not its
+  code verbatim.
 - **No manual EOS** on `chosen`/`rejected` — TRL appends it; this also satisfies
   the spec's requirement that those fields carry no role markers.
 - **Conflict filter logs both definitions** — the ~12,616 target is the

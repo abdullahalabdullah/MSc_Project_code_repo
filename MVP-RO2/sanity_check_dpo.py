@@ -10,7 +10,7 @@ optimizer steps.
 
 Purpose: catch formatting / OOM / config / environment (Unsloth-compat) errors
 cheaply, BEFORE committing the GPU allocation to a 3-6 hour run. Because the
-environment (trl==0.9.6, transformers==4.44.0, peft==0.12.0, unsloth) is not yet
+environment (trl==0.8.6, transformers==4.44.0, peft==0.12.0, unsloth) is not yet
 proven on the cluster, this script is the gate: if the pinned stack is broken,
 it fails here, loudly.
 

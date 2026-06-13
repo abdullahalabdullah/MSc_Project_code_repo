@@ -132,8 +132,12 @@ This gives ~13.6M trainable parameters (LoRA adapters only), with the base model
 
 ## DPO Training Configuration
 
+On TRL 0.8.x there is no `DPOConfig`: standard training args go in a
+`transformers.TrainingArguments`, and the DPO-specific knobs (`beta`,
+`max_length`, `max_prompt_length`) are passed directly to `DPOTrainer`.
+
 ```python
-dpo_config = DPOConfig(
+training_args = TrainingArguments(
     output_dir="./checkpoints/harmlessness_dpo",
     num_train_epochs=5,               # Ferreira et al. (2025), Appendix B.2
     per_device_train_batch_size=2,
@@ -144,10 +148,6 @@ dpo_config = DPOConfig(
     weight_decay=0.01,
     bf16=True,
     gradient_checkpointing=True,
-    max_length=2048,                  # cap to prevent quadratic memory scaling on backward pass
-    max_prompt_length=512,
-    beta=0.1,                         # KL penalty coefficient
-    ref_model=None,                   # Unsloth handles reference model internally
     logging_steps=10,
     eval_strategy="steps",
     eval_steps=100,
@@ -159,6 +159,18 @@ dpo_config = DPOConfig(
     load_best_model_at_end=False,      # see "Checkpoint Selection" — custom tie-aware selection runs after training
     remove_unused_columns=False,
     report_to="none",                 # no wandb for MVP; use slurm log file
+)
+
+trainer = DPOTrainer(
+    model,
+    ref_model=None,                   # Unsloth handles the reference model internally
+    args=training_args,
+    beta=0.1,                         # KL penalty coefficient (DPOTrainer kwarg on 0.8.x)
+    max_length=2048,                  # cap to prevent quadratic memory scaling on backward pass
+    max_prompt_length=512,
+    train_dataset=train_ds,
+    eval_dataset=eval_ds,
+    tokenizer=tokenizer,
 )
 ```
 
@@ -476,7 +488,7 @@ conda activate ro2_env
 # Install core dependencies (match CUDA 12.8)
 pip install torch==2.3.0 --index-url https://download.pytorch.org/whl/cu121
 pip install transformers==4.44.0
-pip install trl==0.9.6
+pip install trl==0.8.6             # 0.8.x: the Unsloth build that resolves under transformers 4.44 requires trl<0.9.0
 pip install peft==0.12.0
 pip install datasets==2.21.0
 pip install accelerate==0.33.0
