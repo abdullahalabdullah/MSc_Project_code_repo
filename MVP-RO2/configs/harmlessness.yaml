@@ -14,9 +14,9 @@ base_model: "allenai/Llama-3.1-Tulu-3-8B-SFT-no-safety-data"
 # Not the deliverable — the selected checkpoint's adapter is pushed to HF Hub.
 output_dir: "./checkpoints/harmlessness_dpo"
 # Destination repo for the final selected adapter (private).
-hub_model_id: "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/tulu3-8b-harmlessness-dpo-mvp"
+hub_model_id: "er-abd/tulu3-8b-harmlessness-dpo-mvp"
 # Throwaway repo the sanity check pushes to (validates auth + push end-to-end).
-sanity_hub_model_id: "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/tulu3-8b-harmlessness-dpo-mvp-sanitytest"
+sanity_hub_model_id: "er-abd/tulu3-8b-harmlessness-dpo-mvp-sanitytest"
 
 # --- Dataset -----------------------------------------------------------------
 dataset: "PKU-Alignment/PKU-SafeRLHF"
