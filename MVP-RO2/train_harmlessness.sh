@@ -16,8 +16,11 @@ source ~/.bashrc
 conda activate ro2_env          # or your venv activation command
 
 # Run from the MVP-RO2 project root so relative paths (configs/, checkpoints/)
-# and the .env file resolve correctly.
-cd "$(dirname "$0")" || exit 1
+# and the .env file resolve correctly. Under sbatch, $0 points to a spooled copy
+# of this script, so dirname "$0" would cd into the spool dir — use the submit
+# directory instead (submit with `cd MVP-RO2 && sbatch train_harmlessness.sh`).
+# Falls back to dirname "$0" when the script is run directly (e.g. for testing).
+cd "${SLURM_SUBMIT_DIR:-$(dirname "$0")}" || exit 1
 
 python train_dpo.py \
     --config configs/harmlessness.yaml
