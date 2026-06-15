@@ -1490,7 +1490,15 @@ And the model entry:
   - name: "deepseek_r1_distill_qwen_1_5b"
     hf_id: "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
     role: "standalone"
+  - name: "deepseek_r1_distill_qwen_7b"
+    hf_id: "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B"
+    role: "standalone"
 ```
+
+Both checkpoints share the same `deepseek_inference:` config block — the 7B
+variant uses the same prompt format, sampling parameters, and `<think>`-handling
+as the 1.5B model (see "DeepSeek-R1-Distill-Qwen-7B" subsection below for the
+size-related differences).
 
 **Why these values:** the DeepSeek-R1 model card recommends `temperature` in the
 0.5–0.7 range (0.6 used here), `top_p=0.95`, no system prompt, and a forced opening
@@ -1534,6 +1542,43 @@ python scripts/07_estimate_accuracy_deepseek.py --model deepseek_r1_distill_qwen
 > `02_run_inference_deepseek.py`. If it is non-trivial (> ~5%), raise
 > `deepseek_inference.max_new_tokens` and re-run — reasoning traces from this model
 > can be very long, and any truncated sample is dropped from the g-mean² computation.
+
+---
+
+## Running on DeepSeek-R1-Distill-Qwen-7B
+
+`deepseek-ai/DeepSeek-R1-Distill-Qwen-7B` is the larger sibling of
+`deepseek_r1_distill_qwen_1_5b`, distilled from DeepSeek-R1 onto a Qwen2.5-Math-7B
+base. It uses the **same `model_type: qwen2` architecture**, the **same**
+`src/inference_deepseek.py` module (no system prompt, forced opening `<think>` tag,
+`<think>`-block handling shared with the Qwen3 path), and the **same**
+`deepseek_inference:` config block as the 1.5B model — only `hf_id` differs.
+
+### Differences from the 1.5B run
+
+- **Size:** 7B in bf16 ≈ 16 GB of weights (vs. ≈ 3.5 GB for 1.5B). Still fits
+  comfortably on the same A40 (48 GB) used for the Llama/Tulu 8B and Qwen3-4B runs,
+  alongside vLLM's KV cache.
+- **Environment:** unchanged — `model_type: qwen2` is supported by the pinned
+  Llama/Tulu stack (`transformers==4.46.3`, `vllm==0.6.3`), so no separate
+  `requirements-qwen.txt` env is needed.
+- **Runtime:** expect step 02 to take noticeably longer than the 1.5B run (larger
+  model, same `n_samples=4` × 200 instances × 2 arms × `max_new_tokens=16384`).
+- **Truncation:** the 7B model may reason more concisely than the 1.5B model, but
+  still check the truncation count printed at the end of `02_run_inference_deepseek.py`
+  and raise `deepseek_inference.max_new_tokens` if it is non-trivial (> ~5%).
+
+### Run order for DeepSeek-R1-Distill-Qwen-7B
+
+```bash
+python scripts/01_prepare_dataset.py                                      # once, shared (skip if already run)
+python scripts/02_run_inference_deepseek.py --model deepseek_r1_distill_qwen_7b   # GPU
+OPENAI_API_KEY=$OPENAI_API_KEY python scripts/03_run_monitor.py --model deepseek_r1_distill_qwen_7b
+python scripts/04_compute_gmean2.py  --model deepseek_r1_distill_qwen_7b
+python scripts/05_analyze_gmean2.py  --model deepseek_r1_distill_qwen_7b
+python scripts/06_export_excel.py    --model deepseek_r1_distill_qwen_7b
+python scripts/07_estimate_accuracy_deepseek.py --model deepseek_r1_distill_qwen_7b   # optional
+```
 
 ---
 

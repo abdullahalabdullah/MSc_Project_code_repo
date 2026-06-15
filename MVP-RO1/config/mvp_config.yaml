@@ -31,6 +31,9 @@ models:
   - name: "deepseek_r1_distill_qwen_1_5b"
     hf_id: "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
     role: "standalone"          # reasoning model — run with scripts/02_run_inference_deepseek.py
+  - name: "deepseek_r1_distill_qwen_7b"
+    hf_id: "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B"
+    role: "standalone"          # reasoning model — run with scripts/02_run_inference_deepseek.py
 
 hint:
   type: "stanford_professor"
