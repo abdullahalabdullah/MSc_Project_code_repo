@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
 Step 7 (DeepSeek-R1-Distill variant): Estimate per-instance accuracy and
-hint-following for one DeepSeek-R1-Distill checkpoint, using N=32 runs in
-BOTH the unhinted and hinted conditions, then correlate the two.
+hint-following for one DeepSeek-R1-Distill checkpoint, using N=16 runs (by
+default) in BOTH the unhinted and hinted conditions, then correlate the two.
 
 Same analysis as scripts/07_estimate_accuracy.py, but uses the DeepSeek
 thinking prompt/sampling (src/inference_deepseek.py) — no system prompt,
@@ -23,7 +23,7 @@ figure. See documentation.md, section "Hint susceptibility vs. accuracy".
 
 Usage:
     python scripts/07_estimate_accuracy_deepseek.py --model deepseek_r1_distill_qwen_1_5b
-    python scripts/07_estimate_accuracy_deepseek.py --model deepseek_r1_distill_qwen_1_5b --n 32 --seed 2000
+    python scripts/07_estimate_accuracy_deepseek.py --model deepseek_r1_distill_qwen_1_5b --n 16 --seed 2000
 
 Output:
     analysis/{model}/accuracy_runs.jsonl          — unhinted, one record per instance
@@ -228,11 +228,11 @@ def write_arm_summary(records: list, model_name: str, hf_id: str, n_samples: int
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Estimate DeepSeek-R1-Distill unhinted/hinted accuracy and hint-following with N=32 runs."
+        description="Estimate DeepSeek-R1-Distill unhinted/hinted accuracy and hint-following with N=16 runs."
     )
     parser.add_argument("--model", required=True, help="Model name from config")
     parser.add_argument("--config", default="config/mvp_config.yaml")
-    parser.add_argument("--n", type=int, default=32, help="Samples per instance, per arm")
+    parser.add_argument("--n", type=int, default=16, help="Samples per instance, per arm")
     parser.add_argument("--seed", type=int, default=2000,
                         help="Base random seed for the unhinted arm")
     args = parser.parse_args()
