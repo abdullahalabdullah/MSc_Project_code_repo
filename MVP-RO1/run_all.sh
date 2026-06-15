@@ -24,7 +24,7 @@ cd "$(dirname "$0")"
 # --- Configuration ----------------------------------------------------------
 # Datasets to process. Edit this list to add/remove tasks (e.g. drop "mmlu" if
 # its results already exist — re-runs resume from checkpoints and are cheap).
-DATASETS=(mmlu gpqa gsm_mc math_mc agieval wmdp)
+DATASETS=(gpqa gsm_mc math_mc agieval wmdp)
 
 # Config model names (the `name:` keys in config/mvp_config.yaml) that map to:
 #   deepseek_r1_distill_qwen_1_5b -> deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B
