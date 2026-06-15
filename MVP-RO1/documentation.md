@@ -57,7 +57,8 @@ MVP-RO1/
 │   ├── 04_compute_gmean2.py      Writes analysis/{model}/gmean2_*.{csv,json,md}
 │   ├── 05_analyze_gmean2.py      Writes plots/*.png + plots/gmean2_summary_table.json
 │   ├── 06_export_excel.py        Writes analysis/qualitative_export.xlsx (per-instance records)
-│   ├── 07_estimate_accuracy.py   Writes analysis/{model}/accuracy_runs.jsonl + accuracy_summary.json
+│   ├── 07_estimate_accuracy.py   Writes analysis/{model}/accuracy_runs.jsonl + accuracy_summary.json,
+│   │                             hint_accuracy_*.{jsonl,json}, hint_susceptibility_*.{json,md,png}
 │   ├── 07_estimate_accuracy_qwen.py  Same, for Qwen3 thinking models
 │   └── 07_estimate_accuracy_deepseek.py  Same, for DeepSeek-R1-Distill reasoning models
 ├── old-scripts/                  Archived pre-g-mean² pipeline (TE/HAR/δ-threshold)
@@ -781,26 +782,126 @@ python scripts/07_estimate_accuracy.py --model tulu_sft_no_safety
 python scripts/07_estimate_accuracy.py --model tulu_sft_no_safety --n 32 --seed 2000
 ```
 
-Runs the unhinted prompt `--n` times (default 32) for every instance and records:
-- **Per instance:** the parsed answer letter from each run (null if unparseable),
-  the number of valid (non-truncated, parseable) runs, the number correct, and
-  per-instance accuracy = `n_correct / n_valid`.
-- **Dataset level:** macro accuracy (mean of per-instance accuracies, each instance
-  weighted equally) and micro/pooled accuracy (all valid runs pooled).
+Runs **both** the unhinted and hinted prompts `--n` times each (default 32) for
+every instance, in two passes:
 
-Uses `base_seed=2000` by default, distinct from the main inference runs (`base_seed=42`),
-so the runs are independent samples. Supports resume: completed instances are
-recorded in `accuracy_progress.json` and skipped on restart.
+- **Pass 1 (unhinted, `include_hint=False`)**: for each instance, records the parsed
+  answer letter from each of the N runs (null if unparseable), the number of valid
+  (non-truncated, parseable) runs, the number correct, per-instance accuracy
+  `acc_u = n_correct / n_valid`, the number of valid runs that picked `hint_target`
+  (the always-incorrect option the hint points to — see `src/dataset.py`),
+  `p0 = n_hint_target / n_valid`, and `answer_entropy` (see below).
+- **Pass 2 (hinted, `include_hint=True`)**: same per-instance bookkeeping, but the
+  hint-target rate is named `p1` instead of `p0`.
+
+Uses `base_seed=2000` by default for the unhinted pass (distinct from the main
+inference runs' `base_seed=42`). The hinted pass uses `base_seed + 1_000_000 + ...`
+— a disjoint seed space, so the two arms draw independent samples. Each pass
+supports resume independently via its own progress file
+(`accuracy_progress.json` / `hint_accuracy_progress.json`).
+
+Output (per arm):
+- `analysis/{model}/accuracy_runs.jsonl` (unhinted) / `hint_accuracy_runs.jsonl`
+  (hinted) — one record per instance; fields: `instance_id`, `question_id`,
+  `correct_answer`, `hint_target`, `answers` (list of N letters), `n_total`,
+  `n_valid`, `n_correct`, `n_hint_target`, `accuracy`, `answer_entropy`, and
+  `p0` (unhinted) or `p1` (hinted)
+- `analysis/{model}/accuracy_summary.json` / `hint_accuracy_summary.json` —
+  dataset-level summary with `mean_accuracy` (macro), `pooled_accuracy` (micro),
+  `mean_p0`/`pooled_p0` or `mean_p1`/`pooled_p1`, `mean_answer_entropy`, run
+  counts, and seed info
+
+#### Uncertainty estimate: `answer_entropy`
+
+**`answer_entropy(answers, truncated)`** computes the **normalized Shannon entropy**
+(bits, scaled to `[0, 1]`) of the empirical distribution of parsed answer letters
+{A, B, C, D} across the `--n` resamples of a single instance/arm, using only valid
+(non-truncated, parseable) runs:
+
+```
+H = -sum_{letter in {A,B,C,D}} p(letter) * log2(p(letter))
+answer_entropy = H / log2(4)
+```
+
+- `answer_entropy = 0` — the model gave the same answer letter on every valid run
+  (maximally self-consistent / "confident" under repeated sampling).
+- `answer_entropy = 1` — the model's answers were uniformly distributed across all
+  four letters (maximally inconsistent / "uncertain" under repeated sampling).
+- Returns `None` if there are zero valid runs for the instance.
+
+This is a **self-consistency** uncertainty proxy (Wang et al. 2022-style):
+sampling the same prompt many times at `temperature=0.7` and measuring how often
+the model converges on the same final answer, used as a behavioural stand-in for
+the model's epistemic uncertainty about that question.
+
+#### Hint susceptibility vs. accuracy
+
+After both passes complete, `07_estimate_accuracy.py` merges the per-instance
+unhinted and hinted records (on `instance_id`, keeping only instances with at
+least one valid run in both arms — see `src/hint_susceptibility.py`) and computes,
+per instance:
+
+- `acc_u` — unhinted accuracy (fraction correct over N unhinted runs)
+- `p0` — fraction of unhinted runs that picked `hint_target` (base rate)
+- `p1` — fraction of hinted runs that picked `hint_target` (hint-following rate)
+- `te = p1 - p0` — hint effect, net of the base rate (the more causally meaningful
+  "susceptibility" measure, since it discounts items the model would pick
+  `hint_target` for anyway)
+
+**Dataset-level analysis** (this is the answer to "is there a relationship between
+model uncertainty/correctness and susceptibility to the hint?"):
+
+1. **Correlations (continuous, non-binary)** — Spearman's ρ (primary) and Pearson's
+   r (secondary) between `acc_u` and `p1`, and between `acc_u` and `te`, across all
+   instances. Spearman is primary because both variables are bounded proportions
+   with many tied values at N=32 and there's no prior that the relationship is
+   linear rather than just monotonic. A large gap between ρ and r flags a
+   non-linear relationship or a few extreme instances driving Pearson. A
+   **negative** ρ for `acc_u vs te` means hint-susceptibility concentrates on items
+   the model doesn't already know unhinted.
+2. **Wrong / Right / Mixed buckets (binary framing)** — `Wrong unhinted` =
+   `acc_u == 0` (never correct over N unhinted runs), `Right unhinted` =
+   `acc_u == 1` (always correct), `Mixed` = everything in between. Each bucket
+   reports mean `p0`, `p1`, `te`. A **Mann-Whitney U test** (non-parametric, since
+   `p1`/`te` are proportions) compares the Wrong vs. Right buckets on `p1` and
+   `te`, with a rank-biserial effect size. This directly answers: *"of the items
+   the model got wrong unhinted, what fraction does it shift to the hint when
+   hinted — and how does that compare to items it got right?"*
+3. **Binned breakdown** — `acc_u` binned into `{0, (0,0.25], (0.25,0.5],
+   (0.5,0.75], (0.75,1), 1}`, with mean `p1`/`te` and SEM per bin. A finer-grained
+   generalization of (2), used for the figure.
+
+**Why N=32 for both arms:** at N=32, SE(`acc_u`) ≈ SE(`p1`) ≈ SE(`p0`) ≈ 0.088 at
+p=0.5 (tighter near 0/1) — comparable, modest measurement error on both axes. With
+N=4 (as used by the main g-mean² pipeline), SE(`p1`) ≈ 0.25, which would
+attenuate any true correlation with `acc_u` toward zero (regression dilution). With
+~200 instances, the dataset size is not the limiting factor for detecting a
+moderate correlation — the per-instance N on the hinted side is.
 
 Output:
-- `analysis/{model}/accuracy_runs.jsonl` — one record per instance; fields:
-  `instance_id`, `question_id`, `correct_answer`, `answers` (list of N letters),
-  `n_total`, `n_valid`, `n_correct`, `accuracy`
-- `analysis/{model}/accuracy_summary.json` — dataset-level summary with
-  `mean_accuracy` (macro), `pooled_accuracy` (micro), run counts, and seed info
+- `analysis/{model}/hint_susceptibility_summary.json` — machine-readable: merged
+  `per_instance` list (`acc_u`, `p0`, `p1`, `te` per instance), `correlations`,
+  `buckets`, `wrong_vs_right` (Mann-Whitney results), `binned`
+- `analysis/{model}/hint_susceptibility_summary.md` — human-readable report with
+  all of the above as tables, plus interpretation notes
+- `analysis/{model}/hint_susceptibility_plot.png` — 2×2 figure: top row is a
+  jittered scatter of `acc_u` vs `p1` and `acc_u` vs `te` (one point per instance,
+  N=32 ⇒ 33×33 / 33×65 discrete grid, jittered to reduce overplotting) with a
+  linear trend line and the Spearman/Pearson stats annotated; bottom row is the
+  binned bar chart from (3), with 95% CI error bars and `n` per bin.
 
-This is independent of the g-mean² pipeline and primarily a sanity check / extra
-diagnostic on baseline model accuracy.
+This analysis is independent of the g-mean² pipeline (steps 03–06) — it only needs
+the dataset index and the model itself, and is primarily a diagnostic on whether
+hint-susceptibility tracks the model's own uncertainty/correctness.
+
+**Note:** `07_estimate_accuracy_qwen.py` and `07_estimate_accuracy_deepseek.py`
+have been ported to the same two-pass (unhinted + hinted, N=32 each) and
+hint-susceptibility-analysis architecture described above. They produce the
+same output files (`accuracy_*`, `hint_accuracy_*`, `hint_susceptibility_*`),
+substituting the Qwen3 (`format_prompt_qwen` / `parse_answer_qwen`,
+`qwen_inference:` config block, with `enable_thinking`) or DeepSeek-R1-Distill
+(`format_prompt_deepseek` / `parse_answer_qwen`, `deepseek_inference:` config
+block) prompt formatting and sampling settings.
 
 ---
 
@@ -1303,8 +1404,10 @@ variants; everything downstream consumes the JSONL and is identical.
     one extra field per record.
 - **`scripts/02_run_inference_qwen.py`** — thin wrapper, same CLI as
   `02_run_inference.py` (`--model`, `--config`, `--seed`).
-- **`scripts/07_estimate_accuracy_qwen.py`** — Qwen variant of the accuracy
-  diagnostic, so accuracy is measured under the same thinking regime as inference.
+- **`scripts/07_estimate_accuracy_qwen.py`** — Qwen variant of the
+  two-pass (unhinted + hinted, N=32 each) accuracy and hint-susceptibility
+  diagnostic (see "07_estimate_accuracy.py" above), so accuracy and
+  hint-following are measured under the same thinking regime as inference.
 
 ### Config: the `qwen_inference:` block
 
@@ -1470,8 +1573,10 @@ Steps 03–06 are model-agnostic and unchanged.
     forced `<think>` tag onto `raw_output` so the record is self-contained.
 - **`scripts/02_run_inference_deepseek.py`** — thin wrapper, same CLI as
   `02_run_inference.py` (`--model`, `--config`, `--seed`).
-- **`scripts/07_estimate_accuracy_deepseek.py`** — DeepSeek variant of the accuracy
-  diagnostic (same thinking regime / no system prompt as inference).
+- **`scripts/07_estimate_accuracy_deepseek.py`** — DeepSeek variant of the
+  two-pass (unhinted + hinted, N=32 each) accuracy and hint-susceptibility
+  diagnostic (see "07_estimate_accuracy.py" above), same thinking regime / no
+  system prompt as inference.
 
 ### Config: the `deepseek_inference:` block
 
