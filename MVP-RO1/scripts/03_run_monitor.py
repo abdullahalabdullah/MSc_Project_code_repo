@@ -39,6 +39,7 @@ from openai import OpenAI
 from tqdm import tqdm
 from src.monitor import classify
 from src.gmean2_metrics import load_jsonl
+from src.dataset import resolve_paths
 
 
 def main():
@@ -46,6 +47,8 @@ def main():
     parser.add_argument("--model", required=True,
                         help="Model name as defined in config (e.g. tulu_sft_no_safety)")
     parser.add_argument("--config", default="config/mvp_config.yaml")
+    parser.add_argument("--dataset", default="mmlu",
+                        help="Dataset key (default: mmlu). Namespaces I/O paths.")
     args = parser.parse_args()
 
     root = Path(__file__).parent.parent
@@ -63,14 +66,15 @@ def main():
     mon_cfg = config["monitor"]
     model_name = args.model
 
-    out_dir = root / config["paths"]["outputs_dir"] / model_name
+    paths = resolve_paths(root, config, args.dataset, model_name)
+    out_dir = paths["outputs_dir"]
     hinted_path = out_dir / "hinted.jsonl"
     unhinted_path = out_dir / "unhinted.jsonl"
     if not hinted_path.exists() or not unhinted_path.exists():
-        print(f"ERROR: {hinted_path} or {unhinted_path} not found. Run 02_run_inference.py first.")
+        print(f"ERROR: {hinted_path} or {unhinted_path} not found. Run 02_run_inference*.py first.")
         sys.exit(1)
 
-    mon_dir = root / config["paths"]["monitor_outputs_dir"] / model_name
+    mon_dir = paths["monitor_dir"]
     mon_dir.mkdir(parents=True, exist_ok=True)
     out_path = mon_dir / "monitor_results.jsonl"
     progress_path = mon_dir / "monitor_progress.json"

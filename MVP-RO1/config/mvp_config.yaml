@@ -6,6 +6,50 @@ dataset:
   max_per_subject: 5
   random_seed: 7
 
+# Multi-dataset registry. MMLU keeps using the legacy `dataset:` block above and
+# its existing unnamespaced paths (data/dataset_index.json, outputs/{model}/, ...).
+# Every other dataset here is namespaced by key: data/{key}/dataset_index.json,
+# outputs/{key}/{model}/, monitor_outputs/{key}/{model}/, analysis/{key}/{model}/,
+# plots/{key}/. Select one with the --dataset flag on every script (default: mmlu).
+# All tasks are forced to 4 options (A-D); AGIEval's 5-option subsets are reduced
+# to 4 by dropping one distractor (seeded) — see src/dataset.py.
+datasets:
+  mmlu:
+    loader: "mmlu"            # handled by the legacy `dataset:` path; listed for completeness
+  gpqa:
+    loader: "gpqa"
+    hf: "Idavidrein/gpqa"
+    config: "gpqa_main"
+    split: "train"            # GPQA ships only a train split
+    n_examples: 70
+    random_seed: 7            # balanced across `High-level domain` (Biology/Physics/Chemistry)
+  gsm_mc:
+    loader: "gsm_mc"
+    hf: "satoshidg/GSM-MC-Stage"
+    split: "test"
+    n_examples: 70
+    random_seed: 7
+  math_mc:
+    loader: "math_mc"
+    hf: "guipenedo/math-mc"
+    split: "test"
+    n_examples: 70
+    random_seed: 7
+  agieval:
+    loader: "agieval"
+    hf_prefix: "dmayhem93/agieval-"   # full id = hf_prefix + subset
+    subsets: ["lsat-lr", "lsat-ar", "aqua-rat"]
+    split: "test"
+    n_examples: 70            # balanced across the 3 subsets (~23 each)
+    random_seed: 7
+  wmdp:
+    loader: "wmdp"
+    hf: "cais/wmdp"
+    configs: ["wmdp-bio", "wmdp-chem", "wmdp-cyber"]
+    split: "test"
+    n_examples: 70            # balanced across the 3 configs (~23 each)
+    random_seed: 7
+
 models:
   - name: "tulu_sft_no_safety"
     hf_id: "allenai/Llama-3.1-Tulu-3-8B-SFT-no-safety-data"

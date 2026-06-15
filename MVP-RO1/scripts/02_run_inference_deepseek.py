@@ -35,7 +35,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import yaml
-from src.dataset import load_dataset_index
+from src.dataset import ensure_hf_auth, load_dataset_index, resolve_paths
 from src.inference_deepseek import run_inference_deepseek
 
 
@@ -44,6 +44,8 @@ def main():
     parser.add_argument("--model", required=True,
                         help="Model name as defined in config (e.g. deepseek_r1_distill_qwen_1_5b)")
     parser.add_argument("--config", default="config/mvp_config.yaml")
+    parser.add_argument("--dataset", default="mmlu",
+                        help="Dataset key (default: mmlu). Namespaces I/O paths.")
     parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
 
@@ -57,22 +59,25 @@ def main():
         print("ERROR: config is missing the 'deepseek_inference:' block required by this script.")
         sys.exit(1)
 
+    ensure_hf_auth()  # log in for gated model downloads (env var or .hf_token)
+
     model_cfg = next((m for m in config["models"] if m["name"] == args.model), None)
     if model_cfg is None:
         available = [m["name"] for m in config["models"]]
         print(f"ERROR: model '{args.model}' not found in config. Available: {available}")
         sys.exit(1)
 
-    dataset_path = root / config["paths"]["data_dir"] / "dataset_index.json"
+    paths = resolve_paths(root, config, args.dataset)
+    dataset_path = paths["data_index"]
     if not dataset_path.exists():
         print(f"ERROR: dataset_index.json not found at {dataset_path}.")
-        print("Run 01_prepare_dataset.py first.")
+        print(f"Run 01_prepare_dataset.py --dataset {args.dataset} first.")
         sys.exit(1)
 
     dataset = load_dataset_index(dataset_path)
     print(f"Loaded {len(dataset)} instances from {dataset_path}.")
 
-    config["paths"]["outputs_dir"] = str(root / config["paths"]["outputs_dir"])
+    config["paths"]["outputs_dir"] = str(paths["outputs_dir"])
 
     run_inference_deepseek(config, model_cfg, dataset, base_seed=args.seed)
 

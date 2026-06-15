@@ -45,7 +45,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import numpy as np
 import yaml
-from src.dataset import MMLU_LETTERS, load_dataset_index
+from src.dataset import MMLU_LETTERS, ensure_hf_auth, load_dataset_index, resolve_paths
 from src.gmean2_metrics import load_jsonl
 from src.hint_susceptibility import (
     compute_hint_susceptibility,
@@ -232,6 +232,8 @@ def main():
     )
     parser.add_argument("--model", required=True, help="Model name from config")
     parser.add_argument("--config", default="config/mvp_config.yaml")
+    parser.add_argument("--dataset", default="mmlu",
+                        help="Dataset key (default: mmlu). Namespaces I/O paths.")
     parser.add_argument("--n", type=int, default=32, help="Samples per instance, per arm")
     parser.add_argument("--seed", type=int, default=2000,
                         help="Base random seed for the unhinted arm")
@@ -241,16 +243,19 @@ def main():
     with open(root / args.config) as f:
         config = yaml.safe_load(f)
 
+    ensure_hf_auth()  # log in for gated model downloads (env var or .hf_token)
+
     models = {m["name"]: m for m in config["models"]}
     if args.model not in models:
         print(f"ERROR: model '{args.model}' not in config. Available: {list(models)}")
         sys.exit(1)
     model_cfg = models[args.model]
 
-    dataset_path = root / config["paths"]["data_dir"] / "dataset_index.json"
+    paths = resolve_paths(root, config, args.dataset, args.model)
+    dataset_path = paths["data_index"]
     dataset = load_dataset_index(dataset_path)
 
-    analysis_dir = root / config["paths"]["analysis_dir"] / args.model
+    analysis_dir = paths["analysis_dir"]
     analysis_dir.mkdir(parents=True, exist_ok=True)
 
     unhinted_runs_path = analysis_dir / "accuracy_runs.jsonl"

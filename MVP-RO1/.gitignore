@@ -14,6 +14,9 @@
 .env
 *.env
 
+# Secrets — HuggingFace token (read from env var first, this file as fallback)
+.hf_token
+
 # Jupyter
 .ipynb_checkpoints/
 

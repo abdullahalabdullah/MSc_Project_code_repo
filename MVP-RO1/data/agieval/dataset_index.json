@@ -1,0 +1,982 @@
+[
+  {
+    "instance_id": 0,
+    "question_id": "aqua-rat_163",
+    "subject": "aqua-rat",
+    "question": "Q: What is the greatest number of identical bouquets that can be made out of 28 white and 98 red tulips if no flowers are to be left out? (Two bouquets are identical whenever the number of red tulips in the two bouquets is equal and the number of white tulips in the two bouquets is equal.) Answer Choices: (A)4 (B)7 (C)10 (D)14 (E)21\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "4",
+      "B": "10",
+      "C": "14",
+      "D": "21"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 1,
+    "question_id": "lsat-ar_37",
+    "subject": "lsat-ar",
+    "question": "A bakery makes exactly three kinds of cookie—oatmeal, peanut butter, and sugar. Exactly three batches of each kind of cookie are made each week (Monday through Friday) and each batch is made, from start to finish, on a single day. The following conditions apply: No two batches of the same kind of cookie are made on the same day. At least one batch of cookies is made on Monday. The second batch of oatmeal cookies is made on the same day as the first batch of peanut butter cookies. The second batch of sugar cookies is made on Thursday.Q: How many of the days, Monday through Friday, are such that at most two batches of cookies could be made on that day? Answer Choices: (A)one (B)two (C)three (D)four (E)five\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "one",
+      "B": "two",
+      "C": "three",
+      "D": "four"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 2,
+    "question_id": "lsat-lr_452",
+    "subject": "lsat-lr",
+    "question": "The company president says that significant procedural changes were made before either she or Yeung was told about them. But, according to Grimes, the contract requires that either the. company president or any lawyer in the company's legal department be told about proposed procedural changes before they are made. Thus, unless what Grimes or the company president said is incorrect, the contract was violated.Q: The argument's conclusion can be properly inferred if which one of the following is assumed? Answer Choices: (A)Yeung is a lawyer in the company's legal department. (B)Neither Grimes nor Yeung was told about the procedural changes until after they were made. (C)No lawyer in the company's legal department was told about the procedural changes until . after they were made. (D)If the company's president was told about the procedural changes before they were made, then the contract was not violated. (E)If no lawyer in the company's legal department was told about the procedural changes before they were made, then the contract was violated.\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "Yeung is a lawyer in the company's legal department.",
+      "B": "No lawyer in the company's legal department was told about the procedural changes until . after they were made.",
+      "C": "If the company's president was told about the procedural changes before they were made, then the contract was not violated.",
+      "D": "If no lawyer in the company's legal department was told about the procedural changes before they were made, then the contract was violated."
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 3,
+    "question_id": "aqua-rat_107",
+    "subject": "aqua-rat",
+    "question": "Q: x men working x hours per day can do x units of a work in x days. How much work can be completed by y men working y hours per day in y days? Answer Choices: (A)x2/y2 units (B)y3/x2 units (C)x3/y2 units (D)y2/x2 units (E)None of these\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "y3/x2 units",
+      "B": "x3/y2 units",
+      "C": "y2/x2 units",
+      "D": "None of these"
+    },
+    "correct_answer": "A",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 4,
+    "question_id": "lsat-ar_228",
+    "subject": "lsat-ar",
+    "question": "Three real estate companies—RealProp, Southco, and Trustcorp—are considering trading buildings with one another. Each building they own is categorized as either class 1, class 2, or class 3, depending on its approximate value: RealProp owns the Garza Tower (class 1), the Yates House (class 3), and the Zimmer House (class 3). Southco owns the Flores Tower (class 1) and the Lynch Building (class 2). Trustcorp owns the King Building, the Meyer Building, and the Ortiz Building, all of which are class 2. Each trade must be of exactly one of the following three kinds: Trading one building for one other building of the same class Trading one class 1 building for two class 2 buildings Trading one class 2 building for two class 3 buildingsQ: If Trustcorp owns no class 2 buildings after some number of trades, which one of the following must be true? Answer Choices: (A)RealProp owns a class 1 building. (B)Southco owns only class 2 buildings. (C)Southco has made at least one trade with Trustcorp. (D)Trustcorp owns the Garza Tower. (E)Trustcorp owns the Zimmer House.\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "RealProp owns a class 1 building.",
+      "B": "Southco owns only class 2 buildings.",
+      "C": "Trustcorp owns the Garza Tower.",
+      "D": "Trustcorp owns the Zimmer House."
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 5,
+    "question_id": "lsat-lr_418",
+    "subject": "lsat-lr",
+    "question": "Modest amounts of exercise can produce a dramatic improvement in cardiovascular health. One should exercise most days of the week, but one need only do the equivalent of half an hour of brisk walking on those days to obtain cardiovascular health benefits. More vigorous exercise is more effective, but a strenuous workout is not absolutely necessary.Q: Which one of the following is most strongly supported by the statements above? Answer Choices: (A)Having a strenuous workout most days of the week can produce a dramatic improvement in cardiovascular health. (B)Doing the equivalent of an hour of brisk walking two or three times a week generally produces dramatic improvements in cardiovascular health. (C)It is possible to obtain at least as great an improvement in cardiovascular health from doing the equivalent of half an hour of brisk walking most days of the week as from having a strenuous workout most days of the week. (D)Aside from exercise, there is no way of improving one's cardiovascular health. (E)To obtain a dramatic improvement in one's cardiovascular health, one must exercise strenuously at least occasionally.\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "Having a strenuous workout most days of the week can produce a dramatic improvement in cardiovascular health.",
+      "B": "Doing the equivalent of an hour of brisk walking two or three times a week generally produces dramatic improvements in cardiovascular health.",
+      "C": "It is possible to obtain at least as great an improvement in cardiovascular health from doing the equivalent of half an hour of brisk walking most days of the week as from having a strenuous workout most days of the week.",
+      "D": "Aside from exercise, there is no way of improving one's cardiovascular health."
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 6,
+    "question_id": "aqua-rat_156",
+    "subject": "aqua-rat",
+    "question": "Q: In a survey of students, each student selected from a list of 10 songs the 2 songs that the student liked best. If each song was selected 5 times, how many students were surveyed? Answer Choices: (A)96 (B)48 (C)32 (D)25 (E)18\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "96",
+      "B": "48",
+      "C": "32",
+      "D": "25"
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 7,
+    "question_id": "lsat-ar_105",
+    "subject": "lsat-ar",
+    "question": "A maintenance company that takes service requests from three clients—Image, Solide, and Truvest—plans to set targets for its average service response times. Service targets will be set at 3 days, 2 days, or 1 day. Two service targets are set for each client—one for requests received through the maintenance company's website and one for requests received by voicemail. The six targets are set according to the following conditions: None of the clients can have a website target that is longer than its voicemail target. Image's voicemail target must be shorter than the other clients' voicemail targets. Solide's website target must be shorter than Truvest's website target.Q: If Solide's voicemail target is shorter than Truvest's website target, which one of the following targets could be 2 days? Answer Choices: (A)Image's website target (B)Image's voicemail target (C)Solide's website target (D)Truvest's voicemail target (E)Truvest's website target\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "Image's voicemail target",
+      "B": "Solide's website target",
+      "C": "Truvest's voicemail target",
+      "D": "Truvest's website target"
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 8,
+    "question_id": "lsat-lr_429",
+    "subject": "lsat-lr",
+    "question": "In 2005, an environmental group conducted a study measuring the levels of toxic—chemicals in the bodies of eleven volunteers. Scientifically valid inferences could not be drawn from the study because of the small sample size, but the results were interesting nonetheless. Among the subjects tested, younger subjects showed much lower levels of PCBs-toxic chemicals that were banned in the 1970s. This proves that the regulation banning PCBs was effective in reducing human exposure to those chemicals.Q: The reasoning in the argument is most vulnerable to criticism on the grounds that the argument Answer Choices: (A)takes an inconsistent stance regarding the status of the inferences that can be drawn from the study (B)overlooks the possibility that two or more chemicals produce the same effects (C)concludes that a generalization has been proven true merely on the grounds that it has not been proven false (D)takes something to be the cause of a reduction when it could have been an effect of that reduction (E)does not consider the possibility that PCBs have detrimental effects on human health several years after exposure\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "takes an inconsistent stance regarding the status of the inferences that can be drawn from the study",
+      "B": "concludes that a generalization has been proven true merely on the grounds that it has not been proven false",
+      "C": "takes something to be the cause of a reduction when it could have been an effect of that reduction",
+      "D": "does not consider the possibility that PCBs have detrimental effects on human health several years after exposure"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 9,
+    "question_id": "aqua-rat_243",
+    "subject": "aqua-rat",
+    "question": "Q: If m > 0, y > 0, and x is m percent of 4y, then, in terms of y, m is what percentage of x? Answer Choices: (A)y/400 (B)4y (C)50y (D)2500/y (E)5000/y\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "y/400",
+      "B": "4y",
+      "C": "50y",
+      "D": "2500/y"
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 10,
+    "question_id": "lsat-ar_118",
+    "subject": "lsat-ar",
+    "question": "A concert promoter is filling the six slots at a benefit concert. The slots, from earliest to latest, are numbered slot one through slot six. The slots will be filled by six bands—Uneasy, Vegemite, Wellspring, Xpert, Yardsign, and Zircon. Each band will perform in just one slot. The order must meet the following constraints: Vegemite performs in an earlier slot than Zircon. Wellspring and Zircon each perform in an earlier slot than Xpert. Uneasy performs in one of the last three slots. Yardsign performs in one of the first three slots.Q: If Zircon performs immediately before Wellspring, which one of the following must be true? Answer Choices: (A)Uneasy performs in slot five. (B)Vegemite performs in slot one. (C)Xpert performs in slot five. (D)Yardsign performs in slot two. (E)Zircon performs in slot three.\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "Uneasy performs in slot five.",
+      "B": "Vegemite performs in slot one.",
+      "C": "Yardsign performs in slot two.",
+      "D": "Zircon performs in slot three."
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 11,
+    "question_id": "lsat-lr_398",
+    "subject": "lsat-lr",
+    "question": "Economist: If the economy grows stronger, employment will increase, and hence more parents will need to find day care for their young children. Unfortunately, in a stronger economy many day-care workers will quit to take better-paying jobs in other fields. Therefore, a stronger economy is likely to make it much more difficult to find day care.Q: Which one of the following is an assumption the economist's argument requires? Answer Choices: (A)If the economy grows stronger, most of the new jobs that are created will be in fields that pay well. (B)If the economy grows stronger, the number of new day-care workers will not be significantly greater than the number of day-care workers who move to better-paying jobs in other fields. (C)If the economy grows stronger, the number of workers employed by day-care centers is likely to decrease. (D)The shortage of day care for children is unlikely to worsen unless employment increases and many day-care center employees quit to take better-paying jobs in other fields. (E)The total number of young children in day-care centers will decrease if the cost of day care increases significantly.\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "If the economy grows stronger, most of the new jobs that are created will be in fields that pay well.",
+      "B": "If the economy grows stronger, the number of new day-care workers will not be significantly greater than the number of day-care workers who move to better-paying jobs in other fields.",
+      "C": "The shortage of day care for children is unlikely to worsen unless employment increases and many day-care center employees quit to take better-paying jobs in other fields.",
+      "D": "The total number of young children in day-care centers will decrease if the cost of day care increases significantly."
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 12,
+    "question_id": "aqua-rat_81",
+    "subject": "aqua-rat",
+    "question": "Q: Julie’s yard is rectangular. One side of the yard is 100 feet wide. The total area of the yard is 3,000 square feet. What is the length of the other side of the yard? Answer Choices: (A)30 feet (B)20 feet (C)10 feet (D)50 feet (E)60 feet\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "30 feet",
+      "B": "20 feet",
+      "C": "50 feet",
+      "D": "60 feet"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 13,
+    "question_id": "lsat-ar_196",
+    "subject": "lsat-ar",
+    "question": "During the weeklong grand opening of a new antique shop, the antique dealer will auction exactly one antique per day for six consecutive days—June 1st through June 6th. The antiques to be auctioned are: a harmonica, a lamp, a mirror, a sundial, a table, and a vase. The following conditions apply: The sundial is not auctioned on June 1st. If the harmonica is auctioned on an earlier date than the lamp, then the mirror is also auctioned on an earlier date than the lamp. The sundial is auctioned on an earlier date than the mirror and also on an earlier date than the vase. The table is auctioned on an earlier date than the harmonica or on an earlier date than the vase, but not both.Q: Which one of the following could be true? Answer Choices: (A)The table is auctioned on June 2nd and the lamp is auctioned on June 3rd. (B)The sundial is auctioned on June 2nd and the vase is auctioned on June 3rd. (C)The mirror is auctioned on June 3rd and the sundial is auctioned on June 4th. (D)The vase is auctioned on June 4th and the sundial is auctioned on June 5th. (E)The sundial is auctioned on June 4th and the table is auctioned on June 5th.\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "The table is auctioned on June 2nd and the lamp is auctioned on June 3rd.",
+      "B": "The sundial is auctioned on June 2nd and the vase is auctioned on June 3rd.",
+      "C": "The mirror is auctioned on June 3rd and the sundial is auctioned on June 4th.",
+      "D": "The sundial is auctioned on June 4th and the table is auctioned on June 5th."
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 14,
+    "question_id": "lsat-lr_171",
+    "subject": "lsat-lr",
+    "question": "Social scientist: Since the body of thought known as Marxism claims to descrthe rigorously an inexorable historical movement toward the socialization of the means of production, it should be regarded as a scientific theory. Thus, certain interpreters, in taking Marxism as a political program aimed at radically transforming society, have misconstrued it.Q: The social scientist's conclusion follows logically if which one of the following is assumed? Answer Choices: (A)The description that Marxism gives of certain historical phenomena in the economic sphere is as rigorous as it is claimed to be. (B)The aims of science are incompatlble with the aims of those who would seek to transform society by political means. (C)Only bodies of thought consisting purely of rigorous description are scientific theories. (D)Scientific theories cannot be correctly interpreted to be, or to imply, political programs. (E)The means of production will inevitably become socialized regardless of any political programs designed to make that occur.\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "The description that Marxism gives of certain historical phenomena in the economic sphere is as rigorous as it is claimed to be.",
+      "B": "The aims of science are incompatlble with the aims of those who would seek to transform society by political means.",
+      "C": "Only bodies of thought consisting purely of rigorous description are scientific theories.",
+      "D": "Scientific theories cannot be correctly interpreted to be, or to imply, political programs."
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 15,
+    "question_id": "aqua-rat_1",
+    "subject": "aqua-rat",
+    "question": "Q: The original price of an item is discounted 22%. A customer buys the item at this discounted price using a $20-off coupon. There is no tax on the item, and this was the only item the customer bought. If the customer paid $1.90 more than half the original price of the item, what was the original price of the item? Answer Choices: (A)$61 (B)$65 (C)$67.40 (D)$70 (E)$78.20\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "$61",
+      "B": "$67.40",
+      "C": "$70",
+      "D": "$78.20"
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 16,
+    "question_id": "lsat-ar_92",
+    "subject": "lsat-ar",
+    "question": "A realtor will show a prospective buyer seven houses—J, K, L, M, N, 0, and P—during a single day. The first and second houses to be shown will be shown in the morning; the third, fourth, and fifth houses to be shown will be shown in the afternoon; the sixth and seventh houses to be shown will be shown in the evening. The houses will be shown according to the following rules: J must be shown in the evening. K cannot be shown in the morning. L must be shown at some time after K is shown and at some time before M is shown.Q: Which one of the following could be the order, from first through seventh, in which the realtor shows the houses? Answer Choices: (A)K, 0, L, M, N, J, P (B)N, L, P, K, M, 0, J (C)0, P, K, L, N, M, J (D)0, P, M, N, K, L, J (E)P, 0, K, J, L, N, M\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "K, 0, L, M, N, J, P",
+      "B": "N, L, P, K, M, 0, J",
+      "C": "0, P, K, L, N, M, J",
+      "D": "0, P, M, N, K, L, J"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 17,
+    "question_id": "lsat-lr_421",
+    "subject": "lsat-lr",
+    "question": "Ethicist: The general principle-if one ought to do something then one can do it-does not always hold true. This may be seen by considering an example. Suppose, someone promises to meet a friend at a certain time, but-because of an unforeseen traffic jam-it is impossible to do so.Q: Which one of the following is an assumption required by the ethicist's argument? Answer Choices: (A)If a person failed to do something she or he ought to have done, then that person failed to do something that.she or he promised to do. (B)Only an event like an unforeseen.traffic jam could excuse a person from the obligation to keep a promise. (C)If there is something that a.person ought not do, then it is something that that person is capable of not doing. (D)The obligation created by a promise is not relieved by the fact that the promise cannot be kept. (E)If an event like an unforeseen traffic jam interferes with someone's keeping a promise, then that person should not have made the promise to begin with.\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "Only an event like an unforeseen.traffic jam could excuse a person from the obligation to keep a promise.",
+      "B": "If there is something that a.person ought not do, then it is something that that person is capable of not doing.",
+      "C": "The obligation created by a promise is not relieved by the fact that the promise cannot be kept.",
+      "D": "If an event like an unforeseen traffic jam interferes with someone's keeping a promise, then that person should not have made the promise to begin with."
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 18,
+    "question_id": "aqua-rat_108",
+    "subject": "aqua-rat",
+    "question": "Q: ABCDE is a regular pentagon with F at its center. How many different quadrilaterals can be formed by joining 4 of the points A,B,C,D,E and F? Answer Choices: (A)12 (B)10 (C)5 (D)15 (E)20\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "12",
+      "B": "5",
+      "C": "15",
+      "D": "20"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 19,
+    "question_id": "lsat-ar_132",
+    "subject": "lsat-ar",
+    "question": "Exactly five movies are showing at the repertory theater this evening: a horror film, a mystery, a romance, a sci-fi film, and a western. Each movie is shown exactly once, on one of the theater's three screens: screens 1, 2, and 3. Screens 1 and 2 show two movies each, one beginning at 7 P.M. and the other at 9 P.M.; screen 3 shows exactly one movie, at 8 P.M. The following conditions apply to this evening's schedule: The western begins at some time before the horror film does. The sci-fi film is not shown on screen 3. The romance is not shown on screen 2. The horror film and the mystery are shown on different screens.Q: If the sci-fi film and the romance are to be shown on the same screen, then which one of the following must be true of this evening's schedule? Answer Choices: (A)The western begins at 7 P.M. (B)The sci-fi film begins at 9 P.M. (C)The mystery begins at 8 P.M. (D)The romance begins at 9 P.M. (E)The horror film begins at 8 P.M.\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "The western begins at 7 P.M.",
+      "B": "The mystery begins at 8 P.M.",
+      "C": "The romance begins at 9 P.M.",
+      "D": "The horror film begins at 8 P.M."
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 20,
+    "question_id": "lsat-lr_210",
+    "subject": "lsat-lr",
+    "question": "Several companies that make herbal teas containing ginseng assert in their marketing that ginseng counteracts the effects of stress. As a result, many people buy these products hoping to improve their health. Yet no definitive scientific study links ginseng with the relief of stress. Thus, these marketing campaigns make false claims.Q: The reasoning in the argument is flawed in that the argument Answer Choices: (A)rejects an argument because of its source without evaluating the argument's logical strength (B)concludes that a claim is false merely on the grounds that it has not been shown to be true (C)draws an inference on the basis of a sample that is likely to be unrepresentative (D)fails to address the possibility that many people buy herbal teas containing ginseng because they enjoy drinking the tea (E)fails to address the possibility that some ingredients other than ginseng in the herbal teas containing ginseng counteract the effects of stress\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "concludes that a claim is false merely on the grounds that it has not been shown to be true",
+      "B": "draws an inference on the basis of a sample that is likely to be unrepresentative",
+      "C": "fails to address the possibility that many people buy herbal teas containing ginseng because they enjoy drinking the tea",
+      "D": "fails to address the possibility that some ingredients other than ginseng in the herbal teas containing ginseng counteract the effects of stress"
+    },
+    "correct_answer": "A",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 21,
+    "question_id": "aqua-rat_251",
+    "subject": "aqua-rat",
+    "question": "Q: It takes a worker 9 minutes to drive from home to work at an average rate of 20 kilometers per hour. How many minutes will it take the worker to cycle from home to work along the same route at an average rate of 6 kilometers per hour? Answer Choices: (A)30 (B)32 (C)35 (D)36 (E)40\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "30",
+      "B": "32",
+      "C": "36",
+      "D": "40"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 22,
+    "question_id": "lsat-ar_26",
+    "subject": "lsat-ar",
+    "question": "A panel of five scientists will be formed. The panelists will be selected from among three botanists—F, G, and H—three chemists—K, L, and M—and three zoologists—P, Q, and R. Selection is governed by the following conditions: The panel must include at least one scientist of each of the three types. If more than one botanist is selected, then at most one zoologist is selected. F and K cannot both be selected. K and M cannot both be selected. If M is selected, both P and R must be selected.Q: If four of the scientists selected are F, L, Q, and R, which one of the following must be the fifth scientist selected? Answer Choices: (A)G (B)H (C)K (D)M (E)P\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "H",
+      "B": "K",
+      "C": "M",
+      "D": "P"
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 23,
+    "question_id": "lsat-lr_55",
+    "subject": "lsat-lr",
+    "question": "Commentator: In many countries the influence of fringe movements is increasing. The great centrifugal engine of modern culture turns faster and faster, spinning off fashions, ideologies, religions, artistic movements, economic theories, cults, and dogmas in fabulous profusion. Hence, modern culture threatens the national identities that now exist in the world.Q: Which one of the following statements, if true, most seriously weakens the commentator's argument? Answer Choices: (A)New national identities are often forged out of conflicts among diverse groups. (B)A stable national identity is typically a composite of a staggering number of subcultures. (C)The rate of cultural change in most countries will soon change drastically. (D)It is preferable to have a pluralistic rather than a monolithic national culture. (E)A culture with a solidified national identity tends to have more social problems than one without such an identity.\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "A stable national identity is typically a composite of a staggering number of subcultures.",
+      "B": "The rate of cultural change in most countries will soon change drastically.",
+      "C": "It is preferable to have a pluralistic rather than a monolithic national culture.",
+      "D": "A culture with a solidified national identity tends to have more social problems than one without such an identity."
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 24,
+    "question_id": "aqua-rat_147",
+    "subject": "aqua-rat",
+    "question": "Q: The value of log2 4 is: Answer Choices: (A)2 (B)4 (C)6 (D)8 (E)12\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "2",
+      "B": "4",
+      "C": "6",
+      "D": "8"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 25,
+    "question_id": "lsat-ar_39",
+    "subject": "lsat-ar",
+    "question": "A bakery makes exactly three kinds of cookie—oatmeal, peanut butter, and sugar. Exactly three batches of each kind of cookie are made each week (Monday through Friday) and each batch is made, from start to finish, on a single day. The following conditions apply: No two batches of the same kind of cookie are made on the same day. At least one batch of cookies is made on Monday. The second batch of oatmeal cookies is made on the same day as the first batch of peanut butter cookies. The second batch of sugar cookies is made on Thursday.Q: If no batch of cookies is made on Wednesday, then which one of the following must be true? Answer Choices: (A)Exactly three batches of cookies are made on Tuesday. (B)Exactly three batches of cookies are made on Friday. (C)At least two batches of cookies are made on Monday. (D)At least two batches of cookies are made on Thursday. (E)Fewer batches of cookies are made on Monday than on Tuesday.\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "Exactly three batches of cookies are made on Tuesday.",
+      "B": "Exactly three batches of cookies are made on Friday.",
+      "C": "At least two batches of cookies are made on Thursday.",
+      "D": "Fewer batches of cookies are made on Monday than on Tuesday."
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 26,
+    "question_id": "lsat-lr_500",
+    "subject": "lsat-lr",
+    "question": "When expert witnesses give testimony, jurors often do not understand the technical information and thereby are in no position to evaluate such testimony. Although expert witnesses on opposite sides often make conflicting claims, the expert witnesses on both sides frequently seem competent, leaving the jury unable to assess the reliability of their testimonies.Q: The statements above, if true, most strongly support which one of the following? Answer Choices: (A)There should be limits placed on how much technical information can be considered by both sides in preparing a legal case. (B)Jury decisions in cases involving expert witness testimonies are not always determined by the reliability of those testimonies. (C)Jurors who understand the technical information presented in a case can usually assess its legal implications accurately. (D)Jury members should generally be selected on the basis of their technical expertise. (E)Expert witnesses who testify on opposite sides in legal cases are likely to agree in their evaluations of technical claims.\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "Jury decisions in cases involving expert witness testimonies are not always determined by the reliability of those testimonies.",
+      "B": "Jurors who understand the technical information presented in a case can usually assess its legal implications accurately.",
+      "C": "Jury members should generally be selected on the basis of their technical expertise.",
+      "D": "Expert witnesses who testify on opposite sides in legal cases are likely to agree in their evaluations of technical claims."
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 27,
+    "question_id": "aqua-rat_212",
+    "subject": "aqua-rat",
+    "question": "Q: John conducted a survey about car color. 60% of the people who took the survey were women. Of the men who were surveyed, 75% preferred red cars over green cars. If 10 men liked green cars more than red, how many people took the survey? Answer Choices: (A)100 (B)120 (C)50 (D)200 (E)80\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "100",
+      "B": "120",
+      "C": "200",
+      "D": "80"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 28,
+    "question_id": "lsat-ar_7",
+    "subject": "lsat-ar",
+    "question": "The organizer of a reading club will select at least five and at most six works from a group of nine works. The group consists of three French novels, three Russian novels, two French plays, and one Russian play. The organizer's selection of works must conform to the following requirements: No more than four French works are selected. At least three but no more than four novels are selected. At least as many French novels as Russian novels are selected. If both French plays are selected, then the Russian play is not selected.Q: Which one of the following could be true about the organizer's selection of works? Answer Choices: (A)No Russian novels are selected. (B)Exactly one French novel is selected. (C)All three plays are selected. (D)All three Russian novels are selected. (E)All five French works are selected.\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "No Russian novels are selected.",
+      "B": "Exactly one French novel is selected.",
+      "C": "All three Russian novels are selected.",
+      "D": "All five French works are selected."
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 29,
+    "question_id": "lsat-lr_79",
+    "subject": "lsat-lr",
+    "question": "Columnist: Donating items to charity may be a sign of generosity, but any generosity it may demonstrate is rarely a permanent virtue, since most donors make donations only intermittently.Q: Which one of the following most accurately describes a flaw in the columnist's argument? Answer Choices: (A)The argument takes for granted that truly generous people are the most virtuous. (B)The argument attacks the character of those whose values are different from those of the columnist. (C)The argument takes for granted that a character trait is present only when manifested. (D)The argument generalizes from too small a sample of cases. (E)The argument takes for granted that most people donate out of generosity.\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "The argument takes for granted that truly generous people are the most virtuous.",
+      "B": "The argument attacks the character of those whose values are different from those of the columnist.",
+      "C": "The argument takes for granted that a character trait is present only when manifested.",
+      "D": "The argument generalizes from too small a sample of cases."
+    },
+    "correct_answer": "C",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 30,
+    "question_id": "aqua-rat_113",
+    "subject": "aqua-rat",
+    "question": "Q: A point on the edge of a fan blade that is rotating in a plane 10 centimeters from the center of the fan. What is the distance traveled, in centimeters, by this point after 30 seconds when the fan runs at the rate of 300 revolutions per minutes? Answer Choices: (A)750pi (B)1500pi (C)1875pi (D)3000pi (E)7500pi\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "750pi",
+      "B": "1500pi",
+      "C": "3000pi",
+      "D": "7500pi"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 31,
+    "question_id": "lsat-ar_71",
+    "subject": "lsat-ar",
+    "question": "A chemistry class has six lab sessions scheduled over three days—Wednesday, Thursday, and Friday—one session heing held each morning and one each afternoon. Each session will be led by a different lab assistant—Julio, Kevin, Lan, Nessa, Olivia, or Rebecca. The assignment of lab assistants to sessions is constrained as follows: Kevin and Rebecca must lead sessions that meet on the same day. Lan and Olivia cannot lead sessions that meet on the same day. Nessa must lead an afternoon session. Julio's session must meet on an earlier day of the week than Olivia's.Q: If Lan does not lead a Wednesday session, then which one of the following lab assistants must lead a Thursday session? Answer Choices: (A)Rebecca (B)Olivia (C)Nessa (D)Kevin (E)Julio\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "Rebecca",
+      "B": "Olivia",
+      "C": "Nessa",
+      "D": "Julio"
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 32,
+    "question_id": "lsat-lr_451",
+    "subject": "lsat-lr",
+    "question": "Jurist: To ensure that a legal system remains just, it is important to guarantee that lawbreaking does not give lawbreakers an unfair advantage over law abiders. Thus, notwithstanding any other goals that criminal punishment may serve, it should certainly attempt to ensure that criminal wrongdoing remains profitless.Q: The jurist's claim that it is important to guarantee that lawbreaking does not give lawbreakers an unfair advantage over law abiders functions in the argument in which one of the following ways? Answer Choices: (A)It states a condition that, if fulfilled, will ensure that a legal system remains just. (B)It expresses a principle that is offered as support for the conclusion. (C)It is a conclusion for which the only support offered is the claim that the legal system serves multiple goals. (D)It is a premise presented as support for the claim that the most important goal of criminal punishment is to ensure that criminal wrongdoing remains profitless. (E)It is presented as refuting an argument that criminal punishment has goals other than guaranteeing that lawbreaking remains profitless.\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "It states a condition that, if fulfilled, will ensure that a legal system remains just.",
+      "B": "It expresses a principle that is offered as support for the conclusion.",
+      "C": "It is a conclusion for which the only support offered is the claim that the legal system serves multiple goals.",
+      "D": "It is presented as refuting an argument that criminal punishment has goals other than guaranteeing that lawbreaking remains profitless."
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 33,
+    "question_id": "aqua-rat_175",
+    "subject": "aqua-rat",
+    "question": "Q: Jerry purchased a 1-year $5,000 bond that paid an annual interest rate of 12% compounded every six months. How much interest had this bond accrued at maturity? Answer Choices: (A)$5102 (B)$618 (C)$216 (D)$202 (E)$200\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "$5102",
+      "B": "$618",
+      "C": "$202",
+      "D": "$200"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 34,
+    "question_id": "lsat-ar_152",
+    "subject": "lsat-ar",
+    "question": "Three rugs will be woven out of colored thread. Six colors of thread are available—forest, olive, peach, turquoise, white, and yellow—exactly five of which will be used to weave the rugs. Each color that is used will be used in only one of the rugs. The rugs are either solid—woven in a single color—or multicolored. The rugs must be woven according to the following rules: In any rug in which white is used, two other colors are also used. In any rug in which olive is used, peach is also used. Forest and turquoise are not used together in a rug. Peach and turquoise are not used together in a rug. Peach and yellow are not used together in a rug.Q: If forest and peach are used together in a rug, which one of the following could be true? Answer Choices: (A)There is exactly one solid rug. (B)White is not used in any of the rugs. (C)Yellow is not used in any of the rugs. (D)Turquoise and white are used together in a rug. (E)Turquoise and yellow are used together in a rug.\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "White is not used in any of the rugs.",
+      "B": "Yellow is not used in any of the rugs.",
+      "C": "Turquoise and white are used together in a rug.",
+      "D": "Turquoise and yellow are used together in a rug."
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 35,
+    "question_id": "lsat-lr_395",
+    "subject": "lsat-lr",
+    "question": "Government statistics show that the real (adjusted for inflation) average income for families has risen over the last five years. Therefore, since this year the Andersen family's income is average for families, the family's real income must have increased over the last five years.Q: The reasoning in the argument is most vulnerable to criticism on the grounds that the argument Answer Choices: (A)ambiguously uses the term \"average\" in two different senses (B)fails to take into account inflation with respect to the Andersen family's income (C)overlooks the possibility that most families' incomes are below average (D)fails to consider the possibility that the Andersen family's real income was above average in the recent past (E)presumes, without providing justification, that the government makes no errors in gathering accurate estimates of family income\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "ambiguously uses the term \"average\" in two different senses",
+      "B": "fails to take into account inflation with respect to the Andersen family's income",
+      "C": "fails to consider the possibility that the Andersen family's real income was above average in the recent past",
+      "D": "presumes, without providing justification, that the government makes no errors in gathering accurate estimates of family income"
+    },
+    "correct_answer": "C",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 36,
+    "question_id": "aqua-rat_135",
+    "subject": "aqua-rat",
+    "question": "Q: If there are 5,000 voters out of which 20% are not eligible to vote and there are two candidates contesting. The winning candidate won by 15% of the votes. What is the total number of votes he got ? Answer Choices: (A)3267 (B)2678 (C)2797 (D)2300 (E)2781\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "3267",
+      "B": "2678",
+      "C": "2300",
+      "D": "2781"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 37,
+    "question_id": "lsat-ar_225",
+    "subject": "lsat-ar",
+    "question": "Three real estate companies—RealProp, Southco, and Trustcorp—are considering trading buildings with one another. Each building they own is categorized as either class 1, class 2, or class 3, depending on its approximate value: RealProp owns the Garza Tower (class 1), the Yates House (class 3), and the Zimmer House (class 3). Southco owns the Flores Tower (class 1) and the Lynch Building (class 2). Trustcorp owns the King Building, the Meyer Building, and the Ortiz Building, all of which are class 2. Each trade must be of exactly one of the following three kinds: Trading one building for one other building of the same class Trading one class 1 building for two class 2 buildings Trading one class 2 building for two class 3 buildingsQ: Which one of the following could be the buildings owned by the three companies after only one trade is made? Answer Choices: (A)RealProp: the Flores Tower and the Garza Tower Southco: the Lynch Building, the Yates House, and the Zimmer House Trustcorp: the King Building, the Meyer Building, and the Ortiz Building (B)RealProp: the Garza Tower, the King Building, and the Ortiz Building Southco: the Flores Tower and the Lynch Building Trustcorp: the Meyer Building, the Yates House, and the Zimmer House (C)RealProp: the Garza Tower and the Lynch Building Southco: the Flores Tower, the Yates House, and the Zimmer House Trustcorp: the King Building, the Meyer Building, and the Ortiz Building (D)RealProp: the Garza Tower, the Meyer Building, and the Yates House Southco: the Flores Tower and the Lynch Building Trustcorp: the King Building, the Ortiz Building, and the Zimmer House (E)RealProp: the Garza Tower, the Yates House, and the Zimmer House Southco: the Lynch Building and the Ortiz Building Trustcorp: the Flores Tower, the King Building, and the Meyer Building\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "RealProp: the Garza Tower, the King Building, and the Ortiz Building Southco: the Flores Tower and the Lynch Building Trustcorp: the Meyer Building, the Yates House, and the Zimmer House",
+      "B": "RealProp: the Garza Tower and the Lynch Building Southco: the Flores Tower, the Yates House, and the Zimmer House Trustcorp: the King Building, the Meyer Building, and the Ortiz Building",
+      "C": "RealProp: the Garza Tower, the Meyer Building, and the Yates House Southco: the Flores Tower and the Lynch Building Trustcorp: the King Building, the Ortiz Building, and the Zimmer House",
+      "D": "RealProp: the Garza Tower, the Yates House, and the Zimmer House Southco: the Lynch Building and the Ortiz Building Trustcorp: the Flores Tower, the King Building, and the Meyer Building"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 38,
+    "question_id": "lsat-lr_481",
+    "subject": "lsat-lr",
+    "question": "Editorial: Teenagers tend to wake up around 8:00 A.M., the time when they stop releasing melatonin, and are sleepy if made to wake up earlier. Since sleepiness can impair driving ability, car accidents involving teenagers driving to school could be reduced if the school day began later than 8:00 A.M. Indeed, when the schedule for Granville's high school was changed so that school began at 8:30 A.M. rather than earlier, the overall number of car accidents involving teenage drivers in Granville declined.Q: Which one of the following, if true, provides the most support for the argument in the editorial? Answer Choices: (A)Teenagers start releasing melatonin later at night and stop releasing it later in the morning than do young children. (B)Sleepy teenagers are tardy for school morefrequently than teenagers who are well rested when the school day begins. (C)Teenagers who work at jobs during the day spend more time driving than do teenagers who attend high school during the day. (D)Many of the car accidents involving teenage drivers in Granville occurred in the evening rather than in the morning. (E)Car accidents involving teenage drivers rose in the region surrounding Granville during the time they declined in Granville.\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "Teenagers start releasing melatonin later at night and stop releasing it later in the morning than do young children.",
+      "B": "Teenagers who work at jobs during the day spend more time driving than do teenagers who attend high school during the day.",
+      "C": "Many of the car accidents involving teenage drivers in Granville occurred in the evening rather than in the morning.",
+      "D": "Car accidents involving teenage drivers rose in the region surrounding Granville during the time they declined in Granville."
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 39,
+    "question_id": "aqua-rat_232",
+    "subject": "aqua-rat",
+    "question": "Q: By himself, Jack can clean a yacht in 12 hours. On a particular day, he happens to finish two-thirds of the work. The remaining portion of the work is done by Jill, whose rate of cleaning is just 5% of what Jack can do. How long does it take Jill to finish the remaining work? Answer Choices: (A)4 (B)8 (C)22 (D)50 (E)20\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "4",
+      "B": "8",
+      "C": "50",
+      "D": "20"
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 40,
+    "question_id": "lsat-ar_174",
+    "subject": "lsat-ar",
+    "question": "Exactly five students—Grecia, Hakeem, Joe, Katya, and Louise—are to work at a campus art gallery during a special exhibit that runs for exactly five days, Monday through Friday. Each day is divided into two nonoverlapping shifts—first and second—with each student working exactly two shifts. Each shift is worked by exactly one of the students according to the following scheduling restrictions: No student works both shifts of any day. On two consecutive days, Louise works the second shift. On two nonconsecutive days, Grecia works the first shift. Katya works on Tuesday and Friday. Hakeem and Joe work on the same day as each other at least once. Grecia and Louise never work on the same day as each other.Q: Which one of the following could be the list of the students who work the second shifts at the gallery, in order from Monday through Friday? Answer Choices: (A)Hakeem, Louise, Louise, Hakeem, Katya (B)Joe, Hakeem, Grecia, Louise, Louise (C)Joe, Katya, Hakeem, Louise, Katya (D)Louise, Katya, Joe, Louise, Katya (E)Louise, Louise, Hakeem, Joe, Joe\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "Hakeem, Louise, Louise, Hakeem, Katya",
+      "B": "Joe, Hakeem, Grecia, Louise, Louise",
+      "C": "Joe, Katya, Hakeem, Louise, Katya",
+      "D": "Louise, Katya, Joe, Louise, Katya"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 41,
+    "question_id": "lsat-lr_275",
+    "subject": "lsat-lr",
+    "question": "Consumer magazine: Because front-loading washers use less water than top-loading washers, ordinary powder detergent does not dissolve readily in front-loading washers. So, to get clothes really clean in a front-loading machine you need to use a detergent formulated especially for front-loading washers, instead of ordinary powder detergent.Q: Which one of the following is an assumption required by the argument in the consumer magazine? Answer Choices: (A)All top-loading washing machines use the same amount of water. (B)A laundry detergent formulated especially for front-loading washers dissolves more readily in them than it does in top-loading washers. (C)A washing machine gets clothes really clean only with a laundry detergent specially formulated for that machine. (D)A laundry detergent does not get clothes really clean in a washer unless it dissolves readily in it. (E)Washers that use more water get clothes cleaner than those that use less.\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "A laundry detergent formulated especially for front-loading washers dissolves more readily in them than it does in top-loading washers.",
+      "B": "A washing machine gets clothes really clean only with a laundry detergent specially formulated for that machine.",
+      "C": "A laundry detergent does not get clothes really clean in a washer unless it dissolves readily in it.",
+      "D": "Washers that use more water get clothes cleaner than those that use less."
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 42,
+    "question_id": "aqua-rat_78",
+    "subject": "aqua-rat",
+    "question": "Q: The average (arithmetic mean) of the weight of 10 vehicles is 12.2 tons. The average weight of the group of vehicles increased by 2.6 tons after a new heavy duty truck was added to the group? What is the weight in tons of the heavy duty truck? Answer Choices: (A)40.8 (B)41.6 (C)42.2 (D)43.5 (E)44.8\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "40.8",
+      "B": "41.6",
+      "C": "42.2",
+      "D": "43.5"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 43,
+    "question_id": "lsat-ar_149",
+    "subject": "lsat-ar",
+    "question": "Three rugs will be woven out of colored thread. Six colors of thread are available—forest, olive, peach, turquoise, white, and yellow—exactly five of which will be used to weave the rugs. Each color that is used will be used in only one of the rugs. The rugs are either solid—woven in a single color—or multicolored. The rugs must be woven according to the following rules: In any rug in which white is used, two other colors are also used. In any rug in which olive is used, peach is also used. Forest and turquoise are not used together in a rug. Peach and turquoise are not used together in a rug. Peach and yellow are not used together in a rug.Q: Which one of the following must be true? Answer Choices: (A)There are no multicolored rugs in which forest is used. (B)There are no multicolored rugs in which turquoise is used. (C)Peach is used in one of the rugs. (D)Turquoise is used in one of the rugs. (E)Yellow is used in one of the rugs.\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "There are no multicolored rugs in which forest is used.",
+      "B": "There are no multicolored rugs in which turquoise is used.",
+      "C": "Peach is used in one of the rugs.",
+      "D": "Yellow is used in one of the rugs."
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 44,
+    "question_id": "lsat-lr_410",
+    "subject": "lsat-lr",
+    "question": "Flynn: Allowing people to collect large damage awards when they successfully sue corporations that produce dangerous products clearly benefits consumers, since the possibility of large awards gives corporations a strong incentive to reduce safety risks associated with their products. Garcia: Without sensible limits, damage awards can be so high that corporations are destroyed. As a result, employees lose their jobs and the productivity of the corporation is lost. This harms the economy and thus harms consumers.Q: Garcia responds to Flynn's argument by Answer Choices: (A)arguing that the policy supported in Flynn's argument could have undesirable consequences (B)providing evidence that undermines one of the premises of Flynn's argument (C)comparing Flynn's argument to an obviously flawed argument that has the same logical structure (D)contending that Flynn's argument could be used to support a policy that is inconsistent with the policy that Flynn advocates (E)providing an alternative explanation for a situation described in Flynn's argument\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "arguing that the policy supported in Flynn's argument could have undesirable consequences",
+      "B": "providing evidence that undermines one of the premises of Flynn's argument",
+      "C": "comparing Flynn's argument to an obviously flawed argument that has the same logical structure",
+      "D": "contending that Flynn's argument could be used to support a policy that is inconsistent with the policy that Flynn advocates"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 45,
+    "question_id": "aqua-rat_211",
+    "subject": "aqua-rat",
+    "question": "Q: Jim filled his dog's bowl with dog food. Starting at 8:00 am, Jim's dog ate exactly once an hour, consuming exactly 1/3 of the dog food remaining in the bowl at each feeding session. Approximately, what percent of the original food was in the dog's bowl right before the dog began to eat at noon of the same day? Answer Choices: (A)20% (B)25% (C)30% (D)35% (E)40%\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "20%",
+      "B": "25%",
+      "C": "30%",
+      "D": "40%"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 46,
+    "question_id": "lsat-ar_188",
+    "subject": "lsat-ar",
+    "question": "Seven workers—Quinn, Ruiz, Smith, Taylor, Verma, Wells, and Xue—are being considered for a special project. Exactly three of the workers will be selected to be project members, and exactly one of these project members will be the project leader. The selection is subject to the following constraints: Quinn or Ruiz can be a project member only if leading the project. If Smith is a project member, Taylor must also be. If Wells is a project member, neither Ruiz nor Verma can be.Q: The selection for the project is completely determined if which one of the following is true? Answer Choices: (A)Neither Quinn nor Smith is selected. (B)Neither Quinn nor Taylor is selected. (C)Neither Quinn nor Xue is selected. (D)Neither Ruiz nor Wells is selected. (E)Neither Ruiz nor Verma is selected.\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "Neither Quinn nor Smith is selected.",
+      "B": "Neither Quinn nor Taylor is selected.",
+      "C": "Neither Quinn nor Xue is selected.",
+      "D": "Neither Ruiz nor Wells is selected."
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 47,
+    "question_id": "lsat-lr_149",
+    "subject": "lsat-lr",
+    "question": "Most auto mechanics have extensive experience. Furthermore, most mechanics with extensive experience understand electronic circuits. Thus, most auto mechanics understand electronic circuits.Q: The pattern of flawed reasoning in which one of the following arguments is most similar to that in the argument above? Answer Choices: (A)During times of the year when automobile traffic increases, gas prices also increase. Increases in gas prices lead to increases in consumer complaints. Thus, increased automobile traffic causes increased consumer complaints. (B)The most common species of birds in this region are migratory. Moreover, most migratory birds have left this region by the end of November. Hence, few birds remain in this region during the winter. (C)It is not surprising that most speeding tickets in this region are issued to drivers of sports cars. After all, most drivers who are not interested in driving fast do not buy sports cars. (D)Most nature photographers find portrait photography boring. Moreover, most portrait photographers especially enjoy photographing dignitaries. Thus, most nature photographers find photographing dignitaries especially boring. (E)Most snow-removal companies run lawn-care services during the summer. Also, most companies that run lawn-care services during the summer hire additional workers in the summer. Thus, most snow-removal companies hire additional workers in the summer.\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "During times of the year when automobile traffic increases, gas prices also increase. Increases in gas prices lead to increases in consumer complaints. Thus, increased automobile traffic causes increased consumer complaints.",
+      "B": "The most common species of birds in this region are migratory. Moreover, most migratory birds have left this region by the end of November. Hence, few birds remain in this region during the winter.",
+      "C": "It is not surprising that most speeding tickets in this region are issued to drivers of sports cars. After all, most drivers who are not interested in driving fast do not buy sports cars.",
+      "D": "Most snow-removal companies run lawn-care services during the summer. Also, most companies that run lawn-care services during the summer hire additional workers in the summer. Thus, most snow-removal companies hire additional workers in the summer."
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 48,
+    "question_id": "aqua-rat_227",
+    "subject": "aqua-rat",
+    "question": "Q: A box contains a certain number of balls, marked successively from 1 to n. If there are 45 different ways that two balls can be selected from the box such that the ball with number 3 marked on it is not selected, then what is the value of n? Answer Choices: (A)11 (B)10 (C)9 (D)8 (E)7\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "11",
+      "B": "10",
+      "C": "9",
+      "D": "8"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 49,
+    "question_id": "lsat-ar_1",
+    "subject": "lsat-ar",
+    "question": "Of the eight students—George, Helen, Irving, Kyle, Lenore, Nina, Olivia, and Robert—in a seminar, exactly six will give individual oral reports during three consecutive days—Monday, Tuesday, and Wednesday. Exactly two reports will be given each day—one in the morning and one in the afternoon—according to the following conditions: Tuesday is the only day on which George can give a report. Neither Olivia nor Robert can give an afternoon report. If Nina gives a report, then on the next day Helen and Irving must both give reports, unless Nina's report is given on Wednesday.Q: If Kyle and Lenore do not give reports, then the morning reports on Monday, Tuesday, and Wednesday, respectively, could be given by Answer Choices: (A)Helen, George, and Nina (B)Irving, Robert, and Helen (C)Nina, Helen, and Olivia (D)Olivia, Robert, and Irving (E)Robert, George, and Helen\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "Helen, George, and Nina",
+      "B": "Irving, Robert, and Helen",
+      "C": "Nina, Helen, and Olivia",
+      "D": "Olivia, Robert, and Irving"
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 50,
+    "question_id": "lsat-lr_141",
+    "subject": "lsat-lr",
+    "question": "Columnist: Shortsighted motorists learn the hard way about the wisdom of preventive auto maintenance; such maintenance almost always pays off in the long run. Our usually shortsighted city council should be praised for using similar wisdom when they hired a long-term economic development adviser. In hiring this adviser, the council made an investment that is likely to have a big payoff in several years. Other cities in this region that have devoted resources to economic development planning have earned large returns on such an investment.Q: Which one of the following, if true, most weakens the columnist's argument? Answer Choices: (A)Even some cars that receive regular preventive maintenance break down, requiring costly repairs. (B)The columnist's city has a much smaller population and economy than the other cities did when they began devoting resources to economic development planning. (C)Most motorists who fail to perform preventive maintenance on their cars do so for nonfinancial reasons. (D)Qualified economic development advisers generally demand higher salaries than many city councils are willing to spend. (E)Cities that have earned large returns due to hiring economic development advisers did not earn any returns at all in the advisers' first few years of employment.\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "Even some cars that receive regular preventive maintenance break down, requiring costly repairs.",
+      "B": "The columnist's city has a much smaller population and economy than the other cities did when they began devoting resources to economic development planning.",
+      "C": "Most motorists who fail to perform preventive maintenance on their cars do so for nonfinancial reasons.",
+      "D": "Qualified economic development advisers generally demand higher salaries than many city councils are willing to spend."
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 51,
+    "question_id": "aqua-rat_10",
+    "subject": "aqua-rat",
+    "question": "Q: A company produces 420 units of a particular computer component every month, at a production cost to the company of $110 per component, and sells all of the components by the end of each month. What is the minimum selling price per component that will guarantee that the yearly profit (revenue from sales minus production costs) will be at least $626,400 ? Answer Choices: (A)226 (B)230 (C)240 (D)260 (E)280\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "230",
+      "B": "240",
+      "C": "260",
+      "D": "280"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 52,
+    "question_id": "lsat-ar_90",
+    "subject": "lsat-ar",
+    "question": "During a recital, two pianists—Wayne and Zara—will perform solos. There will be five solos altogether, performed one immediately after another. Each solo will be either a modern piece or a traditional piece. The choice of pianist and type of piece for the solos must conform to the following conditions: The third solo is a traditional piece. Exactly two of the traditional pieces are performed consecutively. In the fourth solo, either Wayne performs a traditional piece or Zara performs a modern piece. The pianist who performs the second solo does not perform the fifth solo. No traditional piece is performed until Wayne performs at least one modem piece.Q: If the fifth solo is a traditional piece, then for exactly determined? Answer Choices: (A)one (B)two (C)three (D)four (E)five\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "one",
+      "B": "two",
+      "C": "four",
+      "D": "five"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 53,
+    "question_id": "lsat-lr_116",
+    "subject": "lsat-lr",
+    "question": "The French novelist Colette (1873–1954) has been widely praised for the vividness of her language. But many critics complain that her novels are indifferent to important moral questions. This charge is unfair. Each of her novels is a poetic condensation of a major emotional crisis in the life of an ordinary person of her time. Such emotional crises almost invariably raise important moral questions.Q: Which one of the following is an assumption on which the argument depends? Answer Choices: (A)Critics who suggest that Colette's novels are indifferent to great moral questions of her time greatly underestimate her literary achievements. (B)A novel that poetically condenses a major emotional crisis does not have to be indifferent to the important moral questions raised by that crisis. (C)To deserve the level of praise that Colette has received, a novelist's work must concern itself with important moral questions. (D)The vividness of Colette's language was not itself the result of poetic condensation. (E)Colette's purpose in poetically condensing emotional crises in the lives of characters in her novels was to explore some of the important moral questions of her time.\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "A novel that poetically condenses a major emotional crisis does not have to be indifferent to the important moral questions raised by that crisis.",
+      "B": "To deserve the level of praise that Colette has received, a novelist's work must concern itself with important moral questions.",
+      "C": "The vividness of Colette's language was not itself the result of poetic condensation.",
+      "D": "Colette's purpose in poetically condensing emotional crises in the lives of characters in her novels was to explore some of the important moral questions of her time."
+    },
+    "correct_answer": "A",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 54,
+    "question_id": "aqua-rat_249",
+    "subject": "aqua-rat",
+    "question": "Q: The capacity of a tank of dimensions (8 m × 6 m × 2.5 m) is Answer Choices: (A)120 litres (B)1200 litres (C)12000 litres (D)120000 litres (E)None of these\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "120 litres",
+      "B": "1200 litres",
+      "C": "120000 litres",
+      "D": "None of these"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 55,
+    "question_id": "lsat-ar_221",
+    "subject": "lsat-ar",
+    "question": "At an upcoming exhibition, four art students—Franz, Greene, Hidalgo, and Isaacs—will each display exactly two paintings—an oil and a watercolor. Exactly two paintings will be displayed on each of the walls of the exhibition room—walls 1, 2, 3, and 4—with one painting in the upper position and one in the lower position. The following conditions will apply: No wall has only watercolors displayed on it. No wall has the work of only one student displayed on it. No wall has both a painting by Franz and a painting by Isaacs displayed on it. Greene's watercolor is displayed in the upper position of the wall on which Franz's oil is displayed. Isaacs's oil is displayed in the lower position of wall 4.Q: If Greene's oil is displayed on the same wall as Franz's watercolor, which one of the following must be true? Answer Choices: (A)Greene's oil is displayed in an upper position. (B)Hidalgo's watercolor is displayed on the same wall as Isaacs's watercolor. (C)Hidalgo's oil is displayed in an upper position. (D)Hidalgo's oil is displayed on the same wall as Isaacs's watercolor. (E)Isaacs's watercolor is displayed in a lower position.\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "Greene's oil is displayed in an upper position.",
+      "B": "Hidalgo's watercolor is displayed on the same wall as Isaacs's watercolor.",
+      "C": "Hidalgo's oil is displayed on the same wall as Isaacs's watercolor.",
+      "D": "Isaacs's watercolor is displayed in a lower position."
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 56,
+    "question_id": "lsat-lr_468",
+    "subject": "lsat-lr",
+    "question": "Creating a database of all the plant species in the scientific record has proved to be no easy task. For centuries, botanists have been collecting and naming plants without realizing that many were in fact already named. And by using DNA analysis, botanists have shown that varieties of plants long thought to belong to the same species actually belong to different species.Q: Of the following claims, which one can most justifiably be rejected on the basis of the statements above? Answer Choices: (A)Most of the duplicates and omissions among plant names in the scientific record have yet to be cleared up. (B)An accurate database of all the plant species in the scientific record can serve as an aid to botanists in their work. (C)Duplicates and omissions in the scientific record also occur in fields other than botany. (D)Botanists have no techniques for determining whether distinct plant species have been given distinct names. (E)A person who consults the scientific record looking under only one of a plant's names may miss available information about that plant.\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "An accurate database of all the plant species in the scientific record can serve as an aid to botanists in their work.",
+      "B": "Duplicates and omissions in the scientific record also occur in fields other than botany.",
+      "C": "Botanists have no techniques for determining whether distinct plant species have been given distinct names.",
+      "D": "A person who consults the scientific record looking under only one of a plant's names may miss available information about that plant."
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 57,
+    "question_id": "aqua-rat_122",
+    "subject": "aqua-rat",
+    "question": "Q: Kevin drove from A to B at a constant speed of 70 mph. Once he reached B, he turned right around with pause, and returned to A at a constant speed of 90 mph. Exactly 3 hours before the end of his trip, he was still approaching B, only 70 miles away from it. What is the distance between A and B? Answer Choices: (A)180 (B)90 (C)270 (D)360 (E)None of the above\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "180",
+      "B": "90",
+      "C": "270",
+      "D": "None of the above"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 58,
+    "question_id": "lsat-ar_226",
+    "subject": "lsat-ar",
+    "question": "Three real estate companies—RealProp, Southco, and Trustcorp—are considering trading buildings with one another. Each building they own is categorized as either class 1, class 2, or class 3, depending on its approximate value: RealProp owns the Garza Tower (class 1), the Yates House (class 3), and the Zimmer House (class 3). Southco owns the Flores Tower (class 1) and the Lynch Building (class 2). Trustcorp owns the King Building, the Meyer Building, and the Ortiz Building, all of which are class 2. Each trade must be of exactly one of the following three kinds: Trading one building for one other building of the same class Trading one class 1 building for two class 2 buildings Trading one class 2 building for two class 3 buildingsQ: Which one of the following CANNOT be true, no matter how many trades are made? Answer Choices: (A)The buildings owned by RealProp are the Flores Tower and the Garza Tower. (B)The buildings owned by Southco are the Flores Tower and the Meyer Building. (C)The buildings owned by Southco are the Garza Tower and the Lynch Building. (D)The buildings owned by Trustcorp are the Flores Tower and the Ortiz Building. (E)The buildings owned by Trustcorp are the Garza Tower and the Meyer Building.\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "The buildings owned by RealProp are the Flores Tower and the Garza Tower.",
+      "B": "The buildings owned by Southco are the Flores Tower and the Meyer Building.",
+      "C": "The buildings owned by Southco are the Garza Tower and the Lynch Building.",
+      "D": "The buildings owned by Trustcorp are the Garza Tower and the Meyer Building."
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 59,
+    "question_id": "lsat-lr_344",
+    "subject": "lsat-lr",
+    "question": "Journalist: It is unethical for journalists to lie—to say something untrue with the purpose of deceiving the listener—to get a story. However, journalists commonly withhold relevant information in interviews in order to elicit new information. Some argue that this, like lying, is intentional deception and therefore unethical. However, this argument fails to recognize the distinction between failing to prevent a false belief and actively encouraging one. Lying is unethical because it actively encourages a false belief.Q: The journalist argues by Answer Choices: (A)pointing out a difference between the two cases being compared in order to show that a conclusion based on their similarities should not be drawn (B)defending what the journalist considers a controversial distinction by offering an example of a clear instance of it (C)defining a concept and then showing that under this definition the concept applies to all of the cases under discussion (D)appealing to a counterexample to undermine an ethical principle that supports an argument the journalist is trying to refute (E)clarifying and defending a moral principle by comparing a case in which it applies to one in which it does not apply\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "pointing out a difference between the two cases being compared in order to show that a conclusion based on their similarities should not be drawn",
+      "B": "defining a concept and then showing that under this definition the concept applies to all of the cases under discussion",
+      "C": "appealing to a counterexample to undermine an ethical principle that supports an argument the journalist is trying to refute",
+      "D": "clarifying and defending a moral principle by comparing a case in which it applies to one in which it does not apply"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 60,
+    "question_id": "aqua-rat_90",
+    "subject": "aqua-rat",
+    "question": "Q: In how many ways can a teacher in a kindergarten school arrange a group of 3 children (Susan, Tim and Zen) on 3 identical chairs in a straight line so that Susan is on the left of Tim? Answer Choices: (A)7 (B)3 (C)2 (D)1 (E)6\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "7",
+      "B": "3",
+      "C": "1",
+      "D": "6"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 61,
+    "question_id": "lsat-ar_195",
+    "subject": "lsat-ar",
+    "question": "During the weeklong grand opening of a new antique shop, the antique dealer will auction exactly one antique per day for six consecutive days—June 1st through June 6th. The antiques to be auctioned are: a harmonica, a lamp, a mirror, a sundial, a table, and a vase. The following conditions apply: The sundial is not auctioned on June 1st. If the harmonica is auctioned on an earlier date than the lamp, then the mirror is also auctioned on an earlier date than the lamp. The sundial is auctioned on an earlier date than the mirror and also on an earlier date than the vase. The table is auctioned on an earlier date than the harmonica or on an earlier date than the vase, but not both.Q: Which one of the following could be an accurate list of the six antiques, in the order in which they are auctioned, from June 1st through June 6th? Answer Choices: (A)harmonica, table, sundial, lamp, vase, mirror (B)lamp, harmonica, sundial, mirror, vase, table (C)harmonica, sundial, table, mirror, lamp, vase (D)sundial, mirror, harmonica, table, vase, lamp (E)vase, sundial, lamp, harmonica, table, mirror\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "harmonica, table, sundial, lamp, vase, mirror",
+      "B": "lamp, harmonica, sundial, mirror, vase, table",
+      "C": "harmonica, sundial, table, mirror, lamp, vase",
+      "D": "sundial, mirror, harmonica, table, vase, lamp"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 62,
+    "question_id": "lsat-lr_330",
+    "subject": "lsat-lr",
+    "question": "Student: If a person has an immunity to infection by a microorganism, then that microorganism does not cause them to develop harmful symptoms. Since many people are exposed to staphylococcus without developing any harmful symptoms, it follows that they have an immunity to infection by this microorganism.Q: The student's argument is most similar in its flawed pattern of reasoning to which one of the following? Answer Choices: (A)Everything morally right is just, but some actions that best serve the interests of everyone are not just. Thus, some morally right actions do not serve the interests of everyone. (B)Advertisers try to persuade people that certain claims are true. Since writers of fiction are not advertisers, they probably never try to persuade people that certain claims are true. (C)Isabel said that she would take the medication. Obviously, though, she did not do so, because medication either cures disease or alleviates its symptoms, and Isabel is still quite ill. (D)When business owners are subjected to excessive taxation, they become less willing to expand their businesses. The recent decline in business expansions thus shows that their taxes are too high. (E)Studies show that doctors tend to wash their hands less often than any other health care professionals. This shows that the procedure cannot be of much value in preventing disease.\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "Everything morally right is just, but some actions that best serve the interests of everyone are not just. Thus, some morally right actions do not serve the interests of everyone.",
+      "B": "Advertisers try to persuade people that certain claims are true. Since writers of fiction are not advertisers, they probably never try to persuade people that certain claims are true.",
+      "C": "Isabel said that she would take the medication. Obviously, though, she did not do so, because medication either cures disease or alleviates its symptoms, and Isabel is still quite ill.",
+      "D": "When business owners are subjected to excessive taxation, they become less willing to expand their businesses. The recent decline in business expansions thus shows that their taxes are too high."
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 63,
+    "question_id": "aqua-rat_118",
+    "subject": "aqua-rat",
+    "question": "Q: An athlete runs M miles in 4 hours, then rides a bike N miles in the same number of hours. Which of the following represents the average speed, in miles per hour, for these two activities combined? Answer Choices: (A)M + N / 8 (B)2M + N / 8 (C)M + N / 4 (D)M + 3N / 8 (E)M + N / 5\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "M + N / 8",
+      "B": "2M + N / 8",
+      "C": "M + N / 4",
+      "D": "M + N / 5"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 64,
+    "question_id": "lsat-ar_102",
+    "subject": "lsat-ar",
+    "question": "A maintenance company that takes service requests from three clients—Image, Solide, and Truvest—plans to set targets for its average service response times. Service targets will be set at 3 days, 2 days, or 1 day. Two service targets are set for each client—one for requests received through the maintenance company's website and one for requests received by voicemail. The six targets are set according to the following conditions: None of the clients can have a website target that is longer than its voicemail target. Image's voicemail target must be shorter than the other clients' voicemail targets. Solide's website target must be shorter than Truvest's website target.Q: If none of the clients has a voicemail target of 3 days, then each of the following must be true EXCEPT: Answer Choices: (A)Image's website target is 1 day. (B)Solide's website target is 2 days. (C)Solide's voicemail target is 2 days. (D)Truvest's website target is 2 days. (E)Truvest's voicemail target is 2 days.\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "Image's website target is 1 day.",
+      "B": "Solide's website target is 2 days.",
+      "C": "Solide's voicemail target is 2 days.",
+      "D": "Truvest's website target is 2 days."
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 65,
+    "question_id": "lsat-lr_306",
+    "subject": "lsat-lr",
+    "question": "Children should be discouraged from reading Jones's books. Reading them is like eating candy, which provides intense, short-term sensory stimulation but leaves one poorly nourished and dulls one's taste for better fare. In other words, the problem with letting children read Jones's books is that .Q: Which one of the following most logically completes the argument above? Answer Choices: (A)it will lead them to develop a taste for candy and sweets (B)too many children may become frustrated by their difficulty and stop reading altogether (C)their doing so interferes with the development of appreciation for more challenging literature (D)their message may undermine the positive teaching done by parents (E)children may become so enthralled with books that they will want to spend all their time reading\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "it will lead them to develop a taste for candy and sweets",
+      "B": "too many children may become frustrated by their difficulty and stop reading altogether",
+      "C": "their doing so interferes with the development of appreciation for more challenging literature",
+      "D": "their message may undermine the positive teaching done by parents"
+    },
+    "correct_answer": "C",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 66,
+    "question_id": "aqua-rat_238",
+    "subject": "aqua-rat",
+    "question": "Q: Exactly 2/5th of the children in a certain class are girls. If there are 100 boys in the class, how many girls are in the class? Answer Choices: (A)50 (B)100 (C)150 (D)200 (E)70\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "100",
+      "B": "150",
+      "C": "200",
+      "D": "70"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 67,
+    "question_id": "lsat-ar_184",
+    "subject": "lsat-ar",
+    "question": "Seven workers—Quinn, Ruiz, Smith, Taylor, Verma, Wells, and Xue—are being considered for a special project. Exactly three of the workers will be selected to be project members, and exactly one of these project members will be the project leader. The selection is subject to the following constraints: Quinn or Ruiz can be a project member only if leading the project. If Smith is a project member, Taylor must also be. If Wells is a project member, neither Ruiz nor Verma can be.Q: Which one of the following is an acceptable selection for the project? Answer Choices: (A)Ruiz (leader), Taylor, Wells (B)Verma (leader), Quinn, Taylor (C)Verma (leader), Smith, Taylor (D)Verma (leader), Smith, Xue (E)Xue (leader), Verma, Wells\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "Ruiz (leader), Taylor, Wells",
+      "B": "Verma (leader), Quinn, Taylor",
+      "C": "Verma (leader), Smith, Taylor",
+      "D": "Xue (leader), Verma, Wells"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 68,
+    "question_id": "lsat-lr_265",
+    "subject": "lsat-lr",
+    "question": "Activist: Accidents at the Three Mile Island and Chernobyl nuclear plants have shown the dangers of nuclear power. It was earlier argued that nuclear power was necessary because fossil fuels will eventually run out. Recently, however, a technology has been developed for deriving from sewage sludge an oil that can be used to generate power. This new technology, therefore, together with the possibility of using alternative sources of energy like solar, wind, and hydroelectric power, raises the hope that we can dispense altogether with nuclear power and that we can meet our energy needs in a way that better protects the environment from harm than we do at present.Q: Which one of the following considerations is LEAST relevant in evaluating the degree of practicability of the hope expressed by the activist above? Answer Choices: (A)whether the current methods of disposing of sewage sludge by dumping do environmental damage (B)whether the processes that are used to turn sewage into clean water and sewage sludge have been improved in recent decades (C)whether the cost of producing and using oil from sewage sludge would be economically sustainable (D)whether the burning of oil from sewage sludge would, in contrast to nuclear power production, produce gases that would have a harmful warming effect on climate worldwide (E)whether waste products that would be produced in deriving oil from sewage sludge and burning it would be as dangerous as those produced by the mining and use of nuclear fuel\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "whether the current methods of disposing of sewage sludge by dumping do environmental damage",
+      "B": "whether the processes that are used to turn sewage into clean water and sewage sludge have been improved in recent decades",
+      "C": "whether the burning of oil from sewage sludge would, in contrast to nuclear power production, produce gases that would have a harmful warming effect on climate worldwide",
+      "D": "whether waste products that would be produced in deriving oil from sewage sludge and burning it would be as dangerous as those produced by the mining and use of nuclear fuel"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 69,
+    "question_id": "aqua-rat_136",
+    "subject": "aqua-rat",
+    "question": "Q: For bringing each copper coin from the bottom of a river, a coin-diver gets 20 cents, and for each brass coin she gets 25 cents. If after one dive, she got $3.40. What is the minimum number of copper coins that she brought? Answer Choices: (A)4 (B)3 (C)2 (D)1 (E)0\nA: Among A through E, the answer is",
+    "choices": {
+      "A": "4",
+      "B": "2",
+      "C": "1",
+      "D": "0"
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  }
+]

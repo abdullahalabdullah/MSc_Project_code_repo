@@ -31,7 +31,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import yaml
-from src.dataset import load_dataset_index
+from src.dataset import ensure_hf_auth, load_dataset_index, resolve_paths
 from src.inference import run_inference
 
 
@@ -40,6 +40,8 @@ def main():
     parser.add_argument("--model", required=True,
                         help="Model name as defined in config (e.g. tulu_sft_no_safety)")
     parser.add_argument("--config", default="config/mvp_config.yaml")
+    parser.add_argument("--dataset", default="mmlu",
+                        help="Dataset key (default: mmlu). Namespaces I/O paths.")
     parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
 
@@ -49,6 +51,8 @@ def main():
     with open(config_path) as f:
         config = yaml.safe_load(f)
 
+    ensure_hf_auth()  # log in for gated model downloads (env var or .hf_token)
+
     # Resolve model entry
     model_cfg = next((m for m in config["models"] if m["name"] == args.model), None)
     if model_cfg is None:
@@ -56,17 +60,18 @@ def main():
         print(f"ERROR: model '{args.model}' not found in config. Available: {available}")
         sys.exit(1)
 
-    dataset_path = root / config["paths"]["data_dir"] / "dataset_index.json"
+    paths = resolve_paths(root, config, args.dataset)
+    dataset_path = paths["data_index"]
     if not dataset_path.exists():
         print(f"ERROR: dataset_index.json not found at {dataset_path}.")
-        print("Run 01_prepare_dataset.py first.")
+        print(f"Run 01_prepare_dataset.py --dataset {args.dataset} first.")
         sys.exit(1)
 
     dataset = load_dataset_index(dataset_path)
     print(f"Loaded {len(dataset)} instances from {dataset_path}.")
 
     # Resolve relative output paths to be relative to MVP/ root
-    config["paths"]["outputs_dir"] = str(root / config["paths"]["outputs_dir"])
+    config["paths"]["outputs_dir"] = str(paths["outputs_dir"])
 
     run_inference(config, model_cfg, dataset, base_seed=args.seed)
 

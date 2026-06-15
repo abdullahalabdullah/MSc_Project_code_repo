@@ -25,6 +25,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import yaml
+from src.dataset import resolve_paths
 from src.gmean2_analysis import (
     plot_te_distribution,
     plot_gmean2_distribution,
@@ -78,6 +79,8 @@ def main():
     parser.add_argument("--model", default=None,
                         help="Model name (default: run all models in config)")
     parser.add_argument("--config", default="config/mvp_config.yaml")
+    parser.add_argument("--dataset", default="mmlu",
+                        help="Dataset key (default: mmlu). Namespaces I/O paths.")
     args = parser.parse_args()
 
     root = Path(__file__).parent.parent
@@ -93,15 +96,14 @@ def main():
             print(f"ERROR: model '{args.model}' not found in config.")
             sys.exit(1)
 
-    plots_dir = root / config["paths"]["plots_dir"]
+    plots_dir = resolve_paths(root, config, args.dataset)["plots_dir"]
     plots_dir.mkdir(parents=True, exist_ok=True)
-    analysis_root = root / config["paths"]["analysis_dir"]
 
     summaries = []
 
     for model_cfg in models:
         model_name = model_cfg["name"]
-        analysis_dir = analysis_root / model_name
+        analysis_dir = resolve_paths(root, config, args.dataset, model_name)["analysis_dir"]
 
         csv_path = analysis_dir / "gmean2_per_instance.csv"
         summary_path = analysis_dir / "gmean2_summary.json"

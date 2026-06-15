@@ -54,6 +54,7 @@ import pandas as pd
 import yaml
 
 from src.gmean2_metrics import load_jsonl, compute_gmean2
+from src.dataset import resolve_paths
 
 
 CATEGORY_SHEETS = [
@@ -182,6 +183,8 @@ def main():
     parser.add_argument("--model", default=None,
                         help="Model name (default: all models in config, combined into one workbook)")
     parser.add_argument("--config", default="config/mvp_config.yaml")
+    parser.add_argument("--dataset", default="mmlu",
+                        help="Dataset key (default: mmlu). Namespaces I/O paths.")
     parser.add_argument("--output", default=None,
                         help="Output .xlsx path (only valid with --model; default: "
                              "analysis/{model}/qualitative_export.xlsx)")
@@ -204,9 +207,9 @@ def main():
             print(f"ERROR: model '{args.model}' not found in config.")
             sys.exit(1)
 
-    dataset_path = root / config["paths"]["data_dir"] / "dataset_index.json"
+    dataset_path = resolve_paths(root, config, args.dataset)["data_index"]
     if not dataset_path.exists():
-        print(f"ERROR: {dataset_path} not found. Run 01_prepare_dataset.py first.")
+        print(f"ERROR: {dataset_path} not found. Run 01_prepare_dataset.py --dataset {args.dataset} first.")
         sys.exit(1)
     with open(dataset_path, encoding="utf-8") as f:
         dataset_index = json.load(f)
@@ -215,8 +218,9 @@ def main():
     for model_cfg in models:
         model_name = model_cfg["name"]
 
-        out_dir = root / config["paths"]["outputs_dir"] / model_name
-        mon_dir = root / config["paths"]["monitor_outputs_dir"] / model_name
+        mpaths = resolve_paths(root, config, args.dataset, model_name)
+        out_dir = mpaths["outputs_dir"]
+        mon_dir = mpaths["monitor_dir"]
 
         hinted_path = out_dir / "hinted.jsonl"
         unhinted_path = out_dir / "unhinted.jsonl"
@@ -242,7 +246,7 @@ def main():
         if args.output:
             out_path = root / args.output
         else:
-            out_path = root / config["paths"]["analysis_dir"] / model_name / "qualitative_export.xlsx"
+            out_path = mpaths["analysis_dir"] / "qualitative_export.xlsx"
 
         out_path.parent.mkdir(parents=True, exist_ok=True)
 

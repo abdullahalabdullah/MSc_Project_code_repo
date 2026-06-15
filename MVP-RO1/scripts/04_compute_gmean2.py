@@ -44,6 +44,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import yaml
 from src.gmean2_metrics import load_jsonl, compute_gmean2
+from src.dataset import resolve_paths
 
 
 def _fmt(v, decimals=4):
@@ -198,6 +199,8 @@ def main():
     parser.add_argument("--model", default=None,
                         help="Model name (default: run all models in config)")
     parser.add_argument("--config", default="config/mvp_config.yaml")
+    parser.add_argument("--dataset", default="mmlu",
+                        help="Dataset key (default: mmlu). Namespaces I/O paths.")
     args = parser.parse_args()
 
     root = Path(__file__).parent.parent
@@ -219,9 +222,10 @@ def main():
         model_name = model_cfg["name"]
         print(f"\n--- {model_name} ---")
 
-        out_dir = root / config["paths"]["outputs_dir"] / model_name
-        mon_dir = root / config["paths"]["monitor_outputs_dir"] / model_name
-        analysis_dir = root / config["paths"]["analysis_dir"] / model_name
+        paths = resolve_paths(root, config, args.dataset, model_name)
+        out_dir = paths["outputs_dir"]
+        mon_dir = paths["monitor_dir"]
+        analysis_dir = paths["analysis_dir"]
 
         hinted_path = out_dir / "hinted.jsonl"
         unhinted_path = out_dir / "unhinted.jsonl"

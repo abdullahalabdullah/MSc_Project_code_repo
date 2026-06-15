@@ -21,12 +21,16 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import yaml
-from src.dataset import prepare_dataset
+from src.dataset import prepare_dataset, resolve_paths
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Prepare MMLU dataset index.")
+    parser = argparse.ArgumentParser(description="Prepare a dataset index.")
     parser.add_argument("--config", default="config/mvp_config.yaml")
+    parser.add_argument("--dataset", default="mmlu",
+                        help="Dataset key (mmlu [legacy paths], or a key from the "
+                             "config `datasets:` registry, e.g. gpqa, gsm_mc, math_mc, "
+                             "agieval, wmdp). Default: mmlu.")
     args = parser.parse_args()
 
     config_path = Path(args.config)
@@ -36,14 +40,15 @@ def main():
     with open(config_path) as f:
         config = yaml.safe_load(f)
 
-    output_path = Path(__file__).parent.parent / config["paths"]["data_dir"] / "dataset_index.json"
+    root = Path(__file__).parent.parent
+    output_path = resolve_paths(root, config, args.dataset)["data_index"]
 
     if output_path.exists():
         print(f"dataset_index.json already exists at {output_path}.")
         print("Delete the file to regenerate with a different seed.")
         return
 
-    prepare_dataset(config, output_path)
+    prepare_dataset(config, output_path, dataset_key=args.dataset)
 
 
 if __name__ == "__main__":
