@@ -101,7 +101,7 @@ qwen_inference:
   n_samples: 4
   temperature: 0.6
   top_p: 0.95
-  max_new_tokens: 8192
+  max_new_tokens: 32768
   checkpoint_every: 100
 
 # Sampling for DeepSeek-R1-Distill (reasoning) models. Used ONLY by
@@ -117,7 +117,7 @@ deepseek_inference:
   n_samples: 4
   temperature: 0.6
   top_p: 0.95
-  max_new_tokens: 16384
+  max_new_tokens: 32768
   checkpoint_every: 100
 
 monitor:
