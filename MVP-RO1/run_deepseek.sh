@@ -70,6 +70,13 @@ for ds in "${DATASETS[@]}"; do
     run python scripts/02_run_inference_deepseek.py --dataset "$ds" --model "$DEEPSEEK_MODEL"
 done
 
+# --- Phase 2.5: cross-dataset CoT token-length analysis ----------------------
+# Overall + per-dataset condition tables + per-dataset length buckets, to inform
+# max_new_tokens. Writes analysis/cot_token_report_${DEEPSEEK_MODEL}.md.
+echo ""
+echo "########## PHASE 2.5: CoT token-length analysis — $DEEPSEEK_MODEL ##########"
+run python scripts/08_cot_token_analysis.py --model "$DEEPSEEK_MODEL" --datasets "${DATASETS[@]}"
+
 # --- Phase 3: commit & push --------------------------------------------------
 echo ""
 echo "########## PHASE 3: git add / commit / push ##########"

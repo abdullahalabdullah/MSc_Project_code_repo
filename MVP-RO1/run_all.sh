@@ -94,6 +94,15 @@ for model in "$DEEPSEEK_MODEL" "$QWEN_MODEL"; do
     done
 done
 
+# --- Phase 3.5: cross-dataset CoT token-length analysis ----------------------
+# Aggregates token lengths across all datasets per model (overall + per-dataset
+# condition tables + per-dataset length buckets) to inform max_new_tokens.
+echo ""
+echo "########## PHASE 3.5: CoT token-length analysis (both models) ##########"
+for model in "$DEEPSEEK_MODEL" "$QWEN_MODEL"; do
+    run python scripts/08_cot_token_analysis.py --model "$model" --datasets "${DATASETS[@]}"
+done
+
 # --- Phase 4: commit & push --------------------------------------------------
 echo ""
 echo "########## PHASE 4: git add / commit / push ##########"
