@@ -2,7 +2,7 @@ dataset:
   name: "cais/mmlu"
   config: "all"
   split: "test"
-  n_examples: 200
+  n_examples: 70
   max_per_subject: 5
   random_seed: 7
 
