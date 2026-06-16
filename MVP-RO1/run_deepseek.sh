@@ -5,14 +5,12 @@
 # Order:
 #   1. Prepare every dataset index (model-independent, idempotent).
 #   2. Inference: DeepSeek-R1-Distill-Qwen-1.5B.
-#   3. Monitor (needs OPENAI_API_KEY), after inference is done.
-#   4. git add / commit / push.
+#   3. git add / commit / push.
 #
 # Fail-soft: if any single command errors, it is logged as FAIL and the script
 # moves on to the next one (no `set -e`). A summary is printed at the end.
 #
 # Usage:
-#   export OPENAI_API_KEY=sk-...        # needed for step 3 (monitor)
 #   # HF auth is handled in-code via .hf_token / HF_TOKEN (see src/dataset.py)
 #   bash run_deepseek.sh
 
@@ -58,11 +56,6 @@ echo "Datasets: ${DATASETS[*]}"
 echo "Model:    $DEEPSEEK_MODEL (DeepSeek)"
 echo "Log file: $LOGFILE"
 
-if [[ -z "${OPENAI_API_KEY:-}" ]]; then
-    echo "WARNING: OPENAI_API_KEY is not set — step 3 (monitor) will fail for every"
-    echo "         dataset (and be skipped). Export it before running for monitor results."
-fi
-
 # --- Phase 1: prepare dataset indexes (model-independent) --------------------
 echo ""
 echo "########## PHASE 1: prepare dataset indexes ##########"
@@ -77,16 +70,9 @@ for ds in "${DATASETS[@]}"; do
     run python scripts/02_run_inference_deepseek.py --dataset "$ds" --model "$DEEPSEEK_MODEL"
 done
 
-# --- Phase 3: monitor --------------------------------------------------------
+# --- Phase 3: commit & push --------------------------------------------------
 echo ""
-echo "########## PHASE 3: monitor — $DEEPSEEK_MODEL ##########"
-for ds in "${DATASETS[@]}"; do
-    run python scripts/03_run_monitor.py --dataset "$ds" --model "$DEEPSEEK_MODEL"
-done
-
-# --- Phase 4: commit & push --------------------------------------------------
-echo ""
-echo "########## PHASE 4: git add / commit / push ##########"
+echo "########## PHASE 3: git add / commit / push ##########"
 run git add -A
 run git commit -m "deepseek results"
 run git push
