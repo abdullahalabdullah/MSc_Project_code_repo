@@ -38,9 +38,11 @@ split_seed: 42
 # --- Formatting --------------------------------------------------------------
 # Train in NON-thinking mode (spec §2/§3.4): chosen responses are plain text.
 enable_thinking_train: false
-# Set with scripts/00_check_seq_length.py. 2048 is the spec default; bump only
-# if the preflight shows >1% of examples exceed it.
-max_length: 2048
+# Set with scripts/00_check_seq_length.py. PKU-SafeRLHF conflict cases are short
+# (p99 ~288, max ~1218 tokens), so 1024 keeps all but 1 example whole. Dynamic
+# padding pads to the longest sequence per batch, so this mainly controls
+# truncation of rare outliers, not per-step compute.
+max_length: 1024
 
 # --- LoRA (spec §5) ----------------------------------------------------------
 lora_r: 16

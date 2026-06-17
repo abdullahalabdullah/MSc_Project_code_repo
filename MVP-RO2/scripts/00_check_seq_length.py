@@ -41,7 +41,7 @@ def main():
     cur = cfg["max_length"]
     if rec is not None and rec != cur:
         logger.info(
-            "Config max_length=%d; recommended=%d. Update configs/%s if they differ.",
+            "Config max_length=%d; recommended>=%d. Update %s if you want to change it.",
             cur, rec, args.config,
         )
     else:
