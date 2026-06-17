@@ -9,13 +9,17 @@ if [ -z "${OPENAI_API_KEY:-}" ]; then
     exit 1
 fi
 
-# Auto-discover every dataset/model pair under outputs/ and run the monitor on each.
-# Layout: outputs/{dataset}/{model}/{hinted,unhinted}.jsonl
-for ds_dir in outputs/*/; do
-    ds=$(basename "$ds_dir")
-    for m_dir in "$ds_dir"*/; do
+# Datasets to monitor.
+DATASETS=(mmlu)
+
+# Run the monitor for every model that has outputs under each dataset.
+# All datasets are namespaced: outputs/{dataset}/{model}/{hinted,unhinted}.jsonl
+for ds in "${DATASETS[@]}"; do
+    base="outputs/${ds}"
+
+    for m_dir in "${base}"/*/; do
         m=$(basename "$m_dir")
-        [ -f "$m_dir/hinted.jsonl" ] && [ -f "$m_dir/unhinted.jsonl" ] || continue
+        [ -f "${m_dir}/hinted.jsonl" ] && [ -f "${m_dir}/unhinted.jsonl" ] || continue
         echo "=== monitor: dataset=${ds} model=${m} ==="
         python scripts/03_run_monitor.py --model "${m}" --dataset "${ds}"
     done

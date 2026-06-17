@@ -82,22 +82,18 @@ def ensure_hf_auth(verbose: bool = True) -> bool:
 def resolve_paths(root, config: dict, dataset_key: str, model_name: str | None = None) -> dict:
     """Resolve all on-disk paths for a (dataset, model) pair.
 
-    MMLU ("mmlu") keeps the original unnamespaced layout so existing committed
-    results are untouched:
-        data/dataset_index.json, outputs/{model}/, monitor_outputs/{model}/,
-        analysis/{model}/, plots/
-    Any other dataset key inserts a {dataset} subdirectory:
-        data/{ds}/dataset_index.json, outputs/{ds}/{model}/, ...,  plots/{ds}/
+    Every dataset (including "mmlu") is namespaced by its key:
+        data/{ds}/dataset_index.json, outputs/{ds}/{model}/,
+        monitor_outputs/{ds}/{model}/, analysis/{ds}/{model}/, plots/{ds}/
 
     `model_name` is appended to the per-model dirs (outputs/monitor/analysis) only
     when provided; data_index and plots_dir are never model-specific.
     """
     root = Path(root)
     p = config["paths"]
-    legacy = (dataset_key == "mmlu")
 
     def base(d):
-        return (root / d) if legacy else (root / d / dataset_key)
+        return root / d / dataset_key
 
     def model_dir(d):
         b = base(d)
