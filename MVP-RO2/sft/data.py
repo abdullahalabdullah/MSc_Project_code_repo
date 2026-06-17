@@ -41,6 +41,9 @@ _REQUIRED_COLUMNS = [
 # Qwen3 / ChatML assistant turn marker. The assistant *response* begins
 # immediately after this literal string in the rendered conversation.
 ASSISTANT_HEADER = "<|im_start|>assistant\n"
+# Qwen3 wraps the assistant turn in a thinking block. In non-thinking mode it
+# emits an EMPTY one (<think>\n\n</think>). We must NOT supervise it (see below).
+THINK_CLOSE = "</think>"
 
 
 # =============================================================================
@@ -130,6 +133,21 @@ def tokenize_and_mask(
             "sft/data.py to match the tokenizer's assistant turn opening."
         )
     scaffold = head + sep  # prompt + assistant header (masked)
+
+    # CRITICAL: fold the assistant turn's <think>...</think> block into the MASKED
+    # scaffold so it is never a training target. Qwen3 injects an empty
+    # <think>\n\n</think> in non-thinking mode; supervising it teaches the model
+    # to emit an empty think block and collapses its chain-of-thought (observed:
+    # CoT disappears by epoch 1). Masking it leaves the model's reasoning
+    # behaviour intact and supervises ONLY the safe answer that follows </think>.
+    lstripped = response.lstrip()
+    lead_ws = response[: len(response) - len(lstripped)]
+    if lstripped.startswith("<think>") and THINK_CLOSE in lstripped:
+        before, _, after = lstripped.partition(THINK_CLOSE)  # before='<think>\n\n'
+        after_stripped = after.lstrip()                       # the actual answer
+        scaffold = scaffold + lead_ws + before + THINK_CLOSE \
+            + after[: len(after) - len(after_stripped)]
+        response = after_stripped
 
     # Tokenize the two pieces separately and concatenate -> exact mask boundary.
     scaffold_ids = tokenizer(scaffold, add_special_tokens=False)["input_ids"]

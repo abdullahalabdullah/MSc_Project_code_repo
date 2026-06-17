@@ -1,0 +1,19 @@
+# =============================================================================
+# RO2 MVP — SFT smoke-test overrides (quick train + inspect outputs).
+# =============================================================================
+# Overrides configs/sft_harmlessness.yaml. scripts/smoke_test_sft.py loads the
+# full config first, then deep-merges this. Trains a small slice for a few
+# minutes (no Hub push) and then runs the thinking-mode generation check, so you
+# can confirm the masking fix preserves chain-of-thought BEFORE the full run.
+# =============================================================================
+
+output_dir: "./outputs/qwen3-4b-sft-harmlessness-smoke"
+max_train_samples: 2000     # ~125 steps at effective batch 16 (1 epoch)
+num_train_epochs: 1
+per_device_train_batch_size: 16
+gradient_accumulation_steps: 1   # effective batch 16 -> ~125 quick steps
+max_steps: -1
+val_fraction: 0.0           # no eval split for the smoke test
+eval_strategy: "no"
+save_strategy: "epoch"      # one checkpoint at the end to inspect
+logging_steps: 5
