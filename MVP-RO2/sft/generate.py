@@ -60,8 +60,16 @@ def generation_check(
         gen_ids = out[0][inputs["input_ids"].shape[1]:]
         decoded = tokenizer.decode(gen_ids, skip_special_tokens=False)
 
+        # Prefer a closed <think>...</think>; if the block was truncated by
+        # max_new_tokens (open <think> with no close), count what's there so we
+        # don't falsely report "suppressed" for a model that thinks a lot.
         m = _THINK_RE.search(decoded)
-        think_text = m.group(1).strip() if m else ""
+        if m:
+            think_text = m.group(1).strip()
+        else:
+            m_open = re.search(r"<think>(.*)$", decoded, re.DOTALL)
+            think_text = m_open.group(1).strip() if m_open else ""
+        has_think = "<think>" in decoded
         n_think_tokens = len(tokenizer(think_text, add_special_tokens=False)["input_ids"]) if think_text else 0
         ok = n_think_tokens >= min_think_tokens
         all_ok = all_ok and ok
@@ -69,9 +77,9 @@ def generation_check(
         logger.info("-" * 70)
         logger.info("PROMPT: %s", prompt)
         logger.info("has <think>: %s | think tokens: %d | ok(>=%d): %s",
-                    bool(m), n_think_tokens, min_think_tokens, ok)
+                    has_think, n_think_tokens, min_think_tokens, ok)
         logger.info("GENERATION:\n%s", decoded)
-        results.append({"prompt": prompt, "has_think": bool(m),
+        results.append({"prompt": prompt, "has_think": has_think,
                         "n_think_tokens": n_think_tokens, "ok": ok})
 
     logger.info("=" * 70)
