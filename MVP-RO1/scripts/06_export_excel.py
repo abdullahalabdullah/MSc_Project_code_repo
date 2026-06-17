@@ -24,13 +24,15 @@ Each row is also tagged with a `category`, used to split rows across sheets:
   - Invalid_Truncated                truncated or unparseable response
 
 Usage:
-    python scripts/06_export_excel.py                              # all models, one workbook each
+    python scripts/06_export_excel.py                              # all models, every dataset
+    python scripts/06_export_excel.py --dataset wmdp               # all models, one dataset
     python scripts/06_export_excel.py --model tulu_sft_no_safety   # single model
 
     Options:
-      --config  path to config YAML (default: config/mvp_config.yaml)
-      --output  output .xlsx path (only valid with --model; default:
-                 analysis/{model}/qualitative_export.xlsx)
+      --config   path to config YAML (default: config/mvp_config.yaml)
+      --dataset  restrict to one dataset key (default: every dataset in config)
+      --output   output .xlsx path (only valid with --model and --dataset; default:
+                 analysis/{dataset}/{model}/qualitative_export.xlsx)
 
 Input:
     data/dataset_index.json
@@ -178,39 +180,15 @@ def build_summary_rows(model_name, dataset_by_id, per_example_metrics):
     return rows
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Export per-record qualitative data to a multi-sheet Excel workbook.")
-    parser.add_argument("--model", default=None,
-                        help="Model name (default: all models in config, combined into one workbook)")
-    parser.add_argument("--config", default="config/mvp_config.yaml")
-    parser.add_argument("--dataset", default="mmlu",
-                        help="Dataset key (default: mmlu). Namespaces I/O paths.")
-    parser.add_argument("--output", default=None,
-                        help="Output .xlsx path (only valid with --model; default: "
-                             "analysis/{model}/qualitative_export.xlsx)")
-    args = parser.parse_args()
+def run_dataset(root, config, dataset_key, models, output_override):
+    """Export a qualitative workbook for every given model on a single dataset."""
+    print(f"\n=== dataset: {dataset_key} ===")
 
-    if args.output and not args.model:
-        print("ERROR: --output requires --model (each model gets its own workbook).")
-        sys.exit(1)
-
-    root = Path(__file__).parent.parent
-    config_path = root / args.config
-
-    with open(config_path) as f:
-        config = yaml.safe_load(f)
-
-    models = config["models"]
-    if args.model:
-        models = [m for m in models if m["name"] == args.model]
-        if not models:
-            print(f"ERROR: model '{args.model}' not found in config.")
-            sys.exit(1)
-
-    dataset_path = resolve_paths(root, config, args.dataset)["data_index"]
+    dataset_path = resolve_paths(root, config, dataset_key)["data_index"]
     if not dataset_path.exists():
-        print(f"ERROR: {dataset_path} not found. Run 01_prepare_dataset.py --dataset {args.dataset} first.")
-        sys.exit(1)
+        print(f"  Skipping: {dataset_path} not found. "
+              f"Run 01_prepare_dataset.py --dataset {dataset_key} first.")
+        return
     with open(dataset_path, encoding="utf-8") as f:
         dataset_index = json.load(f)
     dataset_by_id = {d["instance_id"]: d for d in dataset_index}
@@ -218,7 +196,7 @@ def main():
     for model_cfg in models:
         model_name = model_cfg["name"]
 
-        mpaths = resolve_paths(root, config, args.dataset, model_name)
+        mpaths = resolve_paths(root, config, dataset_key, model_name)
         out_dir = mpaths["outputs_dir"]
         mon_dir = mpaths["monitor_dir"]
 
@@ -243,8 +221,8 @@ def main():
         df = pd.DataFrame(rows, columns=COLUMNS)
         summary_df = pd.DataFrame(summary_rows, columns=SUMMARY_COLUMNS)
 
-        if args.output:
-            out_path = root / args.output
+        if output_override:
+            out_path = root / output_override
         else:
             out_path = mpaths["analysis_dir"] / "qualitative_export.xlsx"
 
@@ -258,6 +236,51 @@ def main():
             summary_df.to_excel(writer, sheet_name="Per_Example_Summary", index=False)
 
         print(f"  {model_name}: {len(rows)} records, {len(per_instance)} examples -> {out_path}")
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Export per-record qualitative data to a multi-sheet Excel workbook.")
+    parser.add_argument("--model", default=None,
+                        help="Model name (default: all models in config, combined into one workbook)")
+    parser.add_argument("--config", default="config/mvp_config.yaml")
+    parser.add_argument("--dataset", default=None,
+                        help="Restrict to one dataset key (default: every dataset in config). "
+                             "Namespaces I/O paths.")
+    parser.add_argument("--output", default=None,
+                        help="Output .xlsx path (only valid with --model and --dataset; default: "
+                             "analysis/{dataset}/{model}/qualitative_export.xlsx)")
+    args = parser.parse_args()
+
+    if args.output and (not args.model or not args.dataset):
+        print("ERROR: --output requires --model and --dataset "
+              "(each dataset/model pair gets its own workbook).")
+        sys.exit(1)
+
+    root = Path(__file__).parent.parent
+    config_path = root / args.config
+
+    with open(config_path) as f:
+        config = yaml.safe_load(f)
+
+    models = config["models"]
+    if args.model:
+        models = [m for m in models if m["name"] == args.model]
+        if not models:
+            print(f"ERROR: model '{args.model}' not found in config.")
+            sys.exit(1)
+
+    if args.dataset:
+        datasets = [args.dataset]
+    else:
+        datasets = list(config.get("datasets", {}).keys())
+        if not datasets:
+            print("ERROR: config has no 'datasets' section to sweep.")
+            sys.exit(1)
+
+    for dataset_key in datasets:
+        run_dataset(root, config, dataset_key, models, args.output)
+
+    print("\nDone.")
 
 
 if __name__ == "__main__":

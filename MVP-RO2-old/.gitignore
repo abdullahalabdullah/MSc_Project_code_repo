@@ -1,0 +1,18 @@
+# Credentials — never commit
+.env
+
+# Training scratch — TRL intermediate checkpoints (not the deliverable; the
+# selected adapter is pushed to the HF Hub)
+checkpoints/
+
+# SLURM logs
+slurm-*.out
+slurm-*.err
+
+# Resolved/frozen pins
+requirements.lock.txt
+
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/

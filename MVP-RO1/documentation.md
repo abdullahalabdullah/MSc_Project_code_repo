@@ -651,16 +651,16 @@ Output:
 **Run after the monitor has been run for both arms.**
 
 ```bash
-python scripts/04_compute_gmean2.py                        # all models, every dataset
+python scripts/04_compute_gmean2.py                        # all models, mmlu (default)
 python scripts/04_compute_gmean2.py --dataset wmdp         # all models, one dataset
+python scripts/04_compute_gmean2.py --all-datasets         # all models, every dataset in config
 python scripts/04_compute_gmean2.py --model tulu_sft_full  # one model
 ```
 
-With no `--dataset`, the script sweeps every key in `config["datasets"]` (mmlu,
-gpqa, gsm_mc, math_mc, agieval, wmdp), i.e. analyses everything under
-`monitor_outputs/`. A (dataset, model) pair with no inference outputs on disk is
-skipped with a message, so it is safe to run even when only some pairs have been
-generated. Pass `--dataset` to restrict the sweep to a single dataset.
+`--all-datasets` sweeps every key in `config["datasets"]` (mmlu, gpqa, gsm_mc,
+math_mc, agieval, wmdp), i.e. analyses everything under `monitor_outputs/`. A
+(dataset, model) pair with no inference outputs on disk is skipped with a message,
+so it is safe to run even when only some pairs have been generated.
 
 - Reads `outputs/{dataset}/{model}/hinted.jsonl`,
   `outputs/{dataset}/{model}/unhinted.jsonl`, and

@@ -1,1 +1,0 @@
-This is MVP RO1 for the two models uses in Xiong et al. “deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B” and “qwen3_4b”

@@ -12,8 +12,13 @@ Reads analysis/{model}/gmean2_per_instance.csv and gmean2_summary.json
   plots/gmean2_summary_table.json   (combined summaries across all models)
 
 Usage:
-    python scripts/05_analyze_gmean2.py
+    python scripts/05_analyze_gmean2.py                       # all models, every dataset
+    python scripts/05_analyze_gmean2.py --dataset wmdp        # all models, one dataset
     python scripts/05_analyze_gmean2.py --model tulu_sft_no_safety
+
+    Options:
+      --config   path to config YAML (default: config/mvp_config.yaml)
+      --dataset  restrict to one dataset key (default: every dataset in config)
 """
 
 import argparse
@@ -74,36 +79,18 @@ def _load_per_instance(csv_path: Path) -> list:
     return per_instance
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Generate g-mean^2 plots.")
-    parser.add_argument("--model", default=None,
-                        help="Model name (default: run all models in config)")
-    parser.add_argument("--config", default="config/mvp_config.yaml")
-    parser.add_argument("--dataset", default="mmlu",
-                        help="Dataset key (default: mmlu). Namespaces I/O paths.")
-    args = parser.parse_args()
+def run_dataset(root, config, dataset_key, models):
+    """Generate plots for every given model on a single dataset."""
+    print(f"\n=== dataset: {dataset_key} ===")
 
-    root = Path(__file__).parent.parent
-    config_path = root / args.config
-
-    with open(config_path) as f:
-        config = yaml.safe_load(f)
-
-    models = config["models"]
-    if args.model:
-        models = [m for m in models if m["name"] == args.model]
-        if not models:
-            print(f"ERROR: model '{args.model}' not found in config.")
-            sys.exit(1)
-
-    plots_dir = resolve_paths(root, config, args.dataset)["plots_dir"]
+    plots_dir = resolve_paths(root, config, dataset_key)["plots_dir"]
     plots_dir.mkdir(parents=True, exist_ok=True)
 
     summaries = []
 
     for model_cfg in models:
         model_name = model_cfg["name"]
-        analysis_dir = resolve_paths(root, config, args.dataset, model_name)["analysis_dir"]
+        analysis_dir = resolve_paths(root, config, dataset_key, model_name)["analysis_dir"]
 
         csv_path = analysis_dir / "gmean2_per_instance.csv"
         summary_path = analysis_dir / "gmean2_summary.json"
@@ -132,6 +119,41 @@ def main():
         with open(table_path, "w", encoding="utf-8") as f:
             json.dump(summaries, f, indent=2)
         print(f"\nWritten combined summary table: {table_path}")
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Generate g-mean^2 plots.")
+    parser.add_argument("--model", default=None,
+                        help="Model name (default: run all models in config)")
+    parser.add_argument("--config", default="config/mvp_config.yaml")
+    parser.add_argument("--dataset", default=None,
+                        help="Restrict to one dataset key (default: every dataset in config). "
+                             "Namespaces I/O paths.")
+    args = parser.parse_args()
+
+    root = Path(__file__).parent.parent
+    config_path = root / args.config
+
+    with open(config_path) as f:
+        config = yaml.safe_load(f)
+
+    models = config["models"]
+    if args.model:
+        models = [m for m in models if m["name"] == args.model]
+        if not models:
+            print(f"ERROR: model '{args.model}' not found in config.")
+            sys.exit(1)
+
+    if args.dataset:
+        datasets = [args.dataset]
+    else:
+        datasets = list(config.get("datasets", {}).keys())
+        if not datasets:
+            print("ERROR: config has no 'datasets' section to sweep.")
+            sys.exit(1)
+
+    for dataset_key in datasets:
+        run_dataset(root, config, dataset_key, models)
 
     print("\nDone.")
 

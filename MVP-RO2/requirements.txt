@@ -1,40 +1,39 @@
 # =============================================================================
-# RO2 MVP — DPO training environment (SEPARATE from MVP-RO1's requirements.txt).
+# RO2 MVP — SFT (harmlessness) training environment.
 # =============================================================================
-# These pins follow MVP_RO2.md "Environment Setup". TRL / PEFT / Unsloth APIs
-# change frequently, so versions are pinned. This stack is NOT yet proven on the
-# cluster — run `python sanity_check_dpo.py` first; it is the gate that confirms
-# the environment (especially Unsloth compatibility) works before the full run.
+# This stack is intentionally the MODERN, verified one (NOT the old Unsloth/
+# TRL-0.8.x DPO stack in MVP-RO2-old). The code in sft/ is written against and
+# verified on these exact major versions. The spec gives lower bounds only;
+# these pins are what the API calls (SFTConfig.max_length, processing_class,
+# DataCollatorForSeq2Seq label masking, etc.) were validated against.
 #
-# Install torch FIRST, separately, matching the cluster CUDA:
-#   pip install torch==2.3.0 --index-url https://download.pytorch.org/whl/cu121
+# torch is installed SEPARATELY, matching the pod's CUDA. On RunPod the base
+# image almost always ships a CUDA torch already — check first:
+#   python -c "import torch; print(torch.__version__, torch.cuda.is_available())"
+# If torch is missing, install one matching the pod CUDA, e.g.:
+#   pip install torch --index-url https://download.pytorch.org/whl/cu121
 # then: pip install -r requirements.txt
 #
-# After a successful install, freeze the resolved versions for reproducibility:
+# After a clean install, freeze for reproducibility:
 #   pip freeze > requirements.lock.txt
 # =============================================================================
 
-torch==2.3.0
-transformers==4.44.0
-trl==0.8.6                  # last 0.8.x; the Unsloth build that resolves under transformers 4.44 hardcodes trl<0.9.0. train_dpo.py uses the 0.8.x DPOTrainer API (no DPOConfig).
-peft==0.12.0
-datasets==2.21.0
-accelerate==0.33.0
-bitsandbytes==0.43.3        # provides paged_adamw_32bit
-unsloth                     # installs Triton kernels automatically (version resolved at install)
+transformers==4.56.2
+trl==0.22.2
+peft==0.18.1
+datasets==4.1.1
+accelerate>=0.34.0
+
+# Optional optimisers / kernels
+bitsandbytes>=0.43.0     # only needed if optim="paged_adamw_8bit" (OOM fallback)
+# flash-attn>=2.5.0       # optional: set attn_implementation="flash_attention_2"
+#                         # (install only if the pod has a matching CUDA/torch;
+#                         #  the default attn_implementation="sdpa" needs nothing)
 
 # Credentials / Hub
 python-dotenv
-huggingface_hub
+huggingface_hub>=0.23.0
 
-# Config
+# Config / numerics
 pyyaml
-
-# Monitor (downstream eval; kept here so the same env can run it)
-openai
-
-# Analysis / numerics
 numpy
-scipy
-pandas
-matplotlib

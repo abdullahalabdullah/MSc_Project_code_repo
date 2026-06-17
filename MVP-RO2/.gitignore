@@ -1,18 +1,32 @@
-# Credentials — never commit
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# Environments / credentials
 .env
+.venv/
+venv/
 
-# Training scratch — TRL intermediate checkpoints (not the deliverable; the
-# selected adapter is pushed to the HF Hub)
+# Frozen lockfile is fine to commit; the resolved one is optional
+# requirements.lock.txt
+
+# HuggingFace caches (large)
+hf_cache/
+.cache/
+
+# Training outputs (checkpoints, adapters) — pushed to the Hub, not git
+outputs/
 checkpoints/
+*.safetensors
+*.bin
 
-# SLURM logs
+# Logs
+*.log
 slurm-*.out
 slurm-*.err
 
-# Resolved/frozen pins
-requirements.lock.txt
-
-# Python
-__pycache__/
-*.py[cod]
-.ipynb_checkpoints/
+# OS
+.DS_Store
+Thumbs.db

@@ -1,2 +1,0 @@
-This was for the run with full MVP-RO1 after the eval metric change.
-Next change will be a small modification to the monitor prompt.
