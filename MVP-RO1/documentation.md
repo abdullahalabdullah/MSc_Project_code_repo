@@ -651,13 +651,21 @@ Output:
 **Run after the monitor has been run for both arms.**
 
 ```bash
-python scripts/04_compute_gmean2.py                        # all models
+python scripts/04_compute_gmean2.py                        # all models, every dataset
+python scripts/04_compute_gmean2.py --dataset wmdp         # all models, one dataset
 python scripts/04_compute_gmean2.py --model tulu_sft_full  # one model
 ```
 
-- Reads `outputs/{model}/hinted.jsonl`, `outputs/{model}/unhinted.jsonl`, and
-  `monitor_outputs/{model}/monitor_results.jsonl` (warns if missing, or if it lacks
-  an `"arm"` field).
+With no `--dataset`, the script sweeps every key in `config["datasets"]` (mmlu,
+gpqa, gsm_mc, math_mc, agieval, wmdp), i.e. analyses everything under
+`monitor_outputs/`. A (dataset, model) pair with no inference outputs on disk is
+skipped with a message, so it is safe to run even when only some pairs have been
+generated. Pass `--dataset` to restrict the sweep to a single dataset.
+
+- Reads `outputs/{dataset}/{model}/hinted.jsonl`,
+  `outputs/{dataset}/{model}/unhinted.jsonl`, and
+  `monitor_outputs/{dataset}/{model}/monitor_results.jsonl` (warns if missing, or if
+  it lacks an `"arm"` field). Paths are namespaced by dataset via `resolve_paths`.
 - Calls `compute_gmean2(hinted, unhinted, monitor)`.
 - Filtering follows `metrics/g-mean² Filtering Levels.md`:
   - **Level-1 (applied):** an instance is included in the g-mean² average iff

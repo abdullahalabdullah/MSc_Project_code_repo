@@ -13,11 +13,13 @@ Filtering follows MVP-RO1/metrics/g-mean² Filtering Levels.md:
     exceed config["gmean2"]["level2_te_threshold"].
 
 Usage:
-    python scripts/04_compute_gmean2.py                       # all models
+    python scripts/04_compute_gmean2.py                       # all models, every dataset
+    python scripts/04_compute_gmean2.py --dataset wmdp        # all models, one dataset
     python scripts/04_compute_gmean2.py --model tulu_sft_no_safety
 
     Options:
-      --config  path to config YAML (default: config/mvp_config.yaml)
+      --config   path to config YAML (default: config/mvp_config.yaml)
+      --dataset  restrict to one dataset key (default: every dataset in config)
 
 Input:
     outputs/{model_name}/hinted.jsonl
@@ -194,35 +196,15 @@ def _write_summary_md(summary: dict, level2_threshold: float, path: Path) -> Non
     path.write_text("\n".join(lines), encoding="utf-8")
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Compute the g-mean^2 metric.")
-    parser.add_argument("--model", default=None,
-                        help="Model name (default: run all models in config)")
-    parser.add_argument("--config", default="config/mvp_config.yaml")
-    parser.add_argument("--dataset", default="mmlu",
-                        help="Dataset key (default: mmlu). Namespaces I/O paths.")
-    args = parser.parse_args()
-
-    root = Path(__file__).parent.parent
-    config_path = root / args.config
-
-    with open(config_path) as f:
-        config = yaml.safe_load(f)
-
-    models = config["models"]
-    if args.model:
-        models = [m for m in models if m["name"] == args.model]
-        if not models:
-            print(f"ERROR: model '{args.model}' not found in config.")
-            sys.exit(1)
-
-    level2_threshold = config.get("gmean2", {}).get("level2_te_threshold", 0.05)
+def run_dataset(root, config, dataset_key, models, level2_threshold):
+    """Compute g-mean^2 for every given model on a single dataset."""
+    print(f"\n=== dataset: {dataset_key} ===")
 
     for model_cfg in models:
         model_name = model_cfg["name"]
         print(f"\n--- {model_name} ---")
 
-        paths = resolve_paths(root, config, args.dataset, model_name)
+        paths = resolve_paths(root, config, dataset_key, model_name)
         out_dir = paths["outputs_dir"]
         mon_dir = paths["monitor_dir"]
         analysis_dir = paths["analysis_dir"]
@@ -318,6 +300,43 @@ def main():
         print(f"  Written: {per_instance_json_path}")
         print(f"  Written: {summary_path}")
         print(f"  Written: {md_path}")
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Compute the g-mean^2 metric.")
+    parser.add_argument("--model", default=None,
+                        help="Model name (default: run all models in config)")
+    parser.add_argument("--config", default="config/mvp_config.yaml")
+    parser.add_argument("--dataset", default=None,
+                        help="Restrict to one dataset key (default: every dataset in config). "
+                             "Namespaces I/O paths.")
+    args = parser.parse_args()
+
+    root = Path(__file__).parent.parent
+    config_path = root / args.config
+
+    with open(config_path) as f:
+        config = yaml.safe_load(f)
+
+    models = config["models"]
+    if args.model:
+        models = [m for m in models if m["name"] == args.model]
+        if not models:
+            print(f"ERROR: model '{args.model}' not found in config.")
+            sys.exit(1)
+
+    level2_threshold = config.get("gmean2", {}).get("level2_te_threshold", 0.05)
+
+    if args.dataset:
+        datasets = [args.dataset]
+    else:
+        datasets = list(config.get("datasets", {}).keys())
+        if not datasets:
+            print("ERROR: config has no 'datasets' section to sweep.")
+            sys.exit(1)
+
+    for dataset_key in datasets:
+        run_dataset(root, config, dataset_key, models, level2_threshold)
 
     print("\nDone.")
 
