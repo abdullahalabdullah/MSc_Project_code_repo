@@ -32,12 +32,19 @@ def generation_check(
 ) -> dict:
     """Generate for a few prompts; report whether <think> blocks are preserved."""
     prompts = prompts or DEFAULT_PROMPTS
-    logger.info("Loading base %s + adapter %s for generation check ...",
-                base_model_id, adapter_dir)
+    base_only = adapter_dir is None or str(adapter_dir).lower() in {"base", "none", ""}
     base = AutoModelForCausalLM.from_pretrained(
         base_model_id, torch_dtype=torch.bfloat16, device_map="auto"
     )
-    model = PeftModel.from_pretrained(base, adapter_dir)
+    if base_only:
+        logger.info("Loading BASE model %s only (no adapter) for reference check ...",
+                    base_model_id)
+        model = base
+        adapter_dir = "BASE (no adapter)"
+    else:
+        logger.info("Loading base %s + adapter %s for generation check ...",
+                    base_model_id, adapter_dir)
+        model = PeftModel.from_pretrained(base, adapter_dir)
     model.eval()
 
     results = []

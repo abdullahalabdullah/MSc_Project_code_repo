@@ -25,7 +25,8 @@ def main():
     parser = argparse.ArgumentParser(description="RO2 SFT — thinking-mode generation check.")
     parser.add_argument("--config", default="configs/sft_harmlessness.yaml")
     parser.add_argument("--checkpoint", required=True,
-                        help="Local checkpoint dir OR a Hub adapter repo id.")
+                        help="Local checkpoint dir, a Hub adapter repo id, or "
+                             "'base' to run the un-adapted base model as a reference.")
     parser.add_argument("--max-new-tokens", type=int, default=512)
     parser.add_argument("--min-think-tokens", type=int, default=20)
     args = parser.parse_args()
