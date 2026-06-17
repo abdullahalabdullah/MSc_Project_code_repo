@@ -29,8 +29,15 @@ def generation_check(
     prompts=None,
     max_new_tokens: int = 512,
     min_think_tokens: int = 20,
+    do_sample: bool = False,
+    temperature: float = 0.6,
+    top_p: float = 0.95,
 ) -> dict:
-    """Generate for a few prompts; report whether <think> blocks are preserved."""
+    """Generate for a few prompts; report whether <think> blocks are preserved.
+
+    `do_sample=True` (temp/top_p) matches the RO1 Qwen3 eval settings and avoids
+    greedy repetition loops; the default greedy is fine for a quick yes/no.
+    """
     prompts = prompts or DEFAULT_PROMPTS
     base_only = adapter_dir is None or str(adapter_dir).lower() in {"base", "none", ""}
     base = AutoModelForCausalLM.from_pretrained(
@@ -55,8 +62,11 @@ def generation_check(
             messages, tokenize=False, add_generation_prompt=True, enable_thinking=True
         )
         inputs = tokenizer(text, return_tensors="pt").to(model.device)
+        gen_kwargs = {"max_new_tokens": max_new_tokens, "do_sample": do_sample}
+        if do_sample:
+            gen_kwargs.update(temperature=temperature, top_p=top_p)
         with torch.no_grad():
-            out = model.generate(**inputs, max_new_tokens=max_new_tokens, do_sample=False)
+            out = model.generate(**inputs, **gen_kwargs)
         gen_ids = out[0][inputs["input_ids"].shape[1]:]
         decoded = tokenizer.decode(gen_ids, skip_special_tokens=False)
 

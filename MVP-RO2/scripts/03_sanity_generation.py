@@ -29,6 +29,9 @@ def main():
                              "'base' to run the un-adapted base model as a reference.")
     parser.add_argument("--max-new-tokens", type=int, default=512)
     parser.add_argument("--min-think-tokens", type=int, default=20)
+    parser.add_argument("--sample", action="store_true",
+                        help="Sample (temp 0.6, top_p 0.95) like the RO1 eval, "
+                             "instead of greedy (avoids repetition loops).")
     args = parser.parse_args()
 
     logger = make_logger("sanity_generation")
@@ -43,6 +46,7 @@ def main():
         logger=logger,
         max_new_tokens=args.max_new_tokens,
         min_think_tokens=args.min_think_tokens,
+        do_sample=args.sample,
     )
 
 
