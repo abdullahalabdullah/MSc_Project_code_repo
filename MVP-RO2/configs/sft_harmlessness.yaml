@@ -24,6 +24,8 @@ output_dir: "./outputs/qwen3-4b-sft-harmlessness"
 hf_username: "er-abd"
 repo_prefix: "qwen3-4b-sft-harmlessness-pku-adapter"   # -> <user>/<prefix>-epoch{1,2,3}
 sanity_repo: "qwen3-4b-sft-harmlessness-pku-adapter-sanitytest"  # throwaway repo for the gate
+# Standalone MERGED models for the MVP-RO1 vLLM eval pipeline (scripts/04_merge_and_push.py).
+merged_repo_prefix: "qwen3-4b-sft-harmlessness-pku-merged"   # -> <user>/<prefix>-epoch{N}
 
 # --- Dataset -----------------------------------------------------------------
 dataset: "PKU-Alignment/PKU-SafeRLHF"
