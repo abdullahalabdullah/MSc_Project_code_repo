@@ -40,7 +40,9 @@ def compute_te_har(
       per_instance           list of per-instance dicts (see below)
       HAR_instance           float | None  — macro-average ack rate (mean ack_i across instances)
       HAR_run                float | None  — micro-average ack rate (all hint-following runs pooled)
-      mean_TE / std_TE       float — population mean and std of TE_i
+      mean_TE / std_TE       float — population mean and std (ddof=0) of TE_i
+      sem_TE                  float | None — standard error of mean_TE (sample std / sqrt(n); None if n<2)
+      ci95_TE_lower/_upper    float | None — 95% bootstrap CI for mean_TE (instance resampling; None if n<2)
       min_TE / p25_TE / p50_TE / p75_TE / max_TE  float — TE distribution summary
       n_instances_total      int
       monitor_missing_rate   float | None — fraction of hint-following runs with no monitor verdict
@@ -175,6 +177,9 @@ def compute_te_har(
             "HAR_causal": None,
             "mean_TE": None,
             "std_TE": None,
+            "sem_TE": None,
+            "ci95_TE_lower": None,
+            "ci95_TE_upper": None,
             "min_TE": None,
             "p25_TE": None,
             "p50_TE": None,
@@ -218,13 +223,33 @@ def compute_te_har(
     har_causal = float(np.mean(causal_ack_vals)) if causal_ack_vals else None
 
     # TE stats over all instances
-    mean_te = float(np.mean(all_te))
-    std_te  = float(np.std(all_te))
-    min_te  = float(np.min(all_te))
-    p25_te  = float(np.percentile(all_te, 25))
-    p50_te  = float(np.percentile(all_te, 50))
-    p75_te  = float(np.percentile(all_te, 75))
-    max_te  = float(np.max(all_te))
+    te_arr  = np.asarray(all_te, dtype=float)
+    n_te    = len(te_arr)
+    mean_te = float(np.mean(te_arr))
+    std_te  = float(np.std(te_arr))  # population std (ddof=0): spread of the per-instance TE distribution
+    min_te  = float(np.min(te_arr))
+    p25_te  = float(np.percentile(te_arr, 25))
+    p50_te  = float(np.percentile(te_arr, 50))
+    p75_te  = float(np.percentile(te_arr, 75))
+    max_te  = float(np.max(te_arr))
+
+    # Uncertainty on the MEAN TE (distinct from std_TE, which is the spread of TE_i).
+    # SEM uses the sample std (ddof=1); undefined for n < 2.
+    if n_te >= 2:
+        sem_te = float(np.std(te_arr, ddof=1) / np.sqrt(n_te))
+    else:
+        sem_te = None
+
+    # Nonparametric bootstrap CI for the mean TE, resampling instances with
+    # replacement. Captures uncertainty from the finite set of instances; it does
+    # NOT model the per-instance run-level sampling noise inside each te_i.
+    ci_te_lower = ci_te_upper = None
+    if n_te >= 2:
+        rng = np.random.default_rng(0)  # fixed seed -> reproducible CIs
+        n_boot = 10000
+        boot_means = te_arr[rng.integers(0, n_te, size=(n_boot, n_te))].mean(axis=1)
+        ci_te_lower = float(np.percentile(boot_means, 2.5))
+        ci_te_upper = float(np.percentile(boot_means, 97.5))
 
     # CoT token length stats
     all_cot_h  = [r["mean_cot_tokens_hinted"]           for r in per_instance if r["mean_cot_tokens_hinted"]           is not None]
@@ -280,6 +305,9 @@ def compute_te_har(
         "HAR_causal": har_causal,
         "mean_TE": mean_te,
         "std_TE": std_te,
+        "sem_TE": sem_te,
+        "ci95_TE_lower": ci_te_lower,
+        "ci95_TE_upper": ci_te_upper,
         "min_TE": min_te,
         "p25_TE": p25_te,
         "p50_TE": p50_te,

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""
+"""do that 
 Step 4: Compute TE, delta, S, per-instance ack, and HAR for one or all models.
 
 Reads hinted/unhinted JSONL and monitor JSONL, runs compute_te_har, and
@@ -79,14 +79,21 @@ def _write_summary_md(summary: dict, path: Path) -> None:
     w(
         "TE_i = Pr(answer = hint | hinted) − Pr(answer = hint | unhinted). "
         "Positive means the hint increased the probability of choosing the hinted answer. "
-        "Stats are computed over **all** instances before any threshold filtering.\n"
+        "Stats are computed over **all** instances before any threshold filtering. "
+        "Std/Variance describe the *spread* of TE_i across instances; "
+        "SEM and the 95% CI quantify uncertainty on the *mean* TE.\n"
     )
+    ci_lo = summary.get("pop_ci95_TE_lower")
+    ci_hi = summary.get("pop_ci95_TE_upper")
+    ci_str = f"[{_fmt(ci_lo)}, {_fmt(ci_hi)}]" if ci_lo is not None and ci_hi is not None else "N/A"
     w("| Statistic | Value |")
     w("|-----------|-------|")
-    w(f"| Mean      | {_fmt(summary['pop_mean_TE'])} |")
-    w(f"| Std       | {_fmt(summary['pop_std_TE'])} |")
-    w(f"| Variance  | {_fmt(summary['pop_var_TE'])} |")
-    w(f"| Min       | {_fmt(summary.get('pop_min_TE'))} |")
+    w(f"| Mean         | {_fmt(summary['pop_mean_TE'])} |")
+    w(f"| SEM          | {_fmt(summary.get('pop_sem_TE'))} |")
+    w(f"| 95% CI (mean) | {ci_str} |")
+    w(f"| Std          | {_fmt(summary['pop_std_TE'])} |")
+    w(f"| Variance     | {_fmt(summary['pop_var_TE'])} |")
+    w(f"| Min          | {_fmt(summary.get('pop_min_TE'))} |")
     w(f"| p25       | {_fmt(summary.get('pop_p25_TE'))} |")
     w(f"| Median    | {_fmt(summary.get('pop_p50_TE'))} |")
     w(f"| p75       | {_fmt(summary.get('pop_p75_TE'))} |")
@@ -441,6 +448,9 @@ def main():
             "pop_mean_TE": result["mean_TE"],
             "pop_var_TE":  pop_std ** 2 if pop_std is not None else None,
             "pop_std_TE":  pop_std,
+            "pop_sem_TE":  result["sem_TE"],
+            "pop_ci95_TE_lower": result["ci95_TE_lower"],
+            "pop_ci95_TE_upper": result["ci95_TE_upper"],
             "pop_min_TE":  result["min_TE"],
             "pop_p25_TE":  result["p25_TE"],
             "pop_p50_TE":  result["p50_TE"],
@@ -485,8 +495,11 @@ def main():
         _write_summary_md(summary, md_path)
 
         # Print results
+        sem_str = f"{result['sem_TE']:.4f}" if result['sem_TE'] is not None else "N/A"
+        ci_lo, ci_hi = result["ci95_TE_lower"], result["ci95_TE_upper"]
+        ci_str = f"[{ci_lo:.4f}, {ci_hi:.4f}]" if ci_lo is not None else "N/A"
         print(f"  Population TE  mean={result['mean_TE']:.4f}  "
-              f"var={summary['pop_var_TE']:.4f}  std={pop_std:.4f}")
+              f"std={pop_std:.4f}  sem={sem_str}  95%CI={ci_str}")
         cot = result["cot_tokens"]
         if cot.get("hinted_mean") is not None:
             print(f"  CoT tokens (hinted)    mean={cot['hinted_mean']:.1f}  "
