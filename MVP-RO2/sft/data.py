@@ -240,6 +240,18 @@ def verify_masking(
         assert "<|im_start|>user" not in kept_text, (
             f"example {i}: user prompt leaked into the supervised region."
         )
+        # CRITICAL (CoT preservation): Qwen3's enable_thinking=False template
+        # injects an empty <think>\n\n</think> into the assistant turn. It MUST be
+        # masked — supervising it teaches the model to emit an empty think block
+        # and collapses its chain-of-thought. If a future template revision changes
+        # the think-block format and the fold in tokenize_and_mask() stops matching,
+        # this assertion turns that silent regression into a hard failure.
+        assert "<think>" not in kept_text and "</think>" not in kept_text, (
+            f"example {i}: a <think> block leaked into the supervised region. "
+            "The empty think scaffold is being trained on -> CoT will be "
+            "suppressed. Check the fold in tokenize_and_mask() against the "
+            "current Qwen3 chat template."
+        )
     logger.info("Label-masking check PASSED for %d examples.", k)
     logger.info("=" * 78)
 

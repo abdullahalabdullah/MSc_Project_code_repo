@@ -54,8 +54,8 @@ target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj",
 
 # --- Training (spec §5 "Training Configuration") -----------------------------
 num_train_epochs: 3                # 3 epochs -> 3 per-epoch checkpoints
-per_device_train_batch_size: 16    # fits easily on an 80GB A100 with short seqs
-gradient_accumulation_steps: 2     # 16 * 2 = 32 effective batch size
+per_device_train_batch_size: 32    # 80GB A100 has plenty of headroom (4B+LoRA, short seqs)
+gradient_accumulation_steps: 1     # 32 * 1 = 32 effective batch size (unchanged dynamics)
 per_device_eval_batch_size: 2
 optim: "adamw_torch_fused"         # use "paged_adamw_8bit" (needs bitsandbytes) if OOM
 learning_rate: 2.0e-4
@@ -64,7 +64,7 @@ max_grad_norm: 1.0
 lr_scheduler_type: "cosine"
 warmup_ratio: 0.03
 bf16: true
-gradient_checkpointing: true
+gradient_checkpointing: true       # safe default: no OOM risk on long-outlier batches
 logging_steps: 10
 save_strategy: "epoch"             # checkpoint at the end of each epoch
 eval_strategy: "epoch"             # eval_loss at the end of each epoch
