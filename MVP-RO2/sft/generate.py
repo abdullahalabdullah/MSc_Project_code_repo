@@ -21,6 +21,28 @@ DEFAULT_PROMPTS = [
 ]
 
 
+def count_think_tokens(decoded: str, tokenizer):
+    """Return (has_think, n_think_tokens) for one decoded generation.
+
+    Prefers a closed <think>...</think>; if the block was truncated by
+    max_new_tokens (open <think> with no close), count what's there so a model
+    that thinks a lot is not falsely reported as having no/empty CoT. Shared by
+    the per-prompt sanity check and the eval-set think-token statistics.
+    """
+    m = _THINK_RE.search(decoded)
+    if m:
+        think_text = m.group(1).strip()
+    else:
+        m_open = re.search(r"<think>(.*)$", decoded, re.DOTALL)
+        think_text = m_open.group(1).strip() if m_open else ""
+    has_think = "<think>" in decoded
+    n_think_tokens = (
+        len(tokenizer(think_text, add_special_tokens=False)["input_ids"])
+        if think_text else 0
+    )
+    return has_think, n_think_tokens
+
+
 def generation_check(
     base_model_id: str,
     adapter_dir: str,
@@ -70,17 +92,7 @@ def generation_check(
         gen_ids = out[0][inputs["input_ids"].shape[1]:]
         decoded = tokenizer.decode(gen_ids, skip_special_tokens=False)
 
-        # Prefer a closed <think>...</think>; if the block was truncated by
-        # max_new_tokens (open <think> with no close), count what's there so we
-        # don't falsely report "suppressed" for a model that thinks a lot.
-        m = _THINK_RE.search(decoded)
-        if m:
-            think_text = m.group(1).strip()
-        else:
-            m_open = re.search(r"<think>(.*)$", decoded, re.DOTALL)
-            think_text = m_open.group(1).strip() if m_open else ""
-        has_think = "<think>" in decoded
-        n_think_tokens = len(tokenizer(think_text, add_special_tokens=False)["input_ids"]) if think_text else 0
+        has_think, n_think_tokens = count_think_tokens(decoded, tokenizer)
         ok = n_think_tokens >= min_think_tokens
         all_ok = all_ok and ok
 
