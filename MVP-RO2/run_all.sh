@@ -57,8 +57,10 @@ from dotenv import load_dotenv
 
 # load_dotenv() does NOT override an existing env var: an HF_TOKEN already in the
 # shell takes precedence over .env (matches sft/credentials.py). We test whatever
-# token is actually active.
-load_dotenv()
+# token is actually active. Pass an explicit path: bare load_dotenv() calls
+# find_dotenv(), which inspects the caller's stack frame and asserts when Python
+# runs from stdin (this `python - <<'PY'` heredoc).
+load_dotenv(os.path.join(os.getcwd(), ".env"))
 cfg = yaml.safe_load(open(os.environ["CONFIG"]))
 require_write = os.environ.get("REQUIRE_WRITE", "1") == "1"
 
