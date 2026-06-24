@@ -72,6 +72,12 @@ models:
     # Merged repo's tokenizer has no chat_template; borrow it from the base it was
     # trained on (Llama-3.2-3B-Instruct) so eval format == training format.
     chat_template_source: "meta-llama/Llama-3.2-3B-Instruct"
+  - name: "llama32_3b_sft_harmless_e2"
+    hf_id: "er-abd/llama-3.2-3b-sft-harmlessness-hh-merged-epoch2"
+    role: "sft_harmlessness"     # RO2 merged SFT checkpoint (hh-rlhf harmless, epoch 2) — earlier, less over-trained
+    # chat_template_source only kicks in if the merged repo lacks a chat_template
+    # (re-merge via 04_merge_and_push.py should include it; harmless to keep).
+    chat_template_source: "meta-llama/Llama-3.2-3B-Instruct"
   - name: "llama31_8b_instruct"
     hf_id: "meta-llama/Llama-3.1-8B-Instruct"
     role: "standalone"
