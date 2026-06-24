@@ -1,14 +1,19 @@
 #!/usr/bin/env bash
 #
-# run_qwen35.sh — full RO1 pipeline over MMLU for Qwen3.5-4B (thinking OFF).
+# run_qwen3_nothink.sh — full RO1 pipeline over MMLU for Qwen3-4B (thinking OFF).
 #
-# Mirrors run_qwen.sh, but targets the qwen35_4b checkpoint (Qwen/Qwen3.5-4B)
-# and reads sampling params from the `qwen35_inference:` config block, which sets
-# enable_thinking=false (no <think> trace; visible answer generated directly).
+# Same checkpoint as run_qwen.sh (Qwen/Qwen3-4B), but reads sampling params from
+# the `qwen3_nothink_inference:` config block, which sets enable_thinking=false
+# (no <think> trace; the visible answer is generated directly). Uses a separate
+# model identity `qwen3_4b_nothink` so its outputs/ land in their own dir and do
+# not collide with a thinking-ON `qwen3_4b` run.
+#
+# ENV: runs in the SAME venv as run_qwen.sh — the Qwen3 env from
+# requirements-qwen.txt (vLLM 0.8.5 / transformers 4.51.3). No new dependencies.
 #
 # Order:
 #   1. Prepare every dataset index (model-independent, idempotent).
-#   2. Inference: Qwen3.5-4B (thinking off).
+#   2. Inference: Qwen3-4B (thinking off).
 #   3. git add / commit / push.
 #
 # Fail-soft: if any single command errors, it is logged as FAIL and the script
@@ -16,7 +21,7 @@
 #
 # Usage:
 #   # HF auth is handled in-code via .hf_token / HF_TOKEN (see src/dataset.py)
-#   bash run_qwen35.sh
+#   bash run_qwen3_nothink.sh
 
 set -uo pipefail
 
@@ -30,13 +35,13 @@ DATASETS=(mmlu)
 
 
 # Config model name (the `name:` key in config/mvp_config.yaml) that maps to:
-#   qwen35_4b -> Qwen/Qwen3.5-4B
-QWEN_MODEL="qwen35_4b"
+#   qwen3_4b_nothink -> Qwen/Qwen3-4B  (run with thinking disabled)
+QWEN_MODEL="qwen3_4b_nothink"
 
 # Config block (sampling params) for this run — thinking is disabled here.
-QWEN_CONFIG_BLOCK="qwen35_inference"
+QWEN_CONFIG_BLOCK="qwen3_nothink_inference"
 
-LOGFILE="run_qwen35_$(date +%Y%m%d_%H%M%S).log"
+LOGFILE="run_qwen3_nothink_$(date +%Y%m%d_%H%M%S).log"
 
 # --- Fail-soft command runner ------------------------------------------------
 SUMMARY=()
@@ -59,9 +64,9 @@ run() {
 # Mirror all output to a timestamped log file as well as the console.
 exec > >(tee -a "$LOGFILE") 2>&1
 
-echo "RO1 Qwen3.5 run started: $(date)"
+echo "RO1 Qwen3-4B (thinking off) run started: $(date)"
 echo "Datasets: ${DATASETS[*]}"
-echo "Model:    $QWEN_MODEL (Qwen3.5, thinking off via $QWEN_CONFIG_BLOCK)"
+echo "Model:    $QWEN_MODEL (Qwen/Qwen3-4B, thinking off via $QWEN_CONFIG_BLOCK)"
 echo "Log file: $LOGFILE"
 
 # --- Phase 1: prepare dataset indexes (model-independent) --------------------
@@ -89,7 +94,7 @@ run python scripts/08_cot_token_analysis.py --model "$QWEN_MODEL" --datasets "${
 echo ""
 echo "########## PHASE 3: git add / commit / push ##########"
 run git add -A
-run git commit -m "qwen3.5 results"
+run git commit -m "qwen3-4b (thinking off) results"
 run git push
 
 # --- Summary -----------------------------------------------------------------

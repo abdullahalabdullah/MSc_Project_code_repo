@@ -47,8 +47,8 @@ def main():
                         help="Dataset key (default: mmlu). Namespaces I/O paths.")
     parser.add_argument("--config-block", default="qwen_inference",
                         help="Config block to read sampling params from "
-                             "(default: qwen_inference; use qwen35_inference for the "
-                             "thinking-off Qwen3.5 run).")
+                             "(default: qwen_inference; use qwen3_nothink_inference "
+                             "for the thinking-off Qwen3-4B run).")
     parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
 
@@ -63,7 +63,7 @@ def main():
         sys.exit(1)
 
     # run_inference_qwen() reads config["qwen_inference"]; point it at the chosen
-    # block so an alternate block (e.g. qwen35_inference, thinking off) is used.
+    # block so an alternate block (e.g. qwen3_nothink_inference, thinking off) is used.
     config["qwen_inference"] = config[args.config_block]
 
     ensure_hf_auth()  # log in for gated model downloads (env var or .hf_token)
