@@ -1,0 +1,39 @@
+# =============================================================================
+# RO2 MVP — SFT (harmlessness) training environment.
+# =============================================================================
+# This stack is intentionally the MODERN, verified one (NOT the old Unsloth/
+# TRL-0.8.x DPO stack in MVP-RO2-old). The code in sft/ is written against and
+# verified on these exact major versions. The spec gives lower bounds only;
+# these pins are what the API calls (SFTConfig.max_length, processing_class,
+# DataCollatorForSeq2Seq label masking, etc.) were validated against.
+#
+# torch is installed SEPARATELY, matching the pod's CUDA. On RunPod the base
+# image almost always ships a CUDA torch already — check first:
+#   python -c "import torch; print(torch.__version__, torch.cuda.is_available())"
+# If torch is missing, install one matching the pod CUDA, e.g.:
+#   pip install torch --index-url https://download.pytorch.org/whl/cu121
+# then: pip install -r requirements.txt
+#
+# After a clean install, freeze for reproducibility:
+#   pip freeze > requirements.lock.txt
+# =============================================================================
+
+transformers==4.56.2
+trl==0.22.2
+peft==0.18.1
+datasets==4.1.1
+accelerate>=0.34.0
+
+# Optional optimisers / kernels
+bitsandbytes>=0.43.0     # only needed if optim="paged_adamw_8bit" (OOM fallback)
+# flash-attn>=2.5.0       # optional: set attn_implementation="flash_attention_2"
+#                         # (install only if the pod has a matching CUDA/torch;
+#                         #  the default attn_implementation="sdpa" needs nothing)
+
+# Credentials / Hub
+python-dotenv
+huggingface_hub>=0.23.0
+
+# Config / numerics
+pyyaml
+numpy

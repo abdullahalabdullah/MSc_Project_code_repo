@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# Environments / credentials
+.env
+.venv/
+venv/
+
+# Frozen lockfile is fine to commit; the resolved one is optional
+# requirements.lock.txt
+
+# HuggingFace caches (large)
+hf_cache/
+.cache/
+
+# Training outputs (checkpoints, adapters) — pushed to the Hub, not git
+outputs/
+checkpoints/
+*.safetensors
+*.bin
+
+# Logs
+*.log
+slurm-*.out
+slurm-*.err
+
+# OS
+.DS_Store
+Thumbs.db

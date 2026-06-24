@@ -1,0 +1,75 @@
+# =============================================================================
+# RO2 MVP — Harmlessness SFT training config (Llama-3.2-3B-Instruct, LoRA).
+# =============================================================================
+# The whole full run is described by this single file. The sanity-check config
+# (configs/sft_harmlessness_sanity.yaml) only overrides a handful of keys and is
+# deep-merged on top of this one by scripts/sanity_check_sft.py.
+#
+# Before running:
+#   - set hf_username (and repo_prefix if you want a different name),
+#   - accept the Llama-3.2 license on HF for the token's account (gated MODEL),
+#   - confirm max_length with scripts/00_check_seq_length.py.
+# =============================================================================
+
+# --- Model -------------------------------------------------------------------
+base_model: "meta-llama/Llama-3.2-3B-Instruct"
+# attn_implementation: "sdpa" works everywhere (no extra install). Set to
+# "flash_attention_2" only if flash-attn is installed for the pod's CUDA/torch.
+attn_implementation: "sdpa"
+
+# --- Output / Hub ------------------------------------------------------------
+# Local scratch dir for TRL checkpoints (one per epoch). On RunPod, keep this
+# under /workspace so it survives pod restarts. The deliverables are the adapter
+# repos on the Hub, pushed by scripts/02_push_adapters.py.
+output_dir: "./outputs/llama-3.2-3b-sft-harmlessness"
+hf_username: "er-abd"
+repo_prefix: "llama-3.2-3b-sft-harmlessness-hh-adapter"   # -> <user>/<prefix>-epoch{1..4}
+sanity_repo: "llama-3.2-3b-sft-harmlessness-hh-adapter-sanitytest"  # throwaway repo for the gate
+# Standalone MERGED models for the MVP-RO1 vLLM eval pipeline (scripts/04_merge_and_push.py).
+merged_repo_prefix: "llama-3.2-3b-sft-harmlessness-hh-merged"   # -> <user>/<prefix>-epoch{N}
+
+# --- Dataset -----------------------------------------------------------------
+dataset: "Anthropic/hh-rlhf"
+dataset_subset: "harmless-base"    # data_dir within hh-rlhf
+dataset_split: "train"
+# Single-turn filter: exactly one "\n\nHuman:" turn in the `chosen` transcript
+# (matches hh_rlhf_stats.py). The training target is the chosen assistant reply.
+expected_single_turn_size: 12254   # measured on harmless-base train; logged + compared, NOT a hard-fail
+val_fraction: 0.10                 # 90% train / 10% eval split
+split_seed: 42
+
+# --- Formatting --------------------------------------------------------------
+# Set with scripts/00_check_seq_length.py. Single-turn harmless-base dialogues
+# are short, so 1024 keeps essentially all examples whole. Dynamic padding pads
+# to the longest sequence per batch, so this mainly controls truncation of rare
+# outliers, not per-step compute.
+max_length: 1024
+
+# --- LoRA --------------------------------------------------------------------
+lora_r: 16
+lora_alpha: 32
+lora_dropout: 0.05
+target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+
+# --- Training ----------------------------------------------------------------
+num_train_epochs: 4                # 4 epochs -> 4 per-epoch checkpoints (equal intervals)
+per_device_train_batch_size: 32    # 80GB A100 has plenty of headroom (3B+LoRA, short seqs); lower to 16 if OOM
+gradient_accumulation_steps: 1     # 32 * 1 = 32 effective batch size
+per_device_eval_batch_size: 2
+optim: "adamw_torch_fused"         # use "paged_adamw_8bit" (needs bitsandbytes) if OOM
+learning_rate: 2.0e-4
+weight_decay: 0.01
+max_grad_norm: 1.0
+lr_scheduler_type: "cosine"
+warmup_ratio: 0.03
+bf16: true
+gradient_checkpointing: true       # safe default: no OOM risk on long-outlier batches
+logging_steps: 10
+save_strategy: "epoch"             # checkpoint at the end of each epoch -> 4 checkpoints
+eval_strategy: "epoch"             # eval_loss at the end of each epoch
+save_total_limit: null             # keep ALL epoch checkpoints
+seed: 42
+
+# --- Sanity / debugging knobs (full run leaves these as-is) ------------------
+max_train_samples: null            # null = use the full filtered+split train set
+max_steps: -1                      # -1 = train by epochs (sanity config sets a cap)

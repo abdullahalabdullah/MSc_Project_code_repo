@@ -1,0 +1,24 @@
+# =============================================================================
+# RO2 MVP — SFT sanity-check overrides (tiny dry run / environment gate).
+# =============================================================================
+# These keys OVERRIDE configs/sft_harmlessness.yaml. Everything not listed here
+# (base_model, LoRA settings, learning_rate, etc.) is inherited unchanged.
+# scripts/sanity_check_sft.py loads the full config first, then deep-merges this.
+#
+# Purpose: prove the environment + data formatting + label masking + Hub push
+# work end-to-end on ~64 examples in a couple of minutes, BEFORE committing the
+# GPU to the multi-hour real run. The sanity run pushes to the THROWAWAY repo.
+# =============================================================================
+
+output_dir: "./outputs/llama-3.2-3b-sft-harmlessness-sanity"
+max_train_samples: 64       # tiny slice from the filtered pool (before the split)
+val_fraction: 0.10          # -> ~58 train / ~6 eval
+num_train_epochs: 1
+max_steps: 20               # stop after 20 optimizer steps regardless of epochs
+per_device_train_batch_size: 2
+gradient_accumulation_steps: 2   # effective batch 4 -> several steps within the slice
+save_strategy: "steps"
+save_steps: 10              # produce >=1 checkpoint within 20 steps
+eval_strategy: "steps"
+eval_steps: 10
+logging_steps: 2
