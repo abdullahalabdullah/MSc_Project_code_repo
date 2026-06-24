@@ -67,15 +67,30 @@ def build_user_content(item: dict, include_hint: bool) -> str:
 
 def format_prompt(item: dict, include_hint: bool, tokenizer) -> str:
     """Apply the model's chat template and return the formatted prompt string."""
+    user_content = build_user_content(item, include_hint)
     messages = [
         {"role": "system", "content": _SYSTEM_PROMPT},
-        {"role": "user", "content": build_user_content(item, include_hint)},
+        {"role": "user", "content": user_content},
     ]
-    return tokenizer.apply_chat_template(
-        messages,
-        tokenize=False,
-        add_generation_prompt=True,
-    )
+    try:
+        return tokenizer.apply_chat_template(
+            messages,
+            tokenize=False,
+            add_generation_prompt=True,
+        )
+    except Exception:
+        # Some chat templates (e.g. Mistral-7B-Instruct-v0.1) reject a `system`
+        # role outright. Fold the system prompt into the user turn so the same
+        # instruction is delivered without changing the template for models that
+        # do support a system role.
+        merged = [
+            {"role": "user", "content": f"{_SYSTEM_PROMPT}\n\n{user_content}"},
+        ]
+        return tokenizer.apply_chat_template(
+            merged,
+            tokenize=False,
+            add_generation_prompt=True,
+        )
 
 
 # ---------------------------------------------------------------------------

@@ -1,0 +1,65 @@
+[
+  {
+    "model_name": "llama32_3b_instruct",
+    "hf_id": "meta-llama/Llama-3.2-3B-Instruct",
+    "role": "standalone",
+    "n_instances_total": 68,
+    "n_total": 68,
+    "n_level1_pass": 8,
+    "skip_rate": 0.8823529411764706,
+    "n_te_negative": 12,
+    "n_te_zero": 48,
+    "n_te_positive": 8,
+    "mean_TE_before": -0.008578431372549019,
+    "std_TE_before": 0.2565083011413123,
+    "mean_TE_after": 0.5104166666666667,
+    "std_TE_after": 0.2373080364561358,
+    "mean_R_effect_before": 0.1127450980392157,
+    "std_R_effect_before": 0.8415968600786671,
+    "mean_R_effect_after": 0.8958333333333334,
+    "std_R_effect_after": 0.1851707170274081,
+    "gmean2": 0.125,
+    "n_gmean2_undefined": 0,
+    "n_tnr_x1_vacuous": 2,
+    "mean_tpr_mc": 0.125,
+    "mean_tnr_x0": 1.0,
+    "mean_tnr_x1": 1.0,
+    "mean_acc_u": 0.6801470588235294,
+    "std_acc_u": 0.36397471444152185,
+    "cot_tokens": {
+      "hinted_mean": 460.86151960784315,
+      "hinted_std": 280.3139826016031,
+      "hinted_min": 128.75,
+      "hinted_max": 1411.0,
+      "unhinted_mean": 483.60661764705884,
+      "unhinted_std": 359.8389995051494,
+      "unhinted_min": 138.0,
+      "unhinted_max": 1818.0,
+      "hint_followed_mean": 649.0686274509803,
+      "hint_followed_std": 310.60083592482664,
+      "hint_followed_min": 146.0,
+      "hint_followed_max": 1411.0,
+      "hint_not_followed_mean": 424.49609375,
+      "hint_not_followed_std": 251.24680433882213,
+      "hint_not_followed_min": 128.75,
+      "hint_not_followed_max": 1041.25
+    },
+    "monitor_coverage": {
+      "x1_y1": {
+        "total": 28,
+        "missing": 0,
+        "missing_rate": 0.0
+      },
+      "x1_y0": {
+        "total": 209,
+        "missing": 0,
+        "missing_rate": 0.0
+      },
+      "x0": {
+        "total": 232,
+        "missing": 0,
+        "missing_rate": 0.0
+      }
+    }
+  }
+]

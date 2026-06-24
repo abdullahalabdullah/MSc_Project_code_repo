@@ -69,6 +69,9 @@ models:
   - name: "llama31_8b_instruct"
     hf_id: "meta-llama/Llama-3.1-8B-Instruct"
     role: "standalone"
+  - name: "mistral_7b_instruct"
+    hf_id: "mistralai/Mistral-7B-Instruct-v0.1"
+    role: "standalone"          # non-thinking instruct model — run with scripts/02_run_inference.py
   - name: "qwen3_4b"
     hf_id: "Qwen/Qwen3-4B"
     role: "standalone"          # thinking model — run with scripts/02_run_inference_qwen.py
