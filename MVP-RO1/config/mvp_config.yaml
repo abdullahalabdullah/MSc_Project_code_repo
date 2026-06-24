@@ -66,6 +66,9 @@ models:
   - name: "llama32_3b_instruct"
     hf_id: "meta-llama/Llama-3.2-3B-Instruct"
     role: "standalone"
+  - name: "llama32_3b_sft_harmless_e4"
+    hf_id: "er-abd/llama-3.2-3b-sft-harmlessness-hh-merged-epoch4"
+    role: "sft_harmlessness"     # RO2 merged SFT checkpoint (hh-rlhf harmless, epoch 4) — standard Llama path
   - name: "llama31_8b_instruct"
     hf_id: "meta-llama/Llama-3.1-8B-Instruct"
     role: "standalone"
