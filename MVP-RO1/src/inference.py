@@ -220,6 +220,24 @@ def run_inference(config: dict, model_cfg: dict, dataset: list, base_seed: int =
     print(f"Loading tokenizer: {hf_id}")
     tokenizer = AutoTokenizer.from_pretrained(hf_id)
 
+    # Some merged/fine-tuned checkpoints are pushed without a chat_template in
+    # tokenizer_config.json (e.g. the RO2 SFT merges, whose tokenizer lost the
+    # template at merge time). apply_chat_template then raises. If the model
+    # declares `chat_template_source` in config, borrow that tokenizer's template
+    # — set it to the SAME base the model was trained on so the eval-time chat
+    # format matches training exactly.
+    if tokenizer.chat_template is None:
+        src = model_cfg.get("chat_template_source")
+        if not src:
+            raise ValueError(
+                f"Tokenizer for {hf_id} has no chat_template and no "
+                f"`chat_template_source` is set in config for model "
+                f"'{model_name}'. Add the base model it was trained on, e.g.\n"
+                f'  chat_template_source: "meta-llama/Llama-3.2-3B-Instruct"'
+            )
+        print(f"  No chat_template on {hf_id}; borrowing it from {src}.")
+        tokenizer.chat_template = AutoTokenizer.from_pretrained(src).chat_template
+
     print(f"Loading model via vLLM: {hf_id}")
     llm = LLM(
         model=hf_id,
