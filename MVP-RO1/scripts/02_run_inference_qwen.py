@@ -45,6 +45,10 @@ def main():
     parser.add_argument("--config", default="config/mvp_config.yaml")
     parser.add_argument("--dataset", default="mmlu",
                         help="Dataset key (default: mmlu). Namespaces I/O paths.")
+    parser.add_argument("--config-block", default="qwen_inference",
+                        help="Config block to read sampling params from "
+                             "(default: qwen_inference; use qwen35_inference for the "
+                             "thinking-off Qwen3.5 run).")
     parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
 
@@ -54,9 +58,13 @@ def main():
     with open(config_path) as f:
         config = yaml.safe_load(f)
 
-    if "qwen_inference" not in config:
-        print("ERROR: config is missing the 'qwen_inference:' block required by this script.")
+    if args.config_block not in config:
+        print(f"ERROR: config is missing the '{args.config_block}:' block required by this script.")
         sys.exit(1)
+
+    # run_inference_qwen() reads config["qwen_inference"]; point it at the chosen
+    # block so an alternate block (e.g. qwen35_inference, thinking off) is used.
+    config["qwen_inference"] = config[args.config_block]
 
     ensure_hf_auth()  # log in for gated model downloads (env var or .hf_token)
 

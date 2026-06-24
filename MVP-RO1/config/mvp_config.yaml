@@ -75,6 +75,9 @@ models:
   - name: "qwen3_4b"
     hf_id: "Qwen/Qwen3-4B"
     role: "standalone"          # thinking model — run with scripts/02_run_inference_qwen.py
+  - name: "qwen35_4b"
+    hf_id: "Qwen/Qwen3.5-4B"
+    role: "standalone"          # run with scripts/02_run_inference_qwen.py --config-block qwen35_inference (thinking OFF)
   - name: "deepseek_r1_distill_qwen_1_5b"
     hf_id: "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
     role: "standalone"          # reasoning model — run with scripts/02_run_inference_deepseek.py
@@ -101,6 +104,19 @@ inference:
 # inline and 2048 truncates it heavily.
 qwen_inference:
   enable_thinking: true
+  n_samples: 4
+  temperature: 0.6
+  top_p: 0.95
+  max_new_tokens: 16384
+  checkpoint_every: 100
+
+# Sampling for Qwen3.5-4B run with thinking DISABLED. Selected via
+# scripts/02_run_inference_qwen.py --config-block qwen35_inference (run_qwen35.sh).
+# Same shape as qwen_inference: but enable_thinking is false, so the model emits
+# the visible answer directly (no <think> block). Sampling values mirror the
+# qwen_inference block so the run is otherwise identical to the Qwen3-4B run.
+qwen35_inference:
+  enable_thinking: false
   n_samples: 4
   temperature: 0.6
   top_p: 0.95
