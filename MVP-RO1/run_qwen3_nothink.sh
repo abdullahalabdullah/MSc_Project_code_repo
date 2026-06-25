@@ -31,7 +31,7 @@ cd "$(dirname "$0")"
 # --- Configuration ----------------------------------------------------------
 # Datasets to process. Edit this list to add/remove tasks (e.g. drop "mmlu" if
 # its results already exist — re-runs resume from checkpoints and are cheap).
-DATASETS=(gpqa gsm_mc math_mc agieval wmdp)
+DATASETS=(gpqa agieval wmdp)
 
 
 
