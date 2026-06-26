@@ -90,6 +90,9 @@ models:
   - name: "qwen3_4b_nothink"
     hf_id: "Qwen/Qwen3-4B"
     role: "standalone"          # same checkpoint as qwen3_4b, run thinking OFF via --config-block qwen3_nothink_inference
+  - name: "qwen3_1_7b"
+    hf_id: "Qwen/Qwen3-1.7B"
+    role: "standalone"          # thinking model — run with scripts/02_run_inference_qwen.py (qwen_inference block, thinking ON)
   - name: "deepseek_r1_distill_qwen_1_5b"
     hf_id: "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
     role: "standalone"          # reasoning model — run with scripts/02_run_inference_deepseek.py
