@@ -15,9 +15,9 @@
 # requirements-qwen.txt (vLLM 0.8.5 / transformers 4.51.3). No new dependencies.
 #
 # Order:
-#   1. Inference: Qwen3-1.7B (thinking on) over each dataset.
-#   2. Cross-dataset CoT token-length analysis.
-#   3. git add / commit / push.
+#   1. Inference: Qwen3-1.7B (thinking on) over each dataset, committing + pushing
+#      results immediately after each dataset finishes (not batched at the end).
+#   2. Cross-dataset CoT token-length analysis (committed + pushed too).
 #
 # Fail-soft: if any single command errors, it is logged as FAIL and the script
 # moves on to the next one (no `set -e`). A summary is printed at the end.
@@ -70,12 +70,36 @@ echo "Datasets: ${DATASETS[*]}"
 echo "Model:    $QWEN_MODEL (Qwen/Qwen3-1.7B, thinking on via $QWEN_CONFIG_BLOCK)"
 echo "Log file: $LOGFILE"
 
-# --- Phase 1: inference ------------------------------------------------------
+# --- Phase 0: git identity ---------------------------------------------------
+# Ensure a committer identity exists so the per-dataset commits below never fail
+# on a fresh box (e.g. RunPod) where git has no global user configured.
+echo ""
+echo "########## PHASE 0: git identity ##########"
+run git config --global user.email "abd@gmail.com"
+run git config --global user.name "Abd"
+
+# --- commit_push: stage, commit, and push the current results ----------------
+# Commits are fail-soft and tolerate "nothing to commit": only push when the
+# commit actually created something, so a no-op dataset doesn't abort the run.
+commit_push() {
+    local msg="$1"
+    run git add -A
+    if git diff --cached --quiet; then
+        echo "  (nothing to commit for: $msg)"
+        SUMMARY+=("OK    | git commit (no changes) | $msg")
+        return
+    fi
+    run git commit -m "$msg"
+    run git push
+}
+
+# --- Phase 1: inference (commit + push after each dataset) -------------------
 # Data is already prepared (n_examples=70 per dataset), so we skip 01_prepare_dataset.py.
 echo ""
 echo "########## PHASE 1: inference — $QWEN_MODEL ##########"
 for ds in "${DATASETS[@]}"; do
     run python scripts/02_run_inference_qwen.py --dataset "$ds" --model "$QWEN_MODEL" --config-block "$QWEN_CONFIG_BLOCK"
+    commit_push "qwen3-1.7b (thinking on) results — $ds"
 done
 
 # --- Phase 1.5: cross-dataset CoT token-length analysis ----------------------
@@ -84,13 +108,7 @@ done
 echo ""
 echo "########## PHASE 1.5: CoT token-length analysis — $QWEN_MODEL ##########"
 run python scripts/08_cot_token_analysis.py --model "$QWEN_MODEL" --datasets "${DATASETS[@]}"
-
-# --- Phase 2: commit & push --------------------------------------------------
-echo ""
-echo "########## PHASE 2: git add / commit / push ##########"
-run git add -A
-run git commit -m "qwen3-1.7b (thinking on) results"
-run git push
+commit_push "qwen3-1.7b (thinking on) — CoT token-length analysis"
 
 # --- Summary -----------------------------------------------------------------
 echo ""
