@@ -1,7 +1,7 @@
 # CoT token-length analysis: qwen3_4b_nothink
 
 **HuggingFace ID:** `Qwen/Qwen3-4B`  
-**Datasets included:** gpqa, agieval, wmdp
+**Datasets included:** mmlu, gpqa, agieval, wmdp
 
 ---
 
@@ -11,16 +11,25 @@ Mean output tokens in the chain-of-thought, averaged per instance then across in
 
 | Condition | Mean | Std | Min | Max |
 |-----------|------|-----|-----|-----|
-| Hinted (X=1, all) | 424.0 | 266.3 | 94 | 1713 |
-| Unhinted (X=0, all) | 399.7 | 239.7 | 85 | 1270 |
-| Hinted — hint followed (X=1, Y=1) | 473.1 | 274.9 | 131 | 1414 |
-| Hinted — hint not followed (X=1, Y=0) | 424.6 | 283.4 | 94 | 1713 |
+| Hinted (X=1, all) | 554.0 | 454.5 | 94 | 3528 |
+| Unhinted (X=0, all) | 492.2 | 355.1 | 85 | 3124 |
+| Hinted — hint followed (X=1, Y=1) | 563.3 | 493.8 | 131 | 4206 |
+| Hinted — hint not followed (X=1, Y=0) | 577.7 | 480.7 | 94 | 3528 |
 
 ---
 
 ## 2. CoT token length per dataset
 
 Same four conditions, computed separately for each dataset.
+
+### mmlu
+
+| Condition | Mean | Std | Min | Max |
+|-----------|------|-----|-----|-----|
+| Hinted (X=1, all) | 944.2 | 640.9 | 338 | 3528 |
+| Unhinted (X=0, all) | 769.6 | 478.8 | 320 | 3124 |
+| Hinted — hint followed (X=1, Y=1) | 1273.8 | 1000.0 | 399 | 4206 |
+| Hinted — hint not followed (X=1, Y=0) | 952.1 | 634.1 | 338 | 3528 |
 
 ### gpqa
 
@@ -57,7 +66,8 @@ Number of individual responses (every sample, both arms) whose `token_count` fal
 
 | Dataset | 0-512 | 512-1024 | 1024-2048 | 2048-4096 | 4096-8192 | 8192-16384 | 16384-32768 | 32768+ | Total | Truncated (rate) | Max |
 |---|---|---|---|---|---|---|---|---|---|---|---|
+| mmlu | 176 | 256 | 95 | 32 | 1 | 0 | 0 | 0 | 560 | 0 (0.0%) | 4206 |
 | gpqa | 363 | 160 | 29 | 0 | 0 | 0 | 0 | 8 | 560 | 8 (1.4%) | 2048 |
 | agieval | 370 | 158 | 31 | 0 | 0 | 0 | 0 | 1 | 560 | 1 (0.2%) | 2048 |
 | wmdp | 531 | 17 | 6 | 0 | 0 | 0 | 0 | 6 | 560 | 6 (1.1%) | 2048 |
-| **ALL** | **1264** | **335** | **66** | **0** | **0** | **0** | **0** | **15** | **1680** | **15 (0.9%)** | **2048** |
+| **ALL** | **1440** | **591** | **161** | **32** | **1** | **0** | **0** | **15** | **2240** | **15 (0.7%)** | **4206** |
