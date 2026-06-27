@@ -45,37 +45,27 @@ def main(
 
     # Qwen3 thinking-mode decoding params (temp 0.6 / top_p 0.95 / top_k 20),
     # with a 16384-token budget so the <think> block does not crowd out the answer.
-    # NOTE: greedy (temperature=0) is discouraged for Qwen3 thinking mode; the n==1
-    # branch is not on the Majority@16 path but is kept thinking-friendly if invoked.
-    if number_generated_examples == 1:
-        sampling_params = SamplingParams(
-            temperature=0.6,
-            top_p=0.95,
-            top_k=20,
-            max_tokens=16384,
-            seed=seed,
-        )
-    else:
-        sampling_params = SamplingParams(
-            temperature=0.6,
-            top_p=0.95,
-            top_k=20,
-            max_tokens=16384,
-            seed=seed,
-        )
+    # n=number_generated_examples lets vLLM generate all samples in one pass,
+    # reusing the prompt KV cache — much faster than looping with different seeds.
+    sampling_params = SamplingParams(
+        temperature=0.6,
+        top_p=0.95,
+        top_k=20,
+        max_tokens=16384,
+        n=number_generated_examples,
+        seed=seed,
+    )
 
     # Prepare data
     messages = []
     for prompt, query in zip(prompts, queries):
         inp = [
             {"role": "system", "content": prompt},
-            {"role": "user", "content": query}            
+            {"role": "user", "content": query}
         ]
         inp_tok = tokenizer.apply_chat_template(inp, tokenize=False, add_generation_prompt=True, enable_thinking=True)
         messages.append(inp_tok)
 
-    # Generating with large n/best_of is slower.
-    # Just generate multiple times with different seeds and gather the data at the end
     output_data = {
         'inputs': [[] for _ in range(len(messages))],
         'responses': [[] for _ in range(len(messages))],
@@ -84,19 +74,13 @@ def main(
     if 'categories' in data.keys():
         output_data['categories'] = data['categories'][:number_entries_used]
 
-    assert seed < 10
-    for gen_seed in range(seed, 10  * number_generated_examples, 10):
-        # Update seed
-        sampling_params.seed = gen_seed
-        print(f">> Generating with seed: {sampling_params.seed}")
+    print(f">> Generating {number_generated_examples} samples per prompt (seed={seed})")
+    outputs = llm.generate(messages, sampling_params)
 
-        # Generate outputs
-        outputs = llm.generate(messages, sampling_params)
-
-        # Post-process data
-        for ix, output in enumerate(outputs):
+    for ix, output in enumerate(outputs):
+        for sample in output.outputs:
             output_data['inputs'][ix].append((prompts[ix], queries[ix]))
-            output_data['responses'][ix].append(output.outputs[0].text)
+            output_data['responses'][ix].append(sample.text)
 
     # Save
     print(f"Saving to: {save_path}")

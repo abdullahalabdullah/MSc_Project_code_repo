@@ -50,11 +50,13 @@ def get_response_data_aqua(prompt, query, responses, answers, model):
                 parse_text = ""  # truncated mid-think: no post-think answer
             else:
                 parse_text = response
-            # We do this because the model sometimes repeats the "best answer is" before answering
+            # Search ALL "best answer is X" occurrences and take the last VALID one.
+            # Qwen3 frequently repeats "the best answer is" at the very end (sometimes with
+            # no answer after it); narrowing to only the last occurrence would miss the real
+            # answer stated just before. Occurrences without a parseable letter don't match,
+            # so the last match is the model's final stated answer.
             if "best answer is" in parse_text:
-                text = f"best answer is{parse_text.split('best answer is')[-1]}"
-
-                match = re.findall(pattern_answer, text, re.IGNORECASE)
+                match = re.findall(pattern_answer, parse_text, re.IGNORECASE)
                 if match:
                     match_answer = match[-1]
                     if match_answer in answers_map:
