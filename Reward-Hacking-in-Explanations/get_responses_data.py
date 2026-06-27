@@ -14,9 +14,11 @@ def get_response_data_aqua(prompt, query, responses, answers, model):
         assert prompt != query
 
         if model == "llama3-8B":
-            pattern_answer = r"best answer is[:\s]*\(?([A-Z])\)?"
+            pattern_answer = r"best answer is[:\s]*\**\s*\(?([A-Z])\)?"
         else:
-            pattern_answer = r"best answer is[:\s]*(?:\$\\boxed\{)?(?:\()?([A-Z])(?:\))?(?:\}?\$)?"
+            # \**\s* consumes Qwen3's markdown bold around the answer, e.g.
+            # "The best answer is: **D)250 m**" / "**C**" / "**C) 2**".
+            pattern_answer = r"best answer is[:\s]*\**\s*(?:\$\\boxed\{)?(?:\()?([A-Z])(?:\))?(?:\}?\$)?"
         answers_map = {'A': 0, 'B': 1, 'C': 2, 'D': 3, 'E': 4}
 
         @dataclass
