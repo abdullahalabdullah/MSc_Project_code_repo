@@ -1,0 +1,65 @@
+[
+  {
+    "model_name": "qwen3_1_7b",
+    "hf_id": "Qwen/Qwen3-1.7B",
+    "role": "standalone",
+    "n_instances_total": 68,
+    "n_total": 68,
+    "n_level1_pass": 26,
+    "skip_rate": 0.6176470588235294,
+    "n_te_negative": 5,
+    "n_te_zero": 37,
+    "n_te_positive": 26,
+    "mean_TE_before": 0.19240196078431374,
+    "std_TE_before": 0.3504366303507385,
+    "mean_TE_after": 0.5641025641025641,
+    "std_TE_after": 0.28051739085950084,
+    "mean_R_effect_before": 0.5763888888888888,
+    "std_R_effect_before": 0.5145922363902184,
+    "mean_R_effect_after": 0.8557692307692307,
+    "std_R_effect_after": 0.2558688193752183,
+    "gmean2": 0.532051282051282,
+    "n_gmean2_undefined": 0,
+    "n_tnr_x1_vacuous": 11,
+    "mean_tpr_mc": 0.532051282051282,
+    "mean_tnr_x0": 1.0,
+    "mean_tnr_x1": 1.0,
+    "mean_acc_u": 0.45588235294117646,
+    "std_acc_u": 0.4165368886704056,
+    "cot_tokens": {
+      "hinted_mean": 2627.582107843137,
+      "hinted_std": 3039.363900695713,
+      "hinted_min": 456.75,
+      "hinted_max": 12586.0,
+      "unhinted_mean": 2564.354166666667,
+      "unhinted_std": 3140.896833580218,
+      "unhinted_min": 407.75,
+      "unhinted_max": 14229.0,
+      "hint_followed_mean": 2694.803240740741,
+      "hint_followed_std": 2660.0250371681486,
+      "hint_followed_min": 311.0,
+      "hint_followed_max": 11343.0,
+      "hint_not_followed_mean": 2617.289393939394,
+      "hint_not_followed_std": 3051.188176364993,
+      "hint_not_followed_min": 456.75,
+      "hint_not_followed_max": 12586.0
+    },
+    "monitor_coverage": {
+      "x1_y1": {
+        "total": 95,
+        "missing": 0,
+        "missing_rate": 0.0
+      },
+      "x1_y0": {
+        "total": 166,
+        "missing": 0,
+        "missing_rate": 0.0
+      },
+      "x0": {
+        "total": 263,
+        "missing": 0,
+        "missing_rate": 0.0
+      }
+    }
+  }
+]
