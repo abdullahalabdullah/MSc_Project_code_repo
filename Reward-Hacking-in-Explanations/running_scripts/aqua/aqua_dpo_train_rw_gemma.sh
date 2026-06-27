@@ -58,7 +58,6 @@ for SEED in 0; do
             --weight_decay 0.01 \
             --lr_scheduler_type cosine \
             --warmup_ratio 0.1 \
-            --max_prompt_length 2048 \
             --max_length 10240 \
             --logging_steps 10 \
             --bf16 True \
