@@ -61,7 +61,7 @@ for SEED in 0; do
             --max_prompt_length 2048 \
             --max_length 10240 \
             --logging_steps 10 \
-            --bf16 \
+            --bf16 True \
             --tf32 True \
             --eval_strategy steps \
             --save_strategy steps \
@@ -73,7 +73,7 @@ for SEED in 0; do
             --push_to_hub \
             --hub_model_id ${HUB_MODEL_ID} \
             --hub_strategy every_save \
-            --hub_private_repo \
+            --hub_private_repo True \
             --use_peft \
             --lora_alpha 32 \
             --lora_r 16 \
