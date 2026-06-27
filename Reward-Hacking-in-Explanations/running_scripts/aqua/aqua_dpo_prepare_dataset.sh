@@ -19,7 +19,7 @@ RUN_PREPARE_DATA=true
 # Args
 SAVE_PATH="outputs/aqua/qwen3-1.7B/dpo/"
 DATA_PATH="data/aqua/"
-NUM_EXAMPLES=20
+NUM_EXAMPLES=2000
 # Number of responses sampled per prompt to build DPO chosen/rejected pairs.
 N_SAMPLES=8
 
