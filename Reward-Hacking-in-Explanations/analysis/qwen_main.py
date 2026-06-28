@@ -64,6 +64,27 @@ def print_results(metrics):
         print(f"  {label:<30} {orig:>8.1f} {cf:>8.1f} {diff:>+8.1f}")
 
 
+def save_markdown(metrics, model_path_name):
+    os.makedirs('results', exist_ok=True)
+    exp = metrics['original']
+    lines = [
+        f"# DPO + SK-Llama | Majority@16 | {model_path_name}",
+        "",
+        "| Metric | Orig | CF | Diff |",
+        "|---|---|---|---|",
+    ]
+    for k, label in [('acc', 'Accuracy %'), ('ack', 'Acknowledgment Rate %')]:
+        orig = np.mean(exp['orig'][k])
+        cf   = np.mean(exp['cf'][k])
+        diff = np.mean(exp['diff'][k])
+        sign = '+' if diff >= 0 else ''
+        lines.append(f"| {label} | {orig:.1f} | {cf:.1f} | {sign}{diff:.1f} |")
+    path = f"results/qwen_main_{model_path_name}.md"
+    with open(path, 'w') as f:
+        f.write('\n'.join(lines) + '\n')
+    print(f"  Saved → {path}")
+
+
 def plot(metrics, model_path_name):
     os.makedirs('figures', exist_ok=True)
     exp = metrics['original']
@@ -101,6 +122,9 @@ def main(model_path_name):
 
     print("\n> Results (DPO + SK-Llama original, Majority@16):")
     print_results(metrics)
+
+    print("\n> Saving markdown ...")
+    save_markdown(metrics, model_path_name)
 
     print("\n> Plotting ...")
     plot(metrics, model_path_name)

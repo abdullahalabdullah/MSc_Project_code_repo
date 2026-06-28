@@ -22,7 +22,10 @@ SEED=0
 date '+[%H:%M:%S-%d/%m/%y]'
 
 PROJECT_HOME=${PWD}
-source ${PROJECT_HOME}/my_env/bin/activate
+# Activate my_env if it exists (local dev); otherwise use the system Python (RunPod vLLM template)
+if [ -f "${PROJECT_HOME}/my_env/bin/activate" ]; then
+    source ${PROJECT_HOME}/my_env/bin/activate
+fi
 
 BASE_EVAL_PATH=${BASE_OUTPUT_PATH}/seed_${SEED}/eval
 
