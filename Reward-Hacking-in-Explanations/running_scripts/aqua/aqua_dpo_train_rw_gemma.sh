@@ -48,7 +48,7 @@ for SEED in 0; do
             --model_name_or_path ${MODEL} \
             --output_dir ${SAVE_PATH_SEED}/cot_negative_${RW} \
             --run_name dpo_negative_${RW} \
-            --num_train_epochs 1 \
+            --num_train_epochs 3 \
             --per_device_train_batch_size 1 \
             --gradient_accumulation_steps 16 \
             --per_device_eval_batch_size 1 \
