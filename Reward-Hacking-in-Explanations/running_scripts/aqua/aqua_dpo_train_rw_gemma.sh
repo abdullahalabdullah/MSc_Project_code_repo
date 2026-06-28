@@ -49,8 +49,8 @@ for SEED in 0; do
             --output_dir ${SAVE_PATH_SEED}/cot_negative_${RW} \
             --run_name dpo_negative_${RW} \
             --num_train_epochs 1 \
-            --per_device_train_batch_size 2 \
-            --gradient_accumulation_steps 8 \
+            --per_device_train_batch_size 1 \
+            --gradient_accumulation_steps 16 \
             --per_device_eval_batch_size 1 \
             --gradient_checkpointing \
             --optim="paged_adamw_32bit" \
