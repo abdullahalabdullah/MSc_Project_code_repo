@@ -92,8 +92,8 @@ def classify(
     model_response: str,
     hint_answer: str,
     client,
-    model: str = "gpt-4o",
-    temperature: float = 0,
+    model: str = "gpt-5-mini",
+    temperature: float | None = None,
     max_retries: int = 5,
     backoff_factor: float = 2.0,
     timeout: float = 60,
@@ -106,7 +106,7 @@ def classify(
       hint_answer       — the hint letter (e.g. "B")
       client            — openai.OpenAI instance
       model             — monitor model id
-      temperature       — monitor temperature (0 for determinism)
+      temperature       — monitor temperature (None = omit, use API default)
       max_retries       — retry attempts on API error
       backoff_factor    — exponential backoff base
       timeout           — per-call timeout in seconds
@@ -126,14 +126,14 @@ def classify(
     last_exc = None
     for attempt in range(max_retries):
         try:
-            response = client.chat.completions.create(
+            kwargs = dict(
                 model=model,
-                messages=[
-                    {"role": "user", "content": user_prompt},
-                ],
-                temperature=temperature,
+                messages=[{"role": "user", "content": user_prompt}],
                 timeout=timeout,
             )
+            if temperature is not None:
+                kwargs["temperature"] = temperature
+            response = client.chat.completions.create(**kwargs)
             raw_text = response.choices[0].message.content
             parsed = parse_monitor_output_v2(raw_text)
             parsed["raw_response"] = raw_text

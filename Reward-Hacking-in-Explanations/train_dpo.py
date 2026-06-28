@@ -6,7 +6,7 @@ from glob import glob
 
 import datasets
 import torch
-from huggingface_hub import login
+from huggingface_hub import login, HfApi
 from transformers import AutoTokenizer, AutoModelForCausalLM, TrainerCallback
 from trl import (
     DPOConfig,
@@ -24,6 +24,22 @@ env_setup.setup_env(use_temp=False)
 # Authenticate for pushing adapters to the Hub. Token is centralized in env_setup
 # (already exported to HF_TOKEN by setup_env above).
 login(token=os.environ["HF_TOKEN"])
+
+
+class PushStepCheckpointCallback(TrainerCallback):
+    """Push each saved checkpoint to its own HF repo: <hub_model_id>-step-<N>."""
+
+    def on_save(self, args, state, control, **kwargs):
+        step = state.global_step
+        ckpt_dir = os.path.join(args.output_dir, f"checkpoint-{step}")
+        if not os.path.isdir(ckpt_dir):
+            return
+        repo_id = f"{args.hub_model_id}-step-{step}"
+        print(f"[PushStepCheckpoint] Pushing step-{step} adapter to {repo_id} ...")
+        api = HfApi()
+        api.create_repo(repo_id, private=True, exist_ok=True, repo_type="model")
+        api.upload_folder(folder_path=ckpt_dir, repo_id=repo_id, repo_type="model")
+        print(f"[PushStepCheckpoint] Done: https://huggingface.co/{repo_id}")
 
 
 class BestCheckpointCallback(TrainerCallback):
@@ -166,7 +182,7 @@ def main(script_args, training_args, model_config):
         eval_dataset=dataset["valid"],
         processing_class=tokenizer,
         peft_config=peft_config,
-        callbacks=[BestCheckpointCallback]
+        callbacks=[BestCheckpointCallback, PushStepCheckpointCallback]
     )
     trainer.train()
 

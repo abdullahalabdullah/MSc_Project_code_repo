@@ -30,6 +30,7 @@ import argparse
 import json
 import os
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -40,6 +41,8 @@ from tqdm import tqdm
 from src.monitor import classify
 from src.gmean2_metrics import load_jsonl
 from src.dataset import resolve_paths
+
+NUM_WORKERS = 8
 
 
 def main():
@@ -103,47 +106,53 @@ def main():
     failure_count = 0
     total = 0
 
+    def _classify_record(record):
+        result = classify(
+            model_response=record["raw_output"],
+            hint_answer=record["hint_target"],
+            client=client,
+            model=mon_cfg["model"],
+            temperature=mon_cfg.get("temperature"),
+            max_retries=mon_cfg.get("max_retries", 5),
+            backoff_factor=mon_cfg.get("backoff_factor", 2.0),
+            timeout=mon_cfg.get("timeout", 60),
+        )
+        return record, result
+
     with open(out_path, "a", encoding="utf-8") as out_f:
         with tqdm(total=len(pending), unit="call", desc=model_name, dynamic_ncols=True) as pbar:
-            for record in pending:
-                result = classify(
-                    model_response=record["raw_output"],
-                    hint_answer=record["hint_target"],
-                    client=client,
-                    model=mon_cfg["model"],
-                    temperature=mon_cfg["temperature"],
-                    max_retries=mon_cfg.get("max_retries", 5),
-                    backoff_factor=mon_cfg.get("backoff_factor", 2.0),
-                    timeout=mon_cfg.get("timeout", 60),
-                )
+            with ThreadPoolExecutor(max_workers=NUM_WORKERS) as executor:
+                futures = {executor.submit(_classify_record, record): record for record in pending}
+                for future in as_completed(futures):
+                    record, result = future.result()
 
-                output = {
-                    "instance_id": record["instance_id"],
-                    "sample_idx": record["sample_idx"],
-                    "arm": record["arm"],
-                    "hint_target": record["hint_target"],
-                    "followed_hint": record.get("followed_hint", False),
-                    "no_cot": record.get("no_cot", False),
-                    **{k: v for k, v in result.items() if k != "raw_response"},
-                    "raw_response": result.get("raw_response", ""),
-                }
-                out_f.write(json.dumps(output, ensure_ascii=False) + "\n")
-                out_f.flush()
+                    output = {
+                        "instance_id": record["instance_id"],
+                        "sample_idx": record["sample_idx"],
+                        "arm": record["arm"],
+                        "hint_target": record["hint_target"],
+                        "followed_hint": record.get("followed_hint", False),
+                        "no_cot": record.get("no_cot", False),
+                        **{k: v for k, v in result.items() if k != "raw_response"},
+                        "raw_response": result.get("raw_response", ""),
+                    }
+                    out_f.write(json.dumps(output, ensure_ascii=False) + "\n")
+                    out_f.flush()
 
-                done_keys.add((record["instance_id"], record["sample_idx"], record["arm"]))
-                total += 1
+                    done_keys.add((record["instance_id"], record["sample_idx"], record["arm"]))
+                    total += 1
 
-                if result.get("parse_failure"):
-                    failure_count += 1
-                    tqdm.write(f"  Parse failure: instance {record['instance_id']}, "
-                               f"sample {record['sample_idx']}, arm {record['arm']}")
+                    if result.get("parse_failure"):
+                        failure_count += 1
+                        tqdm.write(f"  Parse failure: instance {record['instance_id']}, "
+                                   f"sample {record['sample_idx']}, arm {record['arm']}")
 
-                pbar.set_postfix(failures=failure_count)
-                pbar.update(1)
+                    pbar.set_postfix(failures=failure_count)
+                    pbar.update(1)
 
-                if total % 50 == 0:
-                    with open(progress_path, "w") as pf:
-                        json.dump({"done_keys": [list(k) for k in done_keys]}, pf)
+                    if total % 50 == 0:
+                        with open(progress_path, "w") as pf:
+                            json.dump({"done_keys": [list(k) for k in done_keys]}, pf)
 
     # Final progress save
     with open(progress_path, "w") as pf:

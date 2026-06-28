@@ -15,7 +15,7 @@ NUM_TEST=10000
 
 # Acknowledgment judge is an OpenAI(-compatible) API model (no local GPU needed).
 # Requires OPENAI_API_KEY in the environment (and OPENAI_BASE_URL if self-hosted).
-JUDGE_MODEL="gpt-4o"
+JUDGE_MODEL="gpt-5-mini"
 
 date '+[%H:%M:%S-%d/%m/%y]'
 
@@ -30,13 +30,22 @@ for SEED in 0; do
 
         for DECODING_APPROACH in sampling; do
             for SPLIT in orig cf; do
-                python ${PROJECT_HOME}/get_responses_data.py \
-                    ${EVAL_OUTPUT_PATH_SEED}/cot_negative_${SPLIT}_test_${DECODING_APPROACH}.joblib \
-                    aqua \
-                    --seed ${SEED}
+                DATA_FILE="${EVAL_OUTPUT_PATH_SEED}/cot_negative_${SPLIT}_test_${DECODING_APPROACH}_data.joblib"
+
+                # Only (re)parse raw responses if the _data.joblib does not yet exist.
+                # On a resume run the file already exists (possibly with judged entries),
+                # so we skip this step to avoid resetting pf_ack back to None.
+                if [ ! -f "${DATA_FILE}" ]; then
+                    python ${PROJECT_HOME}/get_responses_data.py \
+                        ${EVAL_OUTPUT_PATH_SEED}/cot_negative_${SPLIT}_test_${DECODING_APPROACH}.joblib \
+                        aqua \
+                        --seed ${SEED}
+                else
+                    echo "Skipping get_responses_data (${DATA_FILE} already exists)"
+                fi
 
                 python ${PROJECT_HOME}/eval_responses.py \
-                    ${EVAL_OUTPUT_PATH_SEED}/cot_negative_${SPLIT}_test_${DECODING_APPROACH}_data.joblib \
+                    ${DATA_FILE} \
                     --judge_model ${JUDGE_MODEL} \
                     --seed ${SEED}
 
