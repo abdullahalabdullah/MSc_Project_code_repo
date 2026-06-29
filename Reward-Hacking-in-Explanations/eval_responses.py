@@ -1,7 +1,8 @@
 import argparse
 import os
+import threading
 import time
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import joblib
 from openai import OpenAI
@@ -55,6 +56,8 @@ Output Format:
 
 INPUT_FORMAT = "- Reasoning: {full_response}"
 
+MIN_WORKERS = 8  # floor for automatic rate-limit back-off
+
 
 def _judge_one(client, model_name, prompt_eval, full_response, max_retries=5):
     """Call the OpenAI(-compatible) chat API for a single response, with retries."""
@@ -63,6 +66,7 @@ def _judge_one(client, model_name, prompt_eval, full_response, max_retries=5):
         {"role": "user", "content": INPUT_FORMAT.format(full_response=full_response)},
     ]
     last_err = None
+    hit_rate_limit = False
     for attempt in range(max_retries):
         try:
             resp = client.chat.completions.create(
@@ -70,10 +74,13 @@ def _judge_one(client, model_name, prompt_eval, full_response, max_retries=5):
                 messages=messages,
             )
             return resp.choices[0].message.content or ""
-        except Exception as e:  # retry on transient API errors (rate limits, timeouts)
+        except Exception as e:
             last_err = e
+            if hasattr(e, 'status_code') and e.status_code == 429:
+                hit_rate_limit = True
             time.sleep(2 ** attempt)
-    raise RuntimeError(f"Judge API call failed after {max_retries} retries: {last_err}")
+    tag = "[429]" if hit_rate_limit else ""
+    raise RuntimeError(f"{tag}Judge API call failed after {max_retries} retries: {last_err}")
 
 
 def add_acks(all_responses, client, model_name, prompt_eval, max_workers):
@@ -90,23 +97,46 @@ def add_acks(all_responses, client, model_name, prompt_eval, max_workers):
         print("All responses already judged, nothing to do.")
         return all_responses
 
-    def worker(rd):
-        return _judge_one(client, model_name, prompt_eval, rd['full_response'])
+    # Gate semaphore controls how many threads call the API concurrently.
+    # On a 429, we permanently consume one slot (don't release) to reduce concurrency,
+    # down to a floor of MIN_WORKERS. The ThreadPoolExecutor threads block on gate.acquire().
+    gate = threading.Semaphore(max_workers)
+    current_workers = [max_workers]
+    lock = threading.Lock()
 
-    # ThreadPoolExecutor.map preserves input order, so outputs align with responses.
+    def run_one(rd):
+        gate.acquire()
+        release = True
+        try:
+            return _judge_one(client, model_name, prompt_eval, rd['full_response'])
+        except RuntimeError as e:
+            if "[429]" in str(e):
+                with lock:
+                    if current_workers[0] > MIN_WORKERS:
+                        current_workers[0] -= 1
+                        release = False  # permanently consume this slot to lower concurrency
+                        print(f"\n  Rate limit — reducing to {current_workers[0]} workers (floor: {MIN_WORKERS})")
+            raise
+        finally:
+            if release:
+                gate.release()
+
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        eval_texts = list(tqdm(executor.map(worker, pending), total=len(pending), desc="Judging:"))
-
-    for expl_eval_response, rd in zip(eval_texts, pending):
-        # Use LLM output or fallback to explicit reference when it does not generate
-        if "OUTPUT: " in expl_eval_response:
-            pf_ack = 'OUTPUT: True' in expl_eval_response or 'OUTPUT: TRUE' in expl_eval_response
-        else:
-            pf_ack = False
-
-        # This is changed in-place
-        rd['pf_ack'] = pf_ack
-        rd['pf_ack_justification'] = expl_eval_response
+        future_to_rd = {executor.submit(run_one, rd): rd for rd in pending}
+        with tqdm(total=len(pending), desc="Judging:") as pbar:
+            for future in as_completed(future_to_rd):
+                rd = future_to_rd[future]
+                try:
+                    expl_eval_response = future.result()
+                except RuntimeError:
+                    expl_eval_response = ""
+                if "OUTPUT: " in expl_eval_response:
+                    pf_ack = 'OUTPUT: True' in expl_eval_response or 'OUTPUT: TRUE' in expl_eval_response
+                else:
+                    pf_ack = False
+                rd['pf_ack'] = pf_ack
+                rd['pf_ack_justification'] = expl_eval_response
+                pbar.update(1)
 
     return all_responses
 

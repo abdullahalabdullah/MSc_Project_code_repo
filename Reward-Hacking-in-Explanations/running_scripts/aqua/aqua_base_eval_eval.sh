@@ -8,6 +8,7 @@
 
 BASE_OUTPUT_PATH="outputs/aqua/qwen3-1.7B/base"
 JUDGE_MODEL="gpt-5-mini"
+MAX_WORKERS=16
 SEED=0
 
 date '+[%H:%M:%S-%d/%m/%y]'
@@ -32,6 +33,7 @@ for SPLIT in orig cf; do
     python ${PROJECT_HOME}/eval_responses.py \
         ${DATA_FILE} \
         --judge_model ${JUDGE_MODEL} \
+        --max_workers ${MAX_WORKERS} \
         --seed ${SEED}
 
     date '+[%H:%M:%S-%d/%m/%y]'; echo -e "\n\n"
