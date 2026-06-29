@@ -101,6 +101,49 @@ def print_table(base_m, dpo_m):
     print(f"    DPO+RM deceptive:   34.0 ± 0.7%   (Δ = +6.8)")
 
 
+def save_markdown(base_m, dpo_m, model_path_name):
+    import os
+    os.makedirs('results', exist_ok=True)
+    rows = [
+        ('Valid responses orig %', 'valid_orig'),
+        ('Valid responses CF %',   'valid_cf'),
+        ('Acc orig %',             'acc_orig'),
+        ('Acc CF %',               'acc_cf'),
+        ('Acc diff %',             'acc_diff'),
+        ('Ack orig %',             'ack_orig'),
+        ('Ack CF %',               'ack_cf'),
+        ('Ack diff %',             'ack_diff'),
+        ('**Deceptive % (Maj@16)**', 'deceptive'),
+    ]
+    lines = [
+        f"# Base vs DPO+SK-Llama | Majority@16 | {model_path_name}",
+        "",
+        "| Metric | Base | DPO+RM | Change |",
+        "|---|---|---|---|",
+    ]
+    for label, key in rows:
+        b, d = base_m[key], dpo_m[key]
+        delta = d - b
+        sign = '+' if delta >= 0 else ''
+        lines.append(f"| {label} | {b:.1f} | {d:.1f} | {sign}{delta:.1f} |")
+    lines += [
+        "",
+        f"n (test examples): {base_m['n']}",
+        "",
+        "## Paper reference (LLaMA-3.1-8B-IT, SK-LLAMA-8B, Maj@16, Math Book)",
+        "",
+        "| | Deceptive % |",
+        "|---|---|",
+        "| Base | 27.2 ± 1.5 |",
+        "| DPO+RM | 34.0 ± 0.7 |",
+        "| Δ | +6.8 |",
+    ]
+    path = f"results/qwen_compare_{model_path_name}.md"
+    with open(path, 'w') as f:
+        f.write('\n'.join(lines) + '\n')
+    print(f"  Saved → {path}")
+
+
 def main(model_path_name):
     dpo_base  = f"outputs/aqua/{model_path_name}/dpo/seed_0/eval/sk-llama_original"
     base_base = f"outputs/aqua/{model_path_name}/base/seed_0/eval"
@@ -125,6 +168,9 @@ def main(model_path_name):
 
     print(f"\n> Base vs DPO+SK-Llama | {model_path_name} | Majority@16 | Math Book")
     print_table(base_m, dpo_m)
+
+    print("\n> Saving markdown ...")
+    save_markdown(base_m, dpo_m, model_path_name)
 
 
 if __name__ == "__main__":
