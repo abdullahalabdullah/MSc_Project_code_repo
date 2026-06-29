@@ -139,12 +139,30 @@ def is_no_cot(cot_text: str) -> bool:
 # Main inference function
 # ---------------------------------------------------------------------------
 
-def run_inference_qwen(config: dict, model_cfg: dict, dataset: list, base_seed: int = 42):
+def load_qwen_model(model_cfg: dict):
+    """Load tokenizer and vLLM engine for a Qwen3 model. Call once; reuse across datasets."""
+    from vllm import LLM
+    from transformers import AutoTokenizer
+
+    hf_id = model_cfg["hf_id"]
+    print(f"Loading tokenizer: {hf_id}")
+    tokenizer = AutoTokenizer.from_pretrained(hf_id)
+    print(f"Loading model via vLLM: {hf_id}")
+    llm = LLM(model=hf_id, dtype="bfloat16", trust_remote_code=True)
+    return tokenizer, llm
+
+
+def run_inference_qwen(config: dict, model_cfg: dict, dataset: list, base_seed: int = 42,
+                       tokenizer=None, llm=None):
     """
     Run hinted and unhinted inference for one Qwen3 model over the full dataset.
 
     Reads sampling parameters from `config["qwen_inference"]` (NOT the shared
     `inference:` block, which is for the Llama/Tulu pipeline).
+
+    `tokenizer` and `llm` may be pre-loaded (e.g. when looping over multiple
+    datasets) to avoid reloading weights on every call. If None, they are loaded
+    here (single-dataset / backward-compatible path).
 
     Writes:
       outputs/{model_name}/hinted.jsonl
@@ -156,15 +174,16 @@ def run_inference_qwen(config: dict, model_cfg: dict, dataset: list, base_seed: 
       full_prompt, raw_output, thinking, cot, parsed_answer, followed_hint,
       token_count, truncated, seed
     """
-    from vllm import LLM, SamplingParams
-    from transformers import AutoTokenizer
+    from vllm import SamplingParams
 
     model_name = model_cfg["name"]
-    hf_id = model_cfg["hf_id"]
     inf = config["qwen_inference"]
     n_samples = inf["n_samples"]
     checkpoint_every = inf["checkpoint_every"]
     enable_thinking = inf.get("enable_thinking", True)
+
+    if tokenizer is None or llm is None:
+        tokenizer, llm = load_qwen_model(model_cfg)
 
     out_dir = Path(config["paths"]["outputs_dir"]) / model_name
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -180,18 +199,8 @@ def run_inference_qwen(config: dict, model_cfg: dict, dataset: list, base_seed: 
             completed = set(json.load(f).get("completed_instance_ids", []))
         print(f"Resuming {model_name}: {len(completed)} instances already done.")
 
-    print(f"Loading tokenizer: {hf_id}")
-    tokenizer = AutoTokenizer.from_pretrained(hf_id)
-
-    print(f"Loading model via vLLM: {hf_id}")
-    llm = LLM(
-        model=hf_id,
-        dtype="bfloat16",
-        trust_remote_code=True,
-    )
-
     todo = [item for item in dataset if item["instance_id"] not in completed]
-    print(f"{len(todo)} instances to process for {model_name} "
+    print(f"{len(todo)} instances to process for {model_name} / {out_dir.name} "
           f"(enable_thinking={enable_thinking}).")
 
     null_count = 0

@@ -122,17 +122,15 @@ else
     fi
 fi
 
-# --- Phase 2: inference (loads from local OUT_DIR, no HF push needed) -------
+# --- Phase 2: inference (model loaded once, all datasets in one process) -----
 echo ""
 echo "########## PHASE 2: inference — $MODEL (local: $OUT_DIR) ##########"
-for ds in "${DATASETS[@]}"; do
-    run python scripts/02_run_inference_qwen.py \
-        --model        "$MODEL" \
-        --dataset      "$ds" \
-        --config-block "$CONFIG_BLOCK" \
-        --hf-id        "$OUT_DIR"
-    commit_push "aqua-dpo qwen3-1.7b s0 (thinking on) results — $ds"
-done
+run python scripts/02_run_inference_qwen.py \
+    --model        "$MODEL" \
+    --datasets     "${DATASETS[@]}" \
+    --config-block "$CONFIG_BLOCK" \
+    --hf-id        "$OUT_DIR"
+commit_push "aqua-dpo qwen3-1.7b s0 (thinking on) results — all datasets"
 
 # --- Phase 3: CoT token-length analysis -------------------------------------
 echo ""

@@ -12,19 +12,26 @@ for the Llama/Tulu checkpoints. Steps 03–06 (monitor, metrics, analysis, excel
 are model-agnostic and the same for both.
 
 Usage:
-    python scripts/02_run_inference_qwen.py --model qwen3_4b
+    # single dataset (original behaviour)
+    python scripts/02_run_inference_qwen.py --model qwen3_4b --dataset mmlu
+
+    # multiple datasets — model loaded ONCE, weights shared across all datasets
+    python scripts/02_run_inference_qwen.py --model qwen3_4b --datasets mmlu gpqa wmdp agieval
 
 Options:
-    --config  path to config YAML (default: config/mvp_config.yaml)
-    --seed    base random seed (default: 42)
+    --config        path to config YAML (default: config/mvp_config.yaml)
+    --seed          base random seed (default: 42)
+    --hf-id         override hf_id from config (e.g. a local merged model dir)
+    --dataset       single dataset key (default: mmlu)
+    --datasets      one or more dataset keys; overrides --dataset when given
 
 Input:
-    data/dataset_index.json
+    data/{dataset}/dataset_index.json
 
 Output:
-    outputs/{model_name}/hinted.jsonl
-    outputs/{model_name}/unhinted.jsonl
-    outputs/{model_name}/progress.json
+    outputs/{dataset}/{model_name}/hinted.jsonl
+    outputs/{dataset}/{model_name}/unhinted.jsonl
+    outputs/{dataset}/{model_name}/progress.json
 """
 
 import argparse
@@ -35,7 +42,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import yaml
 from src.dataset import ensure_hf_auth, load_dataset_index, resolve_paths
-from src.inference_qwen import run_inference_qwen
+from src.inference_qwen import load_qwen_model, run_inference_qwen
 
 
 def main():
@@ -44,7 +51,9 @@ def main():
                         help="Model name as defined in config (e.g. qwen3_4b)")
     parser.add_argument("--config", default="config/mvp_config.yaml")
     parser.add_argument("--dataset", default="mmlu",
-                        help="Dataset key (default: mmlu). Namespaces I/O paths.")
+                        help="Single dataset key (default: mmlu). Ignored when --datasets is given.")
+    parser.add_argument("--datasets", nargs="+", default=None,
+                        help="One or more dataset keys. Model is loaded once and reused across all.")
     parser.add_argument("--config-block", default="qwen_inference",
                         help="Config block to read sampling params from "
                              "(default: qwen_inference; use qwen3_nothink_inference "
@@ -53,6 +62,8 @@ def main():
     parser.add_argument("--hf-id", default=None,
                         help="Override hf_id from config (e.g. a local merged model dir).")
     args = parser.parse_args()
+
+    datasets = args.datasets if args.datasets else [args.dataset]
 
     root = Path(__file__).parent.parent
     config_path = root / args.config
@@ -79,19 +90,26 @@ def main():
     if args.hf_id:
         model_cfg = dict(model_cfg, hf_id=args.hf_id)
 
-    paths = resolve_paths(root, config, args.dataset)
-    dataset_path = paths["data_index"]
-    if not dataset_path.exists():
-        print(f"ERROR: dataset_index.json not found at {dataset_path}.")
-        print(f"Run 01_prepare_dataset.py --dataset {args.dataset} first.")
-        sys.exit(1)
+    # Validate all dataset indexes exist before loading the model.
+    for ds in datasets:
+        paths = resolve_paths(root, config, ds)
+        if not paths["data_index"].exists():
+            print(f"ERROR: dataset_index.json not found at {paths['data_index']}.")
+            print(f"Run 01_prepare_dataset.py --dataset {ds} first.")
+            sys.exit(1)
 
-    dataset = load_dataset_index(dataset_path)
-    print(f"Loaded {len(dataset)} instances from {dataset_path}.")
+    # Load model once — reused across all datasets.
+    tokenizer, llm = load_qwen_model(model_cfg)
 
-    config["paths"]["outputs_dir"] = str(paths["outputs_dir"])
-
-    run_inference_qwen(config, model_cfg, dataset, base_seed=args.seed)
+    for ds in datasets:
+        paths = resolve_paths(root, config, ds)
+        dataset = load_dataset_index(paths["data_index"])
+        print(f"\n{'='*60}")
+        print(f"Dataset: {ds}  ({len(dataset)} instances from {paths['data_index']})")
+        print(f"{'='*60}")
+        ds_config = dict(config, paths=dict(config["paths"], outputs_dir=str(paths["outputs_dir"])))
+        run_inference_qwen(ds_config, model_cfg, dataset, base_seed=args.seed,
+                           tokenizer=tokenizer, llm=llm)
 
 
 if __name__ == "__main__":
