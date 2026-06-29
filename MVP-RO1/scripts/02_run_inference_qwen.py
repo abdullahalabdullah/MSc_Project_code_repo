@@ -50,6 +50,8 @@ def main():
                              "(default: qwen_inference; use qwen3_nothink_inference "
                              "for the thinking-off Qwen3-4B run).")
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--hf-id", default=None,
+                        help="Override hf_id from config (e.g. a local merged model dir).")
     args = parser.parse_args()
 
     root = Path(__file__).parent.parent
@@ -73,6 +75,9 @@ def main():
         available = [m["name"] for m in config["models"]]
         print(f"ERROR: model '{args.model}' not found in config. Available: {available}")
         sys.exit(1)
+
+    if args.hf_id:
+        model_cfg = dict(model_cfg, hf_id=args.hf_id)
 
     paths = resolve_paths(root, config, args.dataset)
     dataset_path = paths["data_index"]

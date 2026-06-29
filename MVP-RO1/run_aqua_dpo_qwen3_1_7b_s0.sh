@@ -100,30 +100,37 @@ if [[ $missing -gt 0 ]]; then
     exit 1
 fi
 
-# --- Phase 1: merge adapter + push ------------------------------------------
+# --- Phase 1: merge adapter (local only, no HF push) ------------------------
 echo ""
-echo "########## PHASE 1: merge adapter + push ##########"
-run pip install -q peft
-run python scripts/merge_and_push.py \
-    --base        "$BASE_MODEL" \
-    --adapter     "$ADAPTER" \
-    --merged-repo "$MERGED_REPO" \
-    --out-dir     "$OUT_DIR"
+echo "########## PHASE 1: merge adapter ##########"
+if [[ -f "$OUT_DIR/config.json" ]]; then
+    echo "  Merged model already exists at $OUT_DIR — skipping merge."
+    SUMMARY+=("OK    | merge (skipped — already exists)")
+else
+    run pip install -q peft
+    run python scripts/merge_and_push.py \
+        --base        "$BASE_MODEL" \
+        --adapter     "$ADAPTER" \
+        --merged-repo "$MERGED_REPO" \
+        --out-dir     "$OUT_DIR" \
+        --no-push
 
-# Abort if merge failed — inference will 404 without the merged repo on Hub.
-if [[ ! -d "$OUT_DIR" ]]; then
-    echo "ERROR: merge failed (out-dir $OUT_DIR not created). Aborting."
-    exit 1
+    # Abort if merge failed — check for config.json written by save_pretrained.
+    if [[ ! -f "$OUT_DIR/config.json" ]]; then
+        echo "ERROR: merge failed (no config.json in $OUT_DIR). Aborting."
+        exit 1
+    fi
 fi
 
-# --- Phase 2: inference (commit + push after each dataset) ------------------
+# --- Phase 2: inference (loads from local OUT_DIR, no HF push needed) -------
 echo ""
-echo "########## PHASE 2: inference — $MODEL ##########"
+echo "########## PHASE 2: inference — $MODEL (local: $OUT_DIR) ##########"
 for ds in "${DATASETS[@]}"; do
     run python scripts/02_run_inference_qwen.py \
         --model        "$MODEL" \
         --dataset      "$ds" \
-        --config-block "$CONFIG_BLOCK"
+        --config-block "$CONFIG_BLOCK" \
+        --hf-id        "$OUT_DIR"
     commit_push "aqua-dpo qwen3-1.7b s0 (thinking on) results — $ds"
 done
 
