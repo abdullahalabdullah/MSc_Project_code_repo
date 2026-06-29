@@ -79,14 +79,42 @@ commit_push() {
     run git push
 }
 
+# --- Pre-flight: verify dataset indexes exist (no recreation) ----------------
+# Datasets are already prepared under data/{ds}/dataset_index.json from a
+# previous run of 01_prepare_dataset.py. This script never calls that script;
+# it aborts here if any index is missing rather than silently recreating it.
+echo ""
+echo "########## PRE-FLIGHT: checking dataset indexes ##########"
+missing=0
+for ds in "${DATASETS[@]}"; do
+    index="data/${ds}/dataset_index.json"
+    if [[ -f "$index" ]]; then
+        echo "  OK  $index"
+    else
+        echo "  MISSING  $index  — run 01_prepare_dataset.py --dataset $ds first"
+        missing=$((missing + 1))
+    fi
+done
+if [[ $missing -gt 0 ]]; then
+    echo "ERROR: $missing dataset index(es) missing. Aborting."
+    exit 1
+fi
+
 # --- Phase 1: merge adapter + push ------------------------------------------
 echo ""
 echo "########## PHASE 1: merge adapter + push ##########"
+run pip install -q peft
 run python scripts/merge_and_push.py \
     --base        "$BASE_MODEL" \
     --adapter     "$ADAPTER" \
     --merged-repo "$MERGED_REPO" \
     --out-dir     "$OUT_DIR"
+
+# Abort if merge failed — inference will 404 without the merged repo on Hub.
+if [[ ! -d "$OUT_DIR" ]]; then
+    echo "ERROR: merge failed (out-dir $OUT_DIR not created). Aborting."
+    exit 1
+fi
 
 # --- Phase 2: inference (commit + push after each dataset) ------------------
 echo ""
