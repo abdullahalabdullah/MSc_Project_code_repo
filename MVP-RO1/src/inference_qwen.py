@@ -139,16 +139,33 @@ def is_no_cot(cot_text: str) -> bool:
 # Main inference function
 # ---------------------------------------------------------------------------
 
-def load_qwen_model(model_cfg: dict):
-    """Load tokenizer and vLLM engine for a Qwen3 model. Call once; reuse across datasets."""
+def load_qwen_model(model_cfg: dict, max_model_len: int = 24576, gpu_memory_utilization: float = 0.95):
+    """Load tokenizer and vLLM engine for a Qwen3 model. Call once; reuse across datasets.
+
+    max_model_len: hard cap on prompt_tokens + output_tokens per sequence. Set to
+        24576 = 16384 (max_new_tokens) + 8192 prompt budget. MCQ prompts are typically
+        1–3k tokens so this gives ample headroom with zero truncation risk, while raising
+        KV-cache concurrency from ~8x (native 40960 limit) to ~14x on a 48GB GPU.
+        Do NOT reduce below 16384 + observed_max_prompt_len or outputs will be silently
+        truncated (finish_reason="length"), which would be a confound.
+    gpu_memory_utilization: fraction of VRAM given to vLLM. 0.95 is safe for a dedicated
+        inference pod with no other GPU workloads.
+    """
     from vllm import LLM
     from transformers import AutoTokenizer
 
     hf_id = model_cfg["hf_id"]
     print(f"Loading tokenizer: {hf_id}")
     tokenizer = AutoTokenizer.from_pretrained(hf_id)
-    print(f"Loading model via vLLM: {hf_id}")
-    llm = LLM(model=hf_id, dtype="bfloat16", trust_remote_code=True)
+    print(f"Loading model via vLLM: {hf_id} "
+          f"(max_model_len={max_model_len}, gpu_memory_utilization={gpu_memory_utilization})")
+    llm = LLM(
+        model=hf_id,
+        dtype="bfloat16",
+        trust_remote_code=True,
+        max_model_len=max_model_len,
+        gpu_memory_utilization=gpu_memory_utilization,
+    )
     return tokenizer, llm
 
 
