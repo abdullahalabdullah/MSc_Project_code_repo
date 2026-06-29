@@ -113,8 +113,12 @@ def add_acks(all_responses, client, model_name, prompt_eval, max_workers):
             if "[429]" in str(e):
                 with lock:
                     if current_workers[0] > MIN_WORKERS:
-                        current_workers[0] -= 1
-                        release = False  # permanently consume this slot to lower concurrency
+                        step = min(4, current_workers[0] - MIN_WORKERS)
+                        current_workers[0] -= step
+                        release = False  # consume current slot (1 of step)
+                        # Drain remaining (step-1) slots via daemon threads that acquire and never release
+                        for _ in range(step - 1):
+                            threading.Thread(target=gate.acquire, daemon=True).start()
                         print(f"\n  Rate limit — reducing to {current_workers[0]} workers (floor: {MIN_WORKERS})")
             raise
         finally:
