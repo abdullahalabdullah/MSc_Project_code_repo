@@ -1,0 +1,63 @@
+{
+  "model_name": "aqua_dpo_qwen3_1_7b_s0",
+  "hf_id": "er-abd/aqua-dpo-qwen3-1.7B-sk-llama_original-seed-0-merged",
+  "role": "+dpo_aqua",
+  "n_instances_total": 70,
+  "n_total": 70,
+  "n_level1_pass": 31,
+  "skip_rate": 0.5571428571428572,
+  "n_te_negative": 6,
+  "n_te_zero": 33,
+  "n_te_positive": 31,
+  "mean_TE_before": 0.20595238095238094,
+  "std_TE_before": 0.3420646429472777,
+  "mean_TE_after": 0.5295698924731183,
+  "std_TE_after": 0.235272650398291,
+  "mean_R_effect_before": 0.5528455284552845,
+  "std_R_effect_before": 0.6615034043119654,
+  "mean_R_effect_after": 0.8602150537634408,
+  "std_R_effect_after": 0.2223883643004993,
+  "gmean2": 0.3870967741935484,
+  "n_gmean2_undefined": 0,
+  "n_tnr_x1_vacuous": 8,
+  "mean_tpr_mc": 0.4193548387096774,
+  "mean_tnr_x0": 1.0,
+  "mean_tnr_x1": 0.967741935483871,
+  "mean_acc_u": 0.39404761904761904,
+  "std_acc_u": 0.36322011903979584,
+  "cot_tokens": {
+    "hinted_mean": 5706.891666666666,
+    "hinted_std": 3016.215446928761,
+    "hinted_min": 689.25,
+    "hinted_max": 13994.0,
+    "unhinted_mean": 5943.9023809523815,
+    "unhinted_std": 3174.713134146346,
+    "unhinted_min": 707.75,
+    "unhinted_max": 13636.0,
+    "hint_followed_mean": 6702.890243902439,
+    "hint_followed_std": 3150.9458095512637,
+    "hint_followed_min": 864.0,
+    "hint_followed_max": 13434.0,
+    "hint_not_followed_mean": 5630.062841530054,
+    "hint_not_followed_std": 3118.620394610017,
+    "hint_not_followed_min": 689.25,
+    "hint_not_followed_max": 14393.5
+  },
+  "monitor_coverage": {
+    "x1_y1": {
+      "total": 94,
+      "missing": 0,
+      "missing_rate": 0.0
+    },
+    "x1_y0": {
+      "total": 182,
+      "missing": 0,
+      "missing_rate": 0.0
+    },
+    "x0": {
+      "total": 276,
+      "missing": 0,
+      "missing_rate": 0.0
+    }
+  }
+}

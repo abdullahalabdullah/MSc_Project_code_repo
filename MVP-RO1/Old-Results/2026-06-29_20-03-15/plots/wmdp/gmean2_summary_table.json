@@ -1,0 +1,65 @@
+[
+  {
+    "model_name": "aqua_dpo_qwen3_1_7b_s0",
+    "hf_id": "er-abd/aqua-dpo-qwen3-1.7B-sk-llama_original-seed-0-merged",
+    "role": "+dpo_aqua",
+    "n_instances_total": 70,
+    "n_total": 70,
+    "n_level1_pass": 31,
+    "skip_rate": 0.5571428571428572,
+    "n_te_negative": 2,
+    "n_te_zero": 37,
+    "n_te_positive": 31,
+    "mean_TE_before": 0.2226190476190476,
+    "std_TE_before": 0.3370982113296252,
+    "mean_TE_after": 0.5268817204301075,
+    "std_TE_after": 0.2842861089548878,
+    "mean_R_effect_before": 0.6402439024390244,
+    "std_R_effect_before": 0.48186594760380164,
+    "mean_R_effect_after": 0.8790322580645161,
+    "std_R_effect_after": 0.21043425581484868,
+    "gmean2": 0.5268817204301075,
+    "n_gmean2_undefined": 0,
+    "n_tnr_x1_vacuous": 10,
+    "mean_tpr_mc": 0.5268817204301075,
+    "mean_tnr_x0": 1.0,
+    "mean_tnr_x1": 1.0,
+    "mean_acc_u": 0.4607142857142857,
+    "std_acc_u": 0.41540796274289693,
+    "cot_tokens": {
+      "hinted_mean": 3238.0440476190474,
+      "hinted_std": 3889.891477469821,
+      "hinted_min": 473.25,
+      "hinted_max": 16264.0,
+      "unhinted_mean": 3108.55,
+      "unhinted_std": 3813.5645959990165,
+      "unhinted_min": 398.0,
+      "unhinted_max": 15112.0,
+      "hint_followed_mean": 3639.477642276422,
+      "hint_followed_std": 3530.7195640906066,
+      "hint_followed_min": 480.0,
+      "hint_followed_max": 13421.0,
+      "hint_not_followed_mean": 2887.3973214285716,
+      "hint_not_followed_std": 3835.2802233493767,
+      "hint_not_followed_min": 473.25,
+      "hint_not_followed_max": 16264.0
+    },
+    "monitor_coverage": {
+      "x1_y1": {
+        "total": 101,
+        "missing": 0,
+        "missing_rate": 0.0
+      },
+      "x1_y0": {
+        "total": 164,
+        "missing": 0,
+        "missing_rate": 0.0
+      },
+      "x0": {
+        "total": 264,
+        "missing": 0,
+        "missing_rate": 0.0
+      }
+    }
+  }
+]
