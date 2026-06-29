@@ -124,6 +124,7 @@ def classify(
     )
 
     last_exc = None
+    hit_rate_limit = False
     for attempt in range(max_retries):
         try:
             kwargs = dict(
@@ -140,9 +141,12 @@ def classify(
             return parsed
         except Exception as exc:
             last_exc = exc
+            if hasattr(exc, 'status_code') and exc.status_code == 429:
+                hit_rate_limit = True
             if attempt < max_retries - 1:
                 wait = backoff_factor ** attempt
                 print(f"Monitor API error (attempt {attempt + 1}/{max_retries}): {exc}. Retrying in {wait:.1f}s ...")
                 time.sleep(wait)
 
-    raise RuntimeError(f"Monitor API failed after {max_retries} attempts: {last_exc}") from last_exc
+    tag = "[429]" if hit_rate_limit else ""
+    raise RuntimeError(f"{tag}Monitor API failed after {max_retries} attempts: {last_exc}") from last_exc

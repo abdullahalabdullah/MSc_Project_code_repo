@@ -30,6 +30,7 @@ import argparse
 import json
 import os
 import sys
+import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
@@ -42,7 +43,8 @@ from src.monitor import classify
 from src.gmean2_metrics import load_jsonl
 from src.dataset import resolve_paths
 
-NUM_WORKERS = 8
+NUM_WORKERS = 16
+MIN_WORKERS = 8  # floor for automatic rate-limit back-off
 
 
 def main():
@@ -119,12 +121,43 @@ def main():
         )
         return record, result
 
+    # Gate semaphore controls how many threads call the API concurrently.
+    # On a 429, we permanently consume one slot (don't release) to reduce concurrency,
+    # down to a floor of MIN_WORKERS. Steps: 16 → 12 → 8.
+    gate = threading.Semaphore(NUM_WORKERS)
+    current_workers = [NUM_WORKERS]
+    lock = threading.Lock()
+
+    def run_one(record):
+        gate.acquire()
+        release = True
+        try:
+            return _classify_record(record)
+        except RuntimeError as e:
+            if "[429]" in str(e):
+                with lock:
+                    if current_workers[0] > MIN_WORKERS:
+                        step = min(4, current_workers[0] - MIN_WORKERS)
+                        current_workers[0] -= step
+                        release = False  # consume current slot (1 of step)
+                        for _ in range(step - 1):
+                            threading.Thread(target=gate.acquire, daemon=True).start()
+                        print(f"\n  Rate limit — reducing to {current_workers[0]} workers (floor: {MIN_WORKERS})")
+            raise
+        finally:
+            if release:
+                gate.release()
+
     with open(out_path, "a", encoding="utf-8") as out_f:
         with tqdm(total=len(pending), unit="call", desc=model_name, dynamic_ncols=True) as pbar:
             with ThreadPoolExecutor(max_workers=NUM_WORKERS) as executor:
-                futures = {executor.submit(_classify_record, record): record for record in pending}
+                futures = {executor.submit(run_one, record): record for record in pending}
                 for future in as_completed(futures):
-                    record, result = future.result()
+                    try:
+                        record, result = future.result()
+                    except RuntimeError:
+                        pbar.update(1)
+                        continue
 
                     output = {
                         "instance_id": record["instance_id"],
