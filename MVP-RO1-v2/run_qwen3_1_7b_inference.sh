@@ -131,27 +131,21 @@ echo "########## PHASE 1: prepare dataset indexes ##########"
 for ds in "${DATASETS[@]}"; do
     run python scripts/01_prepare_dataset.py --dataset "$ds" $PREP_FLAGS
 done
-commit_push "dataset indexes (${N_EXAMPLES:-config budget}) — ${DATASETS[*]}"
+commit_push "dataset indexes ($TAG) — ${DATASETS[*]}"
 
-# --- Phase 2: inference (commit + push after each hint type × dataset) --------
+# --- Phase 2: inference (commit + push after each dataset) -------------------
 echo ""
-echo "########## PHASE 2: inference — $MODEL ##########"
-for ht in "${HINT_TYPES[@]}"; do
-    echo ""
-    echo "---------- hint type: $ht ----------"
-    for ds in "${DATASETS[@]}"; do
-        run python scripts/02_run_inference_qwen.py --dataset "$ds" --model "$MODEL" --hint-type "$ht" $INFER_FLAGS
-        commit_push "$MODEL inference results ($ht$NN_TAG) — $ds"
-    done
+echo "########## PHASE 2: inference — $MODEL ($HINT_TYPE) ##########"
+for ds in "${DATASETS[@]}"; do
+    run python scripts/02_run_inference_qwen.py --dataset "$ds" --model "$MODEL" --hint-type "$HINT_TYPE" $INFER_FLAGS
+    commit_push "$MODEL inference results ($TAG) — $ds"
 done
 
-# --- Phase 3: cross-dataset CoT token-length analysis (per hint type) ---------
+# --- Phase 3: cross-dataset CoT token-length analysis ------------------------
 echo ""
-echo "########## PHASE 3: CoT token-length analysis — $MODEL ##########"
-for ht in "${HINT_TYPES[@]}"; do
-    run python scripts/08_cot_token_analysis.py --model "$MODEL" --datasets "${DATASETS[@]}" --hint-type "$ht"
-    commit_push "$MODEL — CoT token-length analysis ($ht$NN_TAG)"
-done
+echo "########## PHASE 3: CoT token-length analysis — $MODEL ($HINT_TYPE) ##########"
+run python scripts/08_cot_token_analysis.py --model "$MODEL" --datasets "${DATASETS[@]}" --hint-type "$HINT_TYPE"
+commit_push "$MODEL — CoT token-length analysis ($TAG)"
 
 # --- Summary -----------------------------------------------------------------
 echo ""
