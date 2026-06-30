@@ -34,7 +34,7 @@ cd "$(dirname "$0")"
 # --- Configuration ----------------------------------------------------------
 # Config model name (the `name:` key in config/mvp_config.yaml). To run the DPO
 # variant instead, set MODEL=aqua_dpo_qwen3_1_7b_s0 (and merge it first).
-MODELS=(qwen3_1_7b qwen3_4b)   # run both, one after the other; model loaded once per model
+MODEL="qwen3_4b"                # thinking ON (temp 0.6, top_p 0.95, max_new_tokens 16384)
 
 # Hint type for this run. Valid: professor, visual_pattern, metadata, wrong_few_shot,
 # grader_hacking, unethical. Output is namespaced by hint type, so they never collide.
@@ -92,7 +92,7 @@ run() {
 exec > >(tee -a "$LOGFILE") 2>&1
 
 echo "Inference run started: $(date)"
-echo "Models:      ${MODELS[*]} (qwen_inference, thinking ON)"
+echo "Model:       $MODEL (qwen_inference, thinking ON)"
 echo "Hint:        $HINT_TYPE"
 echo "N examples:  ${N_EXAMPLES:-config default} per dataset"
 echo "N samples:   ${N_SAMPLES:-config default} per arm per instance"
@@ -131,23 +131,17 @@ for ds in "${DATASETS[@]}"; do
 done
 commit_push "dataset indexes${NN_TAG} — ${DATASETS[*]}"
 
-# --- Phase 2: inference — model loaded ONCE per model across all datasets -----
+# --- Phase 2: inference — model loaded ONCE across all datasets ---------------
 echo ""
-echo "########## PHASE 2: inference ($HINT_TYPE) ##########"
-for model in "${MODELS[@]}"; do
-    echo ""
-    echo "---------- model: $model ----------"
-    run python scripts/02_run_inference_qwen.py --datasets "${DATASETS[@]}" --model "$model" --hint-type "$HINT_TYPE" $INFER_FLAGS
-    commit_push "$model inference results ($HINT_TYPE$NN_TAG) — all datasets"
-done
+echo "########## PHASE 2: inference — $MODEL ($HINT_TYPE) ##########"
+run python scripts/02_run_inference_qwen.py --datasets "${DATASETS[@]}" --model "$MODEL" --hint-type "$HINT_TYPE" $INFER_FLAGS
+commit_push "$MODEL inference results ($HINT_TYPE$NN_TAG) — all datasets"
 
 # --- Phase 3: cross-dataset CoT token-length analysis ------------------------
 echo ""
-echo "########## PHASE 3: CoT token-length analysis ($HINT_TYPE) ##########"
-for model in "${MODELS[@]}"; do
-    run python scripts/08_cot_token_analysis.py --model "$model" --datasets "${DATASETS[@]}" --hint-type "$HINT_TYPE"
-    commit_push "$model — CoT token-length analysis ($HINT_TYPE$NN_TAG)"
-done
+echo "########## PHASE 3: CoT token-length analysis — $MODEL ($HINT_TYPE) ##########"
+run python scripts/08_cot_token_analysis.py --model "$MODEL" --datasets "${DATASETS[@]}" --hint-type "$HINT_TYPE"
+commit_push "$MODEL — CoT token-length analysis ($HINT_TYPE$NN_TAG)"
 
 # --- Summary -----------------------------------------------------------------
 echo ""
