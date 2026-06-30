@@ -88,7 +88,8 @@ def raw_token_stats(records: list) -> dict:
         return {"mean": None, "std": None, "min": None, "max": None, "n": 0}
     return {
         "mean": float(np.mean(vals)),
-        "std": float(np.std(vals)),
+        # Sample std (ddof=1), consistent with gmean2_metrics / the SEM; n<2 -> 0.0.
+        "std": float(np.std(vals, ddof=1)) if len(vals) > 1 else 0.0,
         "min": int(np.min(vals)),
         "max": int(np.max(vals)),
         "n": len(vals),

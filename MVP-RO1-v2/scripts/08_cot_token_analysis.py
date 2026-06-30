@@ -38,6 +38,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 import yaml
 from src.gmean2_metrics import load_jsonl, compute_gmean2, _cot_stats
 from src.dataset import resolve_paths
+from src.hints import HINT_TYPES
 from src.cot_tokens import (
     DEFAULT_BUCKET_EDGES,
     bucket_labels,
@@ -63,33 +64,36 @@ def _fmt(v, decimals=1):
 
 
 def _condition_table(cot: dict) -> list:
-    """Render a 4-condition mean/std/min/max table from a cot_tokens-style dict."""
-    lines = ["| Condition | Mean | Std | Min | Max |",
-             "|-----------|------|-----|-----|-----|"]
+    """Render a 4-condition run-level mean/std/min/max/runs/instances table."""
+    lines = ["| Condition | Mean | Std | Min | Max | Runs | Instances |",
+             "|-----------|------|-----|-----|-----|------|-----------|"]
     for prefix, label in CONDITIONS:
         lines.append(
             f"| {label} "
             f"| {_fmt(cot.get(f'{prefix}_mean'), 1)} "
             f"| {_fmt(cot.get(f'{prefix}_std'), 1)} "
             f"| {_fmt(cot.get(f'{prefix}_min'), 0)} "
-            f"| {_fmt(cot.get(f'{prefix}_max'), 0)} |"
+            f"| {_fmt(cot.get(f'{prefix}_max'), 0)} "
+            f"| {cot.get(f'{prefix}_n_runs', 0)} "
+            f"| {cot.get(f'{prefix}_n_instances', 0)} |"
         )
     return lines
 
 
-def analyze_model(root, config, dataset_keys, model_cfg) -> str | None:
+def analyze_model(root, config, dataset_keys, model_cfg, hint_type) -> str | None:
     """Build the markdown report for one model, or None if it has no data."""
     model_name = model_cfg["name"]
 
-    # Pools for the "overall" (across-dataset) condition table — per-instance
-    # means, matching gmean2_summary.md methodology.
-    pooled_means = {prefix: [] for prefix, _ in CONDITIONS}
+    # Pools for the "overall" (across-dataset) condition table — run-level: every
+    # valid run pooled across datasets, matching gmean2_summary.md methodology.
+    pooled_pools = {prefix: [] for prefix, _ in CONDITIONS}
+    pooled_insts = {prefix: 0 for prefix, _ in CONDITIONS}
     pooled_records = []  # every response (both arms, all datasets), for buckets/max
 
     per_dataset = []  # list of (dataset_key, cot_tokens, bucket_counts, raw_stats, trunc)
 
     for ds in dataset_keys:
-        paths = resolve_paths(root, config, ds, model_name)
+        paths = resolve_paths(root, config, ds, model_name, hint_type)
         out_dir = paths["outputs_dir"]
         hinted_path = out_dir / "hinted.jsonl"
         unhinted_path = out_dir / "unhinted.jsonl"
@@ -101,15 +105,13 @@ def analyze_model(root, config, dataset_keys, model_cfg) -> str | None:
         if not hinted or not unhinted:
             continue
 
-        # Condition stats (per-instance mean) — reuse compute_gmean2 so they are
+        # Condition stats (run level) — reuse compute_gmean2 so they are
         # byte-for-byte the same methodology as gmean2_summary.md.
         result = compute_gmean2(hinted, unhinted, monitor_records=[])
         cot = result["cot_tokens"]
-        for r in result["per_instance"]:
-            for prefix in pooled_means:
-                v = r.get(f"mean_cot_tokens_{prefix}")
-                if v is not None:
-                    pooled_means[prefix].append(v)
+        for prefix in pooled_pools:
+            pooled_pools[prefix].extend(result["cot_token_pools"][prefix])
+            pooled_insts[prefix] += cot.get(f"{prefix}_n_instances", 0)
 
         # Raw per-sample buckets over every response in both arms. Truncated
         # responses are routed to the overflow bucket by bucket_counts (their
@@ -128,12 +130,11 @@ def analyze_model(root, config, dataset_keys, model_cfg) -> str | None:
     if not per_dataset:
         return None
 
-    overall_cot = {
-        **_cot_stats(pooled_means["hinted"], "hinted"),
-        **_cot_stats(pooled_means["unhinted"], "unhinted"),
-        **_cot_stats(pooled_means["hint_followed"], "hint_followed"),
-        **_cot_stats(pooled_means["hint_not_followed"], "hint_not_followed"),
-    }
+    overall_cot = {}
+    for prefix, _ in CONDITIONS:
+        overall_cot.update(_cot_stats(pooled_pools[prefix], prefix))
+        overall_cot[f"{prefix}_n_runs"] = len(pooled_pools[prefix])
+        overall_cot[f"{prefix}_n_instances"] = pooled_insts[prefix]
 
     labels = bucket_labels(DEFAULT_BUCKET_EDGES)
     lines = []
@@ -141,14 +142,15 @@ def analyze_model(root, config, dataset_keys, model_cfg) -> str | None:
 
     w(f"# CoT token-length analysis: {model_name}\n")
     w(f"**HuggingFace ID:** `{model_cfg['hf_id']}`  ")
+    w(f"**Hint type:** `{hint_type}`  ")
     w(f"**Datasets included:** {', '.join(ds for ds, *_ in per_dataset)}\n")
 
     # 1. Overall condition table -------------------------------------------------
     w("---\n")
     w("## 1. Overall CoT token length (pooled across all datasets)\n")
-    w("Mean output tokens in the chain-of-thought, averaged per instance then "
-      "across instances, pooled over every dataset above. Same methodology as "
-      "each dataset's `gmean2_summary.md`.\n")
+    w("Output tokens in the chain-of-thought, pooled over every valid run (run "
+      "level) across all datasets above. Same methodology as each dataset's "
+      "`gmean2_summary.md`. Runs = pooled responses; Instances = distinct examples.\n")
     lines.extend(_condition_table(overall_cot))
     w("")
 
@@ -205,11 +207,16 @@ def main():
     parser.add_argument("--config", default="config/mvp_config.yaml")
     parser.add_argument("--datasets", nargs="*", default=None,
                         help="Dataset keys (default: mmlu + every key in the datasets registry).")
+    parser.add_argument("--hint-type", default=None, choices=HINT_TYPES,
+                        help="Hint type to read (default: config hint.default). "
+                             "Must match the inference run. Namespaces I/O paths + report name.")
     args = parser.parse_args()
 
     root = Path(__file__).parent.parent
     with open(root / args.config) as f:
         config = yaml.safe_load(f)
+
+    hint_type = args.hint_type or config.get("hint", {}).get("default", "professor")
 
     if args.datasets:
         dataset_keys = args.datasets
@@ -229,11 +236,11 @@ def main():
 
     wrote_any = False
     for model_cfg in models:
-        report = analyze_model(root, config, dataset_keys, model_cfg)
+        report = analyze_model(root, config, dataset_keys, model_cfg, hint_type)
         if report is None:
             print(f"  Skipping {model_cfg['name']}: no inference outputs found.")
             continue
-        out_path = analysis_root / f"cot_token_report_{model_cfg['name']}.md"
+        out_path = analysis_root / f"cot_token_report_{model_cfg['name']}_{hint_type}.md"
         out_path.write_text(report, encoding="utf-8")
         print(f"  Written: {out_path}")
         wrote_any = True

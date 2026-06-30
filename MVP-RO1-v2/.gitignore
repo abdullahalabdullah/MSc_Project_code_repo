@@ -1,14 +1,14 @@
 # Runtime artifacts — large / regeneratable
 
-# # Python
-# __pycache__/
-# *.pyc
-# *.pyo
-# *.pyd
-# *.egg-info/
-# dist/
-# build/
-# .eggs/
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.eggs/
 
 # Environment
 .env
@@ -19,6 +19,9 @@
 
 # Jupyter
 .ipynb_checkpoints/
+
+# MathBench raw release cache (downloaded on demand by src/dataset.py)
+data/_mathbench_raw/
 
 # OS
 .DS_Store

@@ -1,0 +1,2802 @@
+[
+  {
+    "instance_id": 0,
+    "question_id": "mathbench_middle_middle_50",
+    "subject": "Basic Geometry",
+    "question": "Two congruent circles centered at points  $A$ and  $B$ each pass through the other circle's center. The line containing both  $A$ and  $B$ is extended to intersect the circles at points  $C$ and  $D$ . The circles intersect at two points, one of which is  $E$ . What is the degree measure of  $\\angle CED$ ?",
+    "choices": {
+      "A": "150",
+      "B": "120",
+      "C": "105",
+      "D": "135"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 1,
+    "question_id": "mathbench_middle_middle_knowledge_62",
+    "subject": "Basic Numbers and Algebra",
+    "question": "What is called the solution of an inequality?",
+    "choices": {
+      "A": "The value of the coefficient that makes both sides of the inequality equal",
+      "B": "The value of the unknown that makes the inequality hold",
+      "C": "The value of the coefficient that makes the inequality hold",
+      "D": "The value of the unknown that makes both sides of the inequality equal"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 2,
+    "question_id": "mathbench_middle_middle_119",
+    "subject": "Basic Probability and Statistics",
+    "question": "Five different awards are to be given to three students. Each student will receive at least one award. In how many different ways can the awards be distributed?",
+    "choices": {
+      "A": "240",
+      "B": "150",
+      "C": "180",
+      "D": "120"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 3,
+    "question_id": "mathbench_middle_middle_93",
+    "subject": "Basic Geometry",
+    "question": "The faces of a cube are painted in six different colors: red  $(R)$ , white  $(W)$ , green  $(G)$ , brown  $(B)$ , aqua  $(A)$ , and purple  $(P)$ . Three views of the cube are shown below. What is the color of the face opposite the aqua face?\n\n $",
+    "choices": {
+      "A": "\\text{red}",
+      "B": "\\text{green}",
+      "C": "\\text{purple}",
+      "D": "\\text{white}"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 4,
+    "question_id": "mathbench_middle_middle_knowledge_143",
+    "subject": "Basic Numbers and Algebra",
+    "question": "What is the correct order for solving a fractional equation?",
+    "choices": {
+      "A": "Solve for the unknown, remove the denominator, check the root",
+      "B": "Remove the denominator, solve for the unknown, check the root",
+      "C": "Remove the denominator, solve for the unknown",
+      "D": "Solve for the unknown, check the root"
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 5,
+    "question_id": "mathbench_middle_middle_45",
+    "subject": "Basic Probability and Statistics",
+    "question": "An ATM password at Fred's Bank is composed of four digits from  $0$ to  $9$ , with repeated digits allowable. If no password may begin with the sequence  $9,1,1,$ then how many passwords are possible?",
+    "choices": {
+      "A": "30",
+      "B": "9990",
+      "C": "9000",
+      "D": "9999"
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 6,
+    "question_id": "mathbench_middle_middle_72",
+    "subject": "Basic Geometry",
+    "question": "If the degree measures of the angles of a triangle are in the ratio  $3:3:4$ , what is the degree measure of the largest angle of the triangle?",
+    "choices": {
+      "A": "72",
+      "B": "60",
+      "C": "90",
+      "D": "18"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 7,
+    "question_id": "mathbench_middle_middle_knowledge_83",
+    "subject": "Basic Numbers and Algebra",
+    "question": "Regarding the inverse proportion function $y=\\frac{k}{x}$, what is the geometric meaning of $|k|$?",
+    "choices": {
+      "A": "The absolute value of the intercept",
+      "B": "Uncertain",
+      "C": "The area of the rectangle formed by the perpendicular segments drawn from the points on the graph of the inverse proportion function to the two axes",
+      "D": "The absolute value of the slope"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 8,
+    "question_id": "mathbench_middle_middle_34",
+    "subject": "Basic Probability and Statistics",
+    "question": "Each of two boxes contains three chips numbered  $1$ ,  $2$ ,  $3$ . A chip is drawn randomly from each box and the numbers on the two chips are multiplied. What is the probability that their product is even?",
+    "choices": {
+      "A": "\\frac{5}{9}",
+      "B": "\\frac{2}{9}",
+      "C": "\\frac{4}{9}",
+      "D": "\\frac{1}{9}"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 9,
+    "question_id": "mathbench_middle_middle_16",
+    "subject": "Basic Geometry",
+    "question": "Six rectangles each with a common base width of  $2$ have lengths of  $1, 4, 9, 16, 25$ , and  $36$ . What is the sum of the areas of the six rectangles?",
+    "choices": {
+      "A": "182",
+      "B": "162",
+      "C": "93",
+      "D": "202"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 10,
+    "question_id": "mathbench_middle_middle_79",
+    "subject": "Basic Numbers and Algebra",
+    "question": "Laila took five math tests, each worth a maximum of 100 points. Laila's score on each test was an integer between 0 and 100, inclusive. Laila received the same score on the first four tests, and she received a higher score on the last test. Her average score on the five tests was 82. How many values are possible for Laila's score on the last test?",
+    "choices": {
+      "A": "10",
+      "B": "4",
+      "C": "18",
+      "D": "5"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 11,
+    "question_id": "mathbench_middle_middle_4",
+    "subject": "Basic Probability and Statistics",
+    "question": "The \"Middle School Eight\" basketball conference has  $8$ teams. Every season, each team plays every other conference team twice (home and away), and each team also plays  $4$ games against non-conference opponents. What is the total number of games in a season involving the \"Middle School Eight\" teams?",
+    "choices": {
+      "A": "88",
+      "B": "60",
+      "C": "160",
+      "D": "96"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 12,
+    "question_id": "mathbench_middle_middle_91",
+    "subject": "Basic Geometry",
+    "question": "Tyler is tiling the floor of his 12-foot by 16-foot living room. He plans to place one-foot by one-foot square tiles to form a border along the edges of the room and to fill in the rest of the floor with two-foot by two-foot square tiles. How many tiles will he use?",
+    "choices": {
+      "A": "120",
+      "B": "87",
+      "C": "48",
+      "D": "89"
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 13,
+    "question_id": "mathbench_middle_middle_26",
+    "subject": "Basic Numbers and Algebra",
+    "question": "Ralph went to the store and bought 12 pairs of socks for a total of \\$24. Some of the socks he bought cost \\$1 a pair, some of the socks he bought cost \\$3 a pair, and some of the socks he bought cost \\$4 a pair. If he bought at least one pair of each type, how many pairs of \\$1 socks did Ralph buy?",
+    "choices": {
+      "A": "6",
+      "B": "4",
+      "C": "5",
+      "D": "7"
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 14,
+    "question_id": "mathbench_middle_middle_96",
+    "subject": "Basic Probability and Statistics",
+    "question": "On a beach  $50$ people are wearing sunglasses and  $35$ people are wearing caps. Some people are wearing both sunglasses and caps. If one of the people wearing a cap is selected at random, the probability that this person is also wearing sunglasses is  $\\frac{2}{5}$ . If instead, someone wearing sunglasses is selected at random, what is the probability that this person is also wearing a cap?",
+    "choices": {
+      "A": "\\frac{4}{7}",
+      "B": "\\frac{7}{25}",
+      "C": "\\frac{7}{10}",
+      "D": "\\frac{2}{5}"
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 15,
+    "question_id": "mathbench_middle_middle_knowledge_20",
+    "subject": "Basic Geometry",
+    "question": "What is pythagorean theorem in any right triangle, if a and b are the lengths of the legs and c is the length of the hypotenuse?",
+    "choices": {
+      "A": "$a^2+b^2=c$",
+      "B": "$a^2+b^2=c^2$",
+      "C": "$a^2+b^2={(a+b)}^3$",
+      "D": "$a+b=c$"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 16,
+    "question_id": "mathbench_middle_middle_5",
+    "subject": "Basic Numbers and Algebra",
+    "question": "George walks  $1$ mile to school. He leaves home at the same time each day, walks at a steady speed of  $3$ miles per hour, and arrives just as school begins. Today he was distracted by the pleasant weather and walked the first  $\\frac{1}{2}$ mile at a speed of only  $2$ miles per hour. At how many miles per hour must George run the last  $\\frac{1}{2}$ mile in order to arrive just as school begins today?",
+    "choices": {
+      "A": "4",
+      "B": "8",
+      "C": "10",
+      "D": "6"
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 17,
+    "question_id": "mathbench_middle_middle_knowledge_106",
+    "subject": "Basic Probability and Statistics",
+    "question": "Generally, we call the number of data points that fall into different groups as the group's <<<Answer>>>",
+    "choices": {
+      "A": "frequency",
+      "B": "probability",
+      "C": "capacity",
+      "D": "rate"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 18,
+    "question_id": "mathbench_middle_middle_130",
+    "subject": "Basic Geometry",
+    "question": "The midpoints of the four sides of a rectangle are  $(-3,0), (2,0), (5,4),$ and  $(0,4).$ What is the\narea of the rectangle?",
+    "choices": {
+      "A": "20",
+      "B": "80",
+      "C": "40",
+      "D": "25"
+    },
+    "correct_answer": "C",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 19,
+    "question_id": "mathbench_middle_middle_knowledge_7",
+    "subject": "Basic Numbers and Algebra",
+    "question": "What is the largest number that can be evenly divided into each of the given numbers?",
+    "choices": {
+      "A": "The GCF",
+      "B": "All the other options are wrong.",
+      "C": "The LCM",
+      "D": "2"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 20,
+    "question_id": "mathbench_middle_middle_6",
+    "subject": "Basic Probability and Statistics",
+    "question": "Four children were born at City Hospital yesterday. Assume each child is equally likely to be a boy or a girl. Which of the following outcomes is most likely?",
+    "choices": {
+      "A": "3 are of one gender and 1 is of the other gender",
+      "B": "2 are girls and 2 are boys",
+      "C": "all of these outcomes are equally likely",
+      "D": "all 4 are boys"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 21,
+    "question_id": "mathbench_middle_middle_knowledge_147",
+    "subject": "Basic Geometry",
+    "question": "In the same plane, what are two non-intersecting lines called?",
+    "choices": {
+      "A": "Intersecting lines",
+      "B": "Perpendicular lines",
+      "C": "Parallel lines",
+      "D": "Supplementary lines"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 22,
+    "question_id": "mathbench_middle_middle_101",
+    "subject": "Basic Numbers and Algebra",
+    "question": "How many different real numbers  $x$ satisfy the equation  $(x^{2}-5)^{2}=16?$",
+    "choices": {
+      "A": "0",
+      "B": "4",
+      "C": "1",
+      "D": "8"
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 23,
+    "question_id": "mathbench_middle_middle_knowledge_100",
+    "subject": "Basic Probability and Statistics",
+    "question": "What is the survey method that examines all members of the population called?",
+    "choices": {
+      "A": "Comprehensive survey",
+      "B": "Partial survey",
+      "C": "Sample survey",
+      "D": "Member survey"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 24,
+    "question_id": "mathbench_middle_middle_35",
+    "subject": "Basic Geometry",
+    "question": "What is the smallest whole number larger than the perimeter of any triangle with a side of length  $5$ and a side of length  $19$ ?",
+    "choices": {
+      "A": "24",
+      "B": "48",
+      "C": "29",
+      "D": "43"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 25,
+    "question_id": "mathbench_middle_middle_knowledge_87",
+    "subject": "Basic Numbers and Algebra",
+    "question": "Which of the following expressions is the vertex form of a quadratic function?",
+    "choices": {
+      "A": "None",
+      "B": "$y=a(x-x_{1} )(x-x_{2})$",
+      "C": "$y=a(x-\\frac{b}{2a} )^{2}+\\frac{4ac-b^{2}}{4a} $",
+      "D": "$y=ax^{2}+bx+c （a≠0）$"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 26,
+    "question_id": "mathbench_middle_middle_2",
+    "subject": "Basic Probability and Statistics",
+    "question": "A magazine printed photos of three celebrities along with three photos of the celebrities as babies. The baby pictures did not identify the celebrities. Readers were asked to match each celebrity with the correct baby pictures. What is the probability that a reader guessing at random will match all three correctly?",
+    "choices": {
+      "A": "\\frac{1}{2}",
+      "B": "\\frac{1}{9}",
+      "C": "\\frac{1}{6}",
+      "D": "\\frac{1}{3}"
+    },
+    "correct_answer": "C",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 27,
+    "question_id": "mathbench_middle_middle_knowledge_164",
+    "subject": "Basic Geometry",
+    "question": "What is called the horizontal number axis? What is called the vertical number axis? What is the intersection point of the two coordinate axes in the Cartesian coordinate system called?",
+    "choices": {
+      "A": "x-axis; y-axis; origin",
+      "B": "y-axis; y-axis; origin",
+      "C": "y-axis; x-axis; origin",
+      "D": "x-axis; x-axis; origin"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 28,
+    "question_id": "mathbench_middle_middle_53",
+    "subject": "Basic Numbers and Algebra",
+    "question": "When Cheenu was a boy, he could run  $15$ miles in  $3$ hours and  $30$ minutes. As an old man, he can now walk  $10$ miles in  $4$ hours. How many minutes longer does it take for him to walk a mile now compared to when he was a boy?",
+    "choices": {
+      "A": "6",
+      "B": "30",
+      "C": "10",
+      "D": "18"
+    },
+    "correct_answer": "C",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 29,
+    "question_id": "mathbench_middle_middle_knowledge_105",
+    "subject": "Basic Probability and Statistics",
+    "question": "What is the number of individuals in a sample called?",
+    "choices": {
+      "A": "Sample volume",
+      "B": "Number of samples",
+      "C": "Sample total",
+      "D": "Sample size"
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 30,
+    "question_id": "mathbench_middle_middle_33",
+    "subject": "Basic Geometry",
+    "question": "In  $\\bigtriangleup ABC$ ,  $AB=BC=29$ , and  $AC=42$ . What is the area of  $\\bigtriangleup ABC$ ?",
+    "choices": {
+      "A": "701",
+      "B": "420",
+      "C": "500",
+      "D": "609"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 31,
+    "question_id": "mathbench_middle_middle_knowledge_66",
+    "subject": "Basic Numbers and Algebra",
+    "question": "Examine the properties of inequalities. What happens to the direction of the inequality sign when both sides of the inequality are added to (or subtracted from) by the same number (or expression)?",
+    "choices": {
+      "A": "Unchanged",
+      "B": "Changes",
+      "C": "It depends",
+      "D": "None of the above"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 32,
+    "question_id": "mathbench_middle_middle_59",
+    "subject": "Basic Probability and Statistics",
+    "question": "A box contains five cards, numbered 1, 2, 3, 4, and 5. Three cards are selected randomly without replacement from the box. What is the probability that 4 is the largest value selected?",
+    "choices": {
+      "A": "\\frac{3}{10}",
+      "B": "\\frac{1}{5}",
+      "C": "\\frac{1}{10}",
+      "D": "\\frac{2}{5}"
+    },
+    "correct_answer": "A",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 33,
+    "question_id": "mathbench_middle_middle_knowledge_169",
+    "subject": "Basic Geometry",
+    "question": "What must the angle of rotational symmetry be less than and greater than?",
+    "choices": {
+      "A": "0;360",
+      "B": "360;720",
+      "C": "180;360",
+      "D": "0;180"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 34,
+    "question_id": "mathbench_middle_middle_knowledge_133",
+    "subject": "Basic Numbers and Algebra",
+    "question": "What is it called when the common factors (not 1) of the numerator and denominator of a fraction are canceled?",
+    "choices": {
+      "A": "Reduction",
+      "B": "Common denominator",
+      "C": "Product",
+      "D": "General term"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 35,
+    "question_id": "mathbench_middle_middle_knowledge_102",
+    "subject": "Basic Probability and Statistics",
+    "question": "What is the name of the entire set of objects to be examined?",
+    "choices": {
+      "A": "Universal Set",
+      "B": "Total Set",
+      "C": "Partial",
+      "D": "Population"
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 36,
+    "question_id": "mathbench_middle_middle_knowledge_19",
+    "subject": "Basic Geometry",
+    "question": "What is pythagorean theorem in any right triangle, if a and b are the lengths of the legs and c is the length of the hypotenuse?",
+    "choices": {
+      "A": "$a^2+b^2=c^2$",
+      "B": "$a^2+b^2={(a+b)}^2$",
+      "C": "$a^2+b^2=c$",
+      "D": "$a+b=c$"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 37,
+    "question_id": "mathbench_middle_middle_68",
+    "subject": "Basic Numbers and Algebra",
+    "question": "Each day for four days, Linda traveled for one hour at a speed that resulted in her traveling one mile in an integer number of minutes. Each day after the first, her speed decreased so that the number of minutes to travel one mile increased by  $5$ minutes over the preceding day. Each of the four days, her distance traveled was also an integer number of miles. What was the total number of miles for the four trips?",
+    "choices": {
+      "A": "10",
+      "B": "82",
+      "C": "25",
+      "D": "50"
+    },
+    "correct_answer": "C",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 38,
+    "question_id": "mathbench_middle_middle_12",
+    "subject": "Basic Probability and Statistics",
+    "question": "One day the Beverage Barn sold  $252$ cans of soda to  $100$ customers, and every customer bought at least one can of soda. What is the maximum possible median number of cans of soda bought per customer on that day?",
+    "choices": {
+      "A": "3.5",
+      "B": "3.0",
+      "C": "4.5",
+      "D": "4.0"
+    },
+    "correct_answer": "A",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 39,
+    "question_id": "mathbench_middle_middle_knowledge_159",
+    "subject": "Basic Geometry",
+    "question": "If corresponding angles are equal, what is the positional relationship between the two lines?",
+    "choices": {
+      "A": "Intersecting",
+      "B": "Parallel",
+      "C": "Unrelated",
+      "D": "Perpendicular"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 40,
+    "question_id": "mathbench_middle_middle_29",
+    "subject": "Basic Numbers and Algebra",
+    "question": "A baseball league consists of two four-team divisions. Each team plays every other team in its division  $N$ games. Each team plays every team in the other division  $M$ games with  $N>2M$ and  $M>4$ . Each team plays a  $76$ game schedule. How many games does a team play within its own division?",
+    "choices": {
+      "A": "72",
+      "B": "54",
+      "C": "60",
+      "D": "48"
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 41,
+    "question_id": "mathbench_middle_middle_knowledge_101",
+    "subject": "Basic Probability and Statistics",
+    "question": "What is the method of investigation called, where part of the data is surveyed to estimate the whole?",
+    "choices": {
+      "A": "Sampling survey",
+      "B": "Universal survey",
+      "C": "Comprehensive survey",
+      "D": "One-sided survey"
+    },
+    "correct_answer": "A",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 42,
+    "question_id": "mathbench_middle_middle_knowledge_165",
+    "subject": "Basic Geometry",
+    "question": "For any point in the plane, perpendicular lines are drawn from the point to the x-axis and y-axis, respectively, with the feet of the perpendiculars lying on the x-axis and y-axis. What are the corresponding numbers a, b called for that point?",
+    "choices": {
+      "A": "abscissa; ordinate",
+      "B": "ordinate; abscissa",
+      "C": "ordinate; ordinate",
+      "D": "abscissa; abscissa"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 43,
+    "question_id": "mathbench_middle_middle_knowledge_47",
+    "subject": "Basic Numbers and Algebra",
+    "question": "When the coefficients of the same variable are opposite or equal in two equations, adding or subtracting the two sides of the two equations respectively can eliminate this variable. This method is called <<<Answer>>>, known for short as the method of addition and subtraction.",
+    "choices": {
+      "A": "Substitution method",
+      "B": "Method of addition and subtraction elimination",
+      "C": "Exhaustive method",
+      "D": "Substitution elimination method"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 44,
+    "question_id": "mathbench_middle_middle_66",
+    "subject": "Basic Probability and Statistics",
+    "question": "An integer between  $1000$ and  $9999$ , inclusive, is chosen at random. What is the probability that it is an odd integer whose digits are all distinct?",
+    "choices": {
+      "A": "\\frac{7}{25}",
+      "B": "\\frac{9}{25}",
+      "C": "\\frac{14}{75}",
+      "D": "\\frac{56}{225}"
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 45,
+    "question_id": "mathbench_middle_middle_60",
+    "subject": "Basic Geometry",
+    "question": "A square-shaped floor is covered with congruent square tiles. If the total number of tiles that lie on the two diagonals is 37, how many tiles cover the floor?",
+    "choices": {
+      "A": "1369",
+      "B": "324",
+      "C": "361",
+      "D": "148"
+    },
+    "correct_answer": "C",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 46,
+    "question_id": "mathbench_middle_middle_knowledge_67",
+    "subject": "Basic Numbers and Algebra",
+    "question": "If the relationship between two variables x, y can be expressed in the form of $y=kx+b(k\\ne 0)$, then y is called what of x?",
+    "choices": {
+      "A": "Exponential function",
+      "B": "Trigonometric function",
+      "C": "Linear function",
+      "D": "Quadratic function"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 47,
+    "question_id": "mathbench_middle_middle_knowledge_104",
+    "subject": "Basic Probability and Statistics",
+    "question": "What do all the individuals drawn make up?",
+    "choices": {
+      "A": "Partial set",
+      "B": "Sample",
+      "C": "Population",
+      "D": "Individual"
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 48,
+    "question_id": "mathbench_middle_middle_knowledge_37",
+    "subject": "Basic Geometry",
+    "question": "In the process of solving application problems by setting up equations, what are the common formulas for perimeter problems?",
+    "choices": {
+      "A": "$Part = Total \\cdot Ratio$, $Ratio = \\frac{Part}{Total}$, $Total = \\frac{Part}{Ratio}$",
+      "B": "$C_{circle} = 2\\pi R$, $C_{rectangle} = 2(a+b)$, $C_{square} = 4a$",
+      "C": "$V_{rectangular prism} = abc$, $V_{cube} = a^3$, $V_{cylinder} = \\pi R^2h$, $V_{cone} = \\frac{1}{3}\\pi R^2h$",
+      "D": "$S_{circle} = \\pi R^2$, $S_{rectangle} = ab$, $S_{square} = a^2$, $S_{annulus} = \\pi (R^2-r^2)$"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 49,
+    "question_id": "mathbench_middle_middle_knowledge_129",
+    "subject": "Basic Numbers and Algebra",
+    "question": "What must be the final result of factorization?",
+    "choices": {
+      "A": "The product of several fractions",
+      "B": "Several entire expressions subtracted",
+      "C": "Several entire expressions added",
+      "D": "The product of several entire expressions"
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 50,
+    "question_id": "mathbench_middle_middle_143",
+    "subject": "Basic Probability and Statistics",
+    "question": "Two integers are inserted into the list  $3, 3, 8, 11, 28$ to double its range. The mode and median remain unchanged. What is the maximum possible sum of the two additional numbers?",
+    "choices": {
+      "A": "58",
+      "B": "61",
+      "C": "60",
+      "D": "56"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 51,
+    "question_id": "mathbench_middle_middle_knowledge_153",
+    "subject": "Basic Geometry",
+    "question": "Among all the line segments connecting a point outside a line to all points on the line, which line segment is the shortest?",
+    "choices": {
+      "A": "Parallel line segment",
+      "B": "Perpendicular line segment",
+      "C": "Intersecting but not perpendicular line segment",
+      "D": "There is no shortest line segment"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 52,
+    "question_id": "mathbench_middle_middle_knowledge_59",
+    "subject": "Basic Numbers and Algebra",
+    "question": "When solving the quadratic equation $a\\mathop{{x}}\\nolimits^{{2}}+bx+c=0$ using the completing the square method, and transforming the left side into a perfect square trinomial in the form of $(x+p)^{2} = q$, what is the solution?",
+    "choices": {
+      "A": "If $q \\ge 0$, the roots of the equation are $\\frac{{-b \\pm \n  \\sqrt{{\\mathop{{b}}\\nolimits^{{2}}-4ac}}}}{{2a}}$, if $q< 0$, the equation has no real roots",
+      "B": "No real roots",
+      "C": "0",
+      "D": "$\\frac{{-b \\pm  \n  \\sqrt{{\\mathop{{b}}\\nolimits^{{2}}-4ac}}}}{{2a}}$"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 53,
+    "question_id": "mathbench_middle_middle_31",
+    "subject": "Basic Probability and Statistics",
+    "question": "The Blue Bird High School chess team consists of two boys and three girls. A photographer wants to take a picture of the team to appear in the local newspaper. She decides to have them sit in a row with a boy at each end and the three girls in the middle. How many such arrangements are possible?",
+    "choices": {
+      "A": "12",
+      "B": "6",
+      "C": "4",
+      "D": "2"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 54,
+    "question_id": "mathbench_middle_middle_knowledge_145",
+    "subject": "Basic Geometry",
+    "question": "If the sides of one angle are the extensions in the opposite direction of the sides of another angle, what are these two angles to each other?",
+    "choices": {
+      "A": "Vertically opposite angles",
+      "B": "Complementary angles",
+      "C": "Adjacent angles",
+      "D": "Parallel angles"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 55,
+    "question_id": "mathbench_middle_middle_knowledge_88",
+    "subject": "Basic Numbers and Algebra",
+    "question": "Which of the following expressions is the intersection form of a quadratic function?",
+    "choices": {
+      "A": "$y=a(x-\\frac{b}{2a} )^{2}+\\frac{4ac-b^{2}}{4a} $",
+      "B": "None of them",
+      "C": "$y=ax^{2}+bx+c (a\\neq0)$",
+      "D": "$y=a(x-x_{1} )(x-x_{2})$"
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 56,
+    "question_id": "mathbench_middle_middle_127",
+    "subject": "Basic Probability and Statistics",
+    "question": "In how many ways can the letters in  $\\textbf{BEEKEEPER}$ be rearranged so that two or more  $\\textbf{E}$ s do not appear together?",
+    "choices": {
+      "A": "12",
+      "B": "24",
+      "C": "4",
+      "D": "120"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 57,
+    "question_id": "mathbench_middle_middle_knowledge_171",
+    "subject": "Basic Geometry",
+    "question": "If a figure rotates 180 degrees around a certain point and coincides with another figure, what relationship do these two figures have?",
+    "choices": {
+      "A": "Translation symmetry",
+      "B": "Rotational symmetry",
+      "C": "Symmetry",
+      "D": "Central symmetry"
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 58,
+    "question_id": "mathbench_middle_middle_knowledge_51",
+    "subject": "Basic Numbers and Algebra",
+    "question": "What type of number is the result of $\\sqrt{a} (a \\ge 0)$?",
+    "choices": {
+      "A": "Rational number",
+      "B": "Negative number",
+      "C": "Non-negative number",
+      "D": "Integer"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 59,
+    "question_id": "mathbench_middle_middle_81",
+    "subject": "Basic Probability and Statistics",
+    "question": "Professor Chang has nine different language books lined up on a bookshelf: two Arabic, three German, and four Spanish. How many ways are there to arrange the nine books on the shelf keeping the Arabic books together and keeping the Spanish books together?",
+    "choices": {
+      "A": "182,440",
+      "B": "362,880",
+      "C": "2880",
+      "D": "5760"
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 60,
+    "question_id": "mathbench_middle_middle_knowledge_146",
+    "subject": "Basic Geometry",
+    "question": "When two lines intersect at a right angle, they are called mutually perpendicular. One of them is called the other's?",
+    "choices": {
+      "A": "Parallel line",
+      "B": "Intersecting line",
+      "C": "Complementary line",
+      "D": "Perpendicular line"
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 61,
+    "question_id": "mathbench_middle_middle_124",
+    "subject": "Basic Numbers and Algebra",
+    "question": "Ricardo has  $2020$ coins, some of which are pennies ( $1$ -cent coins) and the rest of which are nickels ( $5$ -cent coins). He has at least one penny and at least one nickel. What is the difference in cents between the greatest possible and least amounts of money that Ricardo can have?",
+    "choices": {
+      "A": "\\text{8072}",
+      "B": "\\text{806}",
+      "C": "\\text{8068}",
+      "D": "\\text{8076}"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 62,
+    "question_id": "mathbench_middle_middle_118",
+    "subject": "Basic Probability and Statistics",
+    "question": "A scientist walking through a forest recorded as integers the heights of  $5$ trees standing in a row. She observed that each tree was either twice as tall or half as tall as the one to its right. Unfortunately some of her data was lost when rain fell on her notebook. Her notes are shown below, with blanks indicating the missing numbers. Based on her observations, the scientist was able to reconstruct the lost data. What was the average height of the trees, in meters?\n\n $\\begingroup \\setlength{\\tabcolsep}{10pt} \\renewcommand{\\arraystretch}{1.5} \\begin{array}{|c|c|} \\hline Tree 1 & \\rule{0.4cm}{0.15mm} meters \\\\ Tree 2 & 11 meters \\\\ Tree 3 & \\rule{0.5cm}{0.15mm} meters \\\\ Tree 4 & \\rule{0.5cm}{0.15mm} meters \\\\ Tree 5 & \\rule{0.5cm}{0.15mm} meters \\\\ \\hline Average height & \\rule{0.5cm}{0.15mm}\\text{ .}2 meters \\\\ \\hline \\end{array} \\endgroup$",
+    "choices": {
+      "A": "22.2",
+      "B": "24.2",
+      "C": "37.2",
+      "D": "35.2"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 63,
+    "question_id": "mathbench_middle_middle_102",
+    "subject": "Basic Geometry",
+    "question": "What is the area of the triangle formed by the lines  $y=5$ ,  $y=1+x$ , and  $y=1-x$ ?",
+    "choices": {
+      "A": "8",
+      "B": "16",
+      "C": "12",
+      "D": "4"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 64,
+    "question_id": "mathbench_middle_middle_knowledge_12",
+    "subject": "Basic Numbers and Algebra",
+    "question": "With d≠0，$\\frac{a}{d} +\\frac{b}{d} $=",
+    "choices": {
+      "A": "$\\frac{ad+bd}{d}$",
+      "B": "$\\frac{a+b}{d^{2}}$",
+      "C": "$\\frac{a-b}{d}$",
+      "D": "$\\frac{a+b}{d}$"
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 65,
+    "question_id": "mathbench_middle_middle_105",
+    "subject": "Basic Probability and Statistics",
+    "question": "Alice has  $24$ apples. In how many ways can she share them with Becky and Chris so that each of the three people has at least two apples?",
+    "choices": {
+      "A": "105",
+      "B": "380",
+      "C": "114",
+      "D": "190"
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 66,
+    "question_id": "mathbench_middle_middle_knowledge_174",
+    "subject": "Basic Geometry",
+    "question": "For two centrally symmetric figures, what is the relationship between the corresponding segments?",
+    "choices": {
+      "A": "Parallel and equal",
+      "B": "Equal but not parallel",
+      "C": "Intersecting",
+      "D": "Parallel but not equal"
+    },
+    "correct_answer": "A",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 67,
+    "question_id": "mathbench_middle_middle_knowledge_79",
+    "subject": "Basic Numbers and Algebra",
+    "question": "Regarding the graph of the hyperbolic function, when $k>0$, in which quadrants are the two branches of the hyperbola located?",
+    "choices": {
+      "A": "Second, Third",
+      "B": "Second, Fourth",
+      "C": "First, Third",
+      "D": "First, Fourth"
+    },
+    "correct_answer": "C",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 68,
+    "question_id": "mathbench_middle_middle_99",
+    "subject": "Basic Probability and Statistics",
+    "question": "The faces of each of two fair dice are numbered  $1$ ,  $2$ ,  $3$ ,  $5$ ,  $7$ , and  $8$ . When the two dice are tossed, what is the probability that their sum will be an even number?",
+    "choices": {
+      "A": "\\frac{2}{3}",
+      "B": "\\frac{3}{5}",
+      "C": "\\frac{5}{9}",
+      "D": "\\frac{1}{2}"
+    },
+    "correct_answer": "C",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 69,
+    "question_id": "mathbench_middle_middle_knowledge_154",
+    "subject": "Basic Geometry",
+    "question": "How many lines, passing through a point outside a given line, are parallel to the given line?",
+    "choices": {
+      "A": "4",
+      "B": "2",
+      "C": "1",
+      "D": "3"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 70,
+    "question_id": "mathbench_middle_middle_128",
+    "subject": "Basic Numbers and Algebra",
+    "question": "Four numbers are written in a row. The average of the first two is  $21,$ the average of the middle two is  $26,$ and the average of the last two is  $30.$ What is the average of the first and last of the numbers?",
+    "choices": {
+      "A": "28",
+      "B": "24",
+      "C": "26",
+      "D": "25"
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 71,
+    "question_id": "mathbench_middle_middle_knowledge_108",
+    "subject": "Basic Probability and Statistics",
+    "question": "When collecting statistical data, dividing the data into several groups according to a certain range, the number of groups is called <<<Answer1>>>, and the difference between the two endpoints of each group is called <<<Answer2>>>",
+    "choices": {
+      "A": "Number of categories, Group difference",
+      "B": "Group, Distance",
+      "C": "Group interval, Number of groups",
+      "D": "Number of groups, Group interval"
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 72,
+    "question_id": "mathbench_middle_middle_knowledge_162",
+    "subject": "Basic Geometry",
+    "question": "What is a pair of numbers a and b, arranged in order, called?",
+    "choices": {
+      "A": "Pair of numbers",
+      "B": "Ordered array",
+      "C": "Array",
+      "D": "Ordered pair"
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 73,
+    "question_id": "mathbench_middle_middle_126",
+    "subject": "Basic Numbers and Algebra",
+    "question": "How many positive integers can fill the blank in the sentence below?\n\n“One positive integer is _____ more than twice another, and the sum of the two numbers is  $28$ .”",
+    "choices": {
+      "A": "7",
+      "B": "9",
+      "C": "10",
+      "D": "6"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 74,
+    "question_id": "mathbench_middle_middle_100",
+    "subject": "Basic Probability and Statistics",
+    "question": "In a tournament there are six teams that play each other twice. A team earns  $3$ points for a win,  $1$ point for a draw, and  $0$ points for a loss. After all the games have been played it turns out that the top three teams earned the same number of total points. What is the greatest possible number of total points for each of the top three teams?",
+    "choices": {
+      "A": "30",
+      "B": "26",
+      "C": "24",
+      "D": "23"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 75,
+    "question_id": "mathbench_middle_middle_knowledge_166",
+    "subject": "Basic Geometry",
+    "question": "Two coordinate axes divide the plane into four parts, what is the name of the upper right part? What are they called in counterclockwise order?",
+    "choices": {
+      "A": "First quadrant; Third quadrant; Second quadrant; Fourth quadrant",
+      "B": "First quadrant; Second quadrant; Third quadrant; Fourth quadrant",
+      "C": "First quadrant; Second quadrant; Fourth quadrant; Third quadrant",
+      "D": "Second quadrant; First quadrant; Third quadrant; Fourth quadrant"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 76,
+    "question_id": "mathbench_middle_middle_36",
+    "subject": "Basic Numbers and Algebra",
+    "question": "On her first day of work, Janabel sold one widget. On day two, she sold three widgets. On day three, she sold five widgets, and on each succeeding day, she sold two more widgets than she had sold on the previous day. How many widgets in total had Janabel sold after working  $20$ days?",
+    "choices": {
+      "A": "400",
+      "B": "210",
+      "C": "40",
+      "D": "401"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 77,
+    "question_id": "mathbench_middle_middle_62",
+    "subject": "Basic Probability and Statistics",
+    "question": "Peter, Emma, and Kyler played chess with each other. Peter won 4 games and lost 2 games. Emma won 3 games and lost 3 games. If Kyler lost 3 games, how many games did he win?",
+    "choices": {
+      "A": "3",
+      "B": "0",
+      "C": "1",
+      "D": "2"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 78,
+    "question_id": "mathbench_middle_middle_knowledge_150",
+    "subject": "Basic Geometry",
+    "question": "In the new figure obtained after translation, each point is obtained by moving a certain point from the original figure. What are these two points called?",
+    "choices": {
+      "A": "Equivalent points",
+      "B": "Corresponding points",
+      "C": "Similar points",
+      "D": "Likewise points"
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 79,
+    "question_id": "mathbench_middle_middle_knowledge_119",
+    "subject": "Basic Numbers and Algebra",
+    "question": "For the multiplication of polynomials, which of the following is correct?",
+    "choices": {
+      "A": "Each term in the two polynomials only needs to be multiplied and then added in sequence",
+      "B": "First multiply each term of one polynomial by every term of the other polynomial, then add up the products obtained",
+      "C": "Each term in the two polynomials only needs to be multiplied and then subtracted in sequence",
+      "D": "First multiply each term of one polynomial by every term of the other polynomial, then subtract the products obtained"
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 80,
+    "question_id": "mathbench_middle_middle_32",
+    "subject": "Basic Probability and Statistics",
+    "question": "Billy's basketball team scored the following points over the course of the first  $11$ games of the season. If his team scores  $40$ in the  $12^{th}$ game, which of the following statistics will show an increase?\n\n $42, 47, 53, 53, 58, 58, 58, 61, 64, 65, 73$",
+    "choices": {
+      "A": "\\text{median}",
+      "B": "\\text{mean}",
+      "C": "\\text{mode}",
+      "D": "\\text{range}"
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 81,
+    "question_id": "mathbench_middle_middle_knowledge_168",
+    "subject": "Basic Geometry",
+    "question": "What do you call a shape that overlaps with the original shape after rotating it around a fixed point by an angle?",
+    "choices": {
+      "A": "Centrally symmetrical figure",
+      "B": "Rotational figure",
+      "C": "Symmetrical figure",
+      "D": "Rotationally symmetrical figure"
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 82,
+    "question_id": "mathbench_middle_middle_knowledge_98",
+    "subject": "Basic Numbers and Algebra",
+    "question": "For the parabola $y=ax^{2}+bx+c (a≠0)$, when $b^{2}-4ac>0$, how many real roots does the quadratic equation have, and how many points of intersection does the graph of the quadratic function have with the x-axis?",
+    "choices": {
+      "A": "1,2",
+      "B": "2,1",
+      "C": "1,1",
+      "D": "2,2"
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 83,
+    "question_id": "mathbench_middle_middle_knowledge_103",
+    "subject": "Basic Probability and Statistics",
+    "question": "What is each object under investigation that makes up the population called?",
+    "choices": {
+      "A": "Population",
+      "B": "Individual",
+      "C": "Partial",
+      "D": "Universal set"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 84,
+    "question_id": "mathbench_middle_middle_knowledge_167",
+    "subject": "Basic Geometry",
+    "question": "In a plane, what is the motion called when a figure is rotated around a fixed point in a certain direction by an angle?",
+    "choices": {
+      "A": "Symmetry",
+      "B": "Central Symmetry",
+      "C": "Translation",
+      "D": "Rotation"
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 85,
+    "question_id": "mathbench_middle_middle_knowledge_96",
+    "subject": "Basic Numbers and Algebra",
+    "question": "For a quadratic function, when the x-coordinates are $x_{1}$ and $x_{2}$, and their corresponding y-coordinates are equal, then the axis of symmetry is",
+    "choices": {
+      "A": "$x=\\frac{x_{1}^{2}+x_{2}^{2}}{2}$",
+      "B": "$x=\\frac{x_{1}^{2}-x_{2}^{2}}{2}$",
+      "C": "$x=\\frac{x_{1}+x_{2}}{2} $",
+      "D": "$x=\\frac{x_{1}-x_{2}}{2} $"
+    },
+    "correct_answer": "C",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 86,
+    "question_id": "mathbench_middle_middle_41",
+    "subject": "Basic Probability and Statistics",
+    "question": "Two different numbers are randomly selected from the set  $\\{ - 2, -1, 0, 3, 4, 5\\}$ and multiplied together. What is the probability that the product is  $0$ ?",
+    "choices": {
+      "A": "\\dfrac{1}{5}",
+      "B": "\\dfrac{1}{4}",
+      "C": "\\dfrac{1}{6}",
+      "D": "\\dfrac{1}{3}"
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 87,
+    "question_id": "mathbench_middle_middle_knowledge_38",
+    "subject": "Basic Geometry",
+    "question": "In the process of solving application problems through equation, what are the common formulas for area problems?",
+    "choices": {
+      "A": "$Part = Whole \\cdot Ratio$, $Ratio = \\frac{Part}{Whole}$, $Whole = \\frac{Part}{Ratio}$",
+      "B": "$V_{rectangular prism} =abc$, $V_{cube} =a^3$, $V_{cylinder} =\\pi R^2h$, $V_{cone} =\\frac{1}{3}\\pi R^2h$",
+      "C": "$S_{circle} =\\pi R^2$, $S_{rectangle} =ab$, $S_{square} =a^2$, $S_{annulus} =\\pi (R^2-r^2)$",
+      "D": "$C_{circle} =2\\pi R$, $C_{rectangle} =2(a+b)$, $C_{square} =4a$"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 88,
+    "question_id": "mathbench_middle_middle_123",
+    "subject": "Basic Numbers and Algebra",
+    "question": "How many integers between  $2020$ and  $2400$ have four distinct digits arranged in increasing order? (For example,  $2347$ is one integer.)",
+    "choices": {
+      "A": "\\text{28}",
+      "B": "\\text{21}",
+      "C": "\\text{15}",
+      "D": "\\text{9}"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 89,
+    "question_id": "mathbench_middle_middle_122",
+    "subject": "Basic Probability and Statistics",
+    "question": "Aaron, Darren, Karen, Maren, and Sharon rode on a small train that has five cars that seat one person each. Maren sat in the last car. Aaron sat directly behind Sharon. Darren sat in one of the cars in front of Aaron. At least one person sat between Karen and Darren. Who sat in the middle car?",
+    "choices": {
+      "A": "\\text{Darren}",
+      "B": "\\text{Aaron}",
+      "C": "\\text{Maren}",
+      "D": "\\text{Karen}"
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 90,
+    "question_id": "mathbench_middle_middle_knowledge_158",
+    "subject": "Basic Geometry",
+    "question": "If two lines are parallel, what is the relationship between the same-side interior angles?",
+    "choices": {
+      "A": "Equal",
+      "B": "Complementary",
+      "C": "Double",
+      "D": "Triple"
+    },
+    "correct_answer": "A",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 91,
+    "question_id": "mathbench_middle_middle_knowledge_64",
+    "subject": "Basic Numbers and Algebra",
+    "question": "The left and right sides of the inequality are both <<<Answer1>>> with only one unknown, and the highest degree of the unknown is <<<Answer2>>>. Such inequalities are called linear inequalities in one variable",
+    "choices": {
+      "A": "polynomial, 2",
+      "B": "polynomial, 1",
+      "C": "monomial, 2",
+      "D": "monomial, 1"
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 92,
+    "question_id": "mathbench_middle_middle_49",
+    "subject": "Basic Probability and Statistics",
+    "question": "A top hat contains 3 red chips and 2 green chips. Chips are drawn randomly, one at a time without replacement, until all 3 of the reds are drawn or until both green chips are drawn. What is the probability that the 3 reds are drawn?",
+    "choices": {
+      "A": "\\dfrac{1}{2}",
+      "B": "\\dfrac{3}{5}",
+      "C": "\\dfrac{3}{10}",
+      "D": "\\dfrac{2}{5}"
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 93,
+    "question_id": "mathbench_middle_middle_knowledge_144",
+    "subject": "Basic Geometry",
+    "question": "Among the four angles formed by the intersection of two straight lines, which are the two angles that have a common vertex and share one side?",
+    "choices": {
+      "A": "Complementary angles",
+      "B": "Parallel angles",
+      "C": "Adjacent supplementary angles",
+      "D": "Vertically opposite angles"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 94,
+    "question_id": "mathbench_middle_middle_75",
+    "subject": "Basic Numbers and Algebra",
+    "question": "All of Marcy's marbles are blue, red, green, or yellow. One third of her marbles are blue, one fourth of them are red, and six of them are green. What is the smallest number of yellow marbles that Macy could have?",
+    "choices": {
+      "A": "3",
+      "B": "1",
+      "C": "5",
+      "D": "4"
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 95,
+    "question_id": "mathbench_middle_middle_21",
+    "subject": "Basic Probability and Statistics",
+    "question": "In the small country of Mathland, all automobile license plates have four symbols. The first must be a vowel (A, E, I, O, or U), the second and third must be two different letters among the 21 non-vowels, and the fourth must be a digit (0 through 9). If the symbols are chosen at random subject to these conditions, what is the probability that the plate will read \"AMC8\"?",
+    "choices": {
+      "A": "\\frac{1}{10,500}",
+      "B": "\\frac{1}{2,100}",
+      "C": "\\frac{1}{21,000}",
+      "D": "\\frac{1}{1,050}"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 96,
+    "question_id": "mathbench_middle_middle_knowledge_163",
+    "subject": "Basic Geometry",
+    "question": "In a plane, what is formed by two mutually perpendicular number axes with a common origin?",
+    "choices": {
+      "A": "Set of number axes",
+      "B": "Number axis space",
+      "C": "Coordinate space",
+      "D": "Cartesian coordinate system"
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 97,
+    "question_id": "mathbench_middle_middle_knowledge_76",
+    "subject": "Basic Numbers and Algebra",
+    "question": "What type of graph does an inverse proportion function have?",
+    "choices": {
+      "A": "Arc",
+      "B": "Parabola",
+      "C": "Curve",
+      "D": "Hyperbola"
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 98,
+    "question_id": "mathbench_middle_middle_knowledge_107",
+    "subject": "Basic Probability and Statistics",
+    "question": "The ratio of the frequency to the total number of data is <<<Answer>>>",
+    "choices": {
+      "A": "Frequency",
+      "B": "Frame rate",
+      "C": "Slope",
+      "D": "Probability"
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 99,
+    "question_id": "mathbench_middle_middle_knowledge_39",
+    "subject": "Basic Geometry",
+    "question": "In the process of solving application problems by setting up equations, what are the common formulas for volume problems?",
+    "choices": {
+      "A": "$A_{circle} =\\pi R^2$, $A_{rectangle} =ab$, $A_{square} =a^2$, $A_{annulus} =\\pi (R^2-r^2)$",
+      "B": "$C_{circle} =2\\pi R$, $C_{rectangle} =2(a+b)$, $C_{square} =4a$",
+      "C": "$V_{cuboid} =abc$, $V_{cube} =a^3$, $V_{cylinder} =\\pi R^2h$, $V_{cone} =\\frac{1}{3}\\pi R^2h$",
+      "D": "$Part=Whole\\cdot Ratio$, $Ratio=\\frac{Part}{Whole}$, $Whole=\\frac{Part}{Ratio}$"
+    },
+    "correct_answer": "C",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 100,
+    "question_id": "mathbench_middle_middle_knowledge_34",
+    "subject": "Basic Numbers and Algebra",
+    "question": "In the process of solving application problems by setting up equations, what are the common formulas for moving problems?",
+    "choices": {
+      "A": "$Distance = Speed \\cdot Time$, $Speed =\\frac{Distance}{Time}$, $Time =\\frac{Distance}{Speed}$",
+      "B": "$Work = Efficiency \\cdot Time$, $Efficiency =\\frac{Work}{Time}$, $Time =\\frac{Work}{Efficiency}$",
+      "C": "$Part = Whole \\cdot Ratio$, $Ratio =\\frac{Part}{Whole}$, $Whole =\\frac{Part}{Ratio}$",
+      "D": "Downstream speed = Still water speed + Flow speed, Upstream speed = Still water speed - Flow speed"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 101,
+    "question_id": "mathbench_middle_middle_149",
+    "subject": "Basic Probability and Statistics",
+    "question": "Lola, Lolo, Tiya, and Tiyo participated in a ping pong tournament. Each player competed against each of the other three players exactly twice. Shown below are the win-loss records for the players. The numbers  $1$ and  $0$ represent a win or loss, respectively. For example, Lola won five matches and lost the fourth match. What was Tiyo’s win-loss record?\n\n $\\begin{array}{c | c} Player & Result \\\\ \\hline Lola & \\texttt{111011}\\\\ Lolo & \\texttt{101010}\\\\ Tiya & \\texttt{010100}\\\\ Tiyo & \\texttt{??????} \\end{array}$ \n $",
+    "choices": {
+      "A": "\\texttt{001001}",
+      "B": "\\texttt{010000}",
+      "C": "\\texttt{000101}",
+      "D": "\\texttt{011000}"
+    },
+    "correct_answer": "C",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 102,
+    "question_id": "mathbench_middle_middle_109",
+    "subject": "Basic Geometry",
+    "question": "Alex and Felicia each have cats as pets. Alex buys cat food in cylindrical cans that are  $6$ cm in diameter and  $12$ cm high. Felicia buys cat food in cylindrical cans that are  $12$ cm in diameter and  $6$ cm high. What is the ratio of the volume of one of Alex's cans to the volume of one of Felicia's cans?",
+    "choices": {
+      "A": "4:1",
+      "B": "1:2",
+      "C": "1:4",
+      "D": "2:1"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 103,
+    "question_id": "mathbench_middle_middle_knowledge_43",
+    "subject": "Basic Numbers and Algebra",
+    "question": "What is called the solution of a linear equation in two variables?",
+    "choices": {
+      "A": "In general, the value of x that makes both sides of the linear equation in two variables equal is called the solution of the system of linear equations in two variables.",
+      "B": "In general, the value of the exponent that makes both sides of the linear equation in two variables equal is called the solution of the system of linear equations in two variables.",
+      "C": "In general, the value of the coefficient that makes both sides of the linear equation in two variables equal is called the solution of the system of linear equations in two variables.",
+      "D": "In general, the value of the unknowns that makes both sides of the linear equation in two variables equal is called the solution of the system of linear equations in two variables."
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 104,
+    "question_id": "mathbench_middle_middle_113",
+    "subject": "Basic Probability and Statistics",
+    "question": "Jamal has a drawer containing  $6$ green socks,  $18$ purple socks, and  $12$ orange socks. After adding more purple socks, Jamal noticed that there is now a  $60\\%$ chance that a sock randomly selected from the drawer is purple. How many purple socks did Jamal add?",
+    "choices": {
+      "A": "9",
+      "B": "12",
+      "C": "6",
+      "D": "18"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 105,
+    "question_id": "mathbench_middle_middle_knowledge_173",
+    "subject": "Basic Geometry",
+    "question": "For two figures that are centrally symmetric, through which point do the lines connecting symmetric points pass?",
+    "choices": {
+      "A": "Center of symmetry",
+      "B": "Point outside the figure",
+      "C": "Point on the figure",
+      "D": "Does not pass through a fixed point"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 106,
+    "question_id": "mathbench_middle_middle_knowledge_73",
+    "subject": "Basic Numbers and Algebra",
+    "question": "When the direct proportion function $y=kx(k<0)$ passes through the second and fourth quadrants, what happens to y as x increases?",
+    "choices": {
+      "A": "Decrease",
+      "B": "Unchanged",
+      "C": "Increase",
+      "D": "Decrease then increase"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 107,
+    "question_id": "mathbench_middle_middle_107",
+    "subject": "Basic Probability and Statistics",
+    "question": "Shauna takes five tests, each worth a maximum of  $100$ points. Her scores on the first three tests are  $76$ ,  $94$ , and  $87$ . In order to average  $81$ for all five tests, what is the lowest score she could earn on one of the other two tests?",
+    "choices": {
+      "A": "66",
+      "B": "52",
+      "C": "48",
+      "D": "74"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 108,
+    "question_id": "mathbench_middle_middle_knowledge_172",
+    "subject": "Basic Geometry",
+    "question": "What is the relationship between two centrally symmetrical figures?",
+    "choices": {
+      "A": "Coincide",
+      "B": "Congruent",
+      "C": "No specific relationship",
+      "D": "Similar but not congruent"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 109,
+    "question_id": "mathbench_middle_middle_knowledge_126",
+    "subject": "Basic Numbers and Algebra",
+    "question": "Regarding the division of a polynomial by a monomial, which of the following is correct?",
+    "choices": {
+      "A": "First multiply each term of the polynomial by the monomial, then subtract the resulting quotients",
+      "B": "First divide each term of the polynomial by the monomial, then subtract the resulting quotients",
+      "C": "First multiply each term of the polynomial by the monomial, then add up the resulting products",
+      "D": "First divide each term of the polynomial by the monomial, then add up the resulting quotients"
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 110,
+    "question_id": "mathbench_middle_middle_knowledge_155",
+    "subject": "Basic Geometry",
+    "question": "If two lines are both parallel to a third line, what is the positional relationship between the two lines?",
+    "choices": {
+      "A": "Unrelated",
+      "B": "Perpendicular to each other",
+      "C": "Intersect",
+      "D": "Parallel to each other"
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 111,
+    "question_id": "mathbench_middle_middle_knowledge_60",
+    "subject": "Basic Numbers and Algebra",
+    "question": "By applying the formula method to solve the quadratic equation $a\\mathop{{x}}\\nolimits^{{2}}+bx+c=0$ where $a\\neq0$, what are the roots of the equation when $\\mathop{{b}}\\nolimits^{{2}}-4ac> 0$?",
+    "choices": {
+      "A": "1",
+      "B": "0",
+      "C": "No real roots",
+      "D": "$\\frac{{-b \\pm  \\sqrt{{\\mathop{{b}}\\nolimits^{{2}}-4ac}}}}{{2a}}$"
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 112,
+    "question_id": "mathbench_middle_middle_7",
+    "subject": "Basic Geometry",
+    "question": "A cube with  $3$ -inch edges is to be constructed from  $27$ smaller cubes with  $1$ -inch edges. Twenty-one of the cubes are colored red and  $6$ are colored white. If the  $3$ -inch cube is constructed to have the smallest possible white surface area showing, what fraction of the surface area is white?",
+    "choices": {
+      "A": "\\frac{5}{27}",
+      "B": "\\frac{1}{9}",
+      "C": "\\frac{5}{54}",
+      "D": "\\frac{2}{9}"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 113,
+    "question_id": "mathbench_middle_middle_knowledge_97",
+    "subject": "Basic Numbers and Algebra",
+    "question": "In the quadratic function $y=ax^{2}+bx+c (a≠0)$, a is used to determine",
+    "choices": {
+      "A": "Vertex position",
+      "B": "Direction of opening",
+      "C": "Neither",
+      "D": "Position of the function graph"
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 114,
+    "question_id": "mathbench_middle_middle_knowledge_156",
+    "subject": "Basic Geometry",
+    "question": "If two lines are parallel, what is the relationship between the corresponding angles?",
+    "choices": {
+      "A": "Twice",
+      "B": "Equal",
+      "C": "Unrelated",
+      "D": "Three times"
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 115,
+    "question_id": "mathbench_middle_middle_knowledge_116",
+    "subject": "Basic Numbers and Algebra",
+    "question": "What is $(a^m)^n$ equal to?",
+    "choices": {
+      "A": "$a^{mn}$",
+      "B": "$a^{m-n}$",
+      "C": "$a^{m^n}$",
+      "D": "$a^{m+n}$"
+    },
+    "correct_answer": "A",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 116,
+    "question_id": "mathbench_middle_middle_knowledge_149",
+    "subject": "Basic Geometry",
+    "question": "In a plane, moving a shape a certain distance in a certain direction is called what?",
+    "choices": {
+      "A": "Translation",
+      "B": "Move right",
+      "C": "Move left",
+      "D": "Move"
+    },
+    "correct_answer": "A",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 117,
+    "question_id": "mathbench_middle_middle_knowledge_65",
+    "subject": "Basic Numbers and Algebra",
+    "question": "Generally, several single-variable linear inequalities about the same unknown combined together form what?",
+    "choices": {
+      "A": "Single-variable linear equation",
+      "B": "System of single-variable linear inequalities",
+      "C": "System of single-variable linear equations",
+      "D": "Single-variable linear inequality"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 118,
+    "question_id": "mathbench_middle_middle_knowledge_170",
+    "subject": "Basic Geometry",
+    "question": "If a figure can coincide with itself after rotating 180 degrees around a certain point, what is this figure called?",
+    "choices": {
+      "A": "Rotational symmetry figure",
+      "B": "Centrosymmetric figure",
+      "C": "Translation symmetry figure",
+      "D": "Symmetric figure"
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 119,
+    "question_id": "mathbench_middle_middle_77",
+    "subject": "Basic Numbers and Algebra",
+    "question": "The harmonic mean of a set of non-zero numbers is the reciprocal of the average of the reciprocals of the numbers. What is the harmonic mean of 1, 2, and 4?",
+    "choices": {
+      "A": "\\frac{7}{3}",
+      "B": "\\frac{3}{7}",
+      "C": "\\frac{7}{12}",
+      "D": "\\frac{12}{7}"
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 120,
+    "question_id": "mathbench_middle_middle_knowledge_152",
+    "subject": "Basic Geometry",
+    "question": "How many lines at most can pass through a point and be perpendicular to a given line?",
+    "choices": {
+      "A": "3",
+      "B": "1",
+      "C": "2",
+      "D": "4"
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 121,
+    "question_id": "mathbench_middle_middle_knowledge_75",
+    "subject": "Basic Numbers and Algebra",
+    "question": "What is the function in the form $y=\\frac{k}{x} $ (where k is a constant, $k \\ne 0$) called?",
+    "choices": {
+      "A": "Inverse proportion function",
+      "B": "Hyperbolic function",
+      "C": "Constant function",
+      "D": "Monotonic function"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 122,
+    "question_id": "mathbench_middle_middle_knowledge_161",
+    "subject": "Basic Geometry",
+    "question": "If the corresponding angles are equal, what is the positional relationship between the two lines?",
+    "choices": {
+      "A": "Unrelated",
+      "B": "Parallel",
+      "C": "Intersecting",
+      "D": "Perpendicular"
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 123,
+    "question_id": "mathbench_middle_middle_142",
+    "subject": "Basic Numbers and Algebra",
+    "question": "Greta Grasshopper sits on a long line of lily pads in a pond. From any lily pad, Greta can jump 5 pads to the right or 3 pads to the left. What is the fewest number of jumps Greta must make to reach the lilly pad located 2023 pads to the right of her starting position?",
+    "choices": {
+      "A": "411",
+      "B": "409",
+      "C": "413",
+      "D": "407"
+    },
+    "correct_answer": "A",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 124,
+    "question_id": "mathbench_middle_middle_19",
+    "subject": "Basic Geometry",
+    "question": "Onkon wants to cover his room's floor with his favourite red carpet. How many square yards of red carpet are required to cover a rectangular floor that is  $12$ feet long and  $9$ feet wide? (There are 3 feet in a yard.)",
+    "choices": {
+      "A": "12",
+      "B": "972",
+      "C": "108",
+      "D": "36"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 125,
+    "question_id": "mathbench_middle_middle_knowledge_46",
+    "subject": "Basic Numbers and Algebra",
+    "question": "Express one variable in terms of another and substitute it into another equation to eliminate variables and then solve the system of linear equations. This method is called <<<Answer>>>, commonly known as the substitution method.",
+    "choices": {
+      "A": "Addition and Subtraction Elimination Method",
+      "B": "Exhaustive Method",
+      "C": "Substitution Elimination Method",
+      "D": "Change of Variable Method"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 126,
+    "question_id": "mathbench_middle_middle_knowledge_151",
+    "subject": "Basic Geometry",
+    "question": "What is the relationship between vertical angles?",
+    "choices": {
+      "A": "Equal",
+      "B": "Twice",
+      "C": "Unrelated",
+      "D": "Not equal"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 127,
+    "question_id": "mathbench_middle_middle_140",
+    "subject": "Basic Numbers and Algebra",
+    "question": "NASA’s Perseverance Rover was launched on July  $30,$  $2020.$ After traveling  $292{,}526{,}838$ miles, it landed on Mars in Jezero Crater about  $6.5$ months later. Which of the following is closest to the Rover’s average interplanetary speed in miles per hour?\n\n $",
+    "choices": {
+      "A": "120{,}000",
+      "B": "600{,}000",
+      "C": "12{,}000",
+      "D": "60{,}000"
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 128,
+    "question_id": "mathbench_middle_middle_120",
+    "subject": "Basic Geometry",
+    "question": "Carrie has a rectangular garden that measures  $6$ feet by  $8$ feet. She plants the entire garden with strawberry plants. Carrie is able to plant  $4$ strawberry plants per square foot, and she harvests an average of  $10$ strawberries per plant. How many strawberries can she expect to harvest?",
+    "choices": {
+      "A": "3840",
+      "B": "1120",
+      "C": "1920",
+      "D": "960"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 129,
+    "question_id": "mathbench_middle_middle_knowledge_117",
+    "subject": "Basic Numbers and Algebra",
+    "question": "Regarding the multiplication rule for monomials, which of the following is correct?",
+    "choices": {
+      "A": "For letters present in only one monomial, along with its exponent, should be discarded",
+      "B": "Multiply coefficients, divide same letters",
+      "C": "Divide coefficients, same letters separately",
+      "D": "Multiply their coefficients, same letters separately"
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 130,
+    "question_id": "mathbench_middle_middle_knowledge_160",
+    "subject": "Basic Geometry",
+    "question": "If the interior alternate angles are equal, what is the positional relationship between the two lines?",
+    "choices": {
+      "A": "Perpendicular",
+      "B": "Parallel",
+      "C": "Irrelevant",
+      "D": "Intersecting"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 131,
+    "question_id": "mathbench_middle_middle_knowledge_58",
+    "subject": "Basic Numbers and Algebra",
+    "question": "After organizing a quadratic equation into the form $a\\mathop{{x}}\\nolimits^{{2}}+bx+c=0$, what respectively are $a\\mathop{{x}}\\nolimits^{{2}}$, $bx$, $b$, $c$?",
+    "choices": {
+      "A": "Quadratic term, linear term, constant term, coefficient of the linear term",
+      "B": "Quadratic term, coefficient of the linear term, linear term, constant term",
+      "C": "Quadratic term, linear term, coefficient of the linear term, constant term",
+      "D": "Linear term, quadratic term, coefficient of the linear term, constant term"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 132,
+    "question_id": "mathbench_middle_middle_knowledge_148",
+    "subject": "Basic Geometry",
+    "question": "What is a statement that judges something called?",
+    "choices": {
+      "A": "Proposition",
+      "B": "Definition",
+      "C": "Description",
+      "D": "Portrayal"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 133,
+    "question_id": "mathbench_middle_middle_knowledge_94",
+    "subject": "Basic Numbers and Algebra",
+    "question": "What are the key points in sketching the graph of a quadratic function?",
+    "choices": {
+      "A": "Direction of opening",
+      "B": "Vertex\nE: Intersection points with x-axis\nF: Intersection point with y-axis",
+      "C": "All of the above",
+      "D": "Axis of symmetry"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 134,
+    "question_id": "mathbench_middle_middle_knowledge_157",
+    "subject": "Basic Geometry",
+    "question": "If two lines are parallel, what is the relationship between their alternate interior angles?",
+    "choices": {
+      "A": "Unrelated",
+      "B": "Triple",
+      "C": "Double",
+      "D": "Equal"
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 135,
+    "question_id": "mathbench_middle_middle_knowledge_17",
+    "subject": "Basic Numbers and Algebra",
+    "question": "Which of the following forms is a representation of scientific notation?",
+    "choices": {
+      "A": "$a\\times 2^{n}$,$1\\le \\left|a\\right |< 10 $,n is an integer",
+      "B": "$a\\times 10^{n}$,$0\\le \\left|a\\right |< 10 $,n is an integer",
+      "C": "$a\\times 10^{n}$,$1\\le \\left|a\\right |< 10 $,n is an integer",
+      "D": "$a\\times 10^{n^{2}}$,$1\\le \\left|a\\right |< 10 $,n is an integer"
+    },
+    "correct_answer": "C",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 136,
+    "question_id": "mathbench_middle_middle_knowledge_63",
+    "subject": "Basic Numbers and Algebra",
+    "question": "All solutions of an inequality with an unknown form what of this inequality?",
+    "choices": {
+      "A": "Solution set",
+      "B": "Set",
+      "C": "Eigenvalue",
+      "D": "Solution"
+    },
+    "correct_answer": "A",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 137,
+    "question_id": "mathbench_middle_middle_136",
+    "subject": "Basic Numbers and Algebra",
+    "question": "What is the value of  $\\frac{1}{3}\\cdot\\frac{2}{4}\\cdot\\frac{3}{5}\\cdots\\frac{18}{20}\\cdot\\frac{19}{21}\\cdot\\frac{20}{22}?$",
+    "choices": {
+      "A": "\\frac{1}{132}",
+      "B": "\\frac{2}{213}",
+      "C": "\\frac{1}{462}",
+      "D": "\\frac{1}{231}"
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 138,
+    "question_id": "mathbench_middle_middle_knowledge_78",
+    "subject": "Basic Numbers and Algebra",
+    "question": "What is the center of symmetry of the inverse proportion function?",
+    "choices": {
+      "A": "$(0,1)$",
+      "B": "$(1,0)$",
+      "C": "The origin",
+      "D": "$(1,1)$"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 139,
+    "question_id": "mathbench_middle_middle_133",
+    "subject": "Basic Numbers and Algebra",
+    "question": "Anna and Bella are celebrating their birthdays together. Five years ago, when Bella turned  $6$ years old, she received a newborn kitten as a birthday present. Today the sum of the ages of the two children and the kitten is  $30$ years. How many years older than Bella is Anna?",
+    "choices": {
+      "A": "2",
+      "B": "3",
+      "C": "1",
+      "D": "4"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 140,
+    "question_id": "mathbench_middle_middle_knowledge_44",
+    "subject": "Basic Numbers and Algebra",
+    "question": "What is called the solution of a system of linear equations in two variables?",
+    "choices": {
+      "A": "Generally, the two solutions of the two equations of a system of linear equations in two variables are called a system of linear equations in two variables.",
+      "B": "Generally, all the solutions of the two equations of a system of linear equations in two variables are called a system of linear equations in two variables.",
+      "C": "Generally, one of the solutions of the two equations of a system of linear equations in two variables is called a system of linear equations in two variables.",
+      "D": "Generally, the common solution of the two equations of a system of linear equations in two variables is called a system of linear equations in two variables."
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 141,
+    "question_id": "mathbench_middle_middle_knowledge_71",
+    "subject": "Basic Numbers and Algebra",
+    "question": "For the direct proportion function $y=kx$, when $k<0$, through which quadrants does the line pass?",
+    "choices": {
+      "A": "II, IV",
+      "B": "Only II",
+      "C": "Only IV",
+      "D": "I, III"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 142,
+    "question_id": "mathbench_middle_middle_knowledge_115",
+    "subject": "Basic Numbers and Algebra",
+    "question": "Which of the following is the multiplication rule for powers with the same base?",
+    "choices": {
+      "A": "$a^m \\times b^m = (a\\times b)^m$",
+      "B": "$(ab)^n = a^n \\times b^n$",
+      "C": "$a^m\\cdot a^n=a^{m+n}$",
+      "D": "$(a^m)^n = a^{mn}$"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 143,
+    "question_id": "mathbench_middle_middle_knowledge_57",
+    "subject": "Basic Numbers and Algebra",
+    "question": "What is the general form of a quadratic equation in one variable?",
+    "choices": {
+      "A": "ax^2 + bx + c = 0, where a, b, c are constants, and a ≠ 0",
+      "B": "ax + b = 0, where a, b are constants, and a ≠ 0",
+      "C": "ax^2 + bx = 0, where a, b are constants, and a ≠ 0",
+      "D": "ax^2 = c, where a, c are constants, and a ≠ 0"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 144,
+    "question_id": "mathbench_middle_middle_knowledge_90",
+    "subject": "Basic Numbers and Algebra",
+    "question": "How is the vertex coordinate of a quadratic function represented?",
+    "choices": {
+      "A": "$(-\\frac{b}{2a} ,\\frac{4ac-b^{2}}{4a} )$",
+      "B": "$(-\\frac{b}{2a} ,\\frac{4ac-b^{2}}{2a} )$",
+      "C": "Neither",
+      "D": "$(-\\frac{b}{a} ,\\frac{4ac-b^{2}}{4a} )$"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 145,
+    "question_id": "mathbench_middle_middle_129",
+    "subject": "Basic Numbers and Algebra",
+    "question": "If  $n$ is an even positive integer, the  $\\emph{double factorial}$ notation  $n!!$ represents the product of all the even integers from  $2$ to  $n$ . For example,  $8!! = 2 \\cdot 4 \\cdot 6 \\cdot 8$ . What is the units digit of the following sum?  $2!! + 4!! + 6!! + \\cdots + 2018!! + 2020!! + 2022!!$",
+    "choices": {
+      "A": "4",
+      "B": "2",
+      "C": "6",
+      "D": "8"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 146,
+    "question_id": "mathbench_middle_middle_knowledge_61",
+    "subject": "Basic Numbers and Algebra",
+    "question": "What symbols are used to represent the relationship of inequality in expressions called inequalities?",
+    "choices": {
+      "A": "$<,>$",
+      "B": "$<,>,\\leq,\\geq$",
+      "C": "$<,>,\\leq,\\geq,\\neq$",
+      "D": "$<,>,\\leq,\\geq,=$"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 147,
+    "question_id": "mathbench_middle_middle_139",
+    "subject": "Basic Numbers and Algebra",
+    "question": "Harold made a plum pie to take on a picnic. He was able to eat only  $\\frac{1}{4}$ of the pie, and he left the rest for his friends. A moose came by and ate  $\\frac{1}{3}$ of what Harold left behind. After that, a porcupine ate  $\\frac{1}{3}$ of what the moose left behind. How much of the original pie still remained after the porcupine left?\n\n $",
+    "choices": {
+      "A": "\\frac{1}{6}",
+      "B": "\\frac{1}{4}",
+      "C": "\\frac{1}{3}",
+      "D": "\\frac{1}{12}"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 148,
+    "question_id": "mathbench_middle_middle_15",
+    "subject": "Basic Numbers and Algebra",
+    "question": "Margie's car can go  $32$ miles on a gallon of gas, and gas currently costs \\$ $4$ per gallon. How many miles can Margie drive on  $\\$ 20$ worth of gas?",
+    "choices": {
+      "A": "160",
+      "B": "64",
+      "C": "640",
+      "D": "128"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 149,
+    "question_id": "mathbench_middle_middle_92",
+    "subject": "Basic Numbers and Algebra",
+    "question": "Ike and Mike go into a sandwich shop with a total of  $\\$30.00$ to spend. Sandwiches cost  $\\$4.50$ each and soft drinks cost  $\\$1.00$ each. Ike and Mike plan to buy as many sandwiches as they can,\nand use any remaining money to buy soft drinks. Counting both sandwiches and soft drinks, how\nmany items will they buy?",
+    "choices": {
+      "A": "7",
+      "B": "10",
+      "C": "9",
+      "D": "6"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 150,
+    "question_id": "mathbench_middle_middle_knowledge_45",
+    "subject": "Basic Numbers and Algebra",
+    "question": "What is the idea called that reduces the number of unknowns to fewer and solves them one by one?",
+    "choices": {
+      "A": "Increase element thought",
+      "B": "Simplification thought",
+      "C": "Elimination thought",
+      "D": "Solving element thought"
+    },
+    "correct_answer": "C",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 151,
+    "question_id": "mathbench_middle_middle_knowledge_70",
+    "subject": "Basic Numbers and Algebra",
+    "question": "For the direct proportion function $y=kx$, when $k>0$, through which quadrants does the line pass?",
+    "choices": {
+      "A": "II, IV",
+      "B": "Only III",
+      "C": "I, III",
+      "D": "Only I"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 152,
+    "question_id": "mathbench_middle_middle_145",
+    "subject": "Basic Numbers and Algebra",
+    "question": "In a sequence of positive integers, each term after the second is the product of the previous two terms. The sixth term is  $4000$ . What is the first term?\n\n $",
+    "choices": {
+      "A": "10",
+      "B": "5",
+      "C": "1",
+      "D": "4"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 153,
+    "question_id": "mathbench_middle_middle_knowledge_99",
+    "subject": "Basic Numbers and Algebra",
+    "question": "For the parabola $y=ax^{2}+bx+c$ (where $a≠0$), when $b^{2}-4ac=0$, how many real roots does the quadratic equation have, and how many points of intersection does the graph of the quadratic function have with the x-axis?",
+    "choices": {
+      "A": "1,2",
+      "B": "1,1",
+      "C": "2,1",
+      "D": "2,2"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 154,
+    "question_id": "mathbench_middle_middle_knowledge_92",
+    "subject": "Basic Numbers and Algebra",
+    "question": "In the quadratic function $y=ax^{2}+bx+c (a≠0)$, when $a > 0$, how does y change with an increase in x to the left of the axis of symmetry? And how does it change to the right of the axis of symmetry?",
+    "choices": {
+      "A": "Decreases, Decreases",
+      "B": "Increases, Increases",
+      "C": "Decreases, Increases",
+      "D": "Increases, Decreases"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 155,
+    "question_id": "mathbench_middle_middle_147",
+    "subject": "Basic Numbers and Algebra",
+    "question": "Wind chill is a measure of how cold people feel when exposed to wind outside. A good estimate for wind chill can be found using this calculation\n $(\\text{wind chill}) = (\\text{air temperature}) - 0.7 \\times (\\text{wind speed}),$ \nwhere temperature is measured in degrees Fahrenheit  $(^{\\circ}\\text{F})$ and the wind speed is measured in miles per hour (mph). Suppose the air temperature is  $36^{\\circ}\\text{F}$ and the wind speed is  $18$ mph. Which of the following is closest to the approximate wind chill?\n\n $",
+    "choices": {
+      "A": "18",
+      "B": "32",
+      "C": "28",
+      "D": "23"
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 156,
+    "question_id": "mathbench_middle_middle_knowledge_9",
+    "subject": "Basic Numbers and Algebra",
+    "question": "The numerator of fractions is the () number.",
+    "choices": {
+      "A": "bottom",
+      "B": "top",
+      "C": "middle",
+      "D": "All the other options are wrong"
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 157,
+    "question_id": "mathbench_middle_middle_knowledge_82",
+    "subject": "Basic Numbers and Algebra",
+    "question": "Regarding the graph of the hyperbolic function, when $k<0$, within each quadrant, how does the value of y change as the value of x increases?",
+    "choices": {
+      "A": "Decreases",
+      "B": "Increases",
+      "C": "Remains the same",
+      "D": "Uncertain"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 158,
+    "question_id": "mathbench_middle_middle_38",
+    "subject": "Basic Numbers and Algebra",
+    "question": "Suppose that  $a * b$ means  $3a-b.$ What is the value of  $x$ if\n $2 * (5 * x)=1$",
+    "choices": {
+      "A": "2",
+      "B": "10",
+      "C": "\\frac{10}{3}",
+      "D": "14"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 159,
+    "question_id": "mathbench_middle_middle_knowledge_74",
+    "subject": "Basic Numbers and Algebra",
+    "question": "What method can be used to find the equation of a function given the coordinates of two points?",
+    "choices": {
+      "A": "Point-Slope Method",
+      "B": "Factorization method",
+      "C": "Completing the square",
+      "D": "Parametric equations method"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 160,
+    "question_id": "mathbench_middle_middle_137",
+    "subject": "Basic Numbers and Algebra",
+    "question": "A cup of boiling water ( $212^{\\circ}\\text{F}$ ) is placed to cool in a room whose temperature remains constant at  $68^{\\circ}\\text{F}$ . Suppose the difference between the water temperature and the room temperature is halved every  $5$ minutes. What is the water temperature, in degrees Fahrenheit, after  $15$ minutes?",
+    "choices": {
+      "A": "77",
+      "B": "86",
+      "C": "92",
+      "D": "98"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 161,
+    "question_id": "mathbench_middle_middle_knowledge_125",
+    "subject": "Basic Numbers and Algebra",
+    "question": "Which of the following is correct regarding the division of one monomial by another?",
+    "choices": {
+      "A": "Divide coefficients and powers with the same base respectively",
+      "B": "Letters that only appear in the divisor must be discarded",
+      "C": "Multiply coefficients and powers with the same base respectively",
+      "D": "Multiply coefficients and divide powers with the same base"
+    },
+    "correct_answer": "A",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 162,
+    "question_id": "mathbench_middle_middle_knowledge_56",
+    "subject": "Basic Numbers and Algebra",
+    "question": "What is the highest power of the unknown in a quadratic equation?",
+    "choices": {
+      "A": "1",
+      "B": "3",
+      "C": "0",
+      "D": "2"
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 163,
+    "question_id": "mathbench_middle_middle_knowledge_93",
+    "subject": "Basic Numbers and Algebra",
+    "question": "In the quadratic function $y=ax^{2}+bx+c (a\\neq 0)$, when $a > 0$, how does y change as x increases to the left of the axis of symmetry? How does y change as x increases to the right of the axis of symmetry?",
+    "choices": {
+      "A": "Decreases, Decreases",
+      "B": "Increases, Decreases",
+      "C": "Decreases, Increases",
+      "D": "Increases, Increases"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 164,
+    "question_id": "mathbench_middle_middle_90",
+    "subject": "Basic Numbers and Algebra",
+    "question": "The  $5$ -digit number  $\\underline{2}$  $\\underline{0}$  $\\underline{1}$  $\\underline{8}$  $\\underline{U}$ is divisible by  $9$ . What is the remainder when this number is divided by  $8$ ?",
+    "choices": {
+      "A": "5",
+      "B": "3",
+      "C": "6",
+      "D": "1"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 165,
+    "question_id": "mathbench_middle_middle_knowledge_132",
+    "subject": "Basic Numbers and Algebra",
+    "question": "What is the condition for a rational expression to be meaningful?",
+    "choices": {
+      "A": "The numerator and denominator are not equal",
+      "B": "The numerator is not equal to 1",
+      "C": "The denominator is not equal to 0",
+      "D": "Both numerator and denominator are not equal to 0"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 166,
+    "question_id": "mathbench_middle_middle_knowledge_77",
+    "subject": "Basic Numbers and Algebra",
+    "question": "To what kind of symmetrical figure does the graph of an inverse proportion function belong?",
+    "choices": {
+      "A": "Neither axial nor central symmetry",
+      "B": "Only axial symmetry",
+      "C": "Only central symmetry",
+      "D": "Both axial and central symmetry"
+    },
+    "correct_answer": "C",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 167,
+    "question_id": "mathbench_middle_middle_knowledge_30",
+    "subject": "Basic Numbers and Algebra",
+    "question": "When applying drawing analysis method to solve application problems of linear equations in one variable, what kind of problems is it mostly used for?",
+    "choices": {
+      "A": "Problems of sum, difference, multiple, and division",
+      "B": "Problems involving distances.",
+      "C": "Sudoku problems",
+      "D": "Chickens and rabbits in the same cage problems"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 168,
+    "question_id": "mathbench_middle_middle_knowledge_42",
+    "subject": "Basic Numbers and Algebra",
+    "question": "Putting two linear equations with two variables together forms what?",
+    "choices": {
+      "A": "System of linear equations in two variables",
+      "B": "System of quadratic equations in two variables",
+      "C": "System of quadratic equations in one variable",
+      "D": "System of linear equations in one variable"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 169,
+    "question_id": "mathbench_middle_middle_knowledge_69",
+    "subject": "Basic Numbers and Algebra",
+    "question": "The direct proportion function must pass through which coordinates?",
+    "choices": {
+      "A": "Origin",
+      "B": "None",
+      "C": "x-axis",
+      "D": "y-axis"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 170,
+    "question_id": "mathbench_middle_middle_knowledge_24",
+    "subject": "Basic Numbers and Algebra",
+    "question": "What is an equation in mathematics?",
+    "choices": {
+      "A": "A combination of constants, variables, and at least one operation.",
+      "B": "A mathematical statement that includes a variable and an equals sign.",
+      "C": "A set of numbers that follow a certain pattern.",
+      "D": "A mathematical sentence indicating that two expressions are equal."
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 171,
+    "question_id": "mathbench_middle_middle_knowledge_54",
+    "subject": "Basic Numbers and Algebra",
+    "question": "What are both sides of a quadratic equation called?",
+    "choices": {
+      "A": "Indeterminate",
+      "B": "Fraction",
+      "C": "Inequality",
+      "D": "Polynomial"
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 172,
+    "question_id": "mathbench_middle_middle_knowledge_80",
+    "subject": "Basic Numbers and Algebra",
+    "question": "Regarding the graph of the hyperbolic function, when $k<0$, in which quadrants are the two branches of the hyperbola located?",
+    "choices": {
+      "A": "First, Fourth",
+      "B": "Second, Fourth",
+      "C": "First, Third",
+      "D": "Second, Third"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 173,
+    "question_id": "mathbench_middle_middle_63",
+    "subject": "Basic Numbers and Algebra",
+    "question": "Chloe and Zoe are both students in Ms. Demeanor's math class. Last night, they each solved half of the problems in their homework assignment alone and then solved the other half together. Chloe had correct answers to only  $80\\%$ of the problems she solved alone, but overall  $88\\%$ of her answers were correct. Zoe had correct answers to  $90\\%$ of the problems she solved alone. What was Zoe's overall percentage of correct answers?",
+    "choices": {
+      "A": "93",
+      "B": "92",
+      "C": "96",
+      "D": "98"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 174,
+    "question_id": "mathbench_middle_middle_knowledge_140",
+    "subject": "Basic Numbers and Algebra",
+    "question": "When multiplying two fractions, what are the numerator and denominator of the product?",
+    "choices": {
+      "A": "Product of the numerators, Product of the denominators",
+      "B": "Product of the denominators, Product of the denominators",
+      "C": "Product of the numerators, Product of the numerators",
+      "D": "Product of the denominators, Product of the numerators"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 175,
+    "question_id": "mathbench_middle_middle_knowledge_81",
+    "subject": "Basic Numbers and Algebra",
+    "question": "Regarding the graph of the hyperbolic function, when $k>0$, in each quadrant what happens to the values of y as the values of x increase?",
+    "choices": {
+      "A": "Remain unchanged",
+      "B": "Decrease",
+      "C": "Increase",
+      "D": "Uncertain"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 176,
+    "question_id": "mathbench_middle_middle_146",
+    "subject": "Basic Numbers and Algebra",
+    "question": "Fifteen integers  $a_1, a_2, a_3, \\dots, a_{15}$ are arranged in order on a number line. The integers are equally spaced and have the property that\n $1 \\le a_1 \\le 10, \\thickspace 13 \\le a_2 \\le 20, \\thickspace \\text{ and } \\thickspace 241 \\le a_{15}\\le 250.$ \nWhat is the sum of digits of  $a_{14}?$ \n\n $",
+    "choices": {
+      "A": "10",
+      "B": "8",
+      "C": "9",
+      "D": "12"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 177,
+    "question_id": "mathbench_middle_middle_knowledge_40",
+    "subject": "Basic Numbers and Algebra",
+    "question": "A binomial equation with two unknowns, where the exponent of both unknowns is 1, is called what?",
+    "choices": {
+      "A": "Binomial First Degree Equation",
+      "B": "Uninomial First Degree Equation",
+      "C": "Uninomial Second Degree Equation",
+      "D": "Binomial Second Degree Equation"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 178,
+    "question_id": "mathbench_middle_middle_knowledge_68",
+    "subject": "Basic Numbers and Algebra",
+    "question": "If the relationship between two variables x and y can be expressed in the form $y=kx+b(k\\ne 0)$, then y is called a linear function of x. When is b such that y is a direct proportion function of x?",
+    "choices": {
+      "A": "$b\\ge 0$",
+      "B": "$b<0$",
+      "C": "$b=0$",
+      "D": "$b>0$"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 179,
+    "question_id": "mathbench_middle_middle_knowledge_112",
+    "subject": "Basic Numbers and Algebra",
+    "question": "What is the definition of a polynomial?",
+    "choices": {
+      "A": "The product of several monomials is called a polynomial",
+      "B": "The exponentiation of several monomials is called a polynomial",
+      "C": "The difference of several monomials is called a polynomial",
+      "D": "The sum of several monomials is called a polynomial"
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 180,
+    "question_id": "mathbench_middle_middle_knowledge_55",
+    "subject": "Basic Numbers and Algebra",
+    "question": "How many unknowns are there in a quadratic equation?",
+    "choices": {
+      "A": "1",
+      "B": "0",
+      "C": "3",
+      "D": "2"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 181,
+    "question_id": "mathbench_middle_middle_knowledge_89",
+    "subject": "Basic Numbers and Algebra",
+    "question": "How is the axis of symmetry of a quadratic function represented?",
+    "choices": {
+      "A": "None of the above",
+      "B": "$x=-\\frac{b}{a} $",
+      "C": "$x=-\\frac{2b}{a} $",
+      "D": "$x=-\\frac{b}{2a} $"
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 182,
+    "question_id": "mathbench_middle_middle_11",
+    "subject": "Basic Numbers and Algebra",
+    "question": "Three members of the Euclid Middle School girls' softball team had the following conversation.\n\nAshley: I just realized that our uniform numbers are all  $2$ -digit primes.\n\nBrittany : And the sum of your two uniform numbers is the date of my birthday earlier this month.\n\nCaitlin: That's funny. The sum of your two uniform numbers is the date of my birthday later this month.\n\nAshley: And the sum of your two uniform numbers is today's date.\n\nWhat number does Caitlin wear?",
+    "choices": {
+      "A": "23",
+      "B": "13",
+      "C": "17",
+      "D": "11"
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 183,
+    "question_id": "mathbench_middle_middle_knowledge_15",
+    "subject": "Basic Numbers and Algebra",
+    "question": "$\\frac{a}{b} {\\div} \\frac{c}{d} $=",
+    "choices": {
+      "A": "$\\frac{ad}{bc}$",
+      "B": "$\\frac{ac}{bd}$",
+      "C": "$\\frac{a+d}{bc}$",
+      "D": "$\\frac{ad}{b+c}$"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 184,
+    "question_id": "mathbench_middle_middle_25",
+    "subject": "Basic Numbers and Algebra",
+    "question": "Jeremy's father drives him to school in rush hour traffic in 20 minutes. One day there is no traffic, so his father can drive him 18 miles per hour faster and gets him to school in 12 minutes. How far in miles is it to school?",
+    "choices": {
+      "A": "8",
+      "B": "9",
+      "C": "6",
+      "D": "12"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 185,
+    "question_id": "mathbench_middle_middle_knowledge_41",
+    "subject": "Basic Numbers and Algebra",
+    "question": "What is the general form of a linear equation in two variables?",
+    "choices": {
+      "A": "$ax+by=c(a\\neq 0,b\\neq 0)$",
+      "B": "$ax+by=0(a\\neq 0,b\\neq 0)$",
+      "C": "$ax+by=c(a\\neq 0)$",
+      "D": "$ax+by=c(b\\neq 0)$"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 186,
+    "question_id": "mathbench_middle_middle_knowledge_72",
+    "subject": "Basic Numbers and Algebra",
+    "question": "When the direct proportion function $y=kx(k>0)$ passes through the first and third quadrants, how does y change as x increases?",
+    "choices": {
+      "A": "Decrease",
+      "B": "Increase first then decrease",
+      "C": "Increase",
+      "D": "Remains unchanged"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 187,
+    "question_id": "mathbench_middle_middle_knowledge_113",
+    "subject": "Basic Numbers and Algebra",
+    "question": "What is the number of terms in a polynomial?",
+    "choices": {
+      "A": "The fourth power of the number of monomials contained in the polynomial",
+      "B": "The number of monomials contained in the polynomial",
+      "C": "The square of the number of monomials contained in the polynomial",
+      "D": "The cube of the number of monomials contained in the polynomial"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 188,
+    "question_id": "mathbench_middle_middle_knowledge_84",
+    "subject": "Basic Numbers and Algebra",
+    "question": "Generally, among the following relationships between the independent variable x and the dependent variable y, which one is called a quadratic function of x?",
+    "choices": {
+      "A": "$y=ax^{2}bx+c (a, b, c are constants)$",
+      "B": "None of the above",
+      "C": "$y=ax^{2}+bx+c$",
+      "D": "$y=ax^{2}+bx+c (a\\neq0, a, b, c are constants)$"
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 189,
+    "question_id": "mathbench_middle_middle_138",
+    "subject": "Basic Numbers and Algebra",
+    "question": "What is the value of  $(8 \\times 4 + 2) - (8 + 4 \\times 2)$ ?\n\n $",
+    "choices": {
+      "A": "10",
+      "B": "0",
+      "C": "18",
+      "D": "6"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 190,
+    "question_id": "mathbench_middle_middle_knowledge_138",
+    "subject": "Basic Numbers and Algebra",
+    "question": "What is the rule for adding or subtracting fractions with the same denominator?",
+    "choices": {
+      "A": "Denominator remains the same, numerators are added or subtracted",
+      "B": "Denominator remains the same, denominators are added or subtracted",
+      "C": "Numerator remains the same, denominators are added or subtracted",
+      "D": "Numerator remains the same, numerators are added or subtracted"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 191,
+    "question_id": "mathbench_middle_middle_42",
+    "subject": "Basic Numbers and Algebra",
+    "question": "Karl's car uses a gallon of gas every  $35$ miles, and his gas tank holds  $14$ gallons when it is full. One day, Karl started with a full tank of gas, drove  $350$ miles, bought  $8$ gallons of gas, and continued driving to his destination. When he arrived, his gas tank was half full. How many miles did Karl drive that day?",
+    "choices": {
+      "A": "595",
+      "B": "525",
+      "C": "560",
+      "D": "665"
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 192,
+    "question_id": "mathbench_middle_middle_knowledge_32",
+    "subject": "Basic Numbers and Algebra",
+    "question": "In the process of setting up equations to solve application problems, what are the common formulas for trip problems?",
+    "choices": {
+      "A": "Downstream speed = Still water speed + Current speed, Upstream speed = Still water speed - Current speed",
+      "B": "$Distance = Speed \\cdot Time$, $Speed = \\frac{Distance}{Time}$, $Time = \\frac{Distance}{Speed}$",
+      "C": "$Workload = Efficiency \\cdot Work hours$, $Efficiency = \\frac{Workload}{Work hours}$, $Work hours = \\frac{Workload}{Efficiency}$",
+      "D": "$Part = Whole \\cdot Ratio$, $Ratio = \\frac{Part}{Whole}$, $Whole = \\frac{Part}{Ratio}$"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 193,
+    "question_id": "mathbench_middle_middle_65",
+    "subject": "Basic Numbers and Algebra",
+    "question": "For any positive integer  $M$ , the notation  $M!$ denotes the product of the integers  $1$ through  $M$ . What is the largest integer  $n$ for which  $5^n$ is a factor of the sum  $98!+99!+100!$  ?",
+    "choices": {
+      "A": "26",
+      "B": "23",
+      "C": "24",
+      "D": "27"
+    },
+    "correct_answer": "A",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 194,
+    "question_id": "mathbench_middle_middle_knowledge_85",
+    "subject": "Basic Numbers and Algebra",
+    "question": "Generally, there exists the following relationship between the independent variable x and the dependent variable y: General form: $y=ax^{2}+bx+c (a\\neq0, a, b, c are constants)$, then y is called a",
+    "choices": {
+      "A": "Quadratic function",
+      "B": "Linear function",
+      "C": "Cubic function",
+      "D": "None of these"
+    },
+    "correct_answer": "A",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 195,
+    "question_id": "mathbench_middle_middle_14",
+    "subject": "Basic Numbers and Algebra",
+    "question": "The sum of two prime numbers is  $85$ . What is the product of these two prime numbers?",
+    "choices": {
+      "A": "85",
+      "B": "115",
+      "C": "133",
+      "D": "166"
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 196,
+    "question_id": "mathbench_middle_middle_knowledge_11",
+    "subject": "Basic Numbers and Algebra",
+    "question": "Fractions must have the same () before they can be added or subtracted.",
+    "choices": {
+      "A": "cut-off score",
+      "B": "All the other options are wrong",
+      "C": "denominator",
+      "D": "numerator"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 197,
+    "question_id": "mathbench_middle_middle_30",
+    "subject": "Basic Numbers and Algebra",
+    "question": "Jack and Jill are going swimming at a pool that is one mile from their house. They leave home simultaneously. Jill rides her bicycle to the pool at a constant speed of  $10$ miles per hour. Jack walks to the pool at a constant speed of  $4$ miles per hour. How many minutes before Jack does Jill arrive?",
+    "choices": {
+      "A": "5",
+      "B": "8",
+      "C": "10",
+      "D": "9"
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 198,
+    "question_id": "mathbench_middle_middle_knowledge_130",
+    "subject": "Basic Numbers and Algebra",
+    "question": "Which of the following is incorrect regarding the steps of factorization?",
+    "choices": {
+      "A": "Check if formula method can be applied",
+      "B": "Check if there are common factors in all terms, if so, extract the common factor first",
+      "C": "The final result of factorization must be the sum of several integral expressions",
+      "D": "The result of factorization must be carried out until each factor cannot be further decomposed within the range of rational numbers"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 199,
+    "question_id": "mathbench_middle_middle_knowledge_95",
+    "subject": "Basic Numbers and Algebra",
+    "question": "What are the translation rules for the quadratic function $y=a(x-h)^{2}+k$?",
+    "choices": {
+      "A": "x-axis: left subtract right add, y-axis: up add down subtract",
+      "B": "x-axis: left add right subtract, y-axis: up add down subtract",
+      "C": "x-axis: left subtract right add, y-axis: up subtract down add",
+      "D": "x-axis: left add right subtract, y-axis: up subtract down add"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  }
+]

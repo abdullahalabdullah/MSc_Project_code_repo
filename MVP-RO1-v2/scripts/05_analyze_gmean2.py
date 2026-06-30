@@ -14,7 +14,7 @@ Reads analysis/{model}/gmean2_per_instance.csv and gmean2_summary.json
 Usage:
     python scripts/05_analyze_gmean2.py                       # all models, every dataset
     python scripts/05_analyze_gmean2.py --dataset wmdp        # all models, one dataset
-    python scripts/05_analyze_gmean2.py --model tulu_sft_no_safety
+    python scripts/05_analyze_gmean2.py --model qwen3_1_7b
 
     Options:
       --config   path to config YAML (default: config/mvp_config.yaml)
@@ -31,6 +31,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import yaml
 from src.dataset import resolve_paths
+from src.hints import HINT_TYPES
 from src.gmean2_analysis import (
     plot_te_distribution,
     plot_gmean2_distribution,
@@ -79,18 +80,18 @@ def _load_per_instance(csv_path: Path) -> list:
     return per_instance
 
 
-def run_dataset(root, config, dataset_key, models):
+def run_dataset(root, config, dataset_key, models, hint_type):
     """Generate plots for every given model on a single dataset."""
-    print(f"\n=== dataset: {dataset_key} ===")
+    print(f"\n=== dataset: {dataset_key}  (hint: {hint_type}) ===")
 
-    plots_dir = resolve_paths(root, config, dataset_key)["plots_dir"]
+    plots_dir = resolve_paths(root, config, dataset_key, hint_type=hint_type)["plots_dir"]
     plots_dir.mkdir(parents=True, exist_ok=True)
 
     summaries = []
 
     for model_cfg in models:
         model_name = model_cfg["name"]
-        analysis_dir = resolve_paths(root, config, dataset_key, model_name)["analysis_dir"]
+        analysis_dir = resolve_paths(root, config, dataset_key, model_name, hint_type)["analysis_dir"]
 
         csv_path = analysis_dir / "gmean2_per_instance.csv"
         summary_path = analysis_dir / "gmean2_summary.json"
@@ -129,6 +130,9 @@ def main():
     parser.add_argument("--dataset", default=None,
                         help="Restrict to one dataset key (default: every dataset in config). "
                              "Namespaces I/O paths.")
+    parser.add_argument("--hint-type", default=None, choices=HINT_TYPES,
+                        help="Hint type to read (default: config hint.default). "
+                             "Must match the inference/monitor run. Namespaces I/O paths.")
     args = parser.parse_args()
 
     root = Path(__file__).parent.parent
@@ -137,6 +141,7 @@ def main():
     with open(config_path) as f:
         config = yaml.safe_load(f)
 
+    hint_type = args.hint_type or config.get("hint", {}).get("default", "professor")
     models = config["models"]
     if args.model:
         models = [m for m in models if m["name"] == args.model]
@@ -153,7 +158,7 @@ def main():
             sys.exit(1)
 
     for dataset_key in datasets:
-        run_dataset(root, config, dataset_key, models)
+        run_dataset(root, config, dataset_key, models, hint_type)
 
     print("\nDone.")
 

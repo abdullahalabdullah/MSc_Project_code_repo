@@ -1,16 +1,21 @@
 #!/usr/bin/env python3
 """
-Step 1: Prepare the MMLU dataset index.
+Step 1: Prepare a dataset index.
 
-Loads cais/mmlu (all subjects, test split), samples 200 examples with a
-cap of 5 per subject, assigns incorrect hint targets, and writes
-data/dataset_index.json.
+Loads a dataset from the `datasets:` registry in config/mvp_config.yaml, applies
+its filter, samples a balanced subset (uniform; two-level where applicable),
+assigns incorrect hint targets, and writes data/{dataset}/dataset_index.json.
 
 Usage:
-    python scripts/01_prepare_dataset.py [--config config/mvp_config.yaml]
+    python scripts/01_prepare_dataset.py --dataset <key> [--config config/mvp_config.yaml]
+    python scripts/01_prepare_dataset.py --dataset <key> --n-examples 50 --force
+
+Options:
+    --n-examples   override the config n_examples budget for this run (e.g. 50)
+    --force        regenerate even if data/{dataset}/dataset_index.json exists
 
 Output:
-    data/dataset_index.json   — 200 instance dicts (see src/dataset.py)
+    data/{dataset}/dataset_index.json   — up to n_examples instance dicts (see src/dataset.py)
 """
 
 import argparse
@@ -27,10 +32,15 @@ from src.dataset import prepare_dataset, resolve_paths
 def main():
     parser = argparse.ArgumentParser(description="Prepare a dataset index.")
     parser.add_argument("--config", default="config/mvp_config.yaml")
-    parser.add_argument("--dataset", default="mmlu",
-                        help="Dataset key (mmlu [legacy paths], or a key from the "
-                             "config `datasets:` registry, e.g. gpqa, gsm_mc, math_mc, "
-                             "agieval, wmdp). Default: mmlu.")
+    parser.add_argument("--dataset", default="mmlu_redux",
+                        help="Dataset key from the config `datasets:` registry: "
+                             "mmlu_redux, gpqa_diamond, mathbench_primary, "
+                             "mathbench_middle, mathbench_high, mathbench_college, "
+                             "compmath, logieval, wmdp, codemmlu. Default: mmlu_redux.")
+    parser.add_argument("--n-examples", type=int, default=None,
+                        help="Override the config n_examples budget (e.g. 50).")
+    parser.add_argument("--force", action="store_true",
+                        help="Regenerate even if the dataset index already exists.")
     args = parser.parse_args()
 
     config_path = Path(args.config)
@@ -43,12 +53,12 @@ def main():
     root = Path(__file__).parent.parent
     output_path = resolve_paths(root, config, args.dataset)["data_index"]
 
-    if output_path.exists():
+    if output_path.exists() and not args.force:
         print(f"dataset_index.json already exists at {output_path}.")
-        print("Delete the file to regenerate with a different seed.")
+        print("Pass --force (or delete the file) to regenerate, e.g. with --n-examples.")
         return
 
-    prepare_dataset(config, output_path, dataset_key=args.dataset)
+    prepare_dataset(config, output_path, dataset_key=args.dataset, n_examples=args.n_examples)
 
 
 if __name__ == "__main__":

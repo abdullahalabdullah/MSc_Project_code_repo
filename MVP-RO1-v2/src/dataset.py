@@ -1,48 +1,53 @@
 """
 Dataset preparation for the MVP CoT monitorability evaluation.
 
-Loads a dataset, samples N examples, assigns incorrect hint targets, and saves a
-dataset_index.json. MMLU is the legacy default (read from the `dataset:` config
-block, unnamespaced paths). Five further 4-option MCQ datasets — GPQA, GSM-MC,
-MATH-MC, AGIEval (English), WMDP — are added via the `datasets:` registry and are
-namespaced on disk by dataset key (see resolve_paths). The whole pipeline is
-strictly 4-option (A-D); AGIEval's 5-option subsets are reduced to 4 by dropping
-one distractor (seeded), never the correct option.
+Loads a dataset, filters it, samples a balanced subset (single- or two-level
+uniform stratified sampling), assigns an incorrect hint target, and writes a
+dataset_index.json. Every dataset is driven by the `datasets:` registry in
+config/mvp_config.yaml and namespaced on disk by its key (see resolve_paths).
+
+The pipeline is multiple-choice with a **variable option count of 3–5 (A–E)**:
+each question keeps its own number of options. The current suite:
+
+  mmlu_redux     — HF edinburgh-dawg/mmlu-redux, error_type=="ok", uniform by subject (4 opt)
+  gpqa_diamond   — HF Idavidrein/gpqa (gpqa_diamond), uniform by domain, all 198 (4 opt)
+  mathbench_*    — MathBench release zip, English single_choice (theory+application),
+                   two-level uniform: subject-area -> topic (4 opt)
+  compmath       — HF biancaraimondi/CompMath-MCQ, uniform by subtopic (3 opt)
+  logieval       — HF (gated), options in {3,4,5}, two-level: reasoning-type -> task-format
+  wmdp           — HF cais/wmdp, uniform by subdomain (4 opt)
+  codemmlu       — HF Fsoft-AIC/CodeMMLU, options in [3,5], uniform by subset (3-5 opt)
 """
 
+import io
 import json
 import os
 import random
 import re
+import ssl
+import urllib.request
+import zipfile
 from collections import defaultdict
 from pathlib import Path
 
-# Answer letters. The pipeline is strictly 4-option, so every dataset normalises to
-# exactly these four. MMLU_LETTERS is kept as a name for backward-compatibility
-# (imported by scripts/07_estimate_accuracy*.py for the answer-entropy calculation).
-LETTERS = ["A", "B", "C", "D"]
-MMLU_LETTERS = LETTERS
+# Answer letters. The pipeline supports 3–5 options, so a question uses LETTERS[:k].
+LETTERS = ["A", "B", "C", "D", "E"]
+MAX_OPTIONS = len(LETTERS)
+MIN_OPTIONS = 3
 
 
 # ---------------------------------------------------------------------------
 # HuggingFace authentication
 # ---------------------------------------------------------------------------
 
-# !!! SECURITY: hardcoded read-only HF token, intentionally committed so the
-# pipeline runs with zero setup in any environment (per project owner's request).
-# This IS pushed to git by run_all.sh. REMOVE THIS and rotate the token before
-# any public release of the code. Env var / .hf_token still override it.
-_FALLBACK_HF_TOKEN = "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"
-
-
 def ensure_hf_auth(verbose: bool = True) -> bool:
-    """Log into the HuggingFace Hub so gated assets (the GPQA dataset, and gated
-    models like Qwen3 / Llama / Tulu) download in any environment.
+    """Log into the HuggingFace Hub so gated assets (GPQA, LogiEval, gated models)
+    download in any environment.
 
     Token resolution order (first hit wins):
       1. env var HF_TOKEN / HUGGING_FACE_HUB_TOKEN / HUGGINGFACE_HUB_TOKEN
-      2. a local, git-ignored `.hf_token` file at the MVP-RO1 root
-      3. the hardcoded `_FALLBACK_HF_TOKEN` above (committed; remove before release)
+      2. the `hf_token` field in config/mvp_config.yaml (committed for zero-setup;
+         read-only — rotate before any public release)
 
     Returns False only if every source is empty AND login fails.
     """
@@ -51,13 +56,15 @@ def ensure_hf_auth(verbose: bool = True) -> bool:
              or os.environ.get("HUGGINGFACE_HUB_TOKEN"))
     source = "env"
     if not token:
-        token_file = Path(__file__).resolve().parent.parent / ".hf_token"
-        if token_file.exists():
-            token = token_file.read_text(encoding="utf-8").strip()
-            source = str(token_file)
-    if not token and _FALLBACK_HF_TOKEN:
-        token = _FALLBACK_HF_TOKEN
-        source = "hardcoded fallback"
+        cfg_path = Path(__file__).resolve().parent.parent / "config" / "mvp_config.yaml"
+        if cfg_path.exists():
+            try:
+                import yaml
+                cfg = yaml.safe_load(cfg_path.read_text(encoding="utf-8")) or {}
+                token = cfg.get("hf_token")
+                source = str(cfg_path)
+            except Exception:
+                token = None
     if not token:
         return False
     try:
@@ -79,15 +86,21 @@ def ensure_hf_auth(verbose: bool = True) -> bool:
 # Path namespacing
 # ---------------------------------------------------------------------------
 
-def resolve_paths(root, config: dict, dataset_key: str, model_name: str | None = None) -> dict:
-    """Resolve all on-disk paths for a (dataset, model) pair.
+def resolve_paths(root, config: dict, dataset_key: str, model_name: str | None = None,
+                  hint_type: str | None = None) -> dict:
+    """Resolve all on-disk paths for a (dataset, model, hint_type) triple.
 
-    Every dataset (including "mmlu") is namespaced by its key:
-        data/{ds}/dataset_index.json, outputs/{ds}/{model}/,
-        monitor_outputs/{ds}/{model}/, analysis/{ds}/{model}/, plots/{ds}/
+    Every dataset is namespaced by its key, and — when a `hint_type` is given —
+    the result dirs are further namespaced by the hint type, so different hints
+    never overwrite each other:
+        data/{ds}/dataset_index.json
+        outputs/{ds}/{model}/{hint}/, monitor_outputs/{ds}/{model}/{hint}/,
+        analysis/{ds}/{model}/{hint}/, plots/{ds}/{hint}/
 
     `model_name` is appended to the per-model dirs (outputs/monitor/analysis) only
-    when provided; data_index and plots_dir are never model-specific.
+    when provided. `hint_type` is appended to those dirs and to plots_dir when
+    provided. `data_index` is never model- or hint-specific (the hint_target is
+    assigned once at prep time and shared by every hint type).
     """
     root = Path(root)
     p = config["paths"]
@@ -97,29 +110,37 @@ def resolve_paths(root, config: dict, dataset_key: str, model_name: str | None =
 
     def model_dir(d):
         b = base(d)
-        return (b / model_name) if model_name else b
+        if model_name:
+            b = b / model_name
+        if hint_type:
+            b = b / hint_type
+        return b
+
+    plots_dir = base(p["plots_dir"])
+    if hint_type:
+        plots_dir = plots_dir / hint_type
 
     return {
         "data_index":  base(p["data_dir"]) / "dataset_index.json",
         "outputs_dir": model_dir(p["outputs_dir"]),
         "monitor_dir": model_dir(p["monitor_outputs_dir"]),
         "analysis_dir": model_dir(p["analysis_dir"]),
-        "plots_dir":   base(p["plots_dir"]),
+        "plots_dir":   plots_dir,
     }
 
 
 # ---------------------------------------------------------------------------
-# Normalisation helpers (shared by all non-MMLU loaders)
+# Normalisation helpers (shared by all loaders)
 # ---------------------------------------------------------------------------
 
 # A normalised record is a dict:
 #   {"question": str, "options": [str, ...], "correct_idx": int,
-#    "group": str, "source_id": str}
-# `options` may have >4 entries (e.g. AGIEval); the finaliser reduces to 4.
+#    "group": str, "subgroup": str | None, "source_id": str}
+# `group` is the primary stratum; `subgroup` (optional) is the second level used by
+# the two-level uniform samplers (MathBench, LogiEval).
 
-# Matches an option label at the start of a choice string: "(A)" (AGIEval style,
-# no trailing space), "A.", or "A)". Trailing whitespace is optional because
-# AGIEval renders options as "(A)4" with no separator.
+# Matches an option label at the start of a choice string: "(A)" (no trailing space),
+# "A.", or "A)". Trailing whitespace optional (some sources render "(A)4").
 _LETTER_PREFIX_RE = re.compile(r"^\s*(?:\([A-E]\)|[A-E][.)])\s*")
 
 
@@ -135,26 +156,17 @@ def _strip_letter_prefix(choice: str) -> str:
     return _LETTER_PREFIX_RE.sub("", str(choice)).strip()
 
 
-def _reduce_to_four(options: list, correct_idx: int, rng: random.Random) -> tuple[list, int]:
-    """Drop (len-4) distractors at random (never the correct option), keep order."""
-    if len(options) <= 4:
-        return options, correct_idx
-    idxs = list(range(len(options)))
-    distractors = [i for i in idxs if i != correct_idx]
-    drop = set(rng.sample(distractors, len(options) - 4))
-    kept = [i for i in idxs if i not in drop]
-    return [options[i] for i in kept], kept.index(correct_idx)
-
-
 def _finalize(instance_id: int, rec: dict, rng: random.Random) -> dict:
-    """Turn a normalised record into a pipeline instance dict (4 options, A-D)."""
-    options, correct_idx = _reduce_to_four(rec["options"], rec["correct_idx"], rng)
-    assert len(options) == 4, f"{rec['source_id']}: {len(options)} options after reduction"
-    assert 0 <= correct_idx < 4, f"{rec['source_id']}: bad correct_idx {correct_idx}"
+    """Turn a normalised record into a pipeline instance dict (3–5 options, A–E)."""
+    options = rec["options"]
+    correct_idx = rec["correct_idx"]
+    k = len(options)
+    assert MIN_OPTIONS <= k <= MAX_OPTIONS, f"{rec['source_id']}: {k} options (must be 3–5)"
+    assert 0 <= correct_idx < k, f"{rec['source_id']}: bad correct_idx {correct_idx} for {k} options"
 
-    correct_letter = LETTERS[correct_idx]
-    wrong_letters = [l for l in LETTERS if l != correct_letter]
-    hint_target = rng.choice(wrong_letters)
+    letters = LETTERS[:k]
+    correct_letter = letters[correct_idx]
+    hint_target = rng.choice([l for l in letters if l != correct_letter])
     assert hint_target != correct_letter
 
     return {
@@ -162,53 +174,86 @@ def _finalize(instance_id: int, rec: dict, rng: random.Random) -> dict:
         "question_id": rec["source_id"],
         "subject": rec["group"],
         "question": _clean(rec["question"]),
-        "choices": {LETTERS[i]: _clean(options[i]) for i in range(4)},
+        "choices": {letters[i]: _clean(options[i]) for i in range(k)},
         "correct_answer": correct_letter,
         "hint_target": hint_target,
     }
 
 
-def _balanced_sample(records: list, n: int, rng: random.Random) -> list:
-    """Sample n records, balanced across distinct `group` values when there is
-    more than one group; otherwise a plain random sample. Deterministic in rng."""
-    if n >= len(records):
+def _balanced_order(records: list, keys: list, rng: random.Random) -> list:
+    """Return all records in a balanced (round-robin) order across `keys`.
+
+    With one key this round-robins across that field's groups; with two keys each
+    group is itself balanced-ordered by the second key before the round-robin, so
+    taking a prefix yields uniform-by-key1-then-uniform-by-key2 sampling. Records
+    within the deepest level are shuffled. Deterministic in `rng`.
+    """
+    if not keys:
         out = list(records)
         rng.shuffle(out)
         return out
 
+    key = keys[0]
     groups: dict[str, list] = defaultdict(list)
     for r in records:
-        groups[r["group"]].append(r)
+        groups[r.get(key) or "unknown"].append(r)
 
-    if len(groups) <= 1:
-        return rng.sample(records, n)
-
-    for g in groups.values():
-        rng.shuffle(g)
-
-    order = sorted(groups)
-    iters = {g: iter(groups[g]) for g in order}
+    ordered = {g: _balanced_order(items, keys[1:], rng) for g, items in groups.items()}
+    iters = {g: iter(ordered[g]) for g in ordered}
+    order = sorted(ordered)
     exhausted: set = set()
-    selected: list = []
-    while len(selected) < n and len(exhausted) < len(order):
+    out: list = []
+    while len(exhausted) < len(order):
         for g in order:
             if g in exhausted:
                 continue
             try:
-                selected.append(next(iters[g]))
+                out.append(next(iters[g]))
             except StopIteration:
                 exhausted.add(g)
+    return out
+
+
+def _stratified_sample(records: list, n: int, rng: random.Random, keys: list) -> list:
+    """Uniformly sample n records across the grouping `keys` (1 or 2 levels).
+
+    If n >= len(records) all records are returned (shuffled)."""
+    if n >= len(records):
+        out = list(records)
+        rng.shuffle(out)
+        return out
+    return _balanced_order(records, keys, rng)[:n]
+
+
+# ---------------------------------------------------------------------------
+# Per-dataset loaders — each returns a list of normalised records (post-filter)
+# ---------------------------------------------------------------------------
+
+def _load_mmlu_redux(ds_cfg: dict, rng: random.Random) -> list:
+    """MMLU-Redux: 30 subject configs, keep only error_type == 'ok'. 4 options."""
+    from datasets import load_dataset as hf_load_dataset, get_dataset_config_names
+    hf = ds_cfg["hf"]
+    subjects = ds_cfg.get("subjects") or get_dataset_config_names(hf)
+    split = ds_cfg.get("split", "test")
+    recs = []
+    for subject in subjects:
+        ds = hf_load_dataset(hf, subject, split=split)
+        for idx, row in enumerate(ds):
+            if row.get("error_type") != "ok":
                 continue
-            if len(selected) >= n:
-                break
-    return selected
+            recs.append({
+                "question": row["question"],
+                "options": [_clean(c) for c in row["choices"]],
+                "correct_idx": int(row["answer"]),
+                "group": subject,
+                "subgroup": None,
+                "source_id": f"{subject}_{idx}",
+            })
+    return recs
 
-
-# ---------------------------------------------------------------------------
-# Per-dataset loaders — each returns a list of normalised records
-# ---------------------------------------------------------------------------
 
 def _load_gpqa(ds_cfg: dict, rng: random.Random) -> list:
+    """GPQA (e.g. gpqa_diamond): 4 options, grouped by High-level domain."""
     from datasets import load_dataset as hf_load_dataset
     ds = hf_load_dataset(ds_cfg["hf"], ds_cfg["config"], split=ds_cfg["split"])
     recs = []
@@ -228,12 +273,14 @@ def _load_gpqa(ds_cfg: dict, rng: random.Random) -> list:
             "options": shuffled,
             "correct_idx": order.index(0),       # original index 0 was the correct one
             "group": row.get("High-level domain") or "unknown",
+            "subgroup": None,
             "source_id": f"gpqa_{row.get('Record ID', idx)}",
         })
     return recs
 
 
 def _load_wmdp(ds_cfg: dict, rng: random.Random) -> list:
+    """WMDP: bio/chem/cyber configs, 4 options, grouped by subdomain."""
     from datasets import load_dataset as hf_load_dataset
     recs = []
     for cfg in ds_cfg["configs"]:
@@ -244,63 +291,187 @@ def _load_wmdp(ds_cfg: dict, rng: random.Random) -> list:
                 "options": [_clean(c) for c in row["choices"]],
                 "correct_idx": int(row["answer"]),
                 "group": cfg,
+                "subgroup": None,
                 "source_id": f"{cfg}_{idx}",
             })
     return recs
 
 
-def _load_letter_mc(ds_cfg: dict, rng: random.Random, group: str, prefix: str) -> list:
-    """Shared loader for the A/B/C/D + Answer-letter schema (GSM-MC, MATH-MC)."""
+def _load_compmath(ds_cfg: dict, rng: random.Random) -> list:
+    """CompMath-MCQ: 3 options, grouped by subtopic."""
     from datasets import load_dataset as hf_load_dataset
-    ds = hf_load_dataset(ds_cfg["hf"], split=ds_cfg["split"])
+    ds = hf_load_dataset(ds_cfg["hf"], split=ds_cfg.get("split", "test"))
     recs = []
     for idx, row in enumerate(ds):
-        options = [row["A"], row["B"], row["C"], row["D"]]
-        correct_idx = LETTERS.index(str(row["Answer"]).strip().upper())
         recs.append({
-            "question": row["Question"],
-            "options": [_clean(o) for o in options],
-            "correct_idx": correct_idx,
-            "group": group,
-            "source_id": f"{prefix}_{idx}",
+            "question": row["question"],
+            "options": [_clean(o) for o in row["options"]],
+            "correct_idx": int(row["correct_label"]),
+            "group": row["subtopic"],
+            "subgroup": None,
+            "source_id": f"compmath_{idx}",
         })
     return recs
 
 
-def _load_gsm_mc(ds_cfg: dict, rng: random.Random) -> list:
-    return _load_letter_mc(ds_cfg, rng, group="gsm", prefix="gsm_mc")
+def _load_codemmlu(ds_cfg: dict, rng: random.Random) -> list:
+    """CodeMMLU: 9 subsets, keep questions with 3–5 options, grouped by subset.
 
-
-def _load_math_mc(ds_cfg: dict, rng: random.Random) -> list:
-    return _load_letter_mc(ds_cfg, rng, group="math", prefix="math_mc")
-
-
-def _load_agieval(ds_cfg: dict, rng: random.Random) -> list:
+    The dataset's `answer` is a letter; a handful of items have 6–7 options (and
+    answers F/G) — those fall outside the A–E pipeline and are dropped along with
+    1–2 option questions."""
     from datasets import load_dataset as hf_load_dataset
     recs = []
-    for subset in ds_cfg["subsets"]:
-        hf_id = f"{ds_cfg['hf_prefix']}{subset}"
-        ds = hf_load_dataset(hf_id, split=ds_cfg["split"])
+    for sub in ds_cfg["subsets"]:
+        ds = hf_load_dataset(ds_cfg["hf"], sub, split=ds_cfg.get("split", "test"))
         for idx, row in enumerate(ds):
-            gold = row["gold"]
-            correct_idx = int(gold[0] if isinstance(gold, (list, tuple)) else gold)
-            options = [_strip_letter_prefix(c) for c in row["choices"]]
+            choices = row["choices"]
+            k = len(choices)
+            if not (MIN_OPTIONS <= k <= MAX_OPTIONS):
+                continue
+            correct_idx = ord(str(row["answer"]).strip().upper()) - ord("A")
+            if not (0 <= correct_idx < k):       # answer letter beyond kept options
+                continue
             recs.append({
-                "question": row["query"],
-                "options": options,                  # 5 options -> reduced to 4 in _finalize
+                "question": row["question"],
+                "options": [_clean(c) for c in choices],
                 "correct_idx": correct_idx,
-                "group": subset,
-                "source_id": f"{subset}_{idx}",
+                "group": sub,
+                "subgroup": None,
+                "source_id": f"{sub}_{idx}",
+            })
+    return recs
+
+
+def _load_logieval(ds_cfg: dict, rng: random.Random) -> list:
+    """LogiEval (gated HF): keep options in {3,4,5}; two-level groups
+    reasoning-type -> task-format.
+
+    Field names are config-driven (LogiEval's gated schema names are confirmed at
+    access time) with sensible defaults. `gold` may be a letter, an index, or the
+    answer string — all three are handled."""
+    from datasets import load_dataset as hf_load_dataset
+    f = ds_cfg.get("fields", {})
+    f_q = f.get("question", "question")
+    f_opts = f.get("options", "options")
+    f_ans = f.get("answer", "answer")
+    f_reason = f.get("reasoning_type", "reasoning type")
+    f_task = f.get("task_format", "task format")
+
+    load_args = {"split": ds_cfg.get("split", "test")}
+    if ds_cfg.get("config"):
+        ds = hf_load_dataset(ds_cfg["hf"], ds_cfg["config"], **load_args)
+    else:
+        ds = hf_load_dataset(ds_cfg["hf"], **load_args)
+
+    recs = []
+    for idx, row in enumerate(ds):
+        options = [_clean(o) for o in row[f_opts]]
+        k = len(options)
+        if k not in (3, 4, 5):
+            continue
+        correct_idx = _resolve_answer_idx(row[f_ans], options)
+        if correct_idx is None or not (0 <= correct_idx < k):
+            continue
+        recs.append({
+            "question": row[f_q],
+            "options": options,
+            "correct_idx": correct_idx,
+            "group": str(row.get(f_reason, "unknown")),
+            "subgroup": str(row.get(f_task, "unknown")),
+            "source_id": f"logieval_{idx}",
+        })
+    return recs
+
+
+def _resolve_answer_idx(gold, options: list) -> int | None:
+    """Map a gold answer (letter 'A'.., int index, or the answer text) to an index."""
+    if isinstance(gold, (list, tuple)):
+        gold = gold[0] if gold else None
+    if isinstance(gold, bool):
+        return None
+    if isinstance(gold, int):
+        return gold
+    s = str(gold).strip()
+    if len(s) == 1 and s.upper() in LETTERS:
+        return LETTERS.index(s.upper())
+    if s.isdigit():
+        return int(s)
+    cleaned = [_strip_letter_prefix(o) for o in options]
+    if s in options:
+        return options.index(s)
+    if s in cleaned:
+        return cleaned.index(s)
+    return None
+
+
+# --- MathBench (downloaded release zip) ------------------------------------
+
+def _mathbench_root(ds_cfg: dict) -> Path:
+    """Download + extract mathbench_v1.zip once into a cache dir; return its path."""
+    cache = ds_cfg.get("cache_dir")
+    cache_dir = Path(cache) if cache else (Path(__file__).resolve().parent.parent
+                                           / "data" / "_mathbench_raw")
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    root = cache_dir / "mathbench_v1"
+    if root.is_dir() and any(root.iterdir()):
+        return root
+    url = ds_cfg["url"]
+    print(f"  Downloading MathBench archive from {url} ...")
+    # Use certifi's CA bundle when available — the macOS python.org build ships
+    # without system roots, so a bare urlopen() fails SSL verification.
+    try:
+        import certifi
+        ssl_ctx = ssl.create_default_context(cafile=certifi.where())
+    except Exception:
+        ssl_ctx = None
+    with urllib.request.urlopen(url, context=ssl_ctx) as resp:
+        data = resp.read()
+    with zipfile.ZipFile(io.BytesIO(data)) as zf:
+        zf.extractall(cache_dir)
+    return root
+
+
+def _load_mathbench(ds_cfg: dict, rng: random.Random) -> list:
+    """One MathBench stage: English single_choice from both the application
+    ({stage}) and theory ({stage}_knowledge) folders. The `topic` field is
+    'Stage--SubjectArea--Topic'; group = subject area, subgroup = topic. 4 options."""
+    root = _mathbench_root(ds_cfg)
+    stage = ds_cfg["stage"]
+    recs = []
+    for folder in (stage, f"{stage}_knowledge"):
+        path = root / folder / "single_choice_en.jsonl"
+        if not path.exists():
+            continue
+        for idx, line in enumerate(path.read_text(encoding="utf-8").splitlines()):
+            line = line.strip()
+            if not line:
+                continue
+            row = json.loads(line)
+            options = [_clean(o) for o in row["options"]]
+            correct_idx = LETTERS.index(str(row["answer"]).strip().upper())
+            parts = [p.strip() for p in str(row.get("topic", "")).split("--")]
+            subject_area = parts[1] if len(parts) > 1 else "unknown"
+            topic = parts[2] if len(parts) > 2 else (parts[1] if len(parts) > 1 else "unknown")
+            recs.append({
+                "question": row["question"],
+                "options": options,
+                "correct_idx": correct_idx,
+                "group": subject_area,
+                "subgroup": topic,
+                "source_id": f"mathbench_{stage}_{folder}_{idx}",
             })
     return recs
 
 
 _LOADERS = {
+    "mmlu_redux": _load_mmlu_redux,
     "gpqa": _load_gpqa,
-    "gsm_mc": _load_gsm_mc,
-    "math_mc": _load_math_mc,
-    "agieval": _load_agieval,
     "wmdp": _load_wmdp,
+    "compmath": _load_compmath,
+    "codemmlu": _load_codemmlu,
+    "logieval": _load_logieval,
+    "mathbench": _load_mathbench,
 }
 
 
@@ -308,106 +479,56 @@ _LOADERS = {
 # Top-level preparation entry point
 # ---------------------------------------------------------------------------
 
-def prepare_dataset(config: dict, output_path: Path, dataset_key: str = "mmlu") -> list:
+def prepare_dataset(config: dict, output_path: Path, dataset_key: str,
+                    n_examples: int | None = None) -> list:
     """Prepare a dataset_index.json for `dataset_key` and write it to output_path.
 
-    `mmlu` (default) uses the legacy code path below, reading the `dataset:` config
-    block, so its index is byte-identical to before. Every other key is resolved
-    through the `datasets:` registry and the per-dataset loaders.
-    """
-    ensure_hf_auth()  # GPQA is gated; harmless no-op for public datasets
+    All datasets are resolved through the `datasets:` registry. Sampling is
+    uniform; two-level (group -> subgroup) when the loader sets `subgroup`.
 
-    if dataset_key != "mmlu":
-        return _prepare_registry_dataset(config, output_path, dataset_key)
+    `n_examples` overrides the config `n_examples` budget for this dataset when
+    given (e.g. a smaller 50-example run); otherwise the config value is used."""
+    ensure_hf_auth()  # GPQA / LogiEval are gated; harmless no-op for public datasets
 
-    from datasets import load_dataset as hf_load_dataset
-
-    ds_cfg = config["dataset"]
-    rng = random.Random(ds_cfg["random_seed"])
-
-    print(f"Loading {ds_cfg['name']} ({ds_cfg['config']}, {ds_cfg['split']}) ...")
-    dataset = hf_load_dataset(ds_cfg["name"], ds_cfg["config"], split=ds_cfg["split"])
-
-    # Group rows by subject
-    by_subject: dict[str, list] = defaultdict(list)
-    for idx, row in enumerate(dataset):
-        by_subject[row["subject"]].append((idx, row))
-
-    # Sample up to max_per_subject from each subject
-    max_per = ds_cfg["max_per_subject"]
-    pool = []
-    for subject, rows in sorted(by_subject.items()):
-        sample_size = min(len(rows), max_per)
-        pool.extend(rng.sample(rows, sample_size))
-
-    n = ds_cfg["n_examples"]
-    if len(pool) < n:
-        raise ValueError(f"Pool has only {len(pool)} examples; need {n}.")
-
-    selected = rng.sample(pool, n)
-
-    records = []
-    for instance_id, (orig_idx, row) in enumerate(selected):
-        correct_letter = MMLU_LETTERS[row["answer"]]
-        wrong_letters = [l for l in MMLU_LETTERS if l != correct_letter]
-        hint_target = rng.choice(wrong_letters)
-
-        assert hint_target != correct_letter, (
-            f"instance {instance_id}: hint_target == correct_answer ({correct_letter})"
+    datasets_cfg = config.get("datasets", {})
+    if dataset_key not in datasets_cfg:
+        raise ValueError(
+            f"dataset '{dataset_key}' not in config datasets registry. "
+            f"Available: {list(datasets_cfg)}"
         )
 
-        records.append({
-            "instance_id": instance_id,
-            "question_id": f"{row['subject']}_{orig_idx}",
-            "subject": row["subject"],
-            "question": row["question"],
-            "choices": {
-                "A": row["choices"][0],
-                "B": row["choices"][1],
-                "C": row["choices"][2],
-                "D": row["choices"][3],
-            },
-            "correct_answer": correct_letter,
-            "hint_target": hint_target,
-        })
-
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(output_path, "w", encoding="utf-8") as f:
-        json.dump(records, f, indent=2, ensure_ascii=False)
-
-    print(f"Saved {len(records)} instances to {output_path}")
-    return records
-
-
-def _prepare_registry_dataset(config: dict, output_path: Path, dataset_key: str) -> list:
-    """Prepare a non-MMLU dataset from the `datasets:` registry."""
-    if dataset_key not in config.get("datasets", {}):
-        available = list(config.get("datasets", {}))
-        raise ValueError(f"dataset '{dataset_key}' not in config datasets registry. Available: {available}")
-
-    ds_cfg = config["datasets"][dataset_key]
+    ds_cfg = datasets_cfg[dataset_key]
     loader = _LOADERS.get(ds_cfg["loader"])
     if loader is None:
         raise ValueError(f"no loader '{ds_cfg['loader']}' registered for dataset '{dataset_key}'.")
 
-    rng = random.Random(ds_cfg.get("random_seed", 88))
+    rng = random.Random(ds_cfg["random_seed"])
 
     print(f"Loading dataset '{dataset_key}' via loader '{ds_cfg['loader']}' ...")
     normalised = loader(ds_cfg, rng)
-    print(f"  Loaded {len(normalised)} raw records.")
+    print(f"  Loaded {len(normalised)} records (post-filter).")
 
-    n = ds_cfg["n_examples"]
+    n = n_examples if n_examples is not None else ds_cfg["n_examples"]
+    if len(normalised) == 0:
+        raise ValueError(f"dataset '{dataset_key}': no records after filtering.")
     if len(normalised) < n:
-        raise ValueError(f"dataset '{dataset_key}' has only {len(normalised)} records; need {n}.")
+        print(f"  NOTE: only {len(normalised)} records available; using all "
+              f"(below the n_examples={n} budget).")
 
-    selected = _balanced_sample(normalised, n, rng)
+    # Two-level uniform when the loader supplies subgroups; otherwise single-level.
+    keys = ["group"] + (["subgroup"] if any(r.get("subgroup") is not None for r in normalised) else [])
+    selected = _stratified_sample(normalised, n, rng, keys)
     records = [_finalize(i, rec, rng) for i, rec in enumerate(selected)]
 
-    # Report group balance (helps confirm balanced sampling worked).
-    counts: dict[str, int] = defaultdict(int)
+    # Report balance (confirms uniform sampling worked).
+    by_group: dict[str, int] = defaultdict(int)
     for r in records:
-        counts[r["subject"]] += 1
-    print(f"  Group balance: {dict(sorted(counts.items()))}")
+        by_group[r["subject"]] += 1
+    opt_counts: dict[int, int] = defaultdict(int)
+    for r in records:
+        opt_counts[len(r["choices"])] += 1
+    print(f"  Group balance: {dict(sorted(by_group.items()))}")
+    print(f"  Option-count distribution: {dict(sorted(opt_counts.items()))}")
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f:

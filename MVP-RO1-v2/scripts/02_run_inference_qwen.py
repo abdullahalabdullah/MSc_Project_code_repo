@@ -3,7 +3,7 @@
 Step 2 (Qwen3 variant): Run hinted and unhinted inference for one Qwen3 checkpoint.
 
 Identical role to scripts/02_run_inference.py, but uses src/inference_qwen.py so
-the model's `<think>...</think>` reasoning is generated (enable_thinking) and
+the model's `<think>...</think>` reasoning is generated (thinking mode) and
 handled correctly, with Qwen3-recommended sampling read from the `qwen_inference:`
 block of the config.
 
@@ -24,14 +24,19 @@ Options:
     --hf-id         override hf_id from config (e.g. a local merged model dir)
     --dataset       single dataset key (default: mmlu)
     --datasets      one or more dataset keys; overrides --dataset when given
+    --hint-type     hint shown in the hinted arm (default: config hint.default).
+                    One of: professor, visual_pattern, metadata, wrong_few_shot,
+                    grader_hacking, unethical. Output is namespaced by hint type.
+    --n-samples     samples (N) per arm per instance (default: config
+                    qwen_inference.n_samples). No fixed cap.
 
 Input:
     data/{dataset}/dataset_index.json
 
 Output:
-    outputs/{dataset}/{model_name}/hinted.jsonl
-    outputs/{dataset}/{model_name}/unhinted.jsonl
-    outputs/{dataset}/{model_name}/progress.json
+    outputs/{dataset}/{model_name}/{hint_type}/hinted.jsonl
+    outputs/{dataset}/{model_name}/{hint_type}/unhinted.jsonl
+    outputs/{dataset}/{model_name}/{hint_type}/progress.json
 """
 
 import argparse
@@ -42,6 +47,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import yaml
 from src.dataset import ensure_hf_auth, load_dataset_index, resolve_paths
+from src.hints import HINT_TYPES
 from src.inference_qwen import load_qwen_model, run_inference_qwen
 
 
@@ -54,10 +60,12 @@ def main():
                         help="Single dataset key (default: mmlu). Ignored when --datasets is given.")
     parser.add_argument("--datasets", nargs="+", default=None,
                         help="One or more dataset keys. Model is loaded once and reused across all.")
-    parser.add_argument("--config-block", default="qwen_inference",
-                        help="Config block to read sampling params from "
-                             "(default: qwen_inference; use qwen3_nothink_inference "
-                             "for the thinking-off Qwen3-4B run).")
+    parser.add_argument("--hint-type", default=None, choices=HINT_TYPES,
+                        help="Hint shown in the hinted arm (default: config hint.default). "
+                             "Output is namespaced by hint type. Choices: " + ", ".join(HINT_TYPES))
+    parser.add_argument("--n-samples", type=int, default=None,
+                        help="Samples (N) per arm per instance (default: config "
+                             "qwen_inference.n_samples). Overrides the config value for this run.")
     parser.add_argument("--seed", type=int, default=88)
     parser.add_argument("--hf-id", default=None,
                         help="Override hf_id from config (e.g. a local merged model dir).")
@@ -71,15 +79,21 @@ def main():
     with open(config_path) as f:
         config = yaml.safe_load(f)
 
-    if args.config_block not in config:
-        print(f"ERROR: config is missing the '{args.config_block}:' block required by this script.")
+    if "qwen_inference" not in config:
+        print("ERROR: config is missing the 'qwen_inference:' block required by this script.")
         sys.exit(1)
 
-    # run_inference_qwen() reads config["qwen_inference"]; point it at the chosen
-    # block so an alternate block (e.g. qwen3_nothink_inference, thinking off) is used.
-    config["qwen_inference"] = config[args.config_block]
+    hint_type = args.hint_type or config.get("hint", {}).get("default", "professor")
+    print(f"Hint type: {hint_type}")
 
-    ensure_hf_auth()  # log in for gated model downloads (env var or .hf_token)
+    if args.n_samples is not None:
+        if args.n_samples < 1:
+            print(f"ERROR: --n-samples must be >= 1 (got {args.n_samples}).")
+            sys.exit(1)
+        config["qwen_inference"]["n_samples"] = args.n_samples
+    print(f"N samples/arm: {config['qwen_inference']['n_samples']}")
+
+    ensure_hf_auth()  # log in for gated model downloads (env var or config hf_token)
 
     model_cfg = next((m for m in config["models"] if m["name"] == args.model), None)
     if model_cfg is None:
@@ -109,7 +123,7 @@ def main():
         print(f"{'='*60}")
         ds_config = dict(config, paths=dict(config["paths"], outputs_dir=str(paths["outputs_dir"])))
         run_inference_qwen(ds_config, model_cfg, dataset, base_seed=args.seed,
-                           tokenizer=tokenizer, llm=llm)
+                           tokenizer=tokenizer, llm=llm, hint_type=hint_type)
 
 
 if __name__ == "__main__":

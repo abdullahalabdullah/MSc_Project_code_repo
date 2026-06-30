@@ -6,24 +6,30 @@ For the g-mean^2 metric, the monitor must be run on both arms:
   - hinted.jsonl   (X=1, intervention) — arm="hinted"
   - unhinted.jsonl (X=0, control)      — arm="unhinted"
 
-using the same prompt template (_MONITOR_PROMPT_TEMPLATE_2, see src/monitor.py).
-The monitor is always told the instance's hint_target, even for unhinted
-responses, so that TNR_X=0 / TNR_X=1 are comparable. Supports resume-on-restart.
-Requires OPENAI_API_KEY in the environment.
+using the same prompt skeleton (_MONITOR_PROMPT_TEMPLATE, see src/monitor.py).
+The HINT description + acknowledgment guideline in that prompt are filled per
+hint type (--hint-type) via src.hints.monitor_hint_fields, so the monitor is
+matched to the hint the model actually saw. The monitor is always told the
+instance's hint_target, even for unhinted responses, so that TNR_X=0 / TNR_X=1
+are comparable. Supports resume-on-restart. Requires OPENAI_API_KEY in the env.
 
 Usage:
-    OPENAI_API_KEY=<key> python scripts/03_run_monitor.py --model tulu_sft_no_safety
+    OPENAI_API_KEY=<key> python scripts/03_run_monitor.py --model qwen3_1_7b \
+        --dataset wmdp --hint-type professor
 
     Options:
-      --config  path to config YAML (default: config/mvp_config.yaml)
+      --config     path to config YAML (default: config/mvp_config.yaml)
+      --dataset    dataset key (namespaces I/O paths)
+      --hint-type  hint type to monitor (default: config hint.default; must match
+                   the inference run). Namespaces I/O paths.
 
 Input:
-    outputs/{model_name}/hinted.jsonl
-    outputs/{model_name}/unhinted.jsonl
+    outputs/{dataset}/{model_name}/{hint_type}/hinted.jsonl
+    outputs/{dataset}/{model_name}/{hint_type}/unhinted.jsonl
 
 Output:
-    monitor_outputs/{model_name}/monitor_results.jsonl
-    monitor_outputs/{model_name}/monitor_progress.json  (checkpoint state)
+    monitor_outputs/{dataset}/{model_name}/{hint_type}/monitor_results.jsonl
+    monitor_outputs/{dataset}/{model_name}/{hint_type}/monitor_progress.json
 """
 
 import argparse
@@ -42,6 +48,7 @@ from tqdm import tqdm
 from src.monitor import classify
 from src.gmean2_metrics import load_jsonl
 from src.dataset import resolve_paths
+from src.hints import HINT_TYPES
 
 NUM_WORKERS = 16
 MIN_WORKERS = 8  # floor for automatic rate-limit back-off
@@ -50,10 +57,13 @@ MIN_WORKERS = 8  # floor for automatic rate-limit back-off
 def main():
     parser = argparse.ArgumentParser(description="Run monitor (both arms) for one model.")
     parser.add_argument("--model", required=True,
-                        help="Model name as defined in config (e.g. tulu_sft_no_safety)")
+                        help="Model name as defined in config (e.g. qwen3_1_7b)")
     parser.add_argument("--config", default="config/mvp_config.yaml")
     parser.add_argument("--dataset", default="mmlu",
                         help="Dataset key (default: mmlu). Namespaces I/O paths.")
+    parser.add_argument("--hint-type", default=None, choices=HINT_TYPES,
+                        help="Hint type to monitor (default: config hint.default). "
+                             "Must match the inference run. Namespaces I/O paths.")
     args = parser.parse_args()
 
     root = Path(__file__).parent.parent
@@ -61,6 +71,8 @@ def main():
 
     with open(config_path) as f:
         config = yaml.safe_load(f)
+
+    hint_type = args.hint_type or config.get("hint", {}).get("default", "professor")
 
     api_key = os.environ.get("OPENAI_API_KEY")
     if not api_key:
@@ -71,7 +83,7 @@ def main():
     mon_cfg = config["monitor"]
     model_name = args.model
 
-    paths = resolve_paths(root, config, args.dataset, model_name)
+    paths = resolve_paths(root, config, args.dataset, model_name, hint_type)
     out_dir = paths["outputs_dir"]
     hinted_path = out_dir / "hinted.jsonl"
     unhinted_path = out_dir / "unhinted.jsonl"
@@ -108,6 +120,8 @@ def main():
     failure_count = 0
     total = 0
 
+    hint_cfg = config.get("hint", {})
+
     def _classify_record(record):
         result = classify(
             model_response=record["raw_output"],
@@ -118,6 +132,8 @@ def main():
             max_retries=mon_cfg.get("max_retries", 5),
             backoff_factor=mon_cfg.get("backoff_factor", 2.0),
             timeout=mon_cfg.get("timeout", 60),
+            hint_type=record.get("hint_type", hint_type),
+            hint_cfg=hint_cfg,
         )
         return record, result
 

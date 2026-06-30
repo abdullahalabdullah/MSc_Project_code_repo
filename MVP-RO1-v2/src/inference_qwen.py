@@ -1,14 +1,14 @@
 """
 Inference pipeline for the MVP CoT monitorability evaluation — Qwen3 variant.
 
-Qwen3 is a hybrid *reasoning* model. With `enable_thinking=True` (the default),
-it emits its chain-of-thought inside a `<think>...</think>` block before the
-visible answer. This is structurally different from the Llama/Tulu checkpoints
+Qwen3 is a hybrid *reasoning* model. This pipeline always runs it in thinking
+mode, so it emits its chain-of-thought inside a `<think>...</think>` block before
+the visible answer. This is structurally different from the Llama/Tulu checkpoints
 handled by `src/inference.py`, so this module exists as a parallel implementation
 rather than modifying the original.
 
 Differences vs. `src/inference.py`:
-  1. `format_prompt_qwen` passes `enable_thinking` to `apply_chat_template`
+  1. `format_prompt_qwen` enables thinking on `apply_chat_template`
      (ChatML template, `<|im_start|>/<|im_end|>`).
   2. The chain-of-thought is the content of the `<think>` block; `extract_cot`
      returns that block's text (tags stripped) and the full block is also stored
@@ -32,8 +32,8 @@ import sys
 from pathlib import Path
 
 # Reuse the model-agnostic prompt construction and the OLMES answer parser /
-# anchor-based CoT splitter from the original module. Importing is safe: the
-# heavy vLLM import lives inside run_inference(), not at module top level.
+# anchor-based CoT splitter from src/inference.py (shared helpers; no heavy
+# vLLM/torch imports at module level, so importing is cheap and safe).
 from src.inference import (
     _SYSTEM_PROMPT,
     build_user_content,
@@ -46,22 +46,29 @@ from src.inference import (
 # Prompt construction (Qwen3 thinking mode)
 # ---------------------------------------------------------------------------
 
-def format_prompt_qwen(item: dict, include_hint: bool, tokenizer, enable_thinking: bool = True) -> str:
-    """Apply Qwen3's chat template with the thinking flag and return the prompt string.
+def format_prompt_qwen(item: dict, include_hint: bool, tokenizer,
+                       hint_type: str = "professor", hint_cfg: dict | None = None,
+                       dataset: list | None = None) -> str:
+    """Apply Qwen3's chat template (thinking mode) and return the prompt string.
 
     The user/system content is byte-for-byte identical to the Llama pipeline
     (`build_user_content`) so the only cross-model difference is the chat
     template itself. `enable_thinking=True` lets the model emit `<think>...</think>`.
+
+    `hint_type`/`hint_cfg`/`dataset` are forwarded to `build_user_content` to
+    select the hinted-arm hint (see src/hints.py); `dataset` is only used by the
+    `wrong_few_shot` hint to sample example questions.
     """
     messages = [
         {"role": "system", "content": _SYSTEM_PROMPT},
-        {"role": "user", "content": build_user_content(item, include_hint)},
+        {"role": "user", "content": build_user_content(
+            item, include_hint, hint_type=hint_type, hint_cfg=hint_cfg, dataset=dataset)},
     ]
     return tokenizer.apply_chat_template(
         messages,
         tokenize=False,
         add_generation_prompt=True,
-        enable_thinking=enable_thinking,
+        enable_thinking=True,
     )
 
 
@@ -150,6 +157,12 @@ def load_qwen_model(model_cfg: dict, max_model_len: int = 24576, gpu_memory_util
         truncated (finish_reason="length"), which would be a confound.
     gpu_memory_utilization: fraction of VRAM given to vLLM. 0.90 is safe for a dedicated
         inference pod with no other GPU workloads.
+
+    Prefix caching is enabled: every prompt shares the identical system-prompt prefix
+    (and, within an instance, the hinted/unhinted prompts share a long common prefix),
+    so vLLM reuses the cached KV for those shared tokens. This is a pure throughput win
+    with no effect on the generated tokens — sampling still starts at the first
+    non-shared position with each request's own seed/params.
     """
     from vllm import LLM
     from transformers import AutoTokenizer
@@ -165,12 +178,13 @@ def load_qwen_model(model_cfg: dict, max_model_len: int = 24576, gpu_memory_util
         trust_remote_code=True,
         max_model_len=max_model_len,
         gpu_memory_utilization=gpu_memory_utilization,
+        enable_prefix_caching=True,
     )
     return tokenizer, llm
 
 
 def run_inference_qwen(config: dict, model_cfg: dict, dataset: list, base_seed: int = 88,
-                       tokenizer=None, llm=None):
+                       tokenizer=None, llm=None, hint_type: str = "professor"):
     """
     Run hinted and unhinted inference for one Qwen3 model over the full dataset.
 
@@ -181,28 +195,33 @@ def run_inference_qwen(config: dict, model_cfg: dict, dataset: list, base_seed: 
     datasets) to avoid reloading weights on every call. If None, they are loaded
     here (single-dataset / backward-compatible path).
 
-    Writes:
-      outputs/{model_name}/hinted.jsonl
-      outputs/{model_name}/unhinted.jsonl
-      outputs/{model_name}/progress.json  (resume checkpoint)
+    `hint_type` selects the hinted-arm hint (see src/hints.HINT_TYPES); the
+    wording is read from the config `hint:` block. Outputs are namespaced by hint
+    type so different hints never collide.
 
-    Each JSONL line contains the same fields as src/inference.py plus `thinking`:
+    Writes:
+      outputs/{model_name}/{hint_type}/hinted.jsonl
+      outputs/{model_name}/{hint_type}/unhinted.jsonl
+      outputs/{model_name}/{hint_type}/progress.json  (resume checkpoint)
+
+    Each JSONL line contains the same fields as src/inference.py plus `thinking`
+    and `hint_type`:
       instance_id, question_id, arm, sample_idx, hint_target, correct_answer,
-      full_prompt, raw_output, thinking, cot, parsed_answer, followed_hint,
-      token_count, truncated, seed
+      hint_type, full_prompt, raw_output, thinking, cot, parsed_answer,
+      followed_hint, token_count, truncated, seed
     """
     from vllm import SamplingParams
 
     model_name = model_cfg["name"]
     inf = config["qwen_inference"]
+    hint_cfg = config.get("hint", {})
     n_samples = inf["n_samples"]
     checkpoint_every = inf["checkpoint_every"]
-    enable_thinking = inf.get("enable_thinking", True)
 
     if tokenizer is None or llm is None:
         tokenizer, llm = load_qwen_model(model_cfg)
 
-    out_dir = Path(config["paths"]["outputs_dir"]) / model_name
+    out_dir = Path(config["paths"]["outputs_dir"]) / model_name / hint_type
     out_dir.mkdir(parents=True, exist_ok=True)
 
     hinted_path = out_dir / "hinted.jsonl"
@@ -218,27 +237,33 @@ def run_inference_qwen(config: dict, model_cfg: dict, dataset: list, base_seed: 
 
     todo = [item for item in dataset if item["instance_id"] not in completed]
     print(f"{len(todo)} instances to process for {model_name} / {out_dir.name} "
-          f"(enable_thinking={enable_thinking}).")
+          f"(thinking mode).")
 
     null_count = 0
     truncated_count = 0
     total_generated = 0
 
-    # Seed scheme matches src/inference.py: the hinted and unhinted arms draw from
-    # DISJOINT lanes (arm_offset 0 vs 1_000_000) so the two arms are independent by
-    # construction (the TE = p1 - p0 analysis assumes Cov(p0, p1) = 0). The
-    # accuracy-estimation run (scripts/07_*) uses higher lanes (+2_000_000 /
-    # +3_000_000) so it never collides on the same model + dataset.
-    _ARM_OFFSET = {"unhinted": 0, "hinted": 1_000_000}
+    # Seed scheme: each of the N samples in an arm uses a distinct, fixed seed,
+    # reused across all instances (different prompts + same seed still yield
+    # independent outputs). The two arms use DISJOINT seed sets so hinted and
+    # unhinted stay independent (the TE = p1 - p0 analysis assumes Cov(p0,p1)=0):
+    # the hinted arm uses powers of 2 and the unhinted arm powers of 3, which can
+    # never coincide (sample s -> 2**(s+1) / 3**(s+1)). This scales to ANY N (no
+    # fixed cap) and reproduces the original [2,4,8,16] / [3,9,27,81] for N<=4.
+    _ARM_SEEDS = {
+        "hinted":   [2 ** (s + 1) for s in range(n_samples)],
+        "unhinted": [3 ** (s + 1) for s in range(n_samples)],
+    }
 
     def _seed(item, s, arm):
-        return base_seed + _ARM_OFFSET[arm] + item["instance_id"] * n_samples + s
+        return _ARM_SEEDS[arm][s]
 
     def _sampling_params(item, s, arm):
         return SamplingParams(
             n=1,
             temperature=inf["temperature"],
             top_p=inf["top_p"],
+            top_k=inf.get("top_k", -1),
             max_tokens=inf["max_new_tokens"],
             seed=_seed(item, s, arm),
         )
@@ -247,76 +272,88 @@ def run_inference_qwen(config: dict, model_cfg: dict, dataset: list, base_seed: 
         batch = todo[batch_start : batch_start + checkpoint_every]
 
         hinted_prompts = [
-            format_prompt_qwen(item, include_hint=True, tokenizer=tokenizer, enable_thinking=enable_thinking)
+            format_prompt_qwen(item, include_hint=True, tokenizer=tokenizer,
+                               hint_type=hint_type, hint_cfg=hint_cfg, dataset=dataset)
             for item in batch
         ]
         unhinted_prompts = [
-            format_prompt_qwen(item, include_hint=False, tokenizer=tokenizer, enable_thinking=enable_thinking)
+            format_prompt_qwen(item, include_hint=False, tokenizer=tokenizer,
+                               hint_type=hint_type, hint_cfg=hint_cfg, dataset=dataset)
             for item in batch
         ]
+
+        # Flatten every (sample, instance, arm) into ONE request list and issue a
+        # single llm.generate call for the whole checkpoint. vLLM's continuous
+        # batching then schedules all of them together and we pay one decode
+        # drain-tail per checkpoint instead of one per (sample × arm) sub-call
+        # (previously 2*n_samples generate calls, each leaving the GPU idle while
+        # its few longest <think> traces finished). This is purely a scheduling
+        # change: each request keeps its own prompt, per-arm/sample seed, and
+        # sampling params, so the sampling distribution is identical — nothing
+        # about the generations or token budget changes.
+        reqs = []          # parallel to prompts/sampling: (item, sample_idx, arm_label, prompt)
+        prompts = []
+        sampling = []
+        for s in range(n_samples):
+            for idx, item in enumerate(batch):
+                for arm_label, arm_prompt in (
+                    ("hinted",   hinted_prompts[idx]),
+                    ("unhinted", unhinted_prompts[idx]),
+                ):
+                    reqs.append((item, s, arm_label, arm_prompt))
+                    prompts.append(arm_prompt)
+                    sampling.append(_sampling_params(item, s, arm_label))
+
+        print(
+            f"  Checkpoint [{batch_start}:{batch_start+len(batch)}] — generating "
+            f"{len(prompts)} requests ({len(batch)} instances × {n_samples} samples × 2 arms) "
+            f"in one batch ..."
+        )
+        outputs = llm.generate(prompts, sampling)
 
         with open(hinted_path, "a", encoding="utf-8") as hf, \
              open(unhinted_path, "a", encoding="utf-8") as uf:
 
-            for s in range(n_samples):
-                hinted_sp   = [_sampling_params(item, s, "hinted")   for item in batch]
-                unhinted_sp = [_sampling_params(item, s, "unhinted") for item in batch]
+            for (item, s, arm_label, arm_prompt), arm_out in zip(reqs, outputs):
+                arm_file = hf if arm_label == "hinted" else uf
+                completion = arm_out.outputs[0]  # n=1
+                raw = completion.text
+                parsed = parse_answer_qwen(raw)
+                trunc = completion.finish_reason == "length"
+                token_count = len(completion.token_ids)
 
-                print(
-                    f"  Batch [{batch_start}:{batch_start+len(batch)}] "
-                    f"— sample {s+1}/{n_samples} — hinted arm ..."
-                )
-                hinted_outputs = llm.generate(hinted_prompts, hinted_sp)
-                print(
-                    f"  Batch [{batch_start}:{batch_start+len(batch)}] "
-                    f"— sample {s+1}/{n_samples} — unhinted arm ..."
-                )
-                unhinted_outputs = llm.generate(unhinted_prompts, unhinted_sp)
+                if parsed is None:
+                    null_count += 1
+                if trunc:
+                    truncated_count += 1
+                    print(
+                        f"  ERROR: truncated output — "
+                        f"instance {item['instance_id']}, {arm_label}, sample {s}",
+                        file=sys.stderr,
+                    )
 
-                for item, h_prompt, u_prompt, h_out, u_out in zip(
-                    batch, hinted_prompts, unhinted_prompts, hinted_outputs, unhinted_outputs
-                ):
-                    for arm_label, arm_prompt, arm_out, arm_file in [
-                        ("hinted",   h_prompt, h_out, hf),
-                        ("unhinted", u_prompt, u_out, uf),
-                    ]:
-                        completion = arm_out.outputs[0]  # n=1
-                        raw = completion.text
-                        parsed = parse_answer_qwen(raw)
-                        trunc = completion.finish_reason == "length"
-                        token_count = len(completion.token_ids)
-
-                        if parsed is None:
-                            null_count += 1
-                        if trunc:
-                            truncated_count += 1
-                            print(
-                                f"  ERROR: truncated output — "
-                                f"instance {item['instance_id']}, {arm_label}, sample {s}",
-                                file=sys.stderr,
-                            )
-
-                        thinking_text, _ = split_thinking(raw)
-                        cot_text = extract_cot_qwen(raw)
-                        record = {
-                            "instance_id":   item["instance_id"],
-                            "question_id":   item["question_id"],
-                            "arm":           arm_label,
-                            "sample_idx":    s,
-                            "hint_target":   item["hint_target"],
-                            "correct_answer": item["correct_answer"],
-                            "full_prompt":   arm_prompt,
-                            "raw_output":    raw,
-                            "thinking":      thinking_text,
-                            "cot":           cot_text,
-                            "parsed_answer": parsed,
-                            "followed_hint": (parsed == item["hint_target"]) if parsed else False,
-                            "token_count":   token_count,
-                            "truncated":     trunc,
-                            "seed":          _seed(item, s, arm_label),
-                        }
-                        arm_file.write(json.dumps(record, ensure_ascii=False) + "\n")
-                        total_generated += 1
+                thinking_text, _ = split_thinking(raw)
+                cot_text = extract_cot_qwen(raw)
+                record = {
+                    "instance_id":   item["instance_id"],
+                    "question_id":   item["question_id"],
+                    "arm":           arm_label,
+                    "sample_idx":    s,
+                    "hint_target":   item["hint_target"],
+                    "correct_answer": item["correct_answer"],
+                    "hint_type":     hint_type,
+                    "full_prompt":   arm_prompt,
+                    "raw_output":    raw,
+                    "thinking":      thinking_text,
+                    "cot":           cot_text,
+                    "parsed_answer": parsed,
+                    "followed_hint": (parsed == item["hint_target"]) if parsed else False,
+                    "token_count":   token_count,
+                    "truncated":     trunc,
+                    "seed":          _seed(item, s, arm_label),
+                }
+                arm_file.write(json.dumps(record, ensure_ascii=False) + "\n")
+                total_generated += 1
 
         completed.update(item["instance_id"] for item in batch)
 

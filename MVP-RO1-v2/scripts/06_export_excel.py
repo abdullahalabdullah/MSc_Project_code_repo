@@ -26,7 +26,7 @@ Each row is also tagged with a `category`, used to split rows across sheets:
 Usage:
     python scripts/06_export_excel.py                              # all models, every dataset
     python scripts/06_export_excel.py --dataset wmdp               # all models, one dataset
-    python scripts/06_export_excel.py --model tulu_sft_no_safety   # single model
+    python scripts/06_export_excel.py --model qwen3_1_7b   # single model
 
     Options:
       --config   path to config YAML (default: config/mvp_config.yaml)
@@ -57,6 +57,7 @@ import yaml
 
 from src.gmean2_metrics import load_jsonl, compute_gmean2
 from src.dataset import resolve_paths
+from src.hints import HINT_TYPES
 
 
 CATEGORY_SHEETS = [
@@ -80,7 +81,7 @@ PER_EXAMPLE_FIELDS = [
 
 COLUMNS = [
     "model_name", "category", "instance_id", "question_id", "subject", "question",
-    "choice_A", "choice_B", "choice_C", "choice_D", "correct_answer", "hint_target",
+    "choice_A", "choice_B", "choice_C", "choice_D", "choice_E", "correct_answer", "hint_target",
     "arm", "sample_idx", "seed",
     "parsed_answer", "followed_hint", "no_cot", "truncated", "token_count",
     "monitor_acknowledged", "monitor_label", "monitor_parse_failure",
@@ -135,6 +136,7 @@ def build_rows(model_name, dataset_by_id, hinted, unhinted, monitor_records, per
             "choice_B": choices.get("B"),
             "choice_C": choices.get("C"),
             "choice_D": choices.get("D"),
+            "choice_E": choices.get("E"),
             "correct_answer": ds.get("correct_answer", rec.get("correct_answer")),
             "hint_target": ds.get("hint_target", rec.get("hint_target")),
             "arm": rec["arm"],
@@ -180,9 +182,9 @@ def build_summary_rows(model_name, dataset_by_id, per_example_metrics):
     return rows
 
 
-def run_dataset(root, config, dataset_key, models, output_override):
+def run_dataset(root, config, dataset_key, models, output_override, hint_type):
     """Export a qualitative workbook for every given model on a single dataset."""
-    print(f"\n=== dataset: {dataset_key} ===")
+    print(f"\n=== dataset: {dataset_key}  (hint: {hint_type}) ===")
 
     dataset_path = resolve_paths(root, config, dataset_key)["data_index"]
     if not dataset_path.exists():
@@ -196,7 +198,7 @@ def run_dataset(root, config, dataset_key, models, output_override):
     for model_cfg in models:
         model_name = model_cfg["name"]
 
-        mpaths = resolve_paths(root, config, dataset_key, model_name)
+        mpaths = resolve_paths(root, config, dataset_key, model_name, hint_type)
         out_dir = mpaths["outputs_dir"]
         mon_dir = mpaths["monitor_dir"]
 
@@ -246,9 +248,12 @@ def main():
     parser.add_argument("--dataset", default=None,
                         help="Restrict to one dataset key (default: every dataset in config). "
                              "Namespaces I/O paths.")
+    parser.add_argument("--hint-type", default=None, choices=HINT_TYPES,
+                        help="Hint type to read (default: config hint.default). "
+                             "Must match the inference/monitor run. Namespaces I/O paths.")
     parser.add_argument("--output", default=None,
                         help="Output .xlsx path (only valid with --model and --dataset; default: "
-                             "analysis/{dataset}/{model}/qualitative_export.xlsx)")
+                             "outputs-and-results/analysis/{dataset}/{model}/qualitative_export.xlsx)")
     args = parser.parse_args()
 
     if args.output and (not args.model or not args.dataset):
@@ -262,6 +267,7 @@ def main():
     with open(config_path) as f:
         config = yaml.safe_load(f)
 
+    hint_type = args.hint_type or config.get("hint", {}).get("default", "professor")
     models = config["models"]
     if args.model:
         models = [m for m in models if m["name"] == args.model]
@@ -278,7 +284,7 @@ def main():
             sys.exit(1)
 
     for dataset_key in datasets:
-        run_dataset(root, config, dataset_key, models, args.output)
+        run_dataset(root, config, dataset_key, models, args.output, hint_type)
 
     print("\nDone.")
 

@@ -200,12 +200,14 @@ def plot_cot_length_distribution(per_instance: list, output_path: Path):
     bins = np.linspace(min(all_vals), max(all_vals), 30)
 
     fig, ax = plt.subplots(figsize=(10, 5))
+    # Sample std (ddof=1), consistent with gmean2_metrics; n<2 -> 0.0.
+    _sstd = lambda v: (np.std(v, ddof=1) if len(v) > 1 else 0.0)
     if h_lens:
         ax.hist(h_lens, bins=bins, alpha=0.6, color="#1f77b4",
-                label=f"Hinted  (mean={np.mean(h_lens):.1f}, std={np.std(h_lens):.1f})")
+                label=f"Hinted  (mean={np.mean(h_lens):.1f}, std={_sstd(h_lens):.1f})")
     if u_lens:
         ax.hist(u_lens, bins=bins, alpha=0.6, color="#ff7f0e",
-                label=f"Unhinted (mean={np.mean(u_lens):.1f}, std={np.std(u_lens):.1f})")
+                label=f"Unhinted (mean={np.mean(u_lens):.1f}, std={_sstd(u_lens):.1f})")
 
     ax.set_xlabel("Mean CoT length (tokens per instance)", fontsize=12)
     ax.set_ylabel("Count", fontsize=12)
