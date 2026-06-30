@@ -16,7 +16,7 @@ datasets:
     loader: "mmlu_redux"
     hf: "edinburgh-dawg/mmlu-redux"
     split: "test"
-    n_examples: 200
+    n_examples: 50
     random_seed: 88
   # Academic QA — science, PhD level. No filter; uniform by High-level domain. Only 198 exist.
   gpqa_diamond:
@@ -24,7 +24,7 @@ datasets:
     hf: "Idavidrein/gpqa"
     config: "gpqa_diamond"
     split: "train"            # GPQA ships only a train split
-    n_examples: 200
+    n_examples: 50
     random_seed: 88
   # Maths — MathBench stages. English single_choice (theory + application), both carry the
   # `Stage--SubjectArea--Topic` taxonomy; two-level uniform: subject-area -> topic. 4 options.
@@ -33,32 +33,32 @@ datasets:
     loader: "mathbench"
     url: "https://github.com/open-compass/MathBench/files/15384594/mathbench_v1.zip"
     stage: "primary"
-    n_examples: 200           # only ~109 English MCQ exist -> all used
+    n_examples: 50           # only ~109 English MCQ exist -> all used
     random_seed: 88
   mathbench_middle:
     loader: "mathbench"
     url: "https://github.com/open-compass/MathBench/files/15384594/mathbench_v1.zip"
     stage: "middle"
-    n_examples: 200
+    n_examples: 50
     random_seed: 88
   mathbench_high:
     loader: "mathbench"
     url: "https://github.com/open-compass/MathBench/files/15384594/mathbench_v1.zip"
     stage: "high"
-    n_examples: 200
+    n_examples: 50
     random_seed: 88
   mathbench_college:
     loader: "mathbench"
     url: "https://github.com/open-compass/MathBench/files/15384594/mathbench_v1.zip"
     stage: "college"
-    n_examples: 200
+    n_examples: 50
     random_seed: 88
   # Maths — graduate level, computational. No filter; uniform by subtopic (5). 3 options.
   compmath:
     loader: "compmath"
     hf: "biancaraimondi/CompMath-MCQ"
     split: "test"
-    n_examples: 200
+    n_examples: 50
     random_seed: 88
   # Logic — DISABLED. The dataset matching the spec (Westlake LogiEval, arXiv
   # 2505.11854: reasoning-type -> task-format, options {3,4,5}) is gated and not
@@ -70,7 +70,7 @@ datasets:
   #   loader: "logieval"
   #   hf: "TODO-SET-GATED-LOGIEVAL-HF-ID"
   #   split: "test"
-  #   n_examples: 200
+  #   n_examples: 50
   #   random_seed: 88
   #   fields:                 # override if the gated schema uses different column names
   #     question: "question"
@@ -84,7 +84,7 @@ datasets:
     hf: "cais/wmdp"
     configs: ["wmdp-bio", "wmdp-chem", "wmdp-cyber"]
     split: "test"
-    n_examples: 200
+    n_examples: 50
     random_seed: 88
   # Coding — MCQ over code. Keep options in [3,5]; uniform by subset (9). 3–5 options.
   codemmlu:
@@ -94,7 +94,7 @@ datasets:
               "fill_in_the_middle", "others", "dbms_sql", "api_frameworks",
               "code_repair", "code_completion"]
     split: "test"
-    n_examples: 200
+    n_examples: 50
     random_seed: 88
 
 models:
