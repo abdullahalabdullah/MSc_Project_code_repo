@@ -34,13 +34,11 @@ cd "$(dirname "$0")"
 # --- Configuration ----------------------------------------------------------
 # Config model name (the `name:` key in config/mvp_config.yaml). To run the DPO
 # variant instead, set MODEL=aqua_dpo_qwen3_1_7b_s0 (and merge it first).
-MODEL="qwen3_4b"                # thinking ON (temp 0.6, top_p 0.95, max_new_tokens 16384)
+MODELS=(qwen3_1_7b qwen3_4b)   # run both, one after the other; model loaded once per model
 
-# Hint type(s) to run — a list, like DATASETS. The run sweeps every hint type over
-# every dataset. Valid: professor, visual_pattern, metadata, wrong_few_shot,
+# Hint type for this run. Valid: professor, visual_pattern, metadata, wrong_few_shot,
 # grader_hacking, unethical. Output is namespaced by hint type, so they never collide.
-# For a single hint type, just list one, e.g. HINT_TYPES=(professor).
-HINT_TYPES=(professor)
+HINT_TYPE="professor"
 
 # Examples per dataset (n). Empty "" = use each dataset's config n_examples budget.
 # Set a number (e.g. 50) to override it for this run.
@@ -58,7 +56,7 @@ FORCE_PREPARE="false"
 # All active datasets (logieval is commented out in the config registry — omit it).
 DATASETS=(codemmlu)
 
-LOGFILE="run_qwen3_1_7b_inference_$(date +%Y%m%d_%H%M%S).log"
+LOGFILE="run_inference_$(date +%Y%m%d_%H%M%S).log"
 
 # Build the optional CLI flags from the knobs above.
 PREP_FLAGS=""
@@ -93,9 +91,9 @@ run() {
 # Mirror all output to a timestamped log file as well as the console.
 exec > >(tee -a "$LOGFILE") 2>&1
 
-echo "Qwen3-1.7B inference run started: $(date)"
-echo "Model:       $MODEL (qwen_inference, thinking ON)"
-echo "Hints:       ${HINT_TYPES[*]}"
+echo "Inference run started: $(date)"
+echo "Models:      ${MODELS[*]} (qwen_inference, thinking ON)"
+echo "Hint:        $HINT_TYPE"
 echo "N examples:  ${N_EXAMPLES:-config default} per dataset"
 echo "N samples:   ${N_SAMPLES:-config default} per arm per instance"
 echo "Force prep:  $FORCE_PREPARE"
@@ -131,21 +129,25 @@ echo "########## PHASE 1: prepare dataset indexes ##########"
 for ds in "${DATASETS[@]}"; do
     run python scripts/01_prepare_dataset.py --dataset "$ds" $PREP_FLAGS
 done
-commit_push "dataset indexes ($TAG) — ${DATASETS[*]}"
+commit_push "dataset indexes${NN_TAG} — ${DATASETS[*]}"
 
-# --- Phase 2: inference (commit + push after each dataset) -------------------
+# --- Phase 2: inference — model loaded ONCE per model across all datasets -----
 echo ""
-echo "########## PHASE 2: inference — $MODEL ($HINT_TYPE) ##########"
-for ds in "${DATASETS[@]}"; do
-    run python scripts/02_run_inference_qwen.py --dataset "$ds" --model "$MODEL" --hint-type "$HINT_TYPE" $INFER_FLAGS
-    commit_push "$MODEL inference results ($TAG) — $ds"
+echo "########## PHASE 2: inference ($HINT_TYPE) ##########"
+for model in "${MODELS[@]}"; do
+    echo ""
+    echo "---------- model: $model ----------"
+    run python scripts/02_run_inference_qwen.py --datasets "${DATASETS[@]}" --model "$model" --hint-type "$HINT_TYPE" $INFER_FLAGS
+    commit_push "$model inference results ($HINT_TYPE$NN_TAG) — all datasets"
 done
 
 # --- Phase 3: cross-dataset CoT token-length analysis ------------------------
 echo ""
-echo "########## PHASE 3: CoT token-length analysis — $MODEL ($HINT_TYPE) ##########"
-run python scripts/08_cot_token_analysis.py --model "$MODEL" --datasets "${DATASETS[@]}" --hint-type "$HINT_TYPE"
-commit_push "$MODEL — CoT token-length analysis ($TAG)"
+echo "########## PHASE 3: CoT token-length analysis ($HINT_TYPE) ##########"
+for model in "${MODELS[@]}"; do
+    run python scripts/08_cot_token_analysis.py --model "$model" --datasets "${DATASETS[@]}" --hint-type "$HINT_TYPE"
+    commit_push "$model — CoT token-length analysis ($HINT_TYPE$NN_TAG)"
+done
 
 # --- Summary -----------------------------------------------------------------
 echo ""
