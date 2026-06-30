@@ -56,7 +56,7 @@ N_SAMPLES=""
 FORCE_PREPARE="false"
 
 # All active datasets (logieval is commented out in the config registry — omit it).
-DATASETS=(mmlu_redux gpqa_diamond mathbench_primary mathbench_middle mathbench_high mathbench_college compmath wmdp codemmlu)
+DATASETS=(codemmlu)
 
 LOGFILE="run_qwen3_1_7b_inference_$(date +%Y%m%d_%H%M%S).log"
 
