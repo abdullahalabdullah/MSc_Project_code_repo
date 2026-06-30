@@ -390,7 +390,7 @@ def _prepare_registry_dataset(config: dict, output_path: Path, dataset_key: str)
     if loader is None:
         raise ValueError(f"no loader '{ds_cfg['loader']}' registered for dataset '{dataset_key}'.")
 
-    rng = random.Random(ds_cfg.get("random_seed", 7))
+    rng = random.Random(ds_cfg.get("random_seed", 88))
 
     print(f"Loading dataset '{dataset_key}' via loader '{ds_cfg['loader']}' ...")
     normalised = loader(ds_cfg, rng)

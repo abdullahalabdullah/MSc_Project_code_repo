@@ -13,7 +13,7 @@ Usage:
 
     Options:
       --config  path to config YAML (default: config/mvp_config.yaml)
-      --seed    base random seed (default: 42)
+      --seed    base random seed (default: 88)
 
 Input:
     data/dataset_index.json
@@ -42,7 +42,7 @@ def main():
     parser.add_argument("--config", default="config/mvp_config.yaml")
     parser.add_argument("--dataset", default="mmlu",
                         help="Dataset key (default: mmlu). Namespaces I/O paths.")
-    parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--seed", type=int, default=88)
     args = parser.parse_args()
 
     root = Path(__file__).parent.parent

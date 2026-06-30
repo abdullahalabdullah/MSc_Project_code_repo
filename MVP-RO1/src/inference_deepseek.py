@@ -84,7 +84,7 @@ def format_prompt_deepseek(item: dict, include_hint: bool, tokenizer) -> str:
 # Main inference function
 # ---------------------------------------------------------------------------
 
-def run_inference_deepseek(config: dict, model_cfg: dict, dataset: list, base_seed: int = 42):
+def run_inference_deepseek(config: dict, model_cfg: dict, dataset: list, base_seed: int = 88):
     """
     Run hinted and unhinted inference for one DeepSeek-R1-Distill model.
 
@@ -144,17 +144,23 @@ def run_inference_deepseek(config: dict, model_cfg: dict, dataset: list, base_se
     truncated_count = 0
     total_generated = 0
 
-    # Seed scheme matches src/inference.py exactly.
-    def _seed(item, s):
-        return base_seed + item["instance_id"] * n_samples + s
+    # Seed scheme matches src/inference.py: the hinted and unhinted arms draw from
+    # DISJOINT lanes (arm_offset 0 vs 1_000_000) so the two arms are independent by
+    # construction (the TE = p1 - p0 analysis assumes Cov(p0, p1) = 0). The
+    # accuracy-estimation run (scripts/07_*) uses higher lanes (+2_000_000 /
+    # +3_000_000) so it never collides on the same model + dataset.
+    _ARM_OFFSET = {"unhinted": 0, "hinted": 1_000_000}
 
-    def _sampling_params(item, s):
+    def _seed(item, s, arm):
+        return base_seed + _ARM_OFFSET[arm] + item["instance_id"] * n_samples + s
+
+    def _sampling_params(item, s, arm):
         return SamplingParams(
             n=1,
             temperature=inf["temperature"],
             top_p=inf["top_p"],
             max_tokens=inf["max_new_tokens"],
-            seed=_seed(item, s),
+            seed=_seed(item, s, arm),
         )
 
     # The forced opening tag lives in the prompt, so each completion starts INSIDE
@@ -177,18 +183,19 @@ def run_inference_deepseek(config: dict, model_cfg: dict, dataset: list, base_se
              open(unhinted_path, "a", encoding="utf-8") as uf:
 
             for s in range(n_samples):
-                sp_s = [_sampling_params(item, s) for item in batch]
+                hinted_sp   = [_sampling_params(item, s, "hinted")   for item in batch]
+                unhinted_sp = [_sampling_params(item, s, "unhinted") for item in batch]
 
                 print(
                     f"  Batch [{batch_start}:{batch_start+len(batch)}] "
                     f"— sample {s+1}/{n_samples} — hinted arm ..."
                 )
-                hinted_outputs = llm.generate(hinted_prompts, sp_s)
+                hinted_outputs = llm.generate(hinted_prompts, hinted_sp)
                 print(
                     f"  Batch [{batch_start}:{batch_start+len(batch)}] "
                     f"— sample {s+1}/{n_samples} — unhinted arm ..."
                 )
-                unhinted_outputs = llm.generate(unhinted_prompts, sp_s)
+                unhinted_outputs = llm.generate(unhinted_prompts, unhinted_sp)
 
                 for item, h_prompt, u_prompt, h_out, u_out in zip(
                     batch, hinted_prompts, unhinted_prompts, hinted_outputs, unhinted_outputs
@@ -232,7 +239,7 @@ def run_inference_deepseek(config: dict, model_cfg: dict, dataset: list, base_se
                             "followed_hint": (parsed == item["hint_target"]) if parsed else False,
                             "token_count":   token_count,
                             "truncated":     trunc,
-                            "seed":          _seed(item, s),
+                            "seed":          _seed(item, s, arm_label),
                         }
                         arm_file.write(json.dumps(record, ensure_ascii=False) + "\n")
                         total_generated += 1

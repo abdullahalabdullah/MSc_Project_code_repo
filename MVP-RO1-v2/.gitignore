@@ -1,0 +1,28 @@
+# Runtime artifacts — large / regeneratable
+
+# # Python
+# __pycache__/
+# *.pyc
+# *.pyo
+# *.pyd
+# *.egg-info/
+# dist/
+# build/
+# .eggs/
+
+# Environment
+.env
+*.env
+
+# Secrets — HuggingFace token (read from env var first, this file as fallback)
+.hf_token
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/

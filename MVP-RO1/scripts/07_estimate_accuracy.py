@@ -21,9 +21,10 @@ Options:
     --config  path to config YAML  (default: config/mvp_config.yaml)
     --model   model name from config (required)
     --n       samples per instance, per arm (default: 32)
-    --seed    base random seed for the unhinted arm (default: 2000,
-              distinct from the main inference runs). The hinted arm uses
-              seed + 1_000_000 + ... so the two arms draw independent samples.
+    --seed    canonical base random seed (default: 88). The main inference
+              (scripts/02_*) uses lanes 0 (unhinted) / 1_000_000 (hinted); this run
+              may share its model + dataset, so to stay independent it draws from
+              disjoint higher lanes: +2_000_000 (unhinted arm) and +3_000_000 (hinted).
 
 Output:
     analysis/{model}/accuracy_runs.jsonl          — unhinted, one record per instance
@@ -235,7 +236,7 @@ def main():
     parser.add_argument("--dataset", default="mmlu",
                         help="Dataset key (default: mmlu). Namespaces I/O paths.")
     parser.add_argument("--n", type=int, default=32, help="Samples per instance, per arm")
-    parser.add_argument("--seed", type=int, default=2000,
+    parser.add_argument("--seed", type=int, default=88,
                         help="Base random seed for the unhinted arm")
     args = parser.parse_args()
 
@@ -287,13 +288,17 @@ def main():
     base_seed = args.seed
     checkpoint_every = inf["checkpoint_every"]
 
+    # This estimation run may execute on the same model + dataset as the main
+    # inference (scripts/02_*), whose two arms occupy lanes 0 (unhinted) and
+    # 1_000_000 (hinted). To keep the two experiments fully independent, this run
+    # draws from disjoint higher lanes derived from the same canonical base_seed:
+    # +2_000_000 for the unhinted arm, +3_000_000 for the hinted arm. The two arms
+    # are therefore independent of each other and of the main run.
     def seed_unhinted(item, s):
-        return base_seed + item["instance_id"] * n_samples + s
+        return base_seed + 2_000_000 + item["instance_id"] * n_samples + s
 
     def seed_hinted(item, s):
-        # Disjoint seed space from the unhinted arm so the two arms are
-        # independent samples.
-        return base_seed + 1_000_000 + item["instance_id"] * n_samples + s
+        return base_seed + 3_000_000 + item["instance_id"] * n_samples + s
 
     print(f"\n=== Pass 1/2: unhinted (N={n_samples}) ===")
     u_null, u_trunc = run_sampling_pass(

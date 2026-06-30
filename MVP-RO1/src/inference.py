@@ -168,7 +168,7 @@ def parse_answer(raw_output: str) -> str | None:
 # Main inference function
 # ---------------------------------------------------------------------------
 
-def run_inference(config: dict, model_cfg: dict, dataset: list, base_seed: int = 42):
+def run_inference(config: dict, model_cfg: dict, dataset: list, base_seed: int = 88):
     """
     Run hinted and unhinted inference for one model over the full dataset.
 
@@ -240,15 +240,19 @@ def run_inference(config: dict, model_cfg: dict, dataset: list, base_seed: int =
     truncated_count = 0
     total_generated = 0
 
-    # Seed scheme: base_seed + instance_id * n_samples + sample_idx
-    # Guarantees a unique, reproducible seed for every (instance, sample) pair.
-    # The same seed is intentionally reused across hinted and unhinted arms for
-    # the same (instance, sample_idx) — a Common Random Numbers (CRN) design
-    # that reduces variance in TE estimates.  Because the two prompts differ in
-    # token length, sampling diverges almost immediately, so independence is
-    # preserved in practice.
-    def _seed(item, s):
-        return base_seed + item["instance_id"] * n_samples + s
+    # Seed scheme: base_seed + arm_offset + instance_id * n_samples + sample_idx
+    # Every (instance, sample) pair gets a unique, reproducible seed, with each
+    # instance occupying a contiguous, non-overlapping block of n_samples seeds.
+    # The hinted and unhinted arms draw from DISJOINT lanes (arm_offset 0 vs
+    # 1_000_000) so the two arms are independent BY CONSTRUCTION — the TE = p1 - p0
+    # analysis assumes Cov(p0, p1) = 0, and disjoint lanes make that exact rather
+    # than merely incidental (the differing prompts would diverge anyway). The
+    # accuracy-estimation run (scripts/07_*) uses higher lanes (+2_000_000 /
+    # +3_000_000), so it never collides with this run on the same model + dataset.
+    _ARM_OFFSET = {"unhinted": 0, "hinted": 1_000_000}
+
+    def _seed(item, s, arm):
+        return base_seed + _ARM_OFFSET[arm] + item["instance_id"] * n_samples + s
 
     for batch_start in range(0, len(todo), checkpoint_every):
         batch = todo[batch_start : batch_start + checkpoint_every]
@@ -263,13 +267,24 @@ def run_inference(config: dict, model_cfg: dict, dataset: list, base_seed: int =
             # One generate call per sample index so each sample uses a distinct
             # seed.  n=1 per request; all instances batched together for throughput.
             for s in range(n_samples):
-                sp_s = [
+                # Separate sampling params per arm so each arm uses its own seed lane.
+                hinted_sp = [
                     SamplingParams(
                         n=1,
                         temperature=inf["temperature"],
                         top_p=inf["top_p"],
                         max_tokens=inf["max_new_tokens"],
-                        seed=_seed(item, s),
+                        seed=_seed(item, s, "hinted"),
+                    )
+                    for item in batch
+                ]
+                unhinted_sp = [
+                    SamplingParams(
+                        n=1,
+                        temperature=inf["temperature"],
+                        top_p=inf["top_p"],
+                        max_tokens=inf["max_new_tokens"],
+                        seed=_seed(item, s, "unhinted"),
                     )
                     for item in batch
                 ]
@@ -278,12 +293,12 @@ def run_inference(config: dict, model_cfg: dict, dataset: list, base_seed: int =
                     f"  Batch [{batch_start}:{batch_start+len(batch)}] "
                     f"— sample {s+1}/{n_samples} — hinted arm ..."
                 )
-                hinted_outputs = llm.generate(hinted_prompts, sp_s)
+                hinted_outputs = llm.generate(hinted_prompts, hinted_sp)
                 print(
                     f"  Batch [{batch_start}:{batch_start+len(batch)}] "
                     f"— sample {s+1}/{n_samples} — unhinted arm ..."
                 )
-                unhinted_outputs = llm.generate(unhinted_prompts, sp_s)
+                unhinted_outputs = llm.generate(unhinted_prompts, unhinted_sp)
 
                 for item, h_prompt, u_prompt, h_out, u_out in zip(
                     batch, hinted_prompts, unhinted_prompts, hinted_outputs, unhinted_outputs
@@ -323,7 +338,7 @@ def run_inference(config: dict, model_cfg: dict, dataset: list, base_seed: int =
                             "followed_hint": (parsed == item["hint_target"]) if parsed else False,
                             "token_count":   token_count,
                             "truncated":     trunc,
-                            "seed":          _seed(item, s),
+                            "seed":          _seed(item, s, arm_label),
                         }
                         arm_file.write(json.dumps(record, ensure_ascii=False) + "\n")
                         total_generated += 1

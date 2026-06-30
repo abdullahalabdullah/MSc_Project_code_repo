@@ -155,7 +155,7 @@ def plot_tpr_tnr_scatter(per_instance: list, output_path: Path):
     if not x:
         return
 
-    rng = np.random.default_rng(0)
+    rng = np.random.default_rng(88)
     jitter_x = rng.normal(0, 0.012, size=len(x))
     jitter_y = rng.normal(0, 0.012, size=len(y))
     x_jit = np.clip(np.array(x) + jitter_x, -0.05, 1.05)

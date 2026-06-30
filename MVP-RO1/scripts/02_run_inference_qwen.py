@@ -20,7 +20,7 @@ Usage:
 
 Options:
     --config        path to config YAML (default: config/mvp_config.yaml)
-    --seed          base random seed (default: 42)
+    --seed          base random seed (default: 88)
     --hf-id         override hf_id from config (e.g. a local merged model dir)
     --dataset       single dataset key (default: mmlu)
     --datasets      one or more dataset keys; overrides --dataset when given
@@ -58,7 +58,7 @@ def main():
                         help="Config block to read sampling params from "
                              "(default: qwen_inference; use qwen3_nothink_inference "
                              "for the thinking-off Qwen3-4B run).")
-    parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--seed", type=int, default=88)
     parser.add_argument("--hf-id", default=None,
                         help="Override hf_id from config (e.g. a local merged model dir).")
     args = parser.parse_args()

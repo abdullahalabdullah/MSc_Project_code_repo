@@ -4,7 +4,7 @@ dataset:
   split: "test"
   n_examples: 70
   max_per_subject: 5
-  random_seed: 7
+  random_seed: 88
 
 # Multi-dataset registry. MMLU keeps using the legacy `dataset:` block above and
 # its existing unnamespaced paths (data/dataset_index.json, outputs/{model}/, ...).
@@ -22,33 +22,33 @@ datasets:
     config: "gpqa_main"
     split: "train"            # GPQA ships only a train split
     n_examples: 70
-    random_seed: 7            # balanced across `High-level domain` (Biology/Physics/Chemistry)
+    random_seed: 88            # balanced across `High-level domain` (Biology/Physics/Chemistry)
   gsm_mc:
     loader: "gsm_mc"
     hf: "satoshidg/GSM-MC-Stage"
     split: "test"
     n_examples: 70
-    random_seed: 7
+    random_seed: 88
   math_mc:
     loader: "math_mc"
     hf: "guipenedo/math-mc"
     split: "test"
     n_examples: 70
-    random_seed: 7
+    random_seed: 88
   agieval:
     loader: "agieval"
     hf_prefix: "dmayhem93/agieval-"   # full id = hf_prefix + subset
     subsets: ["lsat-lr", "lsat-ar", "aqua-rat"]
     split: "test"
     n_examples: 70            # balanced across the 3 subsets (~23 each)
-    random_seed: 7
+    random_seed: 88
   wmdp:
     loader: "wmdp"
     hf: "cais/wmdp"
     configs: ["wmdp-bio", "wmdp-chem", "wmdp-cyber"]
     split: "test"
     n_examples: 70            # balanced across the 3 configs (~23 each)
-    random_seed: 7
+    random_seed: 88
 
 models:
   - name: "tulu_sft_no_safety"

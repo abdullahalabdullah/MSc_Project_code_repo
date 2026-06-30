@@ -328,7 +328,7 @@ def plot_hint_susceptibility(summary: dict, output_path: Path) -> None:
     p1 = np.array([r["p1"] for r in per_instance])
     te = np.array([r["te"] for r in per_instance])
 
-    rng = np.random.default_rng(0)
+    rng = np.random.default_rng(88)
 
     def _jitter(x, amount=0.01):
         return x + rng.uniform(-amount, amount, size=len(x))
