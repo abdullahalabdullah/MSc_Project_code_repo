@@ -44,16 +44,16 @@ HINT_TYPES=(professor)
 
 # Examples per dataset (n). Empty "" = use each dataset's config n_examples budget.
 # Set a number (e.g. 50) to override it for this run.
-N_EXAMPLES=""
+N_EXAMPLES="50"
 
 # Samples per arm per instance (N). Empty "" = use config qwen_inference.n_samples.
 # Set a number (e.g. 4, 8, 16) to override. No fixed cap.
-N_SAMPLES=""
+N_SAMPLES="4"
 
 # Force-regenerate dataset indexes even if they already exist. Leave "false" for
 # idempotent prep; set "true" when you change N_EXAMPLES (so the old index, e.g.
 # 200 examples, is replaced). Note: setting N_EXAMPLES below also forces a rebuild.
-FORCE_PREPARE="false"
+FORCE_PREPARE="treu"
 
 # All active datasets (logieval is commented out in the config registry — omit it).
 DATASETS=(mmlu_redux gpqa_diamond mathbench_primary mathbench_middle mathbench_high mathbench_college compmath wmdp codemmlu)
