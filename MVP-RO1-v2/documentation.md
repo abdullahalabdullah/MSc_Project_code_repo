@@ -128,10 +128,10 @@ in `src/dataset.py` (`_LOADERS`).
 | `logieval` *(disabled)* | Logic | HF gated — **not released yet** | options ∈ {3,4,5} | reasoning-type → task-format | 3/4/5 |
 | `wmdp` | Safety/Security | HF `cais/wmdp` (bio/chem/cyber) | none | by subdomain (~67 each) | 4 |
 | `codemmlu` | Coding | HF `Fsoft-AIC/CodeMMLU` (9 subsets) | options ∈ [3,5] | by subset (9) | 3–5 |
-| `lsat_ar` | Applied Reasoning (analytical) | HF `baber/agieval` (`lsat-ar`) | options ∈ [3,5] | uniform random (230 instances) | 5 |
-| `lsat_lr` | Applied Reasoning (logical) | HF `baber/agieval` (`lsat-lr`) | options ∈ [3,5] | uniform random (510 instances) | 5 |
-| `aqua_rat` | Applied Reasoning (math word) | HF `baber/agieval` (`aqua-rat`) | options ∈ [3,5] | uniform random (254 instances) | 5 |
-| `logiqa_en` | Applied Reasoning (formal logic) | HF `baber/agieval` (`logiqa-en`) | options ∈ [3,5] | uniform random (651 instances) | 4 |
+| `lsat_ar` | Applied Reasoning (analytical) | HF `hails/agieval_lsat_ar` | options ∈ [3,5] | uniform random (~230 instances) | 5 |
+| `lsat_lr` | Applied Reasoning (logical) | HF `hails/agieval_lsat_lr` | options ∈ [3,5] | uniform random (~510 instances) | 5 |
+| `aqua_rat` | Applied Reasoning (math word) | HF `hails/agieval_aqua_rat` | options ∈ [3,5] | uniform random (~254 instances) | 5 |
+| `logiqa_en` | Applied Reasoning (formal logic) | HF `hails/agieval_logiqa_en` | options ∈ [3,5] | uniform random (~651 instances) | 4 |
 
 Notes:
 - **MathBench Arithmetic is omitted** — MathBench has no MCQ for it (cloze only).
@@ -145,11 +145,11 @@ Notes:
   (Westlake LogiEval, arXiv 2505.11854) is gated and not publicly released yet —
   awaiting the authors. The loader is ready; uncomment the `logieval` block, set
   `hf`/`fields`, and add it to the run-script `DATASETS` lists once access exists.
-- **AGIEval subsets (lsat_ar, lsat_lr, aqua_rat, logiqa_en)** are loaded via a shared
-  `agieval` loader. Options carry `(A)` letter prefixes in the raw data which are
-  stripped at load time. LSAT-AR passages are prepended to each question so instances
-  are self-contained. All four are English-only, hard applied reasoning tasks where
-  qwen3_4b scores in the 0.3–0.6 range (genuine uncertainty zone).
+- **AGIEval subsets (lsat_ar, lsat_lr, aqua_rat, logiqa_en)** use the `hails/agieval_*`
+  parquet datasets (not `baber/agieval`, which uses a legacy dataset script incompatible
+  with `datasets>=3.x`). Schema: `query` (full question; LSAT-AR passages are already
+  embedded), `choices` (no letter prefixes), `gold` (0-indexed int). All four are
+  English-only, hard applied reasoning tasks where qwen3_4b scores in the 0.3–0.6 range.
 - The prepared `dataset_index.json` schema is unchanged: each instance has
   `instance_id, question_id, subject, question, choices {A:…, …}, correct_answer,
   hint_target` — `choices` now has 3–5 entries.

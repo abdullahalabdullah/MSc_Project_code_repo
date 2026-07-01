@@ -389,32 +389,43 @@ def _load_logieval(ds_cfg: dict, rng: random.Random) -> list:
 
 
 def _load_agieval(ds_cfg: dict, rng: random.Random) -> list:
-    """AGIEval English subsets via baber/agieval (lsat-ar, lsat-lr, aqua-rat, logiqa-en).
+    """AGIEval English subsets via hails/agieval_* parquet datasets.
 
-    Options carry '(A)' letter prefixes which are stripped. The `label` field is a
-    list containing one 0-indexed int (e.g. [2] = option C). When a `passage` is
-    present it is prepended to the question so each instance is self-contained.
+    Each subset is a separate HF dataset (no config arg needed). Schema:
+      query   — full question text; LSAT-AR passages are already embedded.
+      choices — list of answer strings (no letter prefixes).
+      gold    — 0-indexed int of the correct choice.
+
+    Falls back to baber/agieval-style field names (question/options/label) if the
+    hails fields are absent, for forward-compatibility.
     """
     from datasets import load_dataset as hf_load_dataset
-    cfg_name = ds_cfg["config"]
-    ds = hf_load_dataset(ds_cfg["hf"], cfg_name, split=ds_cfg.get("split", "test"))
+    hf = ds_cfg["hf"]
+    ds_name = ds_cfg.get("name") or hf.split("/")[-1]
+    ds = hf_load_dataset(hf, split=ds_cfg.get("split", "test"))
     recs = []
     for idx, row in enumerate(ds):
-        question = _clean(row.get("question") or "")
+        # hails/agieval_* schema: query + choices + gold
+        question = _clean(row.get("query") or row.get("question") or "")
         passage = row.get("passage") or ""
         if passage:
             question = _clean(passage) + "\n\n" + question
-        options = [_strip_letter_prefix(_clean(o)) for o in row["options"]]
+        raw_opts = row.get("choices") or row.get("options") or []
+        options = [_strip_letter_prefix(_clean(o)) for o in raw_opts]
         k = len(options)
         if not (MIN_OPTIONS <= k <= MAX_OPTIONS):
             continue
-        label = row.get("label")
-        if isinstance(label, (list, tuple)):
-            if not label:
+        gold = row.get("gold")
+        if gold is None:
+            gold = row.get("label") or row.get("answer") or row.get("correct")
+        if isinstance(gold, (list, tuple)):
+            if not gold:
                 continue
-            correct_idx = int(label[0])
+            gold = gold[0]
+        if isinstance(gold, int):
+            correct_idx = gold
         else:
-            correct_idx = _resolve_answer_idx(label, options)
+            correct_idx = _resolve_answer_idx(gold, options)
             if correct_idx is None:
                 continue
         if not (0 <= correct_idx < k):
@@ -423,9 +434,9 @@ def _load_agieval(ds_cfg: dict, rng: random.Random) -> list:
             "question": question,
             "options": options,
             "correct_idx": correct_idx,
-            "group": cfg_name,
+            "group": ds_name,
             "subgroup": None,
-            "source_id": f"{cfg_name}_{idx}",
+            "source_id": f"{ds_name}_{idx}",
         })
     return recs
 
