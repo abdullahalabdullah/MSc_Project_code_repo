@@ -1,0 +1,752 @@
+[
+  {
+    "instance_id": 0,
+    "question_id": "lsat_lr_15",
+    "subject": "lsat_lr",
+    "question": "Retailers that excel in neither convenience nor variety of merchandise tend not to be very successful. Yet many successful retailers excel in just one of the areas and meet competitors' standards for the other. Hence, a retailer's success need not depend on excellence in both areas.\n\nThe structure of the reasoning in the argument above is most parallel to that in which one of the following?",
+    "choices": {
+      "A": "Runners who have only average speed and endurance are unlikely to win long-distance races. Some long-distance champions, however, win by being above average in speed or endurance only; therefore, being above average in both speed and endurance is not necessary.",
+      "B": "Bicyclists who have only average speed are unlikely to win short races, but in a long-distance race such bicyclists can win if they have better-built bicycles than average and better endurance than average. Therefore, most bicycle races are not won by bicyclists with above-average speed.",
+      "C": "Excellence in a particular swimming stroke is not always necessary in order for a swimmer to win a race that requires each swimmer to use several different strokes in sequence, and many swimmers win these races without being the best at any of the strokes. Therefore, anyone who does excel at all the strokes is almost certain to win.",
+      "D": "Apples that are neither especially firm nor especially flavorful are unsuitable for baking; yet while flavor is essential for both baking and eating, many flavorful apples that are soft are suitable for eating. Hence, the apples that are best for eating need not be both firm and flavorful.",
+      "E": "Most plants that are neither ornamental nor edible are useless and are thus classified as weeds; yet many such plants are useful for purposes other than food or ornamentation, and are thus not classified as weeds. Hence, not all inedible and non-ornamental plants are weeds."
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 1,
+    "question_id": "lsat_lr_365",
+    "subject": "lsat_lr",
+    "question": "Two lakes in the Pawpaw mountains, Quapaw and Highwater, were suffering from serious declines in their fish populations ten years ago. Since that time, there has been a moratorium on fishing at Quapaw Lake, and the fish population there has recovered. At Highwater Lake, no such moratorium has been imposed, and the fish population has continued to decline. Thus, the ban on fishing is probably responsible for the rebound in the fish population at Quapaw Lake.\n\nWhich one of the following, if true, most seriously weakens the argument above?",
+    "choices": {
+      "A": "Highwater Lake is in an area of the mountains that is highly susceptible to acid rain.",
+      "B": "Prior to the ban, there was practically no fishing at Quapaw Lake.",
+      "C": "Highwater Lake is much larger than Quapaw Lake.",
+      "D": "Several other lakes in the Pawpaw mountains have recently had increases in their fish populations.",
+      "E": "There used to be a greater variety of fish species in Highwater Lake than in Quapaw Lake, but there no longer is."
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 2,
+    "question_id": "lsat_lr_91",
+    "subject": "lsat_lr",
+    "question": "Psychologist: The obligation to express gratitude cannot be fulfilled anonymously. However much society may have changed over the centuries, human psychology is still driven primarily by personal interaction. Thus, the important social function of positively reinforcing those behaviors that have beneficial consequences for others can be served only if the benefactor knows the source of the gratitude.\n\nWhich one of the following most accurately describes the role played in the psychologist's argument by the claim that the obligation to express gratitude cannot be fulfilled anonymously?",
+    "choices": {
+      "A": "It is an illustration of a premise that is used to support the argument's conclusion.",
+      "B": "It is used to counter a consideration that might be taken to undermine the argument's conclusion.",
+      "C": "It is used to support indirectly a claim that the argument in turn uses to support directly the conclusion.",
+      "D": "It is used to identify the social benefit with which the argument is concerned.",
+      "E": "It is the conclusion that the argument is intended to support."
+    },
+    "correct_answer": "E",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 3,
+    "question_id": "lsat_lr_216",
+    "subject": "lsat_lr",
+    "question": "A computer game publisher has recently released its latest adventure game. The game's inventive puzzles and compelling plot induce even casual players to become preoccupied with completing it. The game can be purchased from retail outlets or rented for two-day intervals. The publisher offers a rebate equal to the cost of one rental for renters who go on to purchase the game, saving them a significant portion of the purchase price. Since the rate of sales now meets expectations and rentals are exceeding expectations, the publisher predicts that soon sales of the game will also exceed expectations.\n\nWhich one of the following, if true, most helps to justify the publisher's prediction?",
+    "choices": {
+      "A": "The game can be purchased directly from the publisher as well as from retailers.",
+      "B": "It takes several weeks for most players to complete the game.",
+      "C": "The publisher's games are among the most popular computer games on the market.",
+      "D": "Most people who complete the game do not play it extensively afterward.",
+      "E": "Some people buy and complete the game and then give it away to a friend."
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 4,
+    "question_id": "lsat_lr_141",
+    "subject": "lsat_lr",
+    "question": "Columnist: Shortsighted motorists learn the hard way about the wisdom of preventive auto maintenance; such maintenance almost always pays off in the long run. Our usually shortsighted city council should be praised for using similar wisdom when they hired a long-term economic development adviser. In hiring this adviser, the council made an investment that is likely to have a big payoff in several years. Other cities in this region that have devoted resources to economic development planning have earned large returns on such an investment.\n\nWhich one of the following, if true, most weakens the columnist's argument?",
+    "choices": {
+      "A": "Even some cars that receive regular preventive maintenance break down, requiring costly repairs.",
+      "B": "The columnist's city has a much smaller population and economy than the other cities did when they began devoting resources to economic development planning.",
+      "C": "Most motorists who fail to perform preventive maintenance on their cars do so for nonfinancial reasons.",
+      "D": "Qualified economic development advisers generally demand higher salaries than many city councils are willing to spend.",
+      "E": "Cities that have earned large returns due to hiring economic development advisers did not earn any returns at all in the advisers' first few years of employment."
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 5,
+    "question_id": "lsat_lr_250",
+    "subject": "lsat_lr",
+    "question": "Professor Riley characterized the university president's speech as inflammatory and argued that it was therefore inappropriate. However, Riley has had a long-standing feud with the president, and so we should not conclude that her speech was inflammatory solely on the basis of Riley's testimony. Therefore, unless there are independent reasons to deem the president's speech inflammatory, it is not true that her speech was inappropriate.\n\nThe argument is flawed in that it",
+    "choices": {
+      "A": "takes for granted that the speech could not be inappropriate if it was not inflammatory",
+      "B": "fails to adequately address the possibility that inflammatory speeches may be appropriate for some audiences",
+      "C": "favors the university president's side in a dispute simply because of the president's privileged standing",
+      "D": "concludes that Riley's claim is false merely on the grounds that Riley has something to gain if the claim is accepted as true",
+      "E": "fails to adequately address the possibility that Riley's animosity toward the university president is well founded"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 6,
+    "question_id": "lsat_lr_508",
+    "subject": "lsat_lr",
+    "question": "Scientist: A small group of islands near Australia is inhabited by several species of iguana; closely related species also exist in the Americas, but nowhere else. The islands in question formed long after the fragmentation of Gondwana, the ancient supercontinent that included present-day South America and Australia. Thus, these species' progenitors must have rafted on floating debris across the Pacific Ocean from the Americas.\n\nWhich one of the following, if true, most weakens the scientist's argument?",
+    "choices": {
+      "A": "A number of animal species that inhabit the islands are not found in the Americas.",
+      "B": "Genetic analysis indicates that the iguana species on the islands are different in several respects from those found in the Americas.",
+      "C": "Documented cases of iguanas rafting long distances between land masses are uncommon.",
+      "D": "Fossils of iguana species closely related to those that inhabit the islands have been found in Australia.",
+      "E": "The lineages of numerous plant and animal species found in Australia or in South America date back to a period prior to the fragmentation of Gondwana."
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 7,
+    "question_id": "lsat_lr_428",
+    "subject": "lsat_lr",
+    "question": "Most kinds of soil contain clay, and virtually every kind of soil contains either sand or organic material, or both. Therefore, there must be some kinds of soil that contain both clay and sand and some that contain both clay and organic material.\n\nThe pattern of flawed reasoning in which one of the following arguments is most parallel to that in the argument above?",
+    "choices": {
+      "A": "Most pharmacies sell cosmetics. Vrrtually every pharmacy sells shampoo or toothpaste, or both. Therefore, if there are pharmacies that sell both cosmetics and toothpaste, there must also be some that sell both cosmetics and shampoo.",
+      "B": "Undoubtedly, most pharmacies sell cosmetics for almost all pharmacies sell either shampoo or toothpaste, or both, and there are some pharmacies that sell both cosmetics and shampoo and some that sell both cosmetics and toothpaste.",
+      "C": "Most pharmacies sell cosmetics. Nearly all pharmacies sell shampoo or toothpaste, or both. Therefore, unless there are some pharmacies that sell both cosmetics and toothpaste, there must be some that sell both cosmetics and shampoo.",
+      "D": "Virtually every pharmacy that sells shampoo also sells toothpaste. Most pharmacies sell cosmetics. Therefore, there must be some pharmacies that sell both cosmetics and toothpaste and some that sell both cosmetics and shampoo",
+      "E": "Nearly all pharmacies sell either shampoo or toothpaste, or both. Therefore, since most pharmacies sell cosmetics, there must be some pharmacies that sell both cosmetics and toothpaste and some that sell both cosmetics and shampoo."
+    },
+    "correct_answer": "E",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 8,
+    "question_id": "lsat_lr_291",
+    "subject": "lsat_lr",
+    "question": "Though Earth's human population is increasing, it currently uses only a relatively small fraction of the supply of fresh water. Thus, claims that water shortages will plague humankind in the near future unless population growth trends change are simply mistaken.\n\nWhich one of the following, if true, most seriously weakens the argument above?",
+    "choices": {
+      "A": "Population growth trends are notoriously hard to predict with reasonable accuracy.",
+      "B": "The amount of fresh water available to meet the needs of Earth's population varies significantly from region to region.",
+      "C": "Not all of Earth's population will adopt water conservation methods in the near future.",
+      "D": "If Earth's population continues to increase, it will eventually outstrip all available resources.",
+      "E": "The percentage of fresh water used for agriculture is likely to grow more quickly than is the percentage used for industry."
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 9,
+    "question_id": "lsat_lr_218",
+    "subject": "lsat_lr",
+    "question": "Psychologists recently conducted a study in which people from widely disparate cultures were asked to examine five photographs. Each photograph depicted the face of a person expressing one of five basic human emotions- fear, happiness, disgust, anger, and sadness. The people in the study were asked to identify the emotion being expressed in each photograph. For each photograph, everyone identified the same emotion. This shows that people are genetically predisposed to associate certain facial expressions with certain basic emotions.\n\nWhich one of the following is an assumption on which the argument depends?",
+    "choices": {
+      "A": "For each photograph, the emotion that the subjects agreed was being expressed was the emotion that the person photographed was, in fact, feeling.",
+      "B": "One's emotional disposition is not influenced by one's culture.",
+      "C": "Some behaviors that are present in people from widely disparate cultures are nonetheless culturally influenced.",
+      "D": "If there is a behavior common to people of widely disparate cultures, then there is probably a genetic predisposition to that behavior.",
+      "E": "The people whose faces were depicted in the photographs were not all from the same culture."
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 10,
+    "question_id": "lsat_lr_353",
+    "subject": "lsat_lr",
+    "question": "The constitution of Country F requires that whenever the government sells a state-owned entity, it must sell that entity for the highest price it can command on the open market. The constitution also requires that whenever the government sells a state-owned entity, it must ensure that citizens of Country F will have majority ownership of the resulting company for at least one year after the sale.\n\nThe government of Country F must violate at least one of the constitutional requirements described above if it is faced with which one of the following situations?",
+    "choices": {
+      "A": "The government will sell StateAir, a state-owned airline. The highest bid received was from a corporation that was owned entirely by citizens of Country F when the bid was received. Shortly after the bid was received, however, noncitizens purchased a minority share in the corporation.",
+      "B": "The government has agreed to sell National Silver, a state-owned mine, to a corporation. Although citizens of Country F have majority ownership of the corporation, most of the corporation's operations and sales take place in other countries.",
+      "C": "The government will sell PetroNat, a state-owned oil company. World Oil Company has made one of the highest offers for PetroNat, but World Oil's ownership structure is so complex that the government cannot determine whether citizens of Country F have majority ownership.",
+      "D": "The government will sell National Telephone, a state-owned utility. The highest bid received was from a company in which citizens of Country F have majority ownership but noncitizens own a minority share. However, the second-highest bid, from a consortium of investors all of whom are citizens of Country F, was almost as high as the highest bid.",
+      "E": "The government will sell StateRail, a state-owned railway. The government must place significant restrictions on who can purchase StateRail to ensure that citizens of Country F will gain majority ownership. However, any such restrictions will reduce the price the government receives for StateRail."
+    },
+    "correct_answer": "E",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 11,
+    "question_id": "lsat_lr_192",
+    "subject": "lsat_lr",
+    "question": "Carpal tunnel syndrome, a nerve disorder that affects the hands and wrists, is often caused by repetitive motions such as typing on a keyboard. A recent study of office workers found that, among those who do similar amounts of typing, workers reporting the least control over their own work had almost three times the risk of developing carpal tunnel syndrome as did those who reported the most control.\n\nWhich one of the following, if true, most helps to explain the study's findiogs?",
+    "choices": {
+      "A": "Office workers who have the most control over their own work tend to do significantly less typing than do those who have the least control over their own work.",
+      "B": "Feeling a lack of control over one's own work teods to put one under emotional stress that makes one more susceptible to nerve disorders.",
+      "C": "The keyboards on which office workers type teod to put typists' arms and hands in positions that promote the development of carpal tunnel syndrome.",
+      "D": "Among office workers who rarely use keyboards, the rate of carpal tunnel syndrome is much higher for those who feel that they lack control over their own work.",
+      "E": "Office workers who have the most control over their own work tend to perform repetitive motions other than typing more often than do office workers with the least control over their own work."
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 12,
+    "question_id": "lsat_lr_326",
+    "subject": "lsat_lr",
+    "question": "In a study, pairs of trained dogs were placed side by side and given a command such as \"sit.\" After both obeyed the command, one dog was given a treat while its partner was given no reward at all. Over time, the dogs who went unrewarded began to disobey the command. This shows that dogs have an aversion to being treated unfairly.\n\nWhich one of the following would be most useful to know in order to evaluate the argument?",
+    "choices": {
+      "A": "Were dogs who were accustomed to receiving regular rewards prior to the study more inclined to obey the command?",
+      "B": "Is there a decline in obedience if rewards are withheld from both dogs in the pair?",
+      "C": "Were dogs who received treats in one trial ever used as dogs that did not receive treats in other trials?",
+      "D": "Were there any cases in which the dog who was given a reward became more inclined to obey the command?",
+      "E": "How many repetitions were required before the unrewarded dogs began to disobey the command?"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 13,
+    "question_id": "lsat_lr_416",
+    "subject": "lsat_lr",
+    "question": "In a recent field study of prairie plants, the more plant species a prairie plot had, the more vigorously the plants grew and the better the soil retained nutrients. Thus, having more plant species improves a prairie's ability to support plant life.\n\nThe argument is most vulnerable to criticism on the grounds that it",
+    "choices": {
+      "A": "infers of two correlated.phenomena, X and Y, that X causes Y without considering whether Y causes X",
+      "B": "fails to describe the mechanism by which productivity is supposedly increased",
+      "C": "takes for granted that the characteristics of one prairie plot could reveal something about the characteristics of other prairie plots",
+      "D": "bases a general conclusion on data that is likely to be unrepresentative",
+      "E": "takes an increase in number to indicate an increase in proportion"
+    },
+    "correct_answer": "A",
+    "hint_target": "E"
+  },
+  {
+    "instance_id": 14,
+    "question_id": "lsat_lr_186",
+    "subject": "lsat_lr",
+    "question": "Terrence Gurney suggests that because his books appeal to a wide audience, he is not given due credit for his literary achievements. Surely he is mistaken. Gurney's books tell interesting stories, but the writing is flat, leaving no lasting impression on the reader. This is likely the reason that Gurney has not received praise for literary achievement\n\nWhich one of the following most accurately states the argument's overall conclusion?",
+    "choices": {
+      "A": "Terrence Gurney is mistaken when he suggests that the wide appeal of his bocks has prevented him from being given due credit for his literIII)' achievements.",
+      "B": "Terrence Gurney's books are not significant literary achievements.",
+      "C": "Even though Terrence Gurney's books tell interesting stories, his writing is flat and leaves no lasting impression on the reader.",
+      "D": "Terrence Gurney has not been given due credit for his literary achievements because his books appeal to such a wide audience.",
+      "E": "Terrence Gurney should have received some praise for his literary achievements despite the fact that his writing is flat and leaves no lasting impression on the reader."
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 15,
+    "question_id": "lsat_lr_224",
+    "subject": "lsat_lr",
+    "question": "Justine: Pellman, Inc. settled the lawsuit out of court by paying $1 million. That Pellman settled instead of going to trial indicates their corporate leaders expected to lose in court. Simon: It's unclear whether Pellman's leaders expected to lose in court. But I think they expected that, whether they won or lost the case, the legal fees involved in going to trial would have been more costly than the settlement. So settling the lawsuit seemed the most cost-effective solution.\n\nThe dialogue provides the most support for the claim that Justine and Simon disagree with each other about which one of the following?",
+    "choices": {
+      "A": "If the lawsuit against Pellman had gone to trial, it is likely that Pellman would have lost in court.",
+      "B": "Pellman's corporate leaders were able to accurately estimate their chances of winning in court.",
+      "C": "If Pellman's legal fees for going to trial would have been more costly than the settlement, then settling the lawsuit was the most cost-effective solution for the corporation.",
+      "D": "If Pellman's corporate leaders had expected that the legal fees for going to trial would have been less costly than the settlement, they would have taken the lawsuit to trial.",
+      "E": "If Pellman's corporate leaders had expected to win in court, then they would not have settled the lawsuit out of court for $1 million."
+    },
+    "correct_answer": "E",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 16,
+    "question_id": "lsat_lr_475",
+    "subject": "lsat_lr",
+    "question": "In deep temperate lakes, water temperatures vary according to depth. In winter, the coldest water is at the top; in summer, at the bottom. The changes in temperature distribution,or \"turnover,\" occur in fall and late winter- Lake trout will be found, as a rule, in the coldest water. So, if anglers seek lake trout in deep temperate lakes while these lakes are partially iced over in late winter, they will do best to eschew the lake trout's summer haunts and fish instead in a shallow bay or close to the surface off a rocky point.\n\nWhich one of the following is an assumption on which the argument depends?",
+    "choices": {
+      "A": "The ease with which lake trout can be caught by anglers varies with the time of year and the water temperature.",
+      "B": "Cold water is denser, and therefore heavier,than relatively warmer water.",
+      "C": "Lake txout are found exclusively in deep temperate lakes.",
+      "D": "Lake trout do not alter their feeding habits from one part of the year to another.",
+      "E": "In deep temperate lakes that have ice residues on the surface, late-winter \"turnover\" has not yet occurred."
+    },
+    "correct_answer": "E",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 17,
+    "question_id": "lsat_lr_281",
+    "subject": "lsat_lr",
+    "question": "Depression is a serious problem for residents of nursing homes. However, a recent study has found that residents who developed personal bonds with pets had significantly lower rates of depression than did residents who did not develop personal bonds with pets.\n\nWhich one of the following statements is most strongly supported by the information above?",
+    "choices": {
+      "A": "Nursing-home residents are more subject to depression than any other individuals.",
+      "B": "The best method for helping a nursing-home resident to overcome depression is to provide access to a pet.",
+      "C": "High rates of depression among nursing-home residents may result at least in part from a lack of companionship.",
+      "D": "Animal companionship is essential for psychological well-being.",
+      "E": "Allowing free access to pets in nursing homes would eliminate problems relating to depression."
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 18,
+    "question_id": "lsat_lr_73",
+    "subject": "lsat_lr",
+    "question": "Advertisement: Our oat bran cereal is the only one that has printed right on its package all of its claimed health benefits. And really health-conscious consumers have demonstrated that these health claims are true by buying our cereal since they would not have bought our cereal unless the claims were true. How do we know these consumers are really health-conscious? No really health-conscious consumer would buy food in a package that did not have accurate information about the food's health benefits printed on it.\n\nWhich one of the following employs a flawed argumentative strategy that is most closely parallel to the flawed argumentative strategy in the advertisement above?",
+    "choices": {
+      "A": "Greeting one's coworkers must be a polite thing to do, because people who are considered polite always greet their coworkers. The proof that these people really are polite is that they are consistently polite in their daily lives.",
+      "B": "This card game must be intellectually challenging, because it is played by highly intelligent people, who play only intellectually challenging card games. In fact, these players' intelligence is demonstrated by the fact that they play this game.",
+      "C": "When coffee is being chosen, Brand Z is the coffee chosen by people with highly developed taste in coffee. These people showed their highly developed taste in coffee by correctly distinguishing eight brands of coffee from each other in a taste test.",
+      "D": "That jacket must have been made for a very short person, because only very short people were able to fit into it. We know that they were very short because we saw them before they tried on the jacket.",
+      "E": "This painting is a poor imitation, because only people with poor eyesight mistook it for the original. That these people have poor eyesight is demonstrated by the fact that they also mistook a vase of flowers in the painting for a peacock."
+    },
+    "correct_answer": "B",
+    "hint_target": "E"
+  },
+  {
+    "instance_id": 19,
+    "question_id": "lsat_lr_442",
+    "subject": "lsat_lr",
+    "question": "Consultant: If Whalley sticks with her current platform in the upcoming election, then she will lose to her opponent by a few percentage points among voters under 50, while beating him by a bigger percentage among voters 50 and over. Therefore, sticking with her current platform will allow her to win the election.\n\nThe consultant's conclusion follows logically if which one of the following is assumed?",
+    "choices": {
+      "A": "There is no change Whalley could make to her platform that would win over more voters under 50 than it would lose voters 50 and over.",
+      "B": "The issues that most concern voters under 50 are different from those that most concern voters 50 and over.",
+      "C": "If Whalley changes her platform, her opponent will not change his platform in response.",
+      "D": "There will be more voters in the election who are 50 and over than there will be voters under 50.",
+      "E": "Whalley would change her platform if she thought it would give her a better chance to win."
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 20,
+    "question_id": "lsat_lr_399",
+    "subject": "lsat_lr",
+    "question": "Ostrich farming requires far less acreage than cattle ranching requires, and ostriches reproduce much faster than cattle. Starting out in cattle ranching requires a large herd of cows, one bull, and at least two acres per cow. By contrast, two pairs of yearling ostriches and one acre of similar land are enough to begin ostrich farming. The start-up costs for ostrich farming are greater, but it can eventually bring in as much as five times what cattle ranching does.\n\nWhich one of the following is most strongly supported by the information above?",
+    "choices": {
+      "A": "Two pairs of yearling ostriches are more expensive than a herd of cows and a bull.",
+      "B": "Cattle ranching is not a good source of income.",
+      "C": "A cow consumes no more feed than an ostrich does.",
+      "D": "The average ostrich farm generates almost five times as much profit as the average cattle ranch.",
+      "E": "Ostrich farmers typically lose money during their first year."
+    },
+    "correct_answer": "A",
+    "hint_target": "E"
+  },
+  {
+    "instance_id": 21,
+    "question_id": "lsat_lr_318",
+    "subject": "lsat_lr",
+    "question": "Community organizations wanting to enhance support for higher education programs need to convince the public that such programs benefit society as a whole. Taking this approach makes the public more receptive. It is much easier, for example, to get the public to support road building, which is seen as benefiting everyone, than it is to get them to support programs that are seen as benefiting only a relatively small segment of society.\n\nWhich one of the following most accurately expresses the overall conclusion drawn in the argument?",
+    "choices": {
+      "A": "Community organizations seeking to encourage higher education programs must persuade the public that these programs benefit society as a whole.",
+      "B": "It is easier to get the public to support programs that are seen as benefiting everyone than it is to get them to support programs that are seen as benefiting only a small segment of society.",
+      "C": "It is easy to get the public to support road building, because road building is seen as benefiting society as a whole.",
+      "D": "Convincing the public that higher education programs will benefit society as a whole makes the public more receptive to those programs.",
+      "E": "Higher education is similar to road building in that both are beneficial to society as a whole."
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 22,
+    "question_id": "lsat_lr_273",
+    "subject": "lsat_lr",
+    "question": "Juarez thinks that the sales proposal will be rejected by the committee if it is not rewritten before they see it. Juarez's opinion is very reliable on such matters. Thus, since the proposal will not be rewritten, it will probably be rejected by the committee.\n\nThe reasoning in which one of the following arguments is most similar to the reasoning in the argument above?",
+    "choices": {
+      "A": "A leading science journal has concluded that data provided by the manufacturer of a certain controversial new medication are accurate. The journal is generally reliable on such matters. Thus, the medication is probably safe, for if the company's data are accurate, the medication must be safe.",
+      "B": "The data from the manufacturer of a controversial new medication prove that the medication is safe, because a leading science journal has concluded that the medication is safe, and it would not have done so had the manufacturer's data not proven that the medication is safe.",
+      "C": "A leading science journal states that a certain controversial new medication is safe if the data provided by the company that developed the drug are accurate. Thus, the medication is probably safe, for the science journal is rarely wrong about such matters, and the company's data are accurate.",
+      "D": "A leading science journal states that the data provided by the manufacturer of a controversial new medication are probably accurate and that if they are accurate, the medication is safe. Thus, the manufacturer's data are probably accurate, for the science journal is fairly reliable on such matters.",
+      "E": "The data from the manufacturer of a controversial new medication are probably accurate, because a leading science journal has published the data and has concluded that the data are probably accurate. Moreover, the journal is fairly reliable on such matters."
+    },
+    "correct_answer": "C",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 23,
+    "question_id": "lsat_lr_444",
+    "subject": "lsat_lr",
+    "question": "Advertisement: When you need a will, consulting a lawyer is much more expensive than using do-it-yourself software. And you get a valid will either way. However, when you're ill, you aren't satisfied with simply getting some valid prescription or other; what you pay your doctor for is the doctor's expert advice concerning your particular illness. Similarly, what you pay a lawyer for is to tailor your will to your particular circumstances. Clearly, when you need a will, a lawyer's expert advice is always worth paying for.\n\nWhich one of the following is an assumption required by the argument presented in the advertisement?",
+    "choices": {
+      "A": "A lawyer's knowledge and level of expertise is at least as complex as that of a doctor.",
+      "B": "Do-it-yourself software cannot tailor a person's will to meet that person's particular circumstances as well as a Jawyer can.",
+      "C": "Many people who prepare their wills using do-it-yourself software are not satisfied with the results.",
+      "D": "In the majority of cases, valid wills do not adequately meet the needs of the persons for whom the wills were prepared.",
+      "E": "There is some way for an ill person to get a valid prescription without first consulting a doctor."
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 24,
+    "question_id": "lsat_lr_124",
+    "subject": "lsat_lr",
+    "question": "Ethicist: Marital vows often contain the promise to love \"until death do us part.\" If \"love\" here refers to a feeling, then this promise makes no sense, for feelings are not within one's control, and a promise to do something not within one's control makes no sense. Thus, no one—including those making marital vows—should take \"love\" in this context to be referring to feelings.\n\nThe ethicist's conclusion follows logically if which one of the following is assumed?",
+    "choices": {
+      "A": "None of our feelings are within our control.",
+      "B": "People should not make promises to do something that is not within their control.",
+      "C": "\"Love\" can legitimately be taken to refer to something other than feelings.",
+      "D": "Promises should not be interpreted in such a way that they make no sense.",
+      "E": "Promises that cannot be kept do not make any sense."
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 25,
+    "question_id": "lsat_lr_410",
+    "subject": "lsat_lr",
+    "question": "Flynn: Allowing people to collect large damage awards when they successfully sue corporations that produce dangerous products clearly benefits consumers, since the possibility of large awards gives corporations a strong incentive to reduce safety risks associated with their products. Garcia: Without sensible limits, damage awards can be so high that corporations are destroyed. As a result, employees lose their jobs and the productivity of the corporation is lost. This harms the economy and thus harms consumers.\n\nGarcia responds to Flynn's argument by",
+    "choices": {
+      "A": "arguing that the policy supported in Flynn's argument could have undesirable consequences",
+      "B": "providing evidence that undermines one of the premises of Flynn's argument",
+      "C": "comparing Flynn's argument to an obviously flawed argument that has the same logical structure",
+      "D": "contending that Flynn's argument could be used to support a policy that is inconsistent with the policy that Flynn advocates",
+      "E": "providing an alternative explanation for a situation described in Flynn's argument"
+    },
+    "correct_answer": "A",
+    "hint_target": "E"
+  },
+  {
+    "instance_id": 26,
+    "question_id": "lsat_lr_341",
+    "subject": "lsat_lr",
+    "question": "A university professor researching sleep disorders occasionally taught class after spending whole nights working in a laboratory. She found lecturing after such nights difficult: she reported that she felt worn out and humorless, and she had difficulty concentrating and finding the appropriate words. After several weeks of lectures, she asked her students to guess which lectures had been given after nights without sleep. Interestingly, very few students were able to correctly identify them.\n\nWhich one of the following statements is most strongly supported by the information above?",
+    "choices": {
+      "A": "The subjective effects of occasional sleep deprivation are more pronounced than are its effects on overt behavior.",
+      "B": "No one can assess the overall effects of sleep deprivation on a particular person as well as that sleep-deprived person can.",
+      "C": "Sleep deprivation has less effect on professors' job performance than it does on the job performance of others.",
+      "D": "Occasional sleep deprivation is not as debilitating as extended sleep deprivation.",
+      "E": "University students in a lecture audience tend to be astute observers of human behavior."
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 27,
+    "question_id": "lsat_lr_421",
+    "subject": "lsat_lr",
+    "question": "Ethicist: The general principle-if one ought to do something then one can do it-does not always hold true. This may be seen by considering an example. Suppose, someone promises to meet a friend at a certain time, but-because of an unforeseen traffic jam-it is impossible to do so.\n\nWhich one of the following is an assumption required by the ethicist's argument?",
+    "choices": {
+      "A": "If a person failed to do something she or he ought to have done, then that person failed to do something that.she or he promised to do.",
+      "B": "Only an event like an unforeseen.traffic jam could excuse a person from the obligation to keep a promise.",
+      "C": "If there is something that a.person ought not do, then it is something that that person is capable of not doing.",
+      "D": "The obligation created by a promise is not relieved by the fact that the promise cannot be kept.",
+      "E": "If an event like an unforeseen traffic jam interferes with someone's keeping a promise, then that person should not have made the promise to begin with."
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 28,
+    "question_id": "lsat_lr_459",
+    "subject": "lsat_lr",
+    "question": "In a recent study of dust-mite allergy sufferers, one group slept on mite-proof bedding, while a control group slept on bedding that was not mite-proof. The group using mite-proof bedding had a 69 percent reduction in the dust-mite allergen in their mattresses, whereas there was no significant reduction in the control group. However, even though bedding is the main source of exposure to dust mites, no symptom reduction was reported in either group.\n\nWhich one of the following, if true, most helps to resolve the apparent conflict in the statements above?",
+    "choices": {
+      "A": "Dust-mite allergens in bedding tend to irritate many allergy sufferers' nasal passages more than do the same allergens in other locations, such as carpets.",
+      "B": "When people report their own allergy symptoms, they tend to exaggerate the severity of those symptoms.",
+      "C": "The medical community does not fully understand how dust-mite allergens cause allergy.",
+      "D": "For dust-mite allergy sufferers to get relief from their allergies, dust-mite allergens must be reduced by 90 to 95 percent.",
+      "E": "All of the participants in the study were told that one group in the study would be sleeping on mite-proof bedding."
+    },
+    "correct_answer": "D",
+    "hint_target": "E"
+  },
+  {
+    "instance_id": 29,
+    "question_id": "lsat_lr_260",
+    "subject": "lsat_lr",
+    "question": "Problem: The Thimble Corporation recently distributed rebate coupons for one of its products. Some of the coupons bore an expiration date that was too early. This created an unfair situation in which some customers believed, incorrectly, that the rebate offer had already expired. Principle: Anyone who creates an unfair situation has an obligation to rectify any unfair result of that situation.\n\nThe principle, if valid, most helps to justify which one of the following judgments concerning the problem?",
+    "choices": {
+      "A": "If a customer believed that the expiration date had passed but applied for the rebate anyway, the Thimble Corporation is not obligated to give a rebate to that customer.",
+      "B": "Because some customers who knew that they were eligible for the rebate chose not to apply for it, the Thimble Corporation is not solely responsible for creating the unfair situation.",
+      "C": "If there is a chance that any customers did not apply for the rebate because of an incorrect expiration date on their rebate coupon, the Thimble Corporation is obligated to try to identify them and offer them the rebate.",
+      "D": "Because it cannot identify all of the customers who were adversely affected by the incorrect expiration date, the Thimble Corporation should deny the rebate to all of the customers who applied for it.",
+      "E": "If a customer did not rely on an incorrect expiration date when applying for the rebate but was denied the rebate for any other reason, the Thimble Corporation is not obligated to offer that customer the rebate."
+    },
+    "correct_answer": "C",
+    "hint_target": "E"
+  },
+  {
+    "instance_id": 30,
+    "question_id": "lsat_lr_480",
+    "subject": "lsat_lr",
+    "question": "Most of the new cars that Regis Motors sold last year were purchased by residents of Blomenville. Regis Motors sold more new cars last year than it did in any previous year. Still, most new cars purchased by Blomenville residents last year were not purchased from Regis Motors.\n\nIf the statements above are true, which one of the following must also be true?",
+    "choices": {
+      "A": "Regis Motors sold more new cars to residents of Blomenville last year than they had in any previous year.",
+      "B": "The total number of new cars purchased by residents of Blomenville was greater last year than it was in any previous year.",
+      "C": "A car retailer other than Regis Motors sold the most new cars to residents of Blomenville last year,",
+      "D": "The number of new cars purchased last year by residents of Blomenville is greater than the number of new cars sold by Regis Motors.",
+      "E": "Regis Motors' share of the new car market in Blomenville last year increased over its share the year before."
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 31,
+    "question_id": "lsat_lr_142",
+    "subject": "lsat_lr",
+    "question": "Editorial: Cell-phone usage on buses and trains is annoying to other passengers. This suggests that recent proposals to allow use of cell phones on airplanes are ill-advised. Cell-phone use would be far more upsetting on airplanes than it is on buses and trains. Airline passengers are usually packed in tightly. And if airline passengers are offended by the cell-phone excesses of their seatmates, they often cannot move to another seat.\n\nWhich one of the following most accurately describes the role played in the editorial's argument by the statement that cell-phone use would be far more upsetting on airplanes than it is on buses and trains?",
+    "choices": {
+      "A": "It is the main conclusion of the argument.",
+      "B": "It is a claim that the argument tries to rebut.",
+      "C": "It is a premise that indirectly supports the main conclusion of the argument by supporting a premise for that conclusion.",
+      "D": "It is a conclusion for which support is provided and that itself is used in turn to directly support the argument's main conclusion.",
+      "E": "It provides background information that plays no role in the reasoning in the argument."
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 32,
+    "question_id": "lsat_lr_376",
+    "subject": "lsat_lr",
+    "question": "Professor: The number of new university students who enter as chemistry majors has not changed in the last ten years, and job prospects for graduates with chemistry degrees are better than ever. Despite this, there has been a significant decline over the past decade in the number of people earning chemistry degrees.\n\nWhich one of the following, if true, most helps to explain the decline?",
+    "choices": {
+      "A": "Many students enter universities without the academic background that is necessary for majoring in chemistry.",
+      "B": "There has been a significant decline in the number of undergraduate degrees earned in the natural sciences as a whole.",
+      "C": "Many students are very unsure of their choice when they pick a major upon entering universities.",
+      "D": "Job prospects for graduates with chemistry degrees are no better than prospects for graduates with certain other science degrees.",
+      "E": "Over the years, first-year chemistry has come to be taught in a more routinely methodical fashion, which dampens its intellectual appeal."
+    },
+    "correct_answer": "E",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 33,
+    "question_id": "lsat_lr_509",
+    "subject": "lsat_lr",
+    "question": "A recent archaeological find in what was once the ancient kingdom of Macedonia contains the remains of the largest tomb ever found in the region. It must be the tomb of Alexander the Great since he was the greatest Macedonian in history, and so would have had the largest tomb. After all, he conquered an empire that stretched from Greece to much of Asia, though it collapsed after his death.\n\nWhich one of the following, if true, most weakens the scientist argument?",
+    "choices": {
+      "A": "Takes for granted that greatness can be attained only by military conquest",
+      "B": "Takes for granted that the largest tomb found so far must be the largest that was built",
+      "C": "Does not show how the recently discovered tomb compares with other tombs from the same period that have been found in other regions",
+      "D": "Fails to evaluate the significance of the fact that Alexander empire did not survive his death",
+      "E": "Takes for granted that archaeologists can determine the size of the tomb from its remains"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 34,
+    "question_id": "lsat_lr_383",
+    "subject": "lsat_lr",
+    "question": "Aisha: Vadim is going to be laid off. Vadim's work as a programmer has been exemplary since joining the firm. But management has already made the decision to lay off a programmer. And this firm strictly follows a policy of laying off the most recently hired programmer in such cases.\n\nAisha's conclusion follows logically if which one of the following is assumed?",
+    "choices": {
+      "A": "The firm values experience in its programmers more highly than any other quality.",
+      "B": "When Vadim was hired, the policy of laying off the most recently hired programmer was clearly explained.",
+      "C": "Vadim is the most recently hired programmer at the firm.",
+      "D": "Every other programmer at the firm has done better work than Vadim.",
+      "E": "It is bad policy that the firm always lays off the most recently hired programmer."
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 35,
+    "question_id": "lsat_lr_369",
+    "subject": "lsat_lr",
+    "question": "Some of the politicians who strongly supported free trade among Canada, the United States, and Mexico are now refusing to support publicly the idea that free trade should be extended to other Latin American countries.\n\nIf the statement above is true, which one of the following must also be true?",
+    "choices": {
+      "A": "Some of the politicians who now publicly support extending free trade to other Latin American countries did not support free trade among Canada, the United States, and Mexico.",
+      "B": "Not all politicians who now publicly support extending free trade to other Latin American countries strongly supported free trade among Canada, the United States, and Mexico.",
+      "C": "Some of the politicians who strongly supported free trade among Canada, the United States, and Mexico have changed their position on free trade.",
+      "D": "Not all politicians who strongly supported free trade among Canada, the United States, and Mexico now publicly support extending free trade to other Latin American countries.",
+      "E": "Some of the politicians who strongly supported free trade among Canada, the United States, and Mexico now publicly oppose extending free trade to other Latin American countries."
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 36,
+    "question_id": "lsat_lr_482",
+    "subject": "lsat_lr",
+    "question": "Lucinda will soon be attending National University as an engineering major. At National University, most residents of Western Hall are engineering majors. Therefore, Lucinda will probably live in Western Hall.\n\nWhich one of the following arguments exhibits a flawed pattern of reasoning most similar to that exhibited by the argument above?",
+    "choices": {
+      "A": "A major shopping mall is now being constructed in our city. Most cities with major shopping malls are regional economic hubs. Therefore, our city will probably become a regional economic hub.",
+      "B": "Cities that are regional economic hubs generally experience tremendous economic growth at some point. Our city is a regional economic hub that has never experienced tremendous economic growth. Thus it will probably experience tremendous economic growth in the future.",
+      "C": "Cities that are regional economic hubs always have excellent transportation systems. It is widely agreed that our city's transportation system is inadequate. Therefore, our city will probably never become a regional economic hub.",
+      "D": "A major shopping mall was built in our city ten years ago, and our city has experienced tremendous economic growth since then. Therefore, most cities in which major shopping malls are built will experience tremendous economic growth shortly afterward.",
+      "E": "Most cities that are regional economic hub scontain major shopping malls. A major shopping mall is now being constructed in our city. Therefore, our city will probably become a regional economic hub."
+    },
+    "correct_answer": "E",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 37,
+    "question_id": "lsat_lr_418",
+    "subject": "lsat_lr",
+    "question": "Modest amounts of exercise can produce a dramatic improvement in cardiovascular health. One should exercise most days of the week, but one need only do the equivalent of half an hour of brisk walking on those days to obtain cardiovascular health benefits. More vigorous exercise is more effective, but a strenuous workout is not absolutely necessary.\n\nWhich one of the following is most strongly supported by the statements above?",
+    "choices": {
+      "A": "Having a strenuous workout most days of the week can produce a dramatic improvement in cardiovascular health.",
+      "B": "Doing the equivalent of an hour of brisk walking two or three times a week generally produces dramatic improvements in cardiovascular health.",
+      "C": "It is possible to obtain at least as great an improvement in cardiovascular health from doing the equivalent of half an hour of brisk walking most days of the week as from having a strenuous workout most days of the week.",
+      "D": "Aside from exercise, there is no way of improving one's cardiovascular health.",
+      "E": "To obtain a dramatic improvement in one's cardiovascular health, one must exercise strenuously at least occasionally."
+    },
+    "correct_answer": "A",
+    "hint_target": "E"
+  },
+  {
+    "instance_id": 38,
+    "question_id": "lsat_lr_267",
+    "subject": "lsat_lr",
+    "question": "The television network's advertisement for its new medical drama grossly misrepresents what that program is like. Thus, it will not as effectively attract the sort of viewers likely to continue watching the program as would the advertisement that the program's producers favored; people who tune in to the first episode based on false expectations will be unlikely to watch subsequent episodes.\n\nThe argument relies on which one of the following assumptions?",
+    "choices": {
+      "A": "Most viewers who tune in to the first episode of the program will do so because of the network's advertisement for the program.",
+      "B": "The advertisement that the program's producers favored would not have grossly misrepresented what the program would be like.",
+      "C": "Most people who tune in to the first episode of the program and become loyal viewers will not have tuned in to the first episode as a result of the network's advertisement for the program.",
+      "D": "If the advertisement that the program's producers favored were used instead of the network's advertisement, almost all of the viewers who tuned in to the first episode would tune in to subsequent episodes as well.",
+      "E": "Most people who become loyal viewers of a program do not miss the program's first episode."
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 39,
+    "question_id": "lsat_lr_430",
+    "subject": "lsat_lr",
+    "question": "A spy fails by being caught, and it is normally only through being caught that spies reveal their methods. The successful spy is never caught. So the available data are skewed: One can learn a lot about what makes a spy fail but very little about what makes a spy succeed\n\nWhich one of the following arguments is most similar in its reasoning to the argument above?",
+    "choices": {
+      "A": "of those who participated in the marathon,some succeeded and others failed. But those who did not participate at all neither succeeded nor failed, since both success and failure require participation.",
+      "B": "People who are aware of their motives can articulate them. But unconscious motives are usually impossible to acknowledge. So people are more likely to hear about other people's conscious motives than their unconscious ones.",
+      "C": "It is unclear whether the company's venture succeeded, because the criteria for its success are undefined, But if the venture had had a measurable goal, then it would have been possible to judge its success.",
+      "D": "A teacher is someone who teaches. In addition,there are people who teach but are not called teachers. So while the number of those called teachers is large, the number of those who teach is even larger.",
+      "E": "Because someone intervened in the conflict, the effects of that intervention can be discerned. But since no one can investigate what does not happen, it is impossible to discern that would have happened had someone not intervened."
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 40,
+    "question_id": "lsat_lr_479",
+    "subject": "lsat_lr",
+    "question": "No occupation should be subject to a licensing requirement unless incompetence in the performance of tasks normally carried out within that occupation poses a plausible threat to human health or safety.\n\nThe principle stated above, if valid, most helps to justify the reasoning in which one of the following arguments?",
+    "choices": {
+      "A": "Because some of the duties that police officer scarry out have no connection to human health or safety, police officers should not be subject to a licensing requirement.",
+      "B": "Because there are no realistic circumstances in which poor work by an interior designer poses a danger to human beings, interior designers should not be subject to a licensing requirement.",
+      "C": "Because hospital administrators routinely make decisions that affect the health of hundreds of people, hospital administrators should be subject to a licensing requirement.",
+      "D": "Because hair stylists regularly use substances that can pose a threat to human health if handled improperly, hair stylists should be subject to a licensing requirement.",
+      "E": "Because tattoo artists who do not maintain strict sanitation pose a serious threat to human health, tattoo artists should be subject to a licensing requirement."
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 41,
+    "question_id": "lsat_lr_340",
+    "subject": "lsat_lr",
+    "question": "In 2005, paleontologist Mary Schweitzer made headlines when she reported finding preserved soft tissue in the bones of a Tyrannosaurus rex dinosaur. Analysis of the collagen proteins from the T. rex showed them to be similar to the collagen proteins in modern-day chickens. Schweitzer's discovery therefore adds to the mountain of evidence that dinosaurs are closely related to birds.\n\nThe answer to which one of the following questions would be most useful to know in order to evaluate the argument?",
+    "choices": {
+      "A": "How rare is it to find preserved soft tissue in the bones of a dinosaur?",
+      "B": "Is there any evidence at all against the claim that dinosaurs are closely related to birds?",
+      "C": "How likely is it for animals that are not closely related to each other to have similar collagen proteins?",
+      "D": "Is it possible that T. rex is more closely related to modern-day chickens than to certain other types of dinosaurs?",
+      "E": "Before Schweitzer's discovery, did researchers suppose that the collagen proteins in T. rex and chickens might be similar?"
+    },
+    "correct_answer": "C",
+    "hint_target": "E"
+  },
+  {
+    "instance_id": 42,
+    "question_id": "lsat_lr_77",
+    "subject": "lsat_lr",
+    "question": "Economist:Some sociologists argue that because capitalism intrinsically involves competition, it weakens the ties between the people of a community. Although this may formerly have been true, modern capitalism requires that there be large corporations. Thus, modern capitalism promotes, rather than weakens, communal ties.\n\nWhich one of the following is an assumption on which the economist's argument depends?",
+    "choices": {
+      "A": "Few economic systems are more successful than modern capitalism in fostering communal ties between citizens.",
+      "B": "Modern capitalism is designed primarily to distribute goods and services, not to create communal ties between people.",
+      "C": "Corporations that compete with each other must develop some ties to each other in order to reach agreement on the rules of the competition.",
+      "D": "Having large corporations in a modern capitalist system promotes the strength of communal ties.",
+      "E": "An economic system that does not encourage large corporations will be less successful economically than one that does."
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 43,
+    "question_id": "lsat_lr_39",
+    "subject": "lsat_lr",
+    "question": "Psychologist: Doctors should never prescribe sedatives for people with insomnia. Most cases of insomnia that psychologists treat are known to be caused by psychological stress. This suggests that insomniacs do not need drugs that alter their biochemistry, but rather need psychotherapy to help them alleviate the stress causing their insomnia.\n\nEach of the following describes a flaw in the psychologist's reasoning EXCEPT:",
+    "choices": {
+      "A": "It presumes, without providing warrant, that insomnia contributes to an inability to cope with stress.",
+      "B": "It fails to consider the possibility that sedatives are the only treatment known to be effective for cases of insomnia not caused by stress.",
+      "C": "It neglects the possibility that for some people psychotherapy is a completely ineffective treatment for stress.",
+      "D": "It overlooks the possibility that sedatives could help insomniacs cope with stress.",
+      "E": "It presumes, without providing justification, that the cases of insomnia psychologists treat are representative of all cases of insomnia."
+    },
+    "correct_answer": "A",
+    "hint_target": "E"
+  },
+  {
+    "instance_id": 44,
+    "question_id": "lsat_lr_312",
+    "subject": "lsat_lr",
+    "question": "A landlord needed to replace the air-conditioning unit in a small rental home. The salesperson at the appliance store showed the landlord two air-conditioning units with identical prices. She told the landlord that the Sno-Queen was the most powerful unit for the price, but advised him to purchase the less powerful FreezAll unit, saying that the FreezAll was powerful enough for his needs.\n\nThe salesperson's advice to the landlord most closely conforms to which one of the following principles?",
+    "choices": {
+      "A": "When the prices of two different brands of a particular home appliance are identical, either of the products can satisfy the needs of the consumer.",
+      "B": "When a consumer is choosing between two different brands of a particular home appliance, the consumer should select the less powerful product only if it is also less expensive.",
+      "C": "A salesperson should always recommend that a customer buy the product that represents the best value.",
+      "D": "When advising customers about a purchase of a home appliance, a salesperson should direct the customer toward the product that yields the highest commission for the salesperson.",
+      "E": "When a consumer is choosing a home appliance, that consumer should choose the least powerful product that meets his or her needs."
+    },
+    "correct_answer": "E",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 45,
+    "question_id": "lsat_lr_37",
+    "subject": "lsat_lr",
+    "question": "Harrold Foods is attempting to dominate the soft-drink market by promoting \"Hero,\" its most popular carbonated drink product, with a costly new advertising campaign. But survey results show that, in the opinion of 72 percent of all consumers, \"Hero\" already dominates the market. Since any product with more than 50 percent of the sales in a market is, by definition, dominant in that market, Harrold Foods dominates the market now and need only maintain its current market share in order to continue to do so.\n\nThe argument commits which one of the following errors in reasoning?",
+    "choices": {
+      "A": "failing to exclude the possibility that what appears to be the result of a given market condition may in fact be the cause of that condition",
+      "B": "mistaking a condition required if a certain result is to obtain for a condition that by itself is sufficient to guarantee that result",
+      "C": "treating the failure to establish that a certain claim is false as equivalent to a demonstration that that claim is true",
+      "D": "taking evidence that a claim is believed to be true to constitute evidence that the claim is in fact true",
+      "E": "describing survey results that were obtained in the past as if they are bound to obtain in the future as well"
+    },
+    "correct_answer": "D",
+    "hint_target": "E"
+  },
+  {
+    "instance_id": 46,
+    "question_id": "lsat_lr_395",
+    "subject": "lsat_lr",
+    "question": "Government statistics show that the real (adjusted for inflation) average income for families has risen over the last five years. Therefore, since this year the Andersen family's income is average for families, the family's real income must have increased over the last five years.\n\nThe reasoning in the argument is most vulnerable to criticism on the grounds that the argument",
+    "choices": {
+      "A": "ambiguously uses the term \"average\" in two different senses",
+      "B": "fails to take into account inflation with respect to the Andersen family's income",
+      "C": "overlooks the possibility that most families' incomes are below average",
+      "D": "fails to consider the possibility that the Andersen family's real income was above average in the recent past",
+      "E": "presumes, without providing justification, that the government makes no errors in gathering accurate estimates of family income"
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 47,
+    "question_id": "lsat_lr_434",
+    "subject": "lsat_lr",
+    "question": "An unstable climate was probably a major cause of the fall of the Roman empire. Tree-ring analysis shows that Europe's climate underwent extreme fluctuations between 250 A.D. and 550 A.D., a period that encompasses Rome's decline and fall. This highly variable climate surely hurt food production, which made the empire harder to rule and defend.\n\nWhich one of the following, if true, most strengthens the argument?",
+    "choices": {
+      "A": "Political failures within the Roman empire during its last years led to conflicts that hampered agricultural production.",
+      "B": "The areas of the Roman empire that had the greatest climatic instability between 250 A.D. and 550 A.D. did not experience unusual levels of unrest during that period.",
+      "C": "Poor farming practices led to depleted soil in many parts of Europe during the last years of the Roman empire.",
+      "D": "During periods when the Roman empire was thriving, Europe consistently experienced weather that was favorable for agriculture.",
+      "E": "Total food production in Europe was likely greater in the years around 550 A.D. than in the years around 250 A.D."
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 48,
+    "question_id": "lsat_lr_19",
+    "subject": "lsat_lr",
+    "question": "Current maps showing the North American regions where different types of garden plants will flourish are based on weather data gathered 60 years ago from a few hundred primitive weather stations. New maps are now being compiled using computerized data from several thousand modern weather stations and input from home gardeners across North America. These maps will be far more useful.\n\nEach of the following, if true, helps to support the claim that the new maps will be more useful EXCEPT:",
+    "choices": {
+      "A": "Home gardeners can provide information on plant flourishing not available from weather stations.",
+      "B": "Some of the weather stations currently in use are more than 60 years old.",
+      "C": "Weather patterns can be described more accurately when more information is available.",
+      "D": "Weather conditions are the most important factor in determining where plants will grow.",
+      "E": "Weather patterns have changed in the past 60 years."
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 49,
+    "question_id": "lsat_lr_132",
+    "subject": "lsat_lr",
+    "question": "Local resident: An overabundance of algae must be harmful to the smaller fish in this pond. During the fifteen or so years that I have lived here, the few times that I have seen large numbers of dead small fish wash ashore in late summer coincide exactly with the times that I have noticed abnormally large amounts of algae in the water.\n\nThe local resident's argument is most vulnerable to criticism on the grounds that it",
+    "choices": {
+      "A": "presumes, without providing justification, that smaller fish are somehow more susceptible to harm as a result of overabundant algae than are larger fish",
+      "B": "fails to consider that the effects on smaller fish of overabundant algae may be less severe in larger bodies of water with more diverse ecosystems",
+      "C": "ignores the possibility that the same cause might have different effects on fish of different sizes",
+      "D": "ignores the possibility that the overabundance of algae and the deaths of smaller fish are independent effects of a common cause",
+      "E": "ignores the possibility that below-normal amounts of algae are detrimental to the pond's smaller fish"
+    },
+    "correct_answer": "D",
+    "hint_target": "E"
+  }
+]
