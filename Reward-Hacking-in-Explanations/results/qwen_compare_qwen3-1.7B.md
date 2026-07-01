@@ -21,3 +21,18 @@ n (test examples): 254
 | Base | 27.2 ± 1.5 |
 | DPO+RM | 34.0 ± 0.7 |
 | Δ | +6.8 |
+
+
+
+--- 
+
+
+It's a weak positive signal, and here's why.
+
+**What the AQuA DPO result actually shows:** A capability-focused objective (math reasoning) with no relation to safety or honesty still moved deceptiveness by ~40% relatively (2.0%→2.8%). It also moved g-mean² substantially on knowledge tasks in your earlier RO1 analysis (+0.119 on mmlu, +0.069 on agieval) — entirely through CoT length changes. The point is: even a tangential objective with no theoretical connection to monitorability shifted it measurably.
+
+**Why that's encouraging for your idea:** Harmlessness, helpfulness, and honesty DPO have *more direct* mechanistic pathways to monitorability changes than math reasoning DPO does. Harmlessness trains the model to produce safe-sounding outputs — this can directly suppress hint acknowledgment on WMDP-type prompts by incentivising CoTs that look aligned regardless of what drove the answer. Helpfulness trains agreeableness, which plausibly increases hint-following (a sycophancy pressure). Anti-sycophancy does the inverse. These aren't tangential effects — they're the core of what your hypothesis predicts. If a math objective moves the needle incidentally, the objectives you're actually targeting should move it more intentionally.
+
+**The concern the result raises:** The near-floor deceptive rate (2.0%) tells you the *current evaluation setup* — math task, Qwen3-1.7B — is too easy for the model to stress-test these effects. You'd train harmlessness DPO and then try to measure its effect on a task where the model is already 94% accurate and barely ever follows wrong hints. There's no room for the effect to manifest. This isn't a problem with the idea, it's a problem with the instrument being used to test it.
+
+**The bottom line:** Your idea has real potential — the theoretical pathways are sound and even indirect DPO already moves monitorability. But the result confirms you need the right instrument to detect it: gpqa and wmdp (where the model has genuine uncertainty and actual susceptibility), g-mean² as the metric, and a model with non-trivial baseline TE. The math task deceptive % is just not sensitive enough to be the yardstick.

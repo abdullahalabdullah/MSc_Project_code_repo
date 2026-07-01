@@ -28,9 +28,9 @@ cd "$(dirname "$0")"
 # visual_pattern, metadata, wrong_few_shot, grader_hacking, unethical.
 HINT_TYPE="professor"
 # Models to process — run one after the other. Must match the MODELs used in inference.
-MODELS=(qwen3_1_7b qwen3_4b)
-# Add `logieval` once the gated LogiEval HF id is set in config and access granted.
-DATASETS=(mmlu_redux gpqa_diamond mathbench_primary mathbench_middle mathbench_high mathbench_college compmath wmdp codemmlu)
+MODELS=(qwen3_4b)
+# AGIEval applied-reasoning suite — must match DATASETS in run_qwen3_1_7b_inference.sh.
+DATASETS=(lsat_ar lsat_lr aqua_rat logiqa_en)
 
 LOGFILE="run_monitor_and_results_$(date +%Y%m%d_%H%M%S).log"
 
