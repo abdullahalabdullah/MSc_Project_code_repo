@@ -1,0 +1,702 @@
+[
+  {
+    "instance_id": 0,
+    "question_id": "logiqa_en_236",
+    "subject": "logiqa_en",
+    "question": "Corporate governance depends on the laws made by the legislator.However, the law alone is not enough, and it must also rely on the best action guidelines for managers.For example, the criterion of \"the directors of a company should have excellent talents\", the law cannot give a standard definition of what is \"excellent talents\".The advantage of the optimal action criterion is that it adopts a more flexible standard.\n\nWhich of the following statements is the hypothesis upon which the superior argument depends?",
+    "choices": {
+      "A": "Only when the law can be implemented, the law will have an effect.",
+      "B": "Adopting a less flexible standard cannot take advantage of the optimal action criterion.",
+      "C": "Adopting a more flexible standard to formulate laws will bring trouble to the implementation of laws.",
+      "D": "Even if you can only take advantage of the most actionable standards, the law is indispensable."
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 1,
+    "question_id": "logiqa_en_50",
+    "subject": "logiqa_en",
+    "question": "The education system has two aspects, one is compulsory education and the other is higher education.A reasonable education system requires everyone to have the right to compulsory education and to have access to higher education through fair competition.\n\nWhich of the following conclusions can be drawn from the above conclusions?",
+    "choices": {
+      "A": "An education system that does not allow everyone to go to college is unreasonable.",
+      "B": "An education system that guarantees everyone to enjoy compulsory education is reasonable.",
+      "C": "An education system that does not allow everyone to enjoy the right to compulsory education is unreasonable.",
+      "D": "There should be more requirements for a reasonable education system."
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 2,
+    "question_id": "logiqa_en_500",
+    "subject": "logiqa_en",
+    "question": "After all the cold dishes at the banquet at one table were served, there were 7 hot dishes.Among them, three Sichuan dishes? K, L, M? three Cantonese dishes? Q, N, P? one Shandong dish? X.Only one hot dish can be served at a time, and the order of serving must meet the following conditions? (1) Cannot serve Sichuan cuisine or Cantonese cuisine continuously.(2) Unless the second is on Q, P cannot be on before Q.(3) P must be on before X.(4) M must be on before K, and K must be on before N.\n\nIf the third is M, which of the following statements may be true?",
+    "choices": {
+      "A": "Fifth on X",
+      "B": "First on Q",
+      "C": "Sixth on L",
+      "D": "Fourth on K"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 3,
+    "question_id": "logiqa_en_90",
+    "subject": "logiqa_en",
+    "question": "Mr.Chen is going to hold a gathering of friends and family.He came forward and invited his father's brother-in-law, his brother-in-law's father, his brother's mother-in-law, his brother-in-law's brother.\n\nHow many guests did Mr.Chen come forward to invite?",
+    "choices": {
+      "A": "No guest invited",
+      "B": "1 guest",
+      "C": "2 guests",
+      "D": "3 guests"
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 4,
+    "question_id": "logiqa_en_272",
+    "subject": "logiqa_en",
+    "question": "twenty one.A said? \"B lied\"; B said? \"C lied\"; C said? \"A and B lied\".\n\nPlease determine which of the following options is true?",
+    "choices": {
+      "A": "Lie",
+      "B": "Both A and B lie",
+      "C": "Both A and C lie",
+      "D": "Both B and C lie"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 5,
+    "question_id": "logiqa_en_239",
+    "subject": "logiqa_en",
+    "question": "The Amendment (Draft) of China's Personal Income Tax Law raises the deduction standard for salary income from the original 800 yuan / month to 1500 yuan / month; when the person's monthly income is less than 1500 yuan, no tax is required; After taxing the income after 1,500 yuan, an official commented that the starting point for personal income tax should not be too high, because taxation is also a citizen's right.If the starting point is too high, it will deprive low-income earners the honor of being the most taxpayers.\n\nWhich of the following is true and can raise the most doubts about this official ’s argument?",
+    "choices": {
+      "A": "All countries in the world levy pre-tax deductions on residents' basic living expenses when collecting personal income tax to ensure the reproduction of social labor.",
+      "B": "A low personal income tax will also affect the honor of low-income earners as taxpayers.",
+      "C": "One of the functions of personal income tax is to regulate social distribution and narrow the gap between rich and poor.",
+      "D": "China's tax system is dominated by commodity taxes.As long as a person buys and consumes commodities, he pays taxes to the state."
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 6,
+    "question_id": "logiqa_en_557",
+    "subject": "logiqa_en",
+    "question": "Consider three numbers? 0.9, 1, 1.1.The difference between the latter number and the previous one is only 0.1.If you let each number multiply 10 times with itself, 0.9 becomes 0.31, 1 is still 1, 1.1 becomes 2.85, which is nearly 10 times 0.31 and nearly 3 times 1.This is how the gap is created!\n\nWhich of the following conclusions cannot be reasonably drawn from the above statement?",
+    "choices": {
+      "A": "A few centimeters are lost, thousands of miles away.",
+      "B": "Details determine success or failure, character determines fate.",
+      "C": "The continuous accumulation and amplification of small differences can produce huge differences.",
+      "D": "Everyone must be aware of every step in the life process? small wins may accumulate big wins, and small wins may make big mistakes."
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 7,
+    "question_id": "logiqa_en_344",
+    "subject": "logiqa_en",
+    "question": "There are 6 rectangular vegetable ponds of the same size in a plastic shed, arranged in order from left to right? 1, 2, 3, 4, 5 and 6.And No.1 and No.6 are not adjacent.There are exactly 6 kinds of vegetables that need to be planted in the greenhouse? Q, L, H, x, S and Y.Each vegetable pond can only grow one of them.The planting arrangement must meet the following conditions? Q is planted in a vegetable pond on the left side of H.X species are in No.1 or No.6 vegetable ponds.No.3 vegetable pond is planted with Y or s.L is planted right next to S.\n\nIf S and Q are planted in odd-numbered vegetable ponds, which of the following statements may be true?",
+    "choices": {
+      "A": "H species are in No.1 vegetable pond.",
+      "B": "Type Y is in No.2 Caichizi.",
+      "C": "Type H is in No.4 vegetable pond.",
+      "D": "L is planted in No.5 vegetable pond."
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 8,
+    "question_id": "logiqa_en_427",
+    "subject": "logiqa_en",
+    "question": "Since 1991, Somalia has actually been in anarchy under the separation of armed forces.In 1991, Somalia ’s GDP per capita was US $ 210, and it increased to US $ 600 in 2011.In the same year, Tanzania ’s per capita GDP was US $ 548, Central Africa was US $ 436, and Ethiopia was US $ 350.From this point of view, compared with many countries in Africa that are ruled by a strong central government, Somalia is in an anarchy and its people's living standards are not bad at all.\n\nWhich of the following statements accurately summarizes the most serious flaw of the above argument?",
+    "choices": {
+      "A": "Somalia ’s wealth is concentrated in the hands of a few people, and many people fall into poverty due to factors such as security or unemployment.",
+      "B": "The increase in GDP per capita has benefited from Somali pirates hijacking merchant ships from various countries and plundering the property of other countries.",
+      "C": "The reason for the increase in GDP per capita in Somalia is the fact of economic freedom contained in anarchy.",
+      "D": "It is unreliable to judge the overall living standard of a country ’s people based on a single indicator."
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 9,
+    "question_id": "logiqa_en_627",
+    "subject": "logiqa_en",
+    "question": "On average, educated people today have significantly less reading time than educated people 50 years ago.However, the number of book sales per day is now much higher than it was 50 years ago.\n\nThe following statements are helpful in explaining the above phenomenon, except",
+    "choices": {
+      "A": "The number of educated people today is much greater than the number of educated people 50 years ago.",
+      "B": "Compared with now, people 50 years ago prefer to borrow books from the library.",
+      "C": "Compared with today, people 50 years ago prefer to show their good education and taste through a large collection of books.",
+      "D": "Today's books are often thinner and easier to read than 50 years ago."
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 10,
+    "question_id": "logiqa_en_449",
+    "subject": "logiqa_en",
+    "question": "There are 6 singers? F, G, L, K, H, M.3 piano accompaniment? X, Y, W.Each piano accompanimentist happened to accompany two of the singers.Known condition information is as follows? (1) If X is F accompaniment, then W is L accompaniment.(2) If X is not a G accompaniment, then Y is an M accompaniment.(3) X or Y is H accompaniment.(4) F and G do not share accompaniment; L and K do not share accompaniment; H and M do not share accompaniment.\n\nIf W is the accompaniment of F and M, which pair of singers can X accompany?",
+    "choices": {
+      "A": "G and H",
+      "B": "G and K",
+      "C": "L and H",
+      "D": "L and K"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 11,
+    "question_id": "logiqa_en_360",
+    "subject": "logiqa_en",
+    "question": "Dai Wei had almost no stomach problems after eating dairy products.Just because he occasionally had stomach pains after eating dairy products, it was concluded that he had no allergy to dairy products.\n\nWhich argument is most similar to the reasoning above?",
+    "choices": {
+      "A": "Dogs and cats are sometimes anxious before the earthquake, so there is no reason to conclude that dogs and cats have the ability to sense earthquakes in advance, because in most cases, there is no earthquake after dogs and cats are anxious.",
+      "B": "Although many people lose weight through short-term diets, it is unreasonable to believe that such diets are effective for weight loss.",
+      "C": "Most hypotheses have a large number of supporting examples before they become scientific theories.It is unreasonable to think that a hypothesis is a scientific theory just because it is successfully applied to a few cases.",
+      "D": "Although many chain stores are more profitable, it is unreasonable to attribute the success of this business model to this business model, because only well-funded businesses can do so."
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 12,
+    "question_id": "logiqa_en_310",
+    "subject": "logiqa_en",
+    "question": "Both \"Le Ji\" and \"Xi Ci\" have sentences such as \"Tian Zun Di Bian\", \"Fang Yi clusters, things separated by groups\".\"Ji\" appears to be barely blunt and protracted, so it must be that \"Le Ji\" followed or quoted the text of \"Xie Ci\".\n\nWhich of the following statements, if true, can weaken the conclusion of the above argument most effectively? ’",
+    "choices": {
+      "A": "\"Tianzundibei\" was used as an idiom in \"Shangshu\", which is older than \"Xianci\".",
+      "B": "\"Family of Speech\" focuses on the difference between heaven and earth in terms of etiquette, while \"Le Ji\" focuses on the sum of heaven and earth in terms of music.,",
+      "C": "The formation of classic works usually goes through a long process from immaturity to maturity.",
+      "D": "Both \"Le Ji\" and \"Xie Ci\" are classic works of Confucianism, and the date of completion has not yet been determined."
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 13,
+    "question_id": "logiqa_en_199",
+    "subject": "logiqa_en",
+    "question": "A provincial Go team coach selects 4 of the 7 players from E, F, G, H, J, K and M to participate in the professional league.The selection must meet the following conditions? E or F has one person to participate, but not both .One of J or K will participate, but not both.If J participates, then G participates.Unless F participates, M does not participate.\n\nWhich of the following listed players cannot participate in the game together?",
+    "choices": {
+      "A": "E and J",
+      "B": "E and M",
+      "C": "F and G",
+      "D": "F and J"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 14,
+    "question_id": "logiqa_en_587",
+    "subject": "logiqa_en",
+    "question": "The tragedy of gun violence in the United States has once again triggered discussions on gun control.Opponents of gun control claim that gun violence in the United States soared in the 1980s.In 1986, some states implemented strict gun control through legal means, but the average violent crime rate in those states that enforced strict gun control was the average violent crime rate in other states 1.5 times.It can be seen that strict gun control does not help reduce violent crime.\n\nIf the following statement is true, which one weakens the above argument the strongest?",
+    "choices": {
+      "A": "Since 1986, the proportion of American households with guns has declined significantly.",
+      "B": "Since 1986, the annual number of violent crimes in these states that have imposed strict gun control has continued to decline.",
+      "C": "In states that enforce strict gun control laws, few people violate this law.",
+      "D": "The criminologist compared the results of various investigations and found no obvious correlation between the number of privately owned guns and gun violence."
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 15,
+    "question_id": "logiqa_en_285",
+    "subject": "logiqa_en",
+    "question": "There are five volcanic islands E, F, G, H, and I in the east coast of a country.They are arranged in a straight line from north to south, and they are found? (1) F is adjacent to H and is on the north side of H.(2) I and E are adjacent.(3) G is somewhere in the north of F.\n\nIf it is found that G is the northernmost island, how many possible arrangements are there for this group of islands?",
+    "choices": {
+      "A": "2",
+      "B": "3",
+      "C": "4",
+      "D": "5"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 16,
+    "question_id": "logiqa_en_508",
+    "subject": "logiqa_en",
+    "question": "Most of my open-minded friends have read a lot of books, but most of my non-open-minded friends are not.The more you read, the more likely you are to be challenged by new ideas, and your perseverance in your thoughts will be weakened, which makes sense.Reading also frees you from daily life and shows you the diversity and richness of life.Therefore, reading makes people open.\n\nIf the following statement is true, which one most strongly weakens the conclusion above?",
+    "choices": {
+      "A": "Someone loves reading literary works, especially poems, and later writes poems by himself.Now he is a very famous poet.",
+      "B": "Some people have read a lot of books, and every time they read a book, it makes sense.Different reasons keep fighting in their heads, and they are almost crazy.",
+      "C": "If you only selectively read books of a certain type or opinion, it is likely that the more you read, the more paranoid.",
+      "D": "Some people like to put themselves in when they read.When they read \"Dream of Red Mansions\", they feel that they are Lin Daiyu or Jia Baoyu."
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 17,
+    "question_id": "logiqa_en_385",
+    "subject": "logiqa_en",
+    "question": "Demand always changes in the opposite direction to price.If the price change causes the total income and price to reverse, then demand is elastic.In 2007, although the tuition fees of W University decreased by 20%, the total tuition fees received by W University increased from 2006.In this case, the demand for W University is flexible.\n\nIf the above statement is true, which of the following statements must be true?",
+    "choices": {
+      "A": "If changes in prices result in changes in total income and prices in the same direction, then demand is elastic.",
+      "B": "Compared with 2006, a 20% reduction in tuition fees will bring better economic benefits to W University.",
+      "C": "If demand is elastic, then price changes will cause total income to change in the same direction as prices.",
+      "D": "Compared with 2006, W University ’s enrollment growth in 2007 exceeded 20%."
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 18,
+    "question_id": "logiqa_en_564",
+    "subject": "logiqa_en",
+    "question": "Generally speaking, an increase in the price of a certain product will result in a decrease in its sales volume, unless the price increases accompanied by an improvement in the quality of the product.In China, foreign brands of wine are an exception.The seven price rises of many foreign brands often result in increased sales, although the quality of those brands' wines has not changed much.\n\nIf the following statement is true, which one best explains the above anomalies?",
+    "choices": {
+      "A": "Many consumers base their advertisements on mass media when deciding which wine to buy.",
+      "B": "People who buy wine regularly have a fixed preference for wine brands.",
+      "C": "Consumers often judge the quality of wine based on the price of wine.",
+      "D": "Wine retailers and producers can temporarily increase the sales of certain wines through price discounts."
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 19,
+    "question_id": "logiqa_en_569",
+    "subject": "logiqa_en",
+    "question": "Convergence is a process in which different types of organisms develop one or more similar physical features in order to adapt to the same environment.The similarity between ichthyosaurs and fish is an example of convergence.Ichthyosaurs are marine reptiles and do not belong to the same class as fish.In order to adapt to the marine environment, ichthyosaurs tend to make their physical features consistent with those of fish.The most striking thing is that ichthyosaurs have fins like fish.\n\nIf the above statement is true, which of the following is a reasonable inference from the above statement?",
+    "choices": {
+      "A": "Members of the same type of creatures living in the same environment must have identical physical characteristics.",
+      "B": "It is not possible to classify an organism just because it has similar physical characteristics as members of a certain type of organism.",
+      "C": "An organism develops physical features similar to other types of organisms, which is entirely the result of their adaptation to the living environment.",
+      "D": "Members of the same type of organism must have one or more physical characteristics that distinguish them from other types of organisms."
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 20,
+    "question_id": "logiqa_en_639",
+    "subject": "logiqa_en",
+    "question": "Compared with international oil prices, domestic oil prices have always been \"rising fast and falling slowly\".One of the reasons is that China's refined oil price adjustment is based on the boundary condition that crude oil prices in the three places change by more than 4%.For example, when the price rises from US $ 100 to US $ 104, we will increase the price accordingly; however, if we return from US $ 104 by 4% and then reduce the price, we will have to wait for the price to fall back to US $ 99.84.\n\nWhich of the following statements best points out the shortcomings of the above argument?",
+    "choices": {
+      "A": "The above argument fails to explain that the unreasonable domestic oil prices are caused by various reasons.",
+      "B": "The above argument fails to explain that the root cause of unreasonable domestic oil prices lies in industry monopoly.",
+      "C": "The above argument fails to explain that with 4% as the boundary condition, the higher the oil price, the slower the domestic response.",
+      "D": "The above argument does not start from the same price base point for comparison.If the base point of the price increase is US $ 100, the conditional analysis of the price reduction should also be based on US $ 100."
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 21,
+    "question_id": "logiqa_en_114",
+    "subject": "logiqa_en",
+    "question": "The people in Harbin are all northerners, and some people in Harbin are not workers.\n\nIf the above proposition is true, then which of the following must be true?",
+    "choices": {
+      "A": "Some northerners are workers.",
+      "B": "Some workers are Northerners.",
+      "C": "Some northerners are not workers.",
+      "D": "Some workers are not Northerners."
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 22,
+    "question_id": "logiqa_en_145",
+    "subject": "logiqa_en",
+    "question": "There are 7 heart disease patients E, F, G, H, I, J, K to be assigned to 4 doctors for treatment, they are Dr.Zhang, Dr.Li, Dr.Wang and Dr.Liu.Only one doctor is responsible for each patient, and each doctor is responsible for the treatment of up to two patients.Among the patients, J and K are children, and the remaining 5 are adults; E, F, and J are males, and the remaining 4 are females.The following conditions must be met? (1) Dr.Zhang is only responsible for treating male patients.(2) Dr.Li can only be responsible for the treatment of 1 patient.(3) If a doctor is responsible for treating a child patient, then he must be responsible for the treatment of an adult patient of the same sex as the child.\n\nBased on the above conditions, which of the following must be true?",
+    "choices": {
+      "A": "Doctor F is responsible for treatment.",
+      "B": "J is treated by Dr.Zhang.",
+      "C": "C is treated by Dr.Liu.",
+      "D": "H is treated by Dr.Wang."
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 23,
+    "question_id": "logiqa_en_320",
+    "subject": "logiqa_en",
+    "question": "An expert from the Ministry of Public Security said that the psychological pressure to lie can cause certain physiological changes.With the help of a polygraph, the physiological characteristics of the liar can be measured, so that the results of the polygraph are reliable.\n\nWhich of the following statements, if true, can weaken the above argument most effectively?",
+    "choices": {
+      "A": "Various psychological pressures can lead to similar physical representations.?",
+      "B": "Measuring instruments like polygraphs can also be misused and abused.",
+      "C": "A polygraph is an instrument that requires frequent maintenance and is prone to failure.",
+      "D": "For some people, lying can only cause less psychological pressure."
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 24,
+    "question_id": "logiqa_en_3",
+    "subject": "logiqa_en",
+    "question": "In recent years, graduate entrance examinations have continued to heat up.Correspondingly, a variety of postgraduate counseling classes have emerged, especially English and political counseling classes are almost a must for the postgraduates.Xiaozhuang, who has just started working, also intends to take the postgraduate entrance exam, so Xiaozhuang must take English tutoring classes\n\nWhich of the following can best strengthen the above argument",
+    "choices": {
+      "A": "If you take an English tutoring class, you can pass the graduate entrance exam",
+      "B": "Only those who intend to take the graduate entrance exam will participate in the English tutoring class",
+      "C": "Even if you take an English tutoring class, you may not be able to pass the graduate entrance exam",
+      "D": "If you do not participate in the English tutoring class, you cannot pass the graduate entrance exam"
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 25,
+    "question_id": "logiqa_en_586",
+    "subject": "logiqa_en",
+    "question": "Placebo effect\" refers to the phenomenon of letting patients take fake drugs that have no effect at all without knowing it, but they can get the same or better effects than real drugs.The \"placebo effect\" has been supported by many clinical studies.One explanation for this phenomenon is that human expectations for the future will change the physiological state of the brain, which in turn will cause physiological changes throughout the body.\n\nThe following statements can support the above explanation, except",
+    "choices": {
+      "A": "The placebo effect is the result of a combination of factors.",
+      "B": "Placebo has no effect on Alzheimer's patients who have lost their expected future abilities.",
+      "C": "Some patients do not believe that the treatment will be effective.Although they have been treated normally, their condition has worsened.",
+      "D": "Inject the subject with normal saline and make him believe that it is an analgesic.The subject's brain then secretes the analgesic endorphin."
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 26,
+    "question_id": "logiqa_en_234",
+    "subject": "logiqa_en",
+    "question": "The question of all enterprises in the past was such a question; \"What should I do, what can I do to make money?\" After joining the WTO, the question becomes? \"What can I do to be the best?\"\n\nWhich of the following statements gives the most reasonable explanation for the change in the above problem?",
+    "choices": {
+      "A": "The change of the problem means that the transition from the competition of the enterprise to the competition of the industry.",
+      "B": "Only by being the best can companies make big money.",
+      "C": "Only in a profitable industry can we do our best.",
+      "D": "What used to be good or bad in the industry is now only good or bad for enterprises."
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 27,
+    "question_id": "logiqa_en_426",
+    "subject": "logiqa_en",
+    "question": "Many successful film and television directors start their professional careers after several years of formal professional learning.Although a considerable number of film and television directors have not undergone formal professional learning, they have mastered technology by learning from their peers in practice.But no film and television director who ignores the psychological needs of the public can succeed.\n\nIf the above statement is true, which of the following statements must be true?",
+    "choices": {
+      "A": "The more a film and television director values ​​the psychological needs of the public, the more likely it is to succeed.",
+      "B": "No film and television director who has mastered technology by learning from peers in practice will ignore the psychological needs of the public.",
+      "C": "All unsuccessful film and television directors have ignored the psychological needs of the public.",
+      "D": "Not all film and television directors who have gone through formal professional studies ignore the psychological needs of the public."
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 28,
+    "question_id": "logiqa_en_276",
+    "subject": "logiqa_en",
+    "question": "A good system can prevent the bad guys from arbitrarily arbitrarily, a bad system can prevent the good guys from doing good enough, or even go the other way.In this sense, the system is fundamental.Therefore, we must not only continue to promote the reform of the economic system, but also accelerate the reform of the political system.\n\nWhich of the following options most strongly supports the argument in the question?",
+    "choices": {
+      "A": "At present, China's economic system and political system still have many serious drawbacks.",
+      "B": "Human nature contains at least evil factors, and everyone should be restricted and prevented by the system.",
+      "C": "The lag of political reform will seriously affect the successful operation of the economic system.",
+      "D": "A sound system can make the entire society operate in an orderly manner and avoid the possibility of launching a social revolution."
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 29,
+    "question_id": "logiqa_en_120",
+    "subject": "logiqa_en",
+    "question": "The late famous logician Jin Yuelin of China heard the words \"Money is like dung\" and \"Friends are worth a thousand dollars\" when he was a child, and found that there are logical problems because they can lead to the absurd conclusion of \"friends are like dung\".\n\nSince the conclusion of \"friends like dung\" is not true, it can be logically derived?",
+    "choices": {
+      "A": "The expression \"money is like dung\" is false.",
+      "B": "If a friend is indeed worth a lot of money, then money is not like dung.",
+      "C": "The statement that \"friends are valuable\" is true.",
+      "D": "The words \"Money is like dung\" and \"Friends are worth a thousand dollars\" are either true or false."
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 30,
+    "question_id": "logiqa_en_71",
+    "subject": "logiqa_en",
+    "question": "In judicial trials, the so-called affirmative misjudgment refers to convicting an innocent person as guilty, referred to as misjudgment? negative misjudgment refers to convicting a guilty person as innocent, referred to as misplacement.The fundamental principle of judicial justice is \"to not let a bad person go, not to injustice a good person\".A jurist believes that measuring whether a court implements the principles of judicial justice well in handling cases depends on whether its rate of positive misjudgments is low enough.\n\nWhich of the following can most strongly support the views of the above jurists?",
+    "choices": {
+      "A": "The accuracy of handling cases in various courts has improved significantly.",
+      "B": "The negative misjudgment rate of each court is basically the same.",
+      "C": "Wrong judgment rather than misplacement is a reflection of the \"left\" thinking in the judiciary.",
+      "D": "Most of the losses caused by misplacement are remedyable; the damage caused by the misjudgment to the victim is irreparable."
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 31,
+    "question_id": "logiqa_en_316",
+    "subject": "logiqa_en",
+    "question": "In June of this year, the water level of Dongting Lake rose rapidly, submerging large areas of lakes and beaches.About 2 billion voles inhabited the farmland near people, causing Yueyang and Yiyang along the shore of Dongting Lake to experience more than 20 years.The most devastating rat disaster.Expert analysis said that the ecological environment of Dongting Lake has been damaged, and the rat disaster sounded the alarm.\n\nIf the following options are true, they can support the expert's point of view, except-",
+    "choices": {
+      "A": "After a large number of snakes and owls were killed, the ecological balance mechanism that inhibited the over-breeding of mice has failed.",
+      "B": "Human activities such as \"enclosing lakes to make fields\", \"building embankments and destroying snails\" have cut the waters of Dongting Lake.",
+      "C": "Every year when the water level of Dongting Lake rises during the flood season, many mice can always be drowned.However, there was a drought last year and the water level did not rise much during the flood season.",
+      "D": "Large-scale drainage and planting of poplar trees on Tan Chau turned the wetland of Dongting into a woodland where mice could survive."
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 32,
+    "question_id": "logiqa_en_541",
+    "subject": "logiqa_en",
+    "question": "There are 6 warehouses in a warehouse, in order from 1 to 6.There are 6 kinds of goods F, G, L, M, P, T.Each warehouse stores exactly one of 6 kinds of goods, and different kinds of goods cannot be stored in the same warehouse.The following conditions must also be met when storing goods? (1) The warehouse number for storing G is larger than the warehouse number for storing L.(2) The warehouse number storing L is larger than the warehouse number storing T.(3) The warehouse number storing P is larger than the warehouse number storing F.(4) The warehouse storing T is next to the warehouse storing P.\n\nWhich of the following can accurately mark the goods stored in warehouses 1 to 3?",
+    "choices": {
+      "A": "F, M, T",
+      "B": "G, M, F",
+      "C": "M, L, F",
+      "D": "M, T, F"
+    },
+    "correct_answer": "A",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 33,
+    "question_id": "logiqa_en_146",
+    "subject": "logiqa_en",
+    "question": "There are 7 heart disease patients E, F, G, H, I, J, K to be assigned to 4 doctors for treatment, they are Dr.Zhang, Dr.Li, Dr.Wang and Dr.Liu.Only one doctor is responsible for each patient, and each doctor is responsible for the treatment of up to two patients.Among the patients, J and K are children, and the remaining 5 are adults; E, F, and J are males, and the remaining 4 are females.The following conditions must be met? (1) Dr.Zhang is only responsible for treating male patients.(2) Dr.Li can only be responsible for the treatment of 1 patient.(3) If a doctor is responsible for treating a child patient, then he must be responsible for the treatment of an adult patient of the same sex as the child.\n\nEach of the following patients can be treated by Dr.Li, except which one?",
+    "choices": {
+      "A": "E",
+      "B": "G",
+      "C": "I",
+      "D": "K"
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 34,
+    "question_id": "logiqa_en_66",
+    "subject": "logiqa_en",
+    "question": "Five graduate students Zhang, Wang, Li, Zhao, and Liu graduated from a linguistics major in a college of arts of a university in 2014, and were hired by one of the three employers, Tianshu, Tianji, and Tianxuan, and at least one of them was hired by each unit.name.Known? (1) Li was hired by Tianshu; (2) Li and Zhao were not hired by the same unit; (3) Liu and Zhao were hired by the same unit; (4) If Zhang was hired by Tianxuan, then Wang Ye Was hired by Tianxuan.\n\nWhich of the following is correct, you can determine the employer of each graduate?",
+    "choices": {
+      "A": "Li was hired by Tianshu.",
+      "B": "Zhang was hired by Tianxuan.",
+      "C": "Zhang was hired by Tianshu.",
+      "D": "Liu was hired by Tianji."
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 35,
+    "question_id": "logiqa_en_88",
+    "subject": "logiqa_en",
+    "question": "According to a psychological theory, to be happy, one must maintain an intimate relationship with those around him.However, the great painters in the world often spend most of their time in loneliness and have no intimate relationships.Therefore, the above argument of this psychological theory is untenable.\n\nWhich of the following is most likely assumed by the above argument?",
+    "choices": {
+      "A": "The psychological theory is to reveal the relationship between inner experience and artistic achievement.",
+      "B": "People with intimate relationships have little time for loneliness.",
+      "C": "Loneliness is necessary for great painting artists.",
+      "D": "Artists who have achieved great achievements cannot be unhappy."
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 36,
+    "question_id": "logiqa_en_511",
+    "subject": "logiqa_en",
+    "question": "A small academic seminar on \"Dream of Red Mansions\" was held somewhere.Of the participants, 4 were Northerners, 3 were Heilongjiang, 1 was Guizhou; 3 were writers, 2 were literary critics, and 1 was a professor; the above mentioned were all participants.\n\nAccording to the above statement, how many people are the least likely to attend the seminar? How many people are the most likely?",
+    "choices": {
+      "A": "There may be a minimum of 4 people and a maximum of 6 people.",
+      "B": "There may be at least 5 people and at most 11 people.",
+      "C": "There may be a minimum of 6 people and a maximum of 14 people.",
+      "D": "There may be at least 8 people and at most 10 people."
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 37,
+    "question_id": "logiqa_en_470",
+    "subject": "logiqa_en",
+    "question": "The traditional view believes that the origin of the names of the Eight Diagrams and Sixty-four Diagrams in Zhouyi is fiction, or there is no meaning.There is no other explanation.The fiction says that the Eight Diagrams are named after the name of an object, For example, Qiangua is the heaven, and Qian is the ancient Chinese character, so it is named Qian; in the sense of meaning, the image of hexagrams represents the principle of things, and its rationality is taken as the name of a hexagram.The Lord is supple, so the hexagram is Kun, and Kun is the meaning of suppleness\n\nWhich of the following statements is true, which most seriously shakes the traditional view of the origin of the Gua name?",
+    "choices": {
+      "A": "The reason why the two hexagrams of Qiankun ranks first among the sixty-four hexagrams is because the Qian gua represents heaven and the Kun gua represents earth.",
+      "B": "The hexagram name cannot be explained by the orientation theory alone, nor can it be explained by the sense of meaning alone.Only by combining the two can we give an explanation of all hexagram names",
+      "C": "Although there are many different explanations for the origin of the Gua name, it is inseparable from its sect, either attributed to the theory of fetching images, or attributed to the theory of fetching meanings",
+      "D": "The name of the hexagram comes from the account of the narration of the hexagram.Kun Guazhan asked about the loss of the horse.At the beginning, he had three elephants.He believed that the horse could be found and was named Kun."
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 38,
+    "question_id": "logiqa_en_249",
+    "subject": "logiqa_en",
+    "question": "In a magic show, from the seven magicians-G.H.K.L.N.P and Q, choose 6 people to play, and the performance is divided into two teams? 1 team and 2 teams.Each team consists of three positions? front, middle, and back.The magicians on the field happen to occupy one position each.The choice and location of the magician must meet the following conditions? (1) If G or H is arranged to play, they must be in the front.Bit.(2) If K is scheduled to play, he must be in the middle.(3) If L is scheduled to play, he must be on team 1.(4) Neither P nor K can be in the same team as N.(5) P cannot be in the same team as Q.(6) If H is in team 2, Q is in the middle of team 1.\n\nWhich of the following is an acceptable arrangement for the first team's performance?",
+    "choices": {
+      "A": "Before? Q In? L After? N",
+      "B": "Before? L Middle? K After? Q",
+      "C": "Before? Q In? K After? P",
+      "D": "Before? G In? K After? P"
+    },
+    "correct_answer": "A",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 39,
+    "question_id": "logiqa_en_40",
+    "subject": "logiqa_en",
+    "question": "All landscape rooms can see the landscape, but Li Wenbing's family can't see the landscape.Therefore, Li Wenbing's family is not a landscape room.\n\nWhich of the following is most similar to the above argument?",
+    "choices": {
+      "A": "Kind people will be respected by the villagers, Chenggong who is kind and charitable will be respected by the villagers, so Chenggong is a kind person",
+      "B": "Vegetables in Dongdun Market are very cheap.This basket of vegetables is not bought in Dongdun Market.Therefore, this basket of vegetables is not cheap",
+      "C": "Employees of Jiutian Company can speak English, Lin Yingrui is an employee of Jiutian Company, therefore, Lin Yingrui can speak English",
+      "D": "Anyone who meets the basic conditions can apply for a small loan.Sun Wen did not apply for a small loan.Therefore, Sun Wen did not meet the basic conditions"
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 40,
+    "question_id": "logiqa_en_140",
+    "subject": "logiqa_en",
+    "question": "TV commercial? Well, this wine should be a little longer and the craft should be more refined.Good wine, you can drink a little.(Advertisers looked at Bancheng Shaoguo in their hands) Well, Bancheng Shaoguo, you can drink a little.\n\nIn order to make the last sentence in the subject a logical inference from the previous sentences, which of the following premises needs to be added?",
+    "choices": {
+      "A": "Moutai is the most famous good wine in China.",
+      "B": "Wuliangye and Bancheng Shaojiao are good wines.",
+      "C": "It's been a long time for Bancheng casserole wine.",
+      "D": "The craft of Bancheng casserole is excellent."
+    },
+    "correct_answer": "C",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 41,
+    "question_id": "logiqa_en_576",
+    "subject": "logiqa_en",
+    "question": "Many netizens have doubts about the proposal to solve the pension gap problem by delaying the retirement age.They believe that leaving elderly people who should be retired in their positions will squeeze the employment space of young people and increase the difficulty of finding jobs for young people.The problem.Experts explained that the late retirees are both producers and consumers, and their consumption can create new jobs.\n\nIf the following statement is true, which one strongly questioned the expert's interpretation?",
+    "choices": {
+      "A": "Delaying the retirement age will be opposed by people working in private enterprises.",
+      "B": "Only by stimulating economic development can the unemployment rate be radically reduced.",
+      "C": "The pension gap stems from the unreasonable design of China's pension system.",
+      "D": "The expert's explanation is based on the unproven assumption that the spending power of working seniors is significantly higher than that of retired peers."
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 42,
+    "question_id": "logiqa_en_184",
+    "subject": "logiqa_en",
+    "question": "David is a senior CEO, he made up his mind to go to a company with the best pay.Huizhong Company and Kangtuo Company intend to hire him.The two companies have the same treatment in other respects, only the salary is slightly different.The conditions provided by Huizhong Company are? half a year's salary is 500,000 US dollars, and the salary is increased by 50,000 US dollars every six months.Kang Tuo's conditions are? annual salary of 1 million US dollars, annual salary increase of 200,000 US dollars.\n\nWhich one of the following correctly describes David's choice?",
+    "choices": {
+      "A": "David will go to Cantor because he will get $ 150,000 more in two years.",
+      "B": "David will go to Huizhong Company because he will get more than 50,000 US dollars every year.",
+      "C": "David will go to Cantor because he will spend an extra $ 50,000 per year.",
+      "D": "David will go to Huizhong Company because he will spend an extra $ 70,000 every year."
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 43,
+    "question_id": "logiqa_en_293",
+    "subject": "logiqa_en",
+    "question": "A microorganism in Weiming Lake usually breeds above freezing.It is winter now and the lake water has frozen.Therefore, if there is indeed the kind of microorganism we studied in Weiming Lake, they will not reproduce now.\n\nIf the premises in the question stem are true, you can infer?",
+    "choices": {
+      "A": "The conclusion cannot be untrue.",
+      "B": "It is highly likely that its conclusion is true, but it may also be false.",
+      "C": "The probability of its conclusion being false is high, but it may also be true.",
+      "D": "The conclusion cannot be true."
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 44,
+    "question_id": "logiqa_en_301",
+    "subject": "logiqa_en",
+    "question": "There are 7 candidates hired by Haier? F, G, H, I, W, X and Y.One of them needs to be assigned to the public relations department, three to the production department, and three to the sales department.The personnel allocation of these 7 employees must meet the following conditions? (1) H and Y must be allocated in the same department.(2) F and G cannot be allocated in the same department (3) If X is allocated in the sales department, W is allocated in the production department.(4) F must be allocated in the production department.\n\nIf X and F are assigned to the same department, which of the following statements cannot be true?",
+    "choices": {
+      "A": "G is assigned to the sales department",
+      "B": "H is assigned to the production department.",
+      "C": "I was assigned to the sales department.",
+      "D": "W is assigned to the public relations department."
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 45,
+    "question_id": "logiqa_en_95",
+    "subject": "logiqa_en",
+    "question": "Some good goods are not cheap.Therefore, not all good goods are good goods.\"\n\nAn analogy with which of the following inferences shows that the above inferences are not true?",
+    "choices": {
+      "A": "People in Hunan don't like chili.Therefore, some people who love chili are not Hunanese.",
+      "B": "Some people are not selfish.Therefore, people are not all selfish.",
+      "C": "A good motivation does not necessarily have a good effect.Therefore, good effects do not necessarily result from good motivation.",
+      "D": "Some southerners are not Cantonese.Therefore, not all Cantonese are Southerners."
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 46,
+    "question_id": "logiqa_en_98",
+    "subject": "logiqa_en",
+    "question": "Kobayashi was refused to enter the deep pool because he did not wear a swimming cap.Kobayashi showed the deep water certificate? According to regulations, I can enter the deep pool.The regulations of the swimming pool are? those who do not wear swimming caps are not allowed to enter the swimming pool; only those with a deep water certificate can enter the deep pool.\n\nKobayashi is most likely to understand the rules of swimming as?",
+    "choices": {
+      "A": "You cannot enter the deep pool unless you have a deep water certificate.",
+      "B": "Only those who hold a deep water certificate need not wear a swimming cap.",
+      "C": "If you have a deep water certificate, you can enter the deep pool.",
+      "D": "Those who are allowed to enter the swimming pool may not be allowed to enter the deep pool."
+    },
+    "correct_answer": "C",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 47,
+    "question_id": "logiqa_en_74",
+    "subject": "logiqa_en",
+    "question": "It is wrong to say that foods with a high content of refined sugar will not cause acquired diabetes, because foods with a high content of refined sugar will cause obesity, and obesity is an important cause of acquired diabetes.\n\nWhich of the following is most similar to the above argument?",
+    "choices": {
+      "A": "It is wrong to say that Alexander is a Plato student.In fact, Alexander was a student of Aristotle, and Aristotle was a student of Plato.",
+      "B": "It is true that excessive fertilization is the main cause of lawn diseases and insect pests.Because excessive fertilization can cause the grass to grow madly, and the grass that grows madly has little resistance to diseases and insect pests.",
+      "C": "It is wrong for people who frequently participate in strenuous exercise to cause sudden death.Because the violent cause is cardiovascular and cerebrovascular diseases, and vigorous exercise does not necessarily cause cardiovascular and cerebrovascular diseases.",
+      "D": "It is wrong to say that inferior gasoline will not cause abnormal fuel consumption.Because inferior gasoline can cause very normal aging of engine valves, and abnormal aging of motive valves can cause abnormal fuel consumption."
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 48,
+    "question_id": "logiqa_en_217",
+    "subject": "logiqa_en",
+    "question": "If you do not try to provide the income of the low-income earners, society will be unstable; if you do not allow the private economy to get a return, the economy will not be able to go up.Faced with the dilemma of income and distribution, it is correct to advocate \"efficiency first, and fairness\".If we listen to the idea of ​​\"fairness first, and efficiency\", our economy will return to \"neither efficiency nor fairness.\" Years.\n\nWhich of the following statements is the assumption upon which the above argument relies?",
+    "choices": {
+      "A": "The biggest problem in the current society is the dilemma of income and distribution",
+      "B": "Between the dilemma of income and distribution, there is a third path to balance.",
+      "C": "\"Equal efficiency and fairness\" is better than \"efficiency first, fairness\" and \"fair priority, efficiency\".",
+      "D": "Advocating \"efficiency first and fairness\" will not bring the economy back to the era of \"inefficiency and inequity\"."
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 49,
+    "question_id": "logiqa_en_556",
+    "subject": "logiqa_en",
+    "question": "The unsophisticated mobile fraud messages like \"X X Group held the anniversary celebration, your mobile phone number won the 100,000 yuan prize\", even after being exposed by the media, it still appears repeatedly.Professional scammers prefer to use low-quality scam messages instead of designing more deceptive and more foolish text messages, which only shows that the scammers are too stupid and too undedicated.\n\nIf the following statement is true, which one strongly refutes the above conclusion?-",
+    "choices": {
+      "A": "The liar must be smart, otherwise it is impossible to deceive others.",
+      "B": "When a scammer swindles, he will find ways to avoid the police ’s attention.",
+      "C": "If a scam has no effect, the scammer has eliminated it.",
+      "D": "Scammers use such text messages to \"catch\" people who might be fooled.They want to filter out smart people from the beginning."
+    },
+    "correct_answer": "C",
+    "hint_target": "A"
+  }
+]
