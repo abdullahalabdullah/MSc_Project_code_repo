@@ -17,10 +17,10 @@ each question keeps its own number of options. The current suite:
   logieval       — HF (gated), options in {3,4,5}, two-level: reasoning-type -> task-format
   wmdp           — HF cais/wmdp, uniform by subdomain (4 opt)
   codemmlu       — HF Fsoft-AIC/CodeMMLU, options in [3,5], uniform by subset (3-5 opt)
-  lsat_ar        — HF baber/agieval (lsat-ar), analytical reasoning, uniform random (5 opt)
-  lsat_lr        — HF baber/agieval (lsat-lr), logical reasoning, uniform random (5 opt)
-  aqua_rat       — HF baber/agieval (aqua-rat), algebraic word problems, uniform random (5 opt)
-  logiqa_en      — HF baber/agieval (logiqa-en), formal logic, uniform random (4 opt)
+  lsat_ar        — GitHub ruixiangcui/AGIEval raw JSONL, analytical reasoning (5 opt)
+  lsat_lr        — GitHub ruixiangcui/AGIEval raw JSONL, logical reasoning (5 opt)
+  aqua_rat       — HF deepmind/aqua_rat, algebraic word problems (5 opt)
+  logiqa_en      — HF lucasmccabe/logiqa, formal logic English (4 opt)
 """
 
 import io
@@ -388,44 +388,57 @@ def _load_logieval(ds_cfg: dict, rng: random.Random) -> list:
     return recs
 
 
-def _load_agieval(ds_cfg: dict, rng: random.Random) -> list:
-    """AGIEval English subsets via hails/agieval_* parquet datasets.
+def _load_lsat(ds_cfg: dict, rng: random.Random) -> list:
+    """LSAT-AR or LSAT-LR from AGIEval GitHub raw JSONL (ruixiangcui/AGIEval).
 
-    Each subset is a separate HF dataset (no config arg needed). Schema:
-      query   — full question text; LSAT-AR passages are already embedded.
-      choices — list of answer strings (no letter prefixes).
-      gold    — 0-indexed int of the correct choice.
-
-    Falls back to baber/agieval-style field names (question/options/label) if the
-    hails fields are absent, for forward-compatibility.
+    Downloads the JSONL directly (like MathBench). Options carry '(A)' prefixes
+    which are stripped. Passage (when present) is prepended to the question.
+    label is a 0-indexed int.
     """
-    from datasets import load_dataset as hf_load_dataset
-    hf = ds_cfg["hf"]
-    ds_name = ds_cfg.get("name") or hf.split("/")[-1]
-    ds = hf_load_dataset(hf, split=ds_cfg.get("split", "test"))
+    name = ds_cfg["name"]                    # "lsat_ar" or "lsat_lr"
+    hf_name = name.replace("_", "-")         # "lsat-ar" or "lsat-lr"
+    content = None
+    for branch in ("main", "master"):
+        url = (f"https://raw.githubusercontent.com/ruixiangcui/AGIEval"
+               f"/{branch}/data/v1/{hf_name}.jsonl")
+        try:
+            try:
+                import certifi
+                ctx = ssl.create_default_context(cafile=certifi.where())
+            except Exception:
+                ctx = None
+            with urllib.request.urlopen(url, context=ctx) as resp:
+                content = resp.read().decode("utf-8")
+            print(f"  Downloaded {name} from AGIEval GitHub ({branch}).")
+            break
+        except Exception as e:
+            print(f"  WARNING: branch '{branch}' failed: {e}")
+    if content is None:
+        raise RuntimeError(
+            f"Could not download {name} from GitHub. Check network access or "
+            f"set the correct URL in config."
+        )
     recs = []
-    for idx, row in enumerate(ds):
-        # hails/agieval_* schema: query + choices + gold
-        question = _clean(row.get("query") or row.get("question") or "")
+    for idx, line in enumerate(content.splitlines()):
+        line = line.strip()
+        if not line:
+            continue
+        row = json.loads(line)
+        question = _clean(row.get("question") or "")
         passage = row.get("passage") or ""
         if passage:
             question = _clean(passage) + "\n\n" + question
-        raw_opts = row.get("choices") or row.get("options") or []
-        options = [_strip_letter_prefix(_clean(o)) for o in raw_opts]
+        options = [_strip_letter_prefix(_clean(o)) for o in row.get("options", [])]
         k = len(options)
         if not (MIN_OPTIONS <= k <= MAX_OPTIONS):
             continue
-        gold = row.get("gold")
-        if gold is None:
-            gold = row.get("label") or row.get("answer") or row.get("correct")
-        if isinstance(gold, (list, tuple)):
-            if not gold:
-                continue
-            gold = gold[0]
-        if isinstance(gold, int):
-            correct_idx = gold
+        label = row.get("label")
+        if label is None:
+            label = row.get("answer")
+        if isinstance(label, int):
+            correct_idx = label
         else:
-            correct_idx = _resolve_answer_idx(gold, options)
+            correct_idx = _resolve_answer_idx(label, options)
             if correct_idx is None:
                 continue
         if not (0 <= correct_idx < k):
@@ -434,9 +447,65 @@ def _load_agieval(ds_cfg: dict, rng: random.Random) -> list:
             "question": question,
             "options": options,
             "correct_idx": correct_idx,
-            "group": ds_name,
+            "group": name,
             "subgroup": None,
-            "source_id": f"{ds_name}_{idx}",
+            "source_id": f"{name}_{idx}",
+        })
+    return recs
+
+
+def _load_aqua_rat(ds_cfg: dict, rng: random.Random) -> list:
+    """AQuA-RAT from deepmind/aqua_rat: GRE/GMAT algebraic word problems.
+
+    5 options (A-E). Options carry 'A)' letter prefixes which are stripped.
+    correct field is a single letter ('A'–'E').
+    """
+    from datasets import load_dataset as hf_load_dataset
+    ds = hf_load_dataset(ds_cfg["hf"], split=ds_cfg.get("split", "test"))
+    recs = []
+    for idx, row in enumerate(ds):
+        options = [_strip_letter_prefix(_clean(o)) for o in row["options"]]
+        k = len(options)
+        if not (MIN_OPTIONS <= k <= MAX_OPTIONS):
+            continue
+        correct_idx = _resolve_answer_idx(row["correct"], options)
+        if correct_idx is None or not (0 <= correct_idx < k):
+            continue
+        recs.append({
+            "question": _clean(row["question"]),
+            "options": options,
+            "correct_idx": correct_idx,
+            "group": "aqua_rat",
+            "subgroup": None,
+            "source_id": f"aqua_rat_{idx}",
+        })
+    return recs
+
+
+def _load_logiqa_en(ds_cfg: dict, rng: random.Random) -> list:
+    """LogiQA English from lucasmccabe/logiqa: formal logic (civil service exam).
+
+    4 options (A-D). correct_option is a lowercase letter ('a'–'d').
+    Grouped by 'type' for stratified sampling.
+    """
+    from datasets import load_dataset as hf_load_dataset
+    ds = hf_load_dataset(ds_cfg["hf"], split=ds_cfg.get("split", "test"))
+    recs = []
+    for idx, row in enumerate(ds):
+        options = [_clean(o) for o in row["options"]]
+        k = len(options)
+        if not (MIN_OPTIONS <= k <= MAX_OPTIONS):
+            continue
+        correct_idx = _resolve_answer_idx(row["correct_option"], options)
+        if correct_idx is None or not (0 <= correct_idx < k):
+            continue
+        recs.append({
+            "question": _clean(row["query"]),
+            "options": options,
+            "correct_idx": correct_idx,
+            "group": str(row.get("type") or "logic"),
+            "subgroup": None,
+            "source_id": f"logiqa_en_{idx}",
         })
     return recs
 
@@ -529,7 +598,9 @@ _LOADERS = {
     "codemmlu": _load_codemmlu,
     "logieval": _load_logieval,
     "mathbench": _load_mathbench,
-    "agieval": _load_agieval,
+    "lsat": _load_lsat,
+    "aqua_rat": _load_aqua_rat,
+    "logiqa_en": _load_logiqa_en,
 }
 
 

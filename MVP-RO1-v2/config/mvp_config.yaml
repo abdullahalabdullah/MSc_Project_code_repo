@@ -86,40 +86,33 @@ datasets:
     split: "test"
     n_examples: 50
     random_seed: 88
-  # Applied Reasoning — AGIEval English subsets via hails/agieval_* parquet datasets.
-  # baber/agieval uses a legacy dataset script incompatible with datasets>=3.x; the
-  # hails/ versions are the standard parquet-converted equivalents used by lm-eval.
-  # Schema: query (full question, passage embedded for LSAT-AR), choices (list),
-  # gold (0-indexed int). Options have no letter prefixes. Uniform random sampling.
+  # Applied Reasoning — AGIEval English subsets.
+  # LSAT-AR/LR: downloaded from AGIEval GitHub raw JSONL (ruixiangcui/AGIEval).
+  # AQuA-RAT: deepmind/aqua_rat (canonical HF parquet dataset).
+  # LogiQA-en: lucasmccabe/logiqa (English LogiQA, HF parquet).
   # LSAT-AR: analytical reasoning (logic games), 5 options, ~230 instances.
   lsat_ar:
-    loader: "agieval"
-    hf: "hails/agieval_lsat_ar"
+    loader: "lsat"
     name: "lsat_ar"
-    split: "test"
     n_examples: 50
     random_seed: 88
   # LSAT-LR: logical reasoning (argument analysis), 5 options, ~510 instances.
   lsat_lr:
-    loader: "agieval"
-    hf: "hails/agieval_lsat_lr"
+    loader: "lsat"
     name: "lsat_lr"
-    split: "test"
     n_examples: 50
     random_seed: 88
   # AQuA-RAT: algebraic word problems (GRE/GMAT), 5 options, ~254 instances.
   aqua_rat:
-    loader: "agieval"
-    hf: "hails/agieval_aqua_rat"
-    name: "aqua_rat"
+    loader: "aqua_rat"
+    hf: "deepmind/aqua_rat"
     split: "test"
     n_examples: 50
     random_seed: 88
   # LogiQA-en: formal logic from civil service exam (English), 4 options, ~651 instances.
   logiqa_en:
-    loader: "agieval"
-    hf: "hails/agieval_logiqa_en"
-    name: "logiqa_en"
+    loader: "logiqa_en"
+    hf: "lucasmccabe/logiqa"
     split: "test"
     n_examples: 50
     random_seed: 88
