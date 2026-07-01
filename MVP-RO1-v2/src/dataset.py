@@ -20,7 +20,7 @@ each question keeps its own number of options. The current suite:
   lsat_ar        — GitHub ruixiangcui/AGIEval raw JSONL, analytical reasoning (5 opt)
   lsat_lr        — GitHub ruixiangcui/AGIEval raw JSONL, logical reasoning (5 opt)
   aqua_rat       — HF deepmind/aqua_rat, algebraic word problems (5 opt)
-  logiqa_en      — HF lucasmccabe/logiqa, formal logic English (4 opt)
+  logiqa_en      — GitHub ruixiangcui/AGIEval raw JSONL, formal logic English (4 opt)
 """
 
 import io
@@ -388,15 +388,16 @@ def _load_logieval(ds_cfg: dict, rng: random.Random) -> list:
     return recs
 
 
-def _load_lsat(ds_cfg: dict, rng: random.Random) -> list:
-    """LSAT-AR or LSAT-LR from AGIEval GitHub raw JSONL (ruixiangcui/AGIEval).
+def _load_agieval_gh(ds_cfg: dict, rng: random.Random) -> list:
+    """AGIEval English subset from GitHub raw JSONL (ruixiangcui/AGIEval).
 
-    Downloads the JSONL directly (like MathBench). Options carry '(A)' prefixes
-    which are stripped. Passage (when present) is prepended to the question.
-    label is a 0-indexed int.
+    Serves lsat_ar, lsat_lr, and logiqa_en — all share the AGIEval schema
+    (passage/question/options/label). Downloads the JSONL directly (like
+    MathBench). Options carry '(A)' prefixes which are stripped. Passage (when
+    present) is prepended to the question. label is a 0-indexed int.
     """
-    name = ds_cfg["name"]                    # "lsat_ar" or "lsat_lr"
-    hf_name = name.replace("_", "-")         # "lsat-ar" or "lsat-lr"
+    name = ds_cfg["name"]                    # "lsat_ar" / "lsat_lr" / "logiqa_en"
+    hf_name = name.replace("_", "-")         # "lsat-ar" / "lsat-lr" / "logiqa-en"
     content = None
     for branch in ("main", "master"):
         url = (f"https://raw.githubusercontent.com/ruixiangcui/AGIEval"
@@ -482,32 +483,6 @@ def _load_aqua_rat(ds_cfg: dict, rng: random.Random) -> list:
     return recs
 
 
-def _load_logiqa_en(ds_cfg: dict, rng: random.Random) -> list:
-    """LogiQA English from lucasmccabe/logiqa: formal logic (civil service exam).
-
-    4 options (A-D). correct_option is a lowercase letter ('a'–'d').
-    Grouped by 'type' for stratified sampling.
-    """
-    from datasets import load_dataset as hf_load_dataset
-    ds = hf_load_dataset(ds_cfg["hf"], split=ds_cfg.get("split", "test"))
-    recs = []
-    for idx, row in enumerate(ds):
-        options = [_clean(o) for o in row["options"]]
-        k = len(options)
-        if not (MIN_OPTIONS <= k <= MAX_OPTIONS):
-            continue
-        correct_idx = _resolve_answer_idx(row["correct_option"], options)
-        if correct_idx is None or not (0 <= correct_idx < k):
-            continue
-        recs.append({
-            "question": _clean(row["query"]),
-            "options": options,
-            "correct_idx": correct_idx,
-            "group": str(row.get("type") or "logic"),
-            "subgroup": None,
-            "source_id": f"logiqa_en_{idx}",
-        })
-    return recs
 
 
 def _resolve_answer_idx(gold, options: list) -> int | None:
@@ -598,9 +573,8 @@ _LOADERS = {
     "codemmlu": _load_codemmlu,
     "logieval": _load_logieval,
     "mathbench": _load_mathbench,
-    "lsat": _load_lsat,
+    "agieval_gh": _load_agieval_gh,
     "aqua_rat": _load_aqua_rat,
-    "logiqa_en": _load_logiqa_en,
 }
 
 

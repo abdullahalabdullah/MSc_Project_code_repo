@@ -87,18 +87,18 @@ datasets:
     n_examples: 50
     random_seed: 88
   # Applied Reasoning — AGIEval English subsets.
-  # LSAT-AR/LR: downloaded from AGIEval GitHub raw JSONL (ruixiangcui/AGIEval).
-  # AQuA-RAT: deepmind/aqua_rat (canonical HF parquet dataset).
-  # LogiQA-en: lucasmccabe/logiqa (English LogiQA, HF parquet).
+  # LSAT-AR/LR + LogiQA-en: downloaded from AGIEval GitHub raw JSONL (ruixiangcui/AGIEval),
+  # which ships them as parquet-free JSONL with a shared schema (passage/question/
+  # options/label). AQuA-RAT: deepmind/aqua_rat (canonical HF parquet dataset).
   # LSAT-AR: analytical reasoning (logic games), 5 options, ~230 instances.
   lsat_ar:
-    loader: "lsat"
+    loader: "agieval_gh"
     name: "lsat_ar"
     n_examples: 50
     random_seed: 88
   # LSAT-LR: logical reasoning (argument analysis), 5 options, ~510 instances.
   lsat_lr:
-    loader: "lsat"
+    loader: "agieval_gh"
     name: "lsat_lr"
     n_examples: 50
     random_seed: 88
@@ -111,9 +111,8 @@ datasets:
     random_seed: 88
   # LogiQA-en: formal logic from civil service exam (English), 4 options, ~651 instances.
   logiqa_en:
-    loader: "logiqa_en"
-    hf: "lucasmccabe/logiqa"
-    split: "test"
+    loader: "agieval_gh"
+    name: "logiqa_en"
     n_examples: 50
     random_seed: 88
   # Coding — MCQ over code. Keep options in [3,5]; uniform by subset (9). 3–5 options.
