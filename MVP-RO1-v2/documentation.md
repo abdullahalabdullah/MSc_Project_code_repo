@@ -128,16 +128,28 @@ in `src/dataset.py` (`_LOADERS`).
 | `logieval` *(disabled)* | Logic | HF gated — **not released yet** | options ∈ {3,4,5} | reasoning-type → task-format | 3/4/5 |
 | `wmdp` | Safety/Security | HF `cais/wmdp` (bio/chem/cyber) | none | by subdomain (~67 each) | 4 |
 | `codemmlu` | Coding | HF `Fsoft-AIC/CodeMMLU` (9 subsets) | options ∈ [3,5] | by subset (9) | 3–5 |
+| `lsat_ar` | Applied Reasoning (analytical) | HF `baber/agieval` (`lsat-ar`) | options ∈ [3,5] | uniform random (230 instances) | 5 |
+| `lsat_lr` | Applied Reasoning (logical) | HF `baber/agieval` (`lsat-lr`) | options ∈ [3,5] | uniform random (510 instances) | 5 |
+| `aqua_rat` | Applied Reasoning (math word) | HF `baber/agieval` (`aqua-rat`) | options ∈ [3,5] | uniform random (254 instances) | 5 |
+| `logiqa_en` | Applied Reasoning (formal logic) | HF `baber/agieval` (`logiqa-en`) | options ∈ [3,5] | uniform random (651 instances) | 4 |
 
 Notes:
 - **MathBench Arithmetic is omitted** — MathBench has no MCQ for it (cloze only).
   Primary has only ~109 English MCQ, so it falls below the 200 budget.
+- **mathbench_* and compmath are excluded from the active eval suite** — both hinted
+  and unhinted accuracies are near-ceiling (≥ 0.90), so the hint has negligible causal
+  leverage and TE ≈ 0. They remain in the config registry but are not in `DATASETS`.
 - **CompMath is 3-option**; **CodeMMLU/LogiEval mix 3/4/5 options**. CodeMMLU's
   rare 6–7-option items (answers F/G) are dropped to keep the pipeline at A–E.
 - **LogiEval is disabled** (commented out in the registry). The spec's dataset
   (Westlake LogiEval, arXiv 2505.11854) is gated and not publicly released yet —
   awaiting the authors. The loader is ready; uncomment the `logieval` block, set
   `hf`/`fields`, and add it to the run-script `DATASETS` lists once access exists.
+- **AGIEval subsets (lsat_ar, lsat_lr, aqua_rat, logiqa_en)** are loaded via a shared
+  `agieval` loader. Options carry `(A)` letter prefixes in the raw data which are
+  stripped at load time. LSAT-AR passages are prepended to each question so instances
+  are self-contained. All four are English-only, hard applied reasoning tasks where
+  qwen3_4b scores in the 0.3–0.6 range (genuine uncertainty zone).
 - The prepared `dataset_index.json` schema is unchanged: each instance has
   `instance_id, question_id, subject, question, choices {A:…, …}, correct_answer,
   hint_target` — `choices` now has 3–5 entries.

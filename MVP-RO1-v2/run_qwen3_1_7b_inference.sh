@@ -54,7 +54,7 @@ N_SAMPLES=""
 FORCE_PREPARE="false"
 
 # All active datasets (logieval is commented out in the config registry — omit it).
-DATASETS=(codemmlu)
+DATASETS=(lsat_ar lsat_lr aqua_rat logiqa_en)
 
 LOGFILE="run_inference_$(date +%Y%m%d_%H%M%S).log"
 

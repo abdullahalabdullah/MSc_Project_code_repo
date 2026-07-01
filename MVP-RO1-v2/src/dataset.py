@@ -17,6 +17,10 @@ each question keeps its own number of options. The current suite:
   logieval       — HF (gated), options in {3,4,5}, two-level: reasoning-type -> task-format
   wmdp           — HF cais/wmdp, uniform by subdomain (4 opt)
   codemmlu       — HF Fsoft-AIC/CodeMMLU, options in [3,5], uniform by subset (3-5 opt)
+  lsat_ar        — HF baber/agieval (lsat-ar), analytical reasoning, uniform random (5 opt)
+  lsat_lr        — HF baber/agieval (lsat-lr), logical reasoning, uniform random (5 opt)
+  aqua_rat       — HF baber/agieval (aqua-rat), algebraic word problems, uniform random (5 opt)
+  logiqa_en      — HF baber/agieval (logiqa-en), formal logic, uniform random (4 opt)
 """
 
 import io
@@ -384,6 +388,48 @@ def _load_logieval(ds_cfg: dict, rng: random.Random) -> list:
     return recs
 
 
+def _load_agieval(ds_cfg: dict, rng: random.Random) -> list:
+    """AGIEval English subsets via baber/agieval (lsat-ar, lsat-lr, aqua-rat, logiqa-en).
+
+    Options carry '(A)' letter prefixes which are stripped. The `label` field is a
+    list containing one 0-indexed int (e.g. [2] = option C). When a `passage` is
+    present it is prepended to the question so each instance is self-contained.
+    """
+    from datasets import load_dataset as hf_load_dataset
+    cfg_name = ds_cfg["config"]
+    ds = hf_load_dataset(ds_cfg["hf"], cfg_name, split=ds_cfg.get("split", "test"))
+    recs = []
+    for idx, row in enumerate(ds):
+        question = _clean(row.get("question") or "")
+        passage = row.get("passage") or ""
+        if passage:
+            question = _clean(passage) + "\n\n" + question
+        options = [_strip_letter_prefix(_clean(o)) for o in row["options"]]
+        k = len(options)
+        if not (MIN_OPTIONS <= k <= MAX_OPTIONS):
+            continue
+        label = row.get("label")
+        if isinstance(label, (list, tuple)):
+            if not label:
+                continue
+            correct_idx = int(label[0])
+        else:
+            correct_idx = _resolve_answer_idx(label, options)
+            if correct_idx is None:
+                continue
+        if not (0 <= correct_idx < k):
+            continue
+        recs.append({
+            "question": question,
+            "options": options,
+            "correct_idx": correct_idx,
+            "group": cfg_name,
+            "subgroup": None,
+            "source_id": f"{cfg_name}_{idx}",
+        })
+    return recs
+
+
 def _resolve_answer_idx(gold, options: list) -> int | None:
     """Map a gold answer (letter 'A'.., int index, or the answer text) to an index."""
     if isinstance(gold, (list, tuple)):
@@ -472,6 +518,7 @@ _LOADERS = {
     "codemmlu": _load_codemmlu,
     "logieval": _load_logieval,
     "mathbench": _load_mathbench,
+    "agieval": _load_agieval,
 }
 
 
