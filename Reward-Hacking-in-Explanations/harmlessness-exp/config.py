@@ -10,8 +10,8 @@ import os
 SEED = 0                      # RHiE convention (utils.set_seed)
 
 # ── Sampling / generation ──────────────────────────────────────────────────
-SAMPLE = 300                  # number of unique prompts to sample
-N = 10                        # responses generated per prompt
+SAMPLE = 300                 # number of unique prompts to sample
+N = 8                        # responses generated per prompt
 MAX_TOKENS = 8192             # per-response token budget (truncation surfaced live)
 
 # Prompts per vLLM generate() call. Large so vLLM's continuous batching keeps the GPU
