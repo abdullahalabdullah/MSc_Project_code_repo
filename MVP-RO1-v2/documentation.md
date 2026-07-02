@@ -29,14 +29,25 @@ labels each response for hint-acknowledgement (Z).
 | 4 | `04_compute_gmean2.py` | inference + monitor → `…/analysis/{ds}/{model}/{hint}/gmean2_summary.{md,json}`, `gmean2_per_instance.{csv,json}` |
 | 5 | `05_analyze_gmean2.py` | per-instance CSV → `…/plots/{ds}/{hint}/*.png` |
 | 6 | `06_export_excel.py` | inference + monitor → `…/analysis/{ds}/{model}/{hint}/qualitative_export.xlsx` |
+| 7 | `07_summary_table.py` | `gmean2_summary.json` (all ds/models) → `…/analysis/summary_{hint}.md` |
 | 8 | `08_cot_token_analysis.py` | inference (all ds) → `…/analysis/cot_token_report_{model}_{hint}.md` |
 
 Every step takes a `--dataset` **and** a `--hint-type` flag; both namespace the I/O
 paths, so a (dataset × hint-type) combination is an independent run. `--hint-type`
 defaults to `hint.default` in the config when omitted. See **Hint types** below.
+Step 7 is the exception — it takes only `--hint-type` (no `--dataset`/`--model`) and
+scans every dataset/model combo under `--analysis-dir` that already has a
+`gmean2_summary.json`, building one cross-dataset, per-model summary table
+(override the output path with `--output`; default
+`…/analysis/summary_{hint_type}.md`). Run it after step 4 for all the
+dataset/model combos you want included:
+
+```bash
+python scripts/07_summary_table.py --hint-type professor
+```
 
 `…` = `outputs-and-results/`. Steps 2 needs a GPU (vLLM); 3 needs the OpenAI API;
-4–6, 8 are CPU-only. Helpers: `scripts/merge_and_push.py` merges a LoRA/DPO adapter
+4–8 are CPU-only. Helpers: `scripts/merge_and_push.py` merges a LoRA/DPO adapter
 into the base model and pushes it to the Hub; `scripts/archive_results.sh` snapshots
 the result dirs into `outputs-and-results/Old-Results/{timestamp}/` and clears them
 for a fresh run.
