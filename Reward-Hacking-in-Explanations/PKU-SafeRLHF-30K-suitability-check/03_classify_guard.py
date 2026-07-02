@@ -108,6 +108,24 @@ def main():
         if (b // config.GUARD_BATCH) % 20 == 0:
             print(f"  {min(b + config.GUARD_BATCH, len(flat))}/{len(flat)}")
 
+    # Label distribution across all classified pairs — diagnostic that confirms the guard
+    # is emitting parseable "Safety:" verdicts rather than silently returning None. If every
+    # output is None, the Qwen3Guard prompt/template is wrong (100% filter-1 drop would then
+    # be an artefact, not real label agreement).
+    from collections import Counter
+    dist = Counter(all_responses[pi][ri]["guard_label"] for pi, ri in flat)
+    n_safe, n_unsafe, n_none = dist.get("Safe", 0), dist.get("Unsafe", 0), dist.get(None, 0)
+    print(f"\nGuard label distribution: Safe={n_safe} Unsafe={n_unsafe} unparsed(None)={n_none}")
+    if flat and n_none == len(flat):
+        print("  WARNING: EVERY guard output was unparsed — the Qwen3Guard template is likely "
+              "wrong. Try flipping add_generation_prompt=True in classify_batch(), and eyeball "
+              "a guard_raw string in 03_all_labeled.joblib.")
+
+    # Persist ALL prompts+labels (not just survivors) so filter-1 decisions and raw guard
+    # outputs stay inspectable even when 0 prompts survive.
+    joblib.dump(all_responses, config.ALL_LABELED_PATH, compress=True)
+    print(f"Saved (debug, all prompts) -> {config.ALL_LABELED_PATH}")
+
     # 3) filter-1: keep a prompt only if its valid responses show BOTH labels.
     survivors = []
     n_dropped = 0

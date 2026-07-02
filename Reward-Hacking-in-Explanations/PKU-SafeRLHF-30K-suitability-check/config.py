@@ -10,8 +10,8 @@ import os
 SEED = 0                      # RHiE convention (utils.set_seed)
 
 # ── Sampling / generation ──────────────────────────────────────────────────
-SAMPLE = 300                 # number of unique prompts to sample
-N = 8                        # responses generated per prompt
+SAMPLE = 300                  # number of unique prompts to sample
+N = 10                        # responses generated per prompt
 MAX_TOKENS = 8192             # per-response token budget (truncation surfaced live)
 
 # Prompts per vLLM generate() call. Large so vLLM's continuous batching keeps the GPU
@@ -31,9 +31,10 @@ TOP_K = 20
 GPU_MEMORY_UTILIZATION = 0.90
 # max_model_len = MAX_TOKENS + prompt budget. Capping it well below Qwen3's native 40960
 #   context multiplies KV-cache concurrency (more sequences resident at once = higher
-#   throughput). PKU-SafeRLHF prompts are short (<~300 tokens); 2048 is ample headroom.
-#   Do NOT set below MAX_TOKENS + observed_max_prompt_len or outputs truncate silently.
-PROMPT_TOKEN_BUDGET = 2048
+#   throughput). WildJailbreak `adversarial_harmful` prompts are LONG (multi-paragraph
+#   jailbreak wrappers), so give a generous 4096-token budget — a prompt longer than
+#   (MAX_MODEL_LEN - MAX_TOKENS) would otherwise error/truncate. Still ~37x concurrency.
+PROMPT_TOKEN_BUDGET = 4096
 MAX_MODEL_LEN = MAX_TOKENS + PROMPT_TOKEN_BUDGET
 
 # ── Models ─────────────────────────────────────────────────────────────────
@@ -47,9 +48,17 @@ GUARD_MAX_NEW_TOKENS = 128    # enough for "Safety: ...\nCategories: ..."
 COST_BATCH = 8               # (prompt, answer) pairs per Beaver forward pass
 
 # ── Dataset ────────────────────────────────────────────────────────────────
-DATASET = "PKU-Alignment/PKU-SafeRLHF-30K"
-DATASET_SPLIT = "train"
-PROMPT_COLUMN = "prompt"
+# WildJailbreak is GATED: accept the terms on the HF page and make HF_TOKEN available on
+# the machine (see .env / env_setup.py). Stored as TSV, so load with delimiter="\t" and
+# keep_default_na=False (empty cells must stay "" not NaN).
+DATASET = "allenai/wildjailbreak"
+DATASET_CONFIG = "train"          # "train" config (has the data_type column)
+# We use ONLY the two harmful subsets. Each maps to the column that holds its prompt text:
+# vanilla_harmful -> the plain request; adversarial_harmful -> the jailbreak-wrapped request.
+WILDJAILBREAK_TYPE_TO_COLUMN = {
+    "vanilla_harmful": "vanilla",
+    "adversarial_harmful": "adversarial",
+}
 
 # ── Paths ──────────────────────────────────────────────────────────────────
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -58,6 +67,7 @@ OUTPUT_DIR = os.path.join(HERE, "outputs")
 PROMPTS_PATH = os.path.join(OUTPUT_DIR, "01_prompts.joblib")
 RESPONSES_PATH = os.path.join(OUTPUT_DIR, "02_responses.joblib")
 LABELED_PATH = os.path.join(OUTPUT_DIR, "03_labeled.joblib")
+ALL_LABELED_PATH = os.path.join(OUTPUT_DIR, "03_all_labeled.joblib")  # every prompt+labels (debug)
 SCORED_PATH = os.path.join(OUTPUT_DIR, "04_scored.joblib")
 FINAL_PAIRS_PATH = os.path.join(OUTPUT_DIR, "final_pairs.joblib")
 

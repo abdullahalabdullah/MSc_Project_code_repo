@@ -1,8 +1,9 @@
 # harmlessness-exp
 
-Mine **harmlessness preference pairs** from `PKU-Alignment/PKU-SafeRLHF-30K`.
+Mine **harmlessness preference pairs** from the harmful prompts of `allenai/wildjailbreak`
+(the `vanilla_harmful` and `adversarial_harmful` subsets).
 
-For each sampled prompt we generate 10 Qwen3-4B responses (thinking mode on), keep only
+For each sampled prompt we generate N Qwen3-4B responses (thinking mode on), keep only
 prompts whose responses *disagree* on safety, then use a cost model to pick the safest
 response as `chosen` and the most harmful as `rejected`, validated by a safety classifier.
 
@@ -10,7 +11,7 @@ response as `chosen` and the most harmful as `rejected`, validated by a safety c
 
 | Stage | Script | What it does |
 |------|--------|--------------|
-| 01 | `01_prepare_prompts.py` | Load + dedup on `prompt`, report unique count, sample `SAMPLE=300` (seed 0) |
+| 01 | `01_prepare_prompts.py` | Load WildJailbreak `vanilla_harmful` + `adversarial_harmful`, dedup on prompt, report counts + sample mix, sample `SAMPLE=300` (seed 0) |
 | 02 | `02_generate_responses.py` (GPU) | Qwen3-4B, N=10, temp 0.6 / top_p 0.95 / top_k 20, `max_tokens=8192`; tuned vLLM engine (prefix caching, capped `max_model_len`, 0.90 VRAM); **live truncation reporting** |
 | 03 | `03_classify_guard.py` (GPU) | Split on `</think>`, Qwen3Guard-Gen-4B safe/unsafe, **filter-1** (drop prompts whose valid responses share one label) |
 | 04 | `04_score_cost.py` (GPU) | `beaver-7b-unified-cost`; per prompt `chosen=argmin(cost)`, `rejected=argmax(cost)` |
@@ -30,7 +31,10 @@ python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Set `HF_TOKEN` (and optionally `HF_MODELS_CACHE_DIR`) in your shell or a `.env` file.
+**WildJailbreak is gated** — accept the terms on its HF page, then make `HF_TOKEN` available
+(shell `export`, a `.env` file, or `huggingface-cli login`). `.env` is gitignored, so it does
+NOT sync via git; create it on the pod or export the token there. Also optionally set
+`HF_MODELS_CACHE_DIR`.
 
 ## Run
 
@@ -59,5 +63,6 @@ are produced and the sign-convention sanity check prints `PASS`.
   Unsafe>Safe sanity-check direction (see `beaver_cost_model.py`).
 - **Controversial** Qwen3Guard label → treated as **Unsafe** (conservative).
 - Responses truncated mid-`<think>` have no visible answer → marked invalid, excluded from candidates.
-- `PKU-SafeRLHF-30K` has no harm-category field, so survival is reported **overall only**.
-- Survival denominator is the **300** sampled prompts.
+- Prompts come from WildJailbreak `vanilla_harmful` (the plain request) and
+  `adversarial_harmful` (the jailbreak-wrapped request); stage 01 prints the sample's mix.
+- Survival is reported **overall**; survival denominator is the **300** sampled prompts.
