@@ -173,5 +173,5 @@ wandb/
 
 # Track this run's experiment outputs + logs (override the broad *.joblib / *.log
 # ignores above so the full run's results get committed/pushed).
-# !outputs/**
+!outputs/**
 !logs/**
