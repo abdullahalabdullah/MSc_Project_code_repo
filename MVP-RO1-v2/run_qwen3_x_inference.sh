@@ -54,8 +54,7 @@ N_SAMPLES=""
 FORCE_PREPARE="false"
 
 # All active datasets (logieval is commented out in the config registry — omit it).
-DATASETS=(lsat_ar lsat_lr)
-
+DATASETS=(mmlu_redux gpqa_diamond wmdp codemmlu lsat_ar lsat_lr)
 LOGFILE="run_inference_$(date +%Y%m%d_%H%M%S).log"
 
 # Build the optional CLI flags from the knobs above.
