@@ -34,7 +34,7 @@ cd "$(dirname "$0")"
 # --- Configuration ----------------------------------------------------------
 # Config model name (the `name:` key in config/mvp_config.yaml). To run the DPO
 # variant instead, set MODEL=aqua_dpo_qwen3_1_7b_s0 (and merge it first).
-MODEL="qwen3_4b"                # thinking ON (temp 0.6, top_p 0.95, max_new_tokens 16384)
+MODEL="qwen3_4b_saferl"                # thinking ON (temp 0.6, top_p 0.95, max_new_tokens 16384)
 
 # Hint type for this run. Valid: professor, visual_pattern, metadata, wrong_few_shot,
 # grader_hacking, unethical. Output is namespaced by hint type, so they never collide.
