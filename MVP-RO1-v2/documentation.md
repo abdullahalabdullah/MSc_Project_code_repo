@@ -62,11 +62,11 @@ Two driver scripts (fail-soft, log to a timestamped file, commit+push after phas
 
 ```bash
 # A) GPU box — prepare data, run inference, CoT-length analysis (no monitor):
-bash run_qwen3_1_7b_inference.sh
+bash run_qwen3_x_inference.sh
 
 # B) Monitor + results (needs OPENAI_API_KEY, no GPU):
 export OPENAI_API_KEY=sk-...
-bash run_qwen3_1_7b_monitor_and_results.sh
+bash run_qwen3_x_monitor_and_results.sh
 ```
 
 Script A's knobs (top of file): `MODEL`, `HINT_TYPE`, `N_EXAMPLES` (examples/dataset;
@@ -101,7 +101,7 @@ All steps **resume from checkpoints** — safe to re-run after an interruption.
 |-------|---------|
 | `hf_token` | HF token (committed for zero-setup; env `HF_TOKEN` overrides). |
 | `datasets` | Registry of all eval datasets (see the table below). Each: `n_examples: 200` budget, `random_seed: 88`, uniform sampling, **variable 3–5 options (A–E)**. |
-| `models` | Model registry (`name` → `hf_id`). Runnable here: `qwen3_1_7b`, `aqua_dpo_qwen3_1_7b_s0`. |
+| `models` | Model registry (`name` → `hf_id`). Runnable here: `qwen3_4b`, `qwen3_4b_saferl`, `qwen3_1_7b`, `aqua_dpo_qwen3_1_7b_s0`. |
 | `hint` | Hint registry: `default` (type used when `--hint-type` is omitted) + `types.<type>` wording. The hint always points at a *wrong* option (`hint_target`) and only appears in the hinted arm. See **Hint types**. |
 | `qwen_inference` | Sampling: `n_samples=4` (N, samples/arm — overridable per run with `02 --n-samples`, no fixed cap), `temperature 0.6`, `top_p 0.95`, `top_k 20`, `max_new_tokens 16384` (Qwen3 thinking-mode recipe; thinking always ON). `checkpoint_every=200` = instances per checkpoint **and** the batch handed to vLLM in one `generate` call (resume granularity; no effect on generations). |
 | `monitor` | Monitor LLM (`model`, e.g. `gpt-5-mini`) + retry/backoff/timeout. |
@@ -130,8 +130,6 @@ in `src/dataset.py` (`_LOADERS`).
 | `codemmlu` | Coding | HF `Fsoft-AIC/CodeMMLU` (9 subsets) | options ∈ [3,5] | by subset (9) | 3–5 |
 | `lsat_ar` | Applied Reasoning (analytical) | GitHub `ruixiangcui/AGIEval` (`lsat-ar.jsonl`) | options ∈ [3,5] | uniform random (~230 instances) | 5 |
 | `lsat_lr` | Applied Reasoning (logical) | GitHub `ruixiangcui/AGIEval` (`lsat-lr.jsonl`) | options ∈ [3,5] | uniform random (~510 instances) | 5 |
-| `aqua_rat` | Applied Reasoning (math word) | HF `deepmind/aqua_rat` | options ∈ [3,5] | uniform random (~254 instances) | 5 |
-| `logiqa_en` | Applied Reasoning (formal logic) | GitHub `ruixiangcui/AGIEval` (`logiqa-en.jsonl`) | options ∈ [3,5] | uniform random (~651 instances) | 4 |
 
 Notes:
 - **MathBench Arithmetic is omitted** — MathBench has no MCQ for it (cloze only).
@@ -145,14 +143,15 @@ Notes:
   (Westlake LogiEval, arXiv 2505.11854) is gated and not publicly released yet —
   awaiting the authors. The loader is ready; uncomment the `logieval` block, set
   `hf`/`fields`, and add it to the run-script `DATASETS` lists once access exists.
-- **AGIEval subsets (lsat_ar, lsat_lr, logiqa_en)** are downloaded from the AGIEval
+- **AGIEval LSAT subsets (lsat_ar, lsat_lr)** are downloaded from the AGIEval
   GitHub repo (`ruixiangcui/AGIEval`, `data/v1/{name}.jsonl`) via the shared
-  `agieval_gh` loader — the HF mirrors (`baber/agieval`, `hails/agieval_*`,
-  `lucasmccabe/logiqa`) either don't exist or use legacy dataset scripts incompatible
-  with `datasets>=3.x`. Schema: `passage` (prepended to `question` when present),
-  `options` (with `(A)` prefixes stripped), `label` (0-indexed int). **AQuA-RAT** uses
-  the canonical `deepmind/aqua_rat` HF parquet dataset (`options` with `A)` prefixes
-  stripped, `correct` letter). All four are English-only, hard applied reasoning tasks.
+  `agieval_gh` loader — the HF mirrors (`baber/agieval`, `hails/agieval_*`) either
+  don't exist or use legacy dataset scripts incompatible with `datasets>=3.x`.
+  Schema: `passage` (prepended to `question` when present), `options` (with `(A)`
+  prefixes stripped), `label` (0-indexed int). Both are English-only, hard applied
+  reasoning tasks. **AQuA-RAT and LogiQA-en were trialled and dropped** — aqua_rat
+  had near-ceiling unhinted accuracy (~0.96, no incentive pressure) and logiqa_en
+  had weak hint signal (TE ≈ 0.04, few retained instances).
 - The prepared `dataset_index.json` schema is unchanged: each instance has
   `instance_id, question_id, subject, question, choices {A:…, …}, correct_answer,
   hint_target` — `choices` now has 3–5 entries.

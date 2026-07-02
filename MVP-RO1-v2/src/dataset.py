@@ -19,8 +19,6 @@ each question keeps its own number of options. The current suite:
   codemmlu       — HF Fsoft-AIC/CodeMMLU, options in [3,5], uniform by subset (3-5 opt)
   lsat_ar        — GitHub ruixiangcui/AGIEval raw JSONL, analytical reasoning (5 opt)
   lsat_lr        — GitHub ruixiangcui/AGIEval raw JSONL, logical reasoning (5 opt)
-  aqua_rat       — HF deepmind/aqua_rat, algebraic word problems (5 opt)
-  logiqa_en      — GitHub ruixiangcui/AGIEval raw JSONL, formal logic English (4 opt)
 """
 
 import io
@@ -391,13 +389,13 @@ def _load_logieval(ds_cfg: dict, rng: random.Random) -> list:
 def _load_agieval_gh(ds_cfg: dict, rng: random.Random) -> list:
     """AGIEval English subset from GitHub raw JSONL (ruixiangcui/AGIEval).
 
-    Serves lsat_ar, lsat_lr, and logiqa_en — all share the AGIEval schema
+    Serves lsat_ar and lsat_lr — both share the AGIEval schema
     (passage/question/options/label). Downloads the JSONL directly (like
     MathBench). Options carry '(A)' prefixes which are stripped. Passage (when
     present) is prepended to the question. label is a 0-indexed int.
     """
-    name = ds_cfg["name"]                    # "lsat_ar" / "lsat_lr" / "logiqa_en"
-    hf_name = name.replace("_", "-")         # "lsat-ar" / "lsat-lr" / "logiqa-en"
+    name = ds_cfg["name"]                    # "lsat_ar" / "lsat_lr"
+    hf_name = name.replace("_", "-")         # "lsat-ar" / "lsat-lr"
     content = None
     for branch in ("main", "master"):
         url = (f"https://raw.githubusercontent.com/ruixiangcui/AGIEval"
@@ -453,36 +451,6 @@ def _load_agieval_gh(ds_cfg: dict, rng: random.Random) -> list:
             "source_id": f"{name}_{idx}",
         })
     return recs
-
-
-def _load_aqua_rat(ds_cfg: dict, rng: random.Random) -> list:
-    """AQuA-RAT from deepmind/aqua_rat: GRE/GMAT algebraic word problems.
-
-    5 options (A-E). Options carry 'A)' letter prefixes which are stripped.
-    correct field is a single letter ('A'–'E').
-    """
-    from datasets import load_dataset as hf_load_dataset
-    ds = hf_load_dataset(ds_cfg["hf"], split=ds_cfg.get("split", "test"))
-    recs = []
-    for idx, row in enumerate(ds):
-        options = [_strip_letter_prefix(_clean(o)) for o in row["options"]]
-        k = len(options)
-        if not (MIN_OPTIONS <= k <= MAX_OPTIONS):
-            continue
-        correct_idx = _resolve_answer_idx(row["correct"], options)
-        if correct_idx is None or not (0 <= correct_idx < k):
-            continue
-        recs.append({
-            "question": _clean(row["question"]),
-            "options": options,
-            "correct_idx": correct_idx,
-            "group": "aqua_rat",
-            "subgroup": None,
-            "source_id": f"aqua_rat_{idx}",
-        })
-    return recs
-
-
 
 
 def _resolve_answer_idx(gold, options: list) -> int | None:
@@ -574,7 +542,6 @@ _LOADERS = {
     "logieval": _load_logieval,
     "mathbench": _load_mathbench,
     "agieval_gh": _load_agieval_gh,
-    "aqua_rat": _load_aqua_rat,
 }
 
 

@@ -1,0 +1,128 @@
+import argparse
+import os
+
+import joblib
+from vllm import LLM, SamplingParams
+
+import env_setup
+from utils import set_seed
+
+env_setup.setup_env(use_temp=False)
+
+
+def main(
+        model_id,
+        output_dir,
+        input_path,
+        data_type,
+        split,
+        number_generated_examples,
+        number_entries_used,
+        suffix,
+        seed,
+    ):
+
+    # Set random seed
+    set_seed(seed)
+
+    # Set save path
+    approach_fp, prompt_fp = os.path.splitext(os.path.basename(input_path))[0].split('_')
+    save_path = f"{output_dir}{os.path.sep}{approach_fp}_{prompt_fp}_{data_type}_{split}{suffix}.joblib"
+    if os.path.exists(save_path):
+        print(f"\n\nPath {save_path} already exists. Skipping.\n\n")
+        return
+
+    # Load data
+    print(f"Loading data from: {input_path}")
+    data = joblib.load(input_path)[data_type][split]
+    prompts = data["prompts"][:number_entries_used]
+    queries = data["queries"][:number_entries_used]
+    true_answers = data["answers"][:number_entries_used]
+
+    # Load model
+    llm = LLM(model=model_id, download_dir=os.environ.get("HF_MODELS_CACHE_DIR"))
+    tokenizer = llm.get_tokenizer()
+
+    # Qwen3 thinking-mode decoding params (temp 0.6 / top_p 0.95 / top_k 20),
+    # with a 16384-token budget so the <think> block does not crowd out the answer.
+    # n=number_generated_examples lets vLLM generate all samples in one pass,
+    # reusing the prompt KV cache — much faster than looping with different seeds.
+    sampling_params = SamplingParams(
+        temperature=0.6,
+        top_p=0.95,
+        top_k=20,
+        max_tokens=16384,
+        n=number_generated_examples,
+        seed=seed,
+    )
+
+    # Prepare data
+    messages = []
+    for prompt, query in zip(prompts, queries):
+        inp = [
+            {"role": "system", "content": prompt},
+            {"role": "user", "content": query}
+        ]
+        inp_tok = tokenizer.apply_chat_template(inp, tokenize=False, add_generation_prompt=True, enable_thinking=True)
+        messages.append(inp_tok)
+
+    output_data = {
+        'inputs': [[] for _ in range(len(messages))],
+        'responses': [[] for _ in range(len(messages))],
+        'answers': true_answers
+    }
+    if 'categories' in data.keys():
+        output_data['categories'] = data['categories'][:number_entries_used]
+
+    print(f">> Generating {number_generated_examples} samples per prompt (seed={seed})")
+    outputs = llm.generate(messages, sampling_params)
+
+    for ix, output in enumerate(outputs):
+        for sample in output.outputs:
+            output_data['inputs'][ix].append((prompts[ix], queries[ix]))
+            output_data['responses'][ix].append(sample.text)
+
+    # Save
+    print(f"Saving to: {save_path}")
+    joblib.dump(output_data, save_path, compress=True)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("model_id", type=str)
+    parser.add_argument("output_dir", type=str)
+    parser.add_argument("input_path", type=str)
+    parser.add_argument("data_type", type=str)
+    parser.add_argument("split", type=str)
+    parser.add_argument("number_generated_examples", type=int)
+    parser.add_argument("--number_entries_used", type=int, default=999999)
+    parser.add_argument("--suffix", type=str, default='')
+    parser.add_argument("--seed", type=int, default=0)
+    args = parser.parse_args()
+
+    # Validate args
+    assert os.path.exists(args.input_path), args.input_path
+    assert args.data_type in ["orig", "cf"]
+    assert args.split in ["train", "valid", "test"]
+
+    # Create path
+    if not os.path.exists(args.output_dir):
+        # If the output_dir does not exist, create it
+        os.makedirs(args.output_dir)
+        print(f"Folder '{args.output_dir}' created.")
+    else:
+        print(f"Folder '{args.output_dir}' already exists.")
+
+    print(f"ARGS:\n{args}\n\n")
+
+    main(
+        model_id=args.model_id,
+        output_dir=args.output_dir,
+        input_path=args.input_path,
+        data_type=args.data_type,
+        split=args.split,
+        number_generated_examples=args.number_generated_examples,
+        number_entries_used=args.number_entries_used,
+        suffix=args.suffix,
+        seed=args.seed,
+    )

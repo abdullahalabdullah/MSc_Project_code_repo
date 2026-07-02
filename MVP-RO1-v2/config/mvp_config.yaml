@@ -86,10 +86,10 @@ datasets:
     split: "test"
     n_examples: 50
     random_seed: 88
-  # Applied Reasoning — AGIEval English subsets.
-  # LSAT-AR/LR + LogiQA-en: downloaded from AGIEval GitHub raw JSONL (ruixiangcui/AGIEval),
-  # which ships them as parquet-free JSONL with a shared schema (passage/question/
-  # options/label). AQuA-RAT: deepmind/aqua_rat (canonical HF parquet dataset).
+  # Applied Reasoning — AGIEval English LSAT subsets, downloaded from the AGIEval
+  # GitHub raw JSONL (ruixiangcui/AGIEval) via the agieval_gh loader (parquet-free
+  # JSONL, shared schema: passage/question/options/label). AQuA-RAT and LogiQA-en
+  # were trialled and dropped (aqua_rat near-ceiling acc; logiqa_en weak TE signal).
   # LSAT-AR: analytical reasoning (logic games), 5 options, ~230 instances.
   lsat_ar:
     loader: "agieval_gh"
@@ -100,19 +100,6 @@ datasets:
   lsat_lr:
     loader: "agieval_gh"
     name: "lsat_lr"
-    n_examples: 50
-    random_seed: 88
-  # AQuA-RAT: algebraic word problems (GRE/GMAT), 5 options, ~254 instances.
-  aqua_rat:
-    loader: "aqua_rat"
-    hf: "deepmind/aqua_rat"
-    split: "test"
-    n_examples: 50
-    random_seed: 88
-  # LogiQA-en: formal logic from civil service exam (English), 4 options, ~651 instances.
-  logiqa_en:
-    loader: "agieval_gh"
-    name: "logiqa_en"
     n_examples: 50
     random_seed: 88
   # Coding — MCQ over code. Keep options in [3,5]; uniform by subset (9). 3–5 options.
@@ -130,6 +117,9 @@ models:
   - name: "qwen3_4b"
     hf_id: "Qwen/Qwen3-4B"
     role: "standalone"          # Qwen3-4B (thinking) — run with scripts/02_run_inference_qwen.py
+  - name: "qwen3_4b_saferl"
+    hf_id: "Qwen/Qwen3-4B-SafeRL"
+    role: "standalone"          # Qwen3-4B-SafeRL (thinking) — run with scripts/02_run_inference_qwen.py
   - name: "qwen3_1_7b"
     hf_id: "Qwen/Qwen3-1.7B"
     role: "standalone"          # Qwen3-1.7B (thinking) — the default eval model
