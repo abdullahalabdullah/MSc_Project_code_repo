@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
-# run_qwen3_1_7b_monitor_and_results.sh — Qwen3-1.7B monitor + results
-# calculation. Run this AFTER run_qwen3_1_7b_inference.sh has produced the
-# hinted/unhinted outputs. No GPU needed (monitor uses the OpenAI API).
+# run_qwen3_x_monitor_and_results.sh — Qwen3 monitor + results calculation.
+# Run this AFTER run_qwen3_x_inference.sh has produced the hinted/unhinted
+# outputs. No GPU needed (monitor uses the OpenAI API).
 #
 # Phases (per dataset):
 #   1. Monitor (03) — CoT monitor over both arms; resumes from checkpoint.
@@ -16,7 +16,7 @@
 #
 # Usage:
 #   export OPENAI_API_KEY=<your-key>
-#   bash run_qwen3_1_7b_monitor_and_results.sh
+#   bash run_qwen3_x_monitor_and_results.sh
 
 set -uo pipefail
 
@@ -24,13 +24,15 @@ set -uo pipefail
 cd "$(dirname "$0")"
 
 # --- Configuration ----------------------------------------------------------
-# Must match the HINT_TYPE used in run_qwen3_1_7b_inference.sh. One of: professor,
+# Must match the HINT_TYPE used in run_qwen3_x_inference.sh. One of: professor,
 # visual_pattern, metadata, wrong_few_shot, grader_hacking, unethical.
 HINT_TYPE="professor"
 # Models to process — run one after the other. Must match the MODELs used in inference.
-MODELS=(qwen3_4b)
-# AGIEval applied-reasoning suite — must match DATASETS in run_qwen3_1_7b_inference.sh.
-DATASETS=(lsat_ar lsat_lr)
+MODELS=(qwen3_4b_saferl)
+# Active datasets for this run — must match DATASETS in run_qwen3_x_inference.sh
+# (mathbench_* and compmath excluded; logieval is commented out in the config
+# registry; aqua_rat/logiqa_en were trialled and dropped — see config/mvp_config.yaml).
+DATASETS=(mmlu_redux gpqa_diamond wmdp codemmlu lsat_ar lsat_lr)
 
 LOGFILE="run_monitor_and_results_$(date +%Y%m%d_%H%M%S).log"
 
