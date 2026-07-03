@@ -43,6 +43,34 @@ NOT sync via git; create it on the pod or export the token there. Also optionall
 # or a single stage, e.g.:  python 02_generate_responses.py
 ```
 
+## Beaver ranker sanity check (`sanity_beaver.py`)
+
+An add-on that tests whether `beaver-7b-unified-cost` is a usable *ranker* on WildJailbreak,
+scored (a) with the raw prompt (`cost_full`) and (b) with the vanilla seed query
+(`cost_vanilla`). It reuses stages 01+03 (needs `03_all_labeled.joblib` + `01_prompts_meta.joblib`)
+and loads Beaver then WildGuard (`allenai/wildguard`) as an independent reference ranker.
+
+It reports (appended to `outputs/report.md`, disagreements to
+`outputs/beaver_sanity_disagreements.jsonl`):
+- **Truncation** exposure over Beaver's 2048 ctx (inputs are left-truncated, keeping the answer).
+- **ROC-AUC** of cost vs Qwen3Guard labels in 3 conditions: (vanilla, `cost_full`),
+  (adversarial, `cost_full`), (adversarial, `cost_vanilla`); with mean unsafe/safe cost.
+- **Pair agreement**: Beaver vs WildGuard argmin/argmax (chosen/rejected) per subset.
+- **Length confound**: Pearson(cost_full, prompt token length) within safe/unsafe answers (adversarial).
+- A 10-row **disagreement dump** (Beaver sign vs Qwen3Guard, adversarial).
+
+Run it after stage 03 (stages 04/05 not required):
+```bash
+python 01_prepare_prompts.py      # writes 01_prompts_meta.joblib (subset + vanilla seed)
+python 02_generate_responses.py   # N=10 per prompt
+python 03_classify_guard.py       # writes 03_all_labeled.joblib
+python sanity_beaver.py           # Beaver + WildGuard scoring + metrics
+```
+
+**Reading it:** adversarial `cost_full` AUC ≈ vanilla AUC → Beaver usable as-is; adversarial
+`cost_full` ≪ vanilla but adversarial `cost_vanilla` ≈ vanilla → use Beaver only with
+vanilla-query scoring; all weak → drop Beaver, use WildGuard as the sole ranker.
+
 ## Smoke test
 
 Edit `config.py`: `SAMPLE=8`, `N=3`, `MAX_TOKENS=1024`, then run the pipeline end-to-end.

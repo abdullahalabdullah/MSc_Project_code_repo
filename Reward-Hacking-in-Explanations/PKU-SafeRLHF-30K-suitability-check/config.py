@@ -41,11 +41,19 @@ MAX_MODEL_LEN = MAX_TOKENS + PROMPT_TOKEN_BUDGET
 GEN_MODEL = "Qwen/Qwen3-4B"
 GUARD_MODEL = "Qwen/Qwen3Guard-Gen-4B"
 COST_MODEL = "PKU-Alignment/beaver-7b-unified-cost"
+WILDGUARD_MODEL = "allenai/wildguard"   # sanity-check reference ranker (Mistral-7B based)
+
+# beaver-7b-unified-cost is LLaMA-1 based: a 2048-token context. Inputs longer than this
+# are LEFT-truncated (drop the prompt head, keep the ASSISTANT answer + final token that
+# the score head reads), and every such truncation is counted in the sanity report.
+BEAVER_MAX_CTX = 2048
 
 # ── Classifier / scorer batch sizes ────────────────────────────────────────
 GUARD_BATCH = 32              # (prompt, answer) pairs per Qwen3Guard generate() call
 GUARD_MAX_NEW_TOKENS = 128    # enough for "Safety: ...\nCategories: ..."
 COST_BATCH = 8               # (prompt, answer) pairs per Beaver forward pass
+WILDGUARD_BATCH = 16         # (prompt, answer) pairs per WildGuard generate() call
+WILDGUARD_MAX_NEW_TOKENS = 32  # enough for the 3-line "Harmful request/refusal/response" verdict
 
 # ── Dataset ────────────────────────────────────────────────────────────────
 # WildJailbreak is GATED: accept the terms on the HF page and make HF_TOKEN available on
@@ -65,6 +73,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 OUTPUT_DIR = os.path.join(HERE, "outputs")
 
 PROMPTS_PATH = os.path.join(OUTPUT_DIR, "01_prompts.joblib")
+PROMPTS_META_PATH = os.path.join(OUTPUT_DIR, "01_prompts_meta.joblib")  # per prompt: subset + vanilla seed
 RESPONSES_PATH = os.path.join(OUTPUT_DIR, "02_responses.joblib")
 LABELED_PATH = os.path.join(OUTPUT_DIR, "03_labeled.joblib")
 ALL_LABELED_PATH = os.path.join(OUTPUT_DIR, "03_all_labeled.joblib")  # every prompt+labels (debug)
@@ -74,6 +83,11 @@ FINAL_PAIRS_PATH = os.path.join(OUTPUT_DIR, "final_pairs.joblib")
 REPORT_PATH = os.path.join(OUTPUT_DIR, "report.md")
 SAMPLE_PAIRS_PATH = os.path.join(OUTPUT_DIR, "sample_pairs.json")
 COST_SPREAD_FIG_PATH = os.path.join(OUTPUT_DIR, "cost_spread.png")
+
+# Beaver ranker sanity-check outputs (sanity_beaver.py)
+SANITY_REPORT_PATH = os.path.join(OUTPUT_DIR, "beaver_sanity_report.md")  # standalone results (.md)
+SANITY_DISAGREEMENT_PATH = os.path.join(OUTPUT_DIR, "beaver_sanity_disagreements.jsonl")
+SANITY_SCORED_PATH = os.path.join(OUTPUT_DIR, "beaver_sanity_scored.joblib")
 
 
 def ensure_output_dir():

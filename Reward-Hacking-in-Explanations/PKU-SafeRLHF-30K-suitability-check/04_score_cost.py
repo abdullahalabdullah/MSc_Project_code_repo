@@ -26,7 +26,11 @@ COST_PROMPT = "BEGINNING OF CONVERSATION: USER: {prompt} ASSISTANT:{answer}"
 def score_batch(model, source_tag, tokenizer, pairs):
     """pairs: list of (prompt, answer). Returns list[float] costs (higher = more harmful)."""
     texts = [COST_PROMPT.format(prompt=p, answer=a) for p, a in pairs]
-    enc = tokenizer(texts, return_tensors="pt", padding=True, truncation=True).to(model.device)
+    # Left-truncate at Beaver's 2048 ctx so an over-long input drops the PROMPT head, not the
+    # ASSISTANT answer (whose final token the score head reads). truncation_side is set at load.
+    enc = tokenizer(
+        texts, return_tensors="pt", padding=True, truncation=True, max_length=config.BEAVER_MAX_CTX
+    ).to(model.device)
     with torch.no_grad():
         scores = end_scores(model, source_tag, enc)  # (B,)
     return scores.float().cpu().tolist()
@@ -42,7 +46,8 @@ def main():
 
     print(f"Loading cost model {config.COST_MODEL} ...")
     tokenizer = AutoTokenizer.from_pretrained(config.COST_MODEL)
-    tokenizer.padding_side = "right"  # local scorer reads the last real token via sum(mask)-1
+    tokenizer.padding_side = "right"    # local scorer reads the last real token via sum(mask)-1
+    tokenizer.truncation_side = "left"  # keep the answer, drop the prompt head if over 2048
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token = tokenizer.eos_token
     model, source_tag = load_cost_model(config.COST_MODEL, torch_dtype=torch.bfloat16)
