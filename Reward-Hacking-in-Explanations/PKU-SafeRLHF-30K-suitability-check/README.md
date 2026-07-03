@@ -39,8 +39,19 @@ NOT sync via git; create it on the pod or export the token there. Also optionall
 ## Run
 
 ```bash
-./run_all.sh            # runs all five stages in order
-# or a single stage, e.g.:  python 02_generate_responses.py
+./run_all.sh            # stages 01-05 + the Beaver sanity check
+```
+
+Each `./run_all.sh` writes to a **new** `outputs/run_<timestamp>/` folder (all stages share it
+via the exported `RUN_OUTPUT_DIR`), so a new run never overrides an old one. Pin a folder with
+`RUN_OUTPUT_DIR=outputs/my_run ./run_all.sh`.
+
+To run stages by hand, set the same folder yourself so they share it (otherwise they default
+to `./outputs` and would overwrite it):
+```bash
+export RUN_OUTPUT_DIR=outputs/run_$(date +%Y%m%d_%H%M%S)
+python 01_prepare_prompts.py && python 02_generate_responses.py \
+  && python 03_classify_guard.py && python sanity_beaver.py
 ```
 
 ## Beaver ranker sanity check (`sanity_beaver.py`)

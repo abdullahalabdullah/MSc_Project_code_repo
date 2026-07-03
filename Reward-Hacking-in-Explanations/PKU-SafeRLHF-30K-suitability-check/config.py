@@ -70,7 +70,10 @@ WILDJAILBREAK_TYPE_TO_COLUMN = {
 
 # ── Paths ──────────────────────────────────────────────────────────────────
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUTPUT_DIR = os.path.join(HERE, "outputs")
+# Output dir is overridable so a new run never clobbers an old one. run_all.sh sets
+# RUN_OUTPUT_DIR to a fresh timestamped folder and exports it to every stage; if unset,
+# it defaults to ./outputs. All stages in one run must share the same RUN_OUTPUT_DIR.
+OUTPUT_DIR = os.environ.get("RUN_OUTPUT_DIR") or os.path.join(HERE, "outputs")
 
 PROMPTS_PATH = os.path.join(OUTPUT_DIR, "01_prompts.joblib")
 PROMPTS_META_PATH = os.path.join(OUTPUT_DIR, "01_prompts_meta.joblib")  # per prompt: subset + vanilla seed
