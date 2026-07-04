@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# End-to-end runner for the harmlessness preference-pair pipeline + Beaver sanity check.
-# All stages run in the same environment (see requirements.txt).
+# Pilot runner for the harmlessness preference-pair pipeline (stages 01-05).
+# (The Beaver ranker sanity check is separate: sanity_beaver.py — or use run_pilot_and_sanity.sh
+#  to do both.)
 #
 # Each invocation writes to a NEW timestamped folder under outputs/ (e.g.
 # outputs/run_20260703_141530), so a new run never overrides an old one. Every stage
@@ -38,9 +39,4 @@ $PY 04_score_cost.py
 echo "== Stage 05: filter-3 + reports =="
 $PY 05_report.py
 
-echo "== Sanity: Beaver ranker check (Beaver + WildGuard) =="
-$PY sanity_beaver.py
-
-echo "== Done. Results in: $RUN_OUTPUT_DIR =="
-echo "   - $RUN_OUTPUT_DIR/report.md"
-echo "   - $RUN_OUTPUT_DIR/beaver_sanity_report.md"
+echo "== Pilot done. Results in: $RUN_OUTPUT_DIR/report.md =="

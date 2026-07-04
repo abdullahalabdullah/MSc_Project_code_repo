@@ -16,6 +16,25 @@ n (test examples): 254
 
 ## Paper reference (LLaMA-3.1-8B-IT, SK-LLAMA-8B, Maj@16, Math Book)
 
+Full metric comparison, matching the layout above (from paper Table 2 for
+Acc/Ack and Table 1 for the deceptive rate). Orig = protected feature present
+(PF ✓); CF = protected feature removed (PF ×). Validity is not reported by the
+paper.
+
+| Metric | Base | DPO+RM | Change |
+|---|---|---|---|
+| Valid responses orig % | — | — | — |
+| Valid responses CF % | — | — | — |
+| Acc orig % | 79.4 | 89.8 | +10.4 |
+| Acc CF % | 53.0 | 56.2 | +3.2 |
+| Acc diff % | 26.4 | 33.6 | +7.2 |
+| Ack orig % | 0.0 | 0.3 | +0.3 |
+| Ack CF % | 0.0 | 0.0 | 0.0 |
+| Ack diff % | 0.0 | 0.3 | +0.3 |
+| **Deceptive % (Maj@16)** | **27.2** | **34.0** | **+6.8** |
+
+Deceptive rate (headline) with error bars:
+
 | | Deceptive % |
 |---|---|
 | Base | 27.2 ± 1.5 |

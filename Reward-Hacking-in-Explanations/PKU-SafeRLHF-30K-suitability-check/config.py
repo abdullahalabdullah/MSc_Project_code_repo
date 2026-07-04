@@ -86,6 +86,7 @@ FINAL_PAIRS_PATH = os.path.join(OUTPUT_DIR, "final_pairs.joblib")
 REPORT_PATH = os.path.join(OUTPUT_DIR, "report.md")
 SAMPLE_PAIRS_PATH = os.path.join(OUTPUT_DIR, "sample_pairs.json")
 COST_SPREAD_FIG_PATH = os.path.join(OUTPUT_DIR, "cost_spread.png")
+PAIRS_MARGINS_PATH = os.path.join(OUTPUT_DIR, "final_pairs_margins.csv")  # per-pair cost margin
 
 # Beaver ranker sanity-check outputs (sanity_beaver.py)
 SANITY_REPORT_PATH = os.path.join(OUTPUT_DIR, "beaver_sanity_report.md")  # standalone results (.md)

@@ -10,6 +10,7 @@ Reports (printed + written to config.REPORT_PATH):
 
 Runs on CPU. Output: config.FINAL_PAIRS_PATH + report artifacts.
 """
+import csv
 import json
 import random
 
@@ -44,6 +45,7 @@ def main():
                 "rejected": rj["answer"],
                 "chosen_cost": ch["cost"],
                 "rejected_cost": rj["cost"],
+                "margin": rj["cost"] - ch["cost"],   # cost margin (rejected - chosen), always >= 0
                 "chosen_label": ch["guard_label"],
                 "rejected_label": rj["guard_label"],
             })
@@ -56,8 +58,17 @@ def main():
 
     joblib.dump(final_pairs, config.FINAL_PAIRS_PATH, compress=True)
 
+    # Per-pair margin table (CSV) — one row per pair, easy to analyse / plot.
+    with open(config.PAIRS_MARGINS_PATH, "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["pair_index", "chosen_cost", "rejected_cost", "margin",
+                    "chosen_label", "rejected_label", "prompt"])
+        for i, p in enumerate(final_pairs):
+            w.writerow([i, p["chosen_cost"], p["rejected_cost"], p["margin"],
+                        p["chosen_label"], p["rejected_label"], p["prompt"]])
+
     # ── cost-spread distribution (max - min per surviving pair) ─────────────
-    spreads = np.array([p["rejected_cost"] - p["chosen_cost"] for p in final_pairs], dtype=float)
+    spreads = np.array([p["margin"] for p in final_pairs], dtype=float)
 
     def q(a, x):
         return float(np.percentile(a, x)) if len(a) else float("nan")
@@ -124,6 +135,7 @@ def main():
     lines.append(f"- Unsafe > Safe (expected)? **{'PASS' if ok else 'FAIL'}**\n")
     lines.append(f"## Artifacts")
     lines.append(f"- final pairs: `{config.FINAL_PAIRS_PATH}` ({n_final} pairs)")
+    lines.append(f"- per-pair margins (CSV): `{config.PAIRS_MARGINS_PATH}`")
     lines.append(f"- sample pairs: `{config.SAMPLE_PAIRS_PATH}` ({sample_n} pairs)")
 
     report = "\n".join(lines)

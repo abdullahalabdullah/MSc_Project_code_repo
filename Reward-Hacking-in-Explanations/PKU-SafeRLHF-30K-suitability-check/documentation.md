@@ -37,12 +37,13 @@ rescues it.
 | Model | Role |
 |---|---|
 | `Qwen/Qwen3-4B` | Generator — produces N responses per prompt (thinking mode). |
-| `Qwen/Qwen3Guard-Gen-4B` | **Labeler** — safe/unsafe per answer. Gates filter-1/filter-3; ground truth for the sanity AUCs. |
-| `PKU-Alignment/beaver-7b-unified-cost` | **Ranker under test** — scalar cost (higher = more harmful) to pick chosen/rejected. |
-| `allenai/wildguard` | Independent reference ranker, only in the sanity check (P(harmful response)). |
+| `allenai/wildguard` | **Labeler** — binary Harmful-response (yes→Unsafe / no→Safe) per answer; also emits `refusal` + `harmful_request`. Purpose-built for WildJailbreak and independent of the generator. Gates filter-1/filter-3. |
+| `PKU-Alignment/beaver-7b-unified-cost` | **Ranker** — scalar cost (higher = more harmful) to pick chosen/rejected. |
+| `Qwen/Qwen3Guard-Gen-4B` | Available as an independent reference/validator (different model from the labeler). |
 
-Using Qwen3Guard for **labels** and a *different* model (Beaver/WildGuard) for **ranking**
-keeps filter-3 a real agreement test rather than a circular one.
+The labeler (WildGuard) is a *different* model from the generator (Qwen3-4B), so labels are
+not self-graded; and a *different* model again (Beaver) does the ranking, so filter-3 is a
+real agreement test, not circular.
 
 ## Pipeline (each stage reads/writes a joblib in `outputs/`)
 
@@ -50,7 +51,7 @@ keeps filter-3 a real agreement test rather than a circular one.
 |---|---|---|
 | 01 | `01_prepare_prompts.py` | Load WildJailbreak `vanilla_harmful` + `adversarial_harmful`, dedup, sample `SAMPLE=300` (seed 0). Also saves per-prompt `{subset, vanilla seed}`. |
 | 02 | `02_generate_responses.py` | Qwen3-4B, N=10, temp 0.6 / top_p 0.95 / top_k 20, `max_tokens=8192`; tuned vLLM (prefix caching, capped `max_model_len`, 0.90 VRAM); live truncation reporting. |
-| 03 | `03_classify_guard.py` | Strip `</think>`, Qwen3Guard label per answer, **filter-1** (drop prompts whose answers all share one label). Also dumps `03_all_labeled.joblib`. |
+| 03 | `03_classify_guard.py` | Strip `</think>`, **WildGuard** label per answer (Harmful-response yes/no → Unsafe/Safe; also stores refusal + harmful_request), **filter-1** (drop prompts whose answers all share one label). Also dumps `03_all_labeled.joblib`. |
 | 04 | `04_score_cost.py` | Beaver cost (left-truncated at 2048); per prompt `chosen=argmin`, `rejected=argmax`. |
 | 05 | `05_report.py` | **filter-3** (chosen=Safe & rejected=Unsafe), survival rate, cost spread, 10 sample pairs, sign sanity check → `outputs/report.md`. |
 | + | `sanity_beaver.py` | Beaver ranker sanity check (below) → `outputs/beaver_sanity_report.md`. |
