@@ -48,6 +48,20 @@ WILDGUARD_MODEL = "allenai/wildguard"   # sanity-check reference ranker (Mistral
 # the score head reads), and every such truncation is counted in the sanity report.
 BEAVER_MAX_CTX = 2048
 
+# ── Optional minimum-margin filter (filter-4, off by default) ────────────────
+# After filter-3, optionally drop pairs whose cost margin (rejected_cost - chosen_cost)
+# is below this floor. For HARMLESSNESS this is redundant with filter-3 (WildGuard's label
+# opposition is the real signal) — leave it OFF. It exists mainly for the HELPFULNESS
+# pipeline, where there is no categorical labeler and the reward margin is the ONLY quality
+# gate. Set via the MIN_MARGIN env var (run_all.sh forwards it). Empty/unset = not applied.
+def _parse_min_margin(raw):
+    if raw is None or str(raw).strip() == "":
+        return None                       # filter disabled
+    return float(raw)
+
+
+MIN_MARGIN = _parse_min_margin(os.environ.get("MIN_MARGIN"))
+
 # ── Classifier / scorer batch sizes ────────────────────────────────────────
 GUARD_BATCH = 32              # (prompt, answer) pairs per Qwen3Guard generate() call
 GUARD_MAX_NEW_TOKENS = 128    # enough for "Safety: ...\nCategories: ..."

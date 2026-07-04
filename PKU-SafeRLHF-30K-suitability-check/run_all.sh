@@ -16,6 +16,14 @@ cd "$(dirname "$0")"
 
 PY="${PY:-python}"
 
+# ── Optional minimum-margin filter (filter-4) ───────────────────────────────
+# EDIT THIS VALUE to turn the filter on. Leave EMPTY ("") = filter not applied (default).
+# Set to a number (e.g. "2.0") to drop final pairs whose cost margin
+# (rejected_cost - chosen_cost) is below it. For harmlessness leave it empty (filter-3
+# already gates quality); use it for the helpfulness pipeline.
+MIN_MARGIN=""
+export MIN_MARGIN
+
 # Fresh per-run output folder unless the caller pinned one.
 if [ -z "${RUN_OUTPUT_DIR:-}" ]; then
     RUN_OUTPUT_DIR="outputs/run_$(date +%Y%m%d_%H%M%S)"
@@ -23,6 +31,11 @@ fi
 export RUN_OUTPUT_DIR
 mkdir -p "$RUN_OUTPUT_DIR"
 echo "== Output folder for this run: $RUN_OUTPUT_DIR =="
+if [ -n "$MIN_MARGIN" ]; then
+    echo "== filter-4 minimum margin: $MIN_MARGIN =="
+else
+    echo "== filter-4 minimum margin: not applied =="
+fi
 
 echo "== Stage 01: prepare prompts =="
 $PY 01_prepare_prompts.py
