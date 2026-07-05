@@ -60,8 +60,8 @@ def main():
                         help="HF model ID used at inference (e.g. Qwen/Qwen3-4B). "
                              "Resolves the same output dirs as step 02.")
     parser.add_argument("--config", default="config/mvp_config.yaml")
-    parser.add_argument("--dataset", default="mmlu_redux",
-                        help="Dataset key (default: mmlu_redux). Namespaces I/O paths.")
+    parser.add_argument("--dataset", default="mmlu_pro",
+                        help="Dataset key (default: mmlu_pro). Namespaces I/O paths.")
     parser.add_argument("--hint-type", default=None, choices=HINT_TYPES,
                         help="Hint type to monitor (default: config hint.default). "
                              "Must match the inference run. Namespaces I/O paths.")

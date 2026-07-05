@@ -66,8 +66,9 @@ def plot_te_distribution(per_instance: list, output_path: Path, bin_width: float
         )
 
     n_level1 = int((te > 0).sum())
+    pct_level1 = (100 * n_level1 / n) if n else 0.0
     ax.axvline(x=0, color="black", linestyle="--", linewidth=1.5, zorder=1,
-                label=f"Level-1 boundary (TE = 0)  —  {n_level1}/{n} instances have TE > 0")
+                label=f"Level-1 boundary (TE = 0)  —  {n_level1}/{n} ({pct_level1:.1f}%) instances have TE > 0")
 
     import matplotlib.patches as mpatches
     ax.legend(

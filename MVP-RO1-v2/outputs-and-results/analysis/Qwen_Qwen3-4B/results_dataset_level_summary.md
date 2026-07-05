@@ -8,7 +8,7 @@
 
 | Dataset | Mean TE before (Std) | Mean R_effect before (Std) | Mean TE after (Std) | Mean R_effect after (Std) | n TE>0 (post L1) | g-mean² | Unhinted Acc (Std) | Hinted Acc (Std) |
 |---|---|---|---|---|---|---|---|---|
-| medxpertqa | 0.3950 (0.4043) | 0.9028 (0.2348) | 0.6583 (0.3113) | 0.9028 (0.2348) | 30 | 0.6639 | 0.125 (0.259) | 0.035 (0.124) |
+| medxpertqa | 0.3950 (0.4043) | 0.9028 (0.2348) | 0.6583 (0.3113) | 0.9028 (0.2348) | 30 (60.0%) | 0.6639 | 0.125 (0.259) | 0.035 (0.124) |
 
 | | Followed | Did not follow |
 |---|---|---|

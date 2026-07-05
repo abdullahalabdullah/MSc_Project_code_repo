@@ -14,6 +14,8 @@
 #                                                   # push every checkpoint (step 0, every ~20%
 #                                                   # of training, and the final step) to its own
 #                                                   # HF repo "<HUB_MODEL_ID>-step-<N>"
+#   WANDB_PROJECT=my-proj RUN_NAME=exp1 bash train.sh   # W&B logging (run `wandb login` first)
+#   REPORT_TO=none bash train.sh                        # disable W&B
 #
 # Run inside tmux for long jobs:  tmux new -s train ;  bash train.sh
 set -euo pipefail
@@ -30,6 +32,12 @@ MAX_LENGTH="${MAX_LENGTH:-12288}"
 MAX_PROMPT_LENGTH="${MAX_PROMPT_LENGTH:-4096}"
 # Optional: set to push every checkpoint to its own private HF repo "<HUB_MODEL_ID>-step-<N>".
 HUB_MODEL_ID="${HUB_MODEL_ID:-}"
+# Experiment tracking. Defaults to Weights & Biases (run `wandb login` once first, or set
+# WANDB_API_KEY). Set REPORT_TO=none to disable. WANDB_PROJECT / RUN_NAME name the run.
+REPORT_TO="${REPORT_TO:-wandb}"
+WANDB_PROJECT="${WANDB_PROJECT:-harmless-dpo-qwen3-4B}"
+RUN_NAME="${RUN_NAME:-harmless_dpo_$(basename "${OUTPUT_DIR}")_seed-${SEED}}"
+export WANDB_PROJECT
 
 # ── Locate the exported DPO dataset ─────────────────────────────────────────
 DATASET_PATH="${1:-$(ls -dt DPO-train-dataset-curation/outputs/*/dpo_dataset 2>/dev/null | head -1 || true)}"
@@ -72,11 +80,13 @@ python -u train_dpo.py \
     --max_prompt_length "${MAX_PROMPT_LENGTH}" \
     --logging_steps 10 \
     --bf16 True \
+    --tf32 True \
     --save_only_model \
     --no_remove_unused_columns \
     --beta 0.1 \
     --seed "${SEED}" \
-    --report_to none \
+    --report_to "${REPORT_TO}" \
+    --run_name "${RUN_NAME}" \
     --use_peft \
     --lora_alpha 32 \
     --lora_r 16 \
@@ -89,3 +99,4 @@ echo "== Done. Best adapter: ${OUTPUT_DIR}/checkpoint-best =="
 echo "   Load it on top of the base model for inference"
 echo "   (transformers PeftModel, or vLLM with --enable-lora) — base: ${MODEL}"
 echo "== Eval metrics (per-eval DPO loss/reward curves): ${OUTPUT_DIR}/eval_metrics.jsonl =="
+echo "== Best checkpoint id (incl. HF repo if pushed):    ${OUTPUT_DIR}/best_checkpoint.txt =="

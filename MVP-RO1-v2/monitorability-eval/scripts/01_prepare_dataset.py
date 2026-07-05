@@ -32,10 +32,10 @@ from src.dataset import prepare_dataset, resolve_paths
 def main():
     parser = argparse.ArgumentParser(description="Prepare a dataset index.")
     parser.add_argument("--config", default="config/mvp_config.yaml")
-    parser.add_argument("--dataset", default="mmlu_redux",
+    parser.add_argument("--dataset", default="mmlu_pro",
                         help="Dataset key from the config `datasets:` registry: "
-                             "mmlu_redux, gpqa_diamond, wmdp, codemmlu, lsat_ar, "
-                             "lsat_lr. Default: mmlu_redux.")
+                             "mmlu_pro, gpqa_diamond, wmdp, codemmlu, lsat_ar, "
+                             "lsat_lr, medxpertqa, lexam. Default: mmlu_pro.")
     parser.add_argument("--n-examples", type=int, default=None,
                         help="Override the config n_examples budget (e.g. 50).")
     parser.add_argument("--force", action="store_true",

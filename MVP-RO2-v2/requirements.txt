@@ -24,3 +24,4 @@ trl==0.22.2            # LoRA DPO training (DPOTrainer / DPOConfig) — pinned e
                         # `python train_dpo.py --help` after upgrading to confirm nothing broke,
                         # then re-pin) rather than floating.
 peft>=0.14.0           # LoRA adapters (train_dpo.py --use_peft)
+wandb>=0.17.0          # experiment tracking (train.sh REPORT_TO=wandb) — run `wandb login` first

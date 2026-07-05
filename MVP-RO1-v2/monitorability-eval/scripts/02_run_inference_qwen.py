@@ -8,15 +8,15 @@ read from the `qwen_inference:` block of the config.
 
 Usage:
     # single dataset
-    python scripts/02_run_inference_qwen.py --model Qwen/Qwen3-4B --dataset mmlu_redux
+    python scripts/02_run_inference_qwen.py --model Qwen/Qwen3-4B --dataset mmlu_pro
 
     # multiple datasets — model loaded ONCE, weights shared across all datasets
-    python scripts/02_run_inference_qwen.py --model Qwen/Qwen3-4B --datasets mmlu_redux gpqa_diamond wmdp
+    python scripts/02_run_inference_qwen.py --model Qwen/Qwen3-4B --datasets mmlu_pro gpqa_diamond wmdp
 
 Options:
     --config        path to config YAML (default: config/mvp_config.yaml)
     --seed          base random seed (default: 88)
-    --dataset       single dataset key (default: mmlu_redux)
+    --dataset       single dataset key (default: mmlu_pro)
     --datasets      one or more dataset keys; overrides --dataset when given
     --hint-type     hint shown in the hinted arm (default: config hint.default).
                     One of: professor, visual_pattern, metadata, wrong_few_shot,
@@ -51,8 +51,8 @@ def main():
                         help="HF model ID (e.g. Qwen/Qwen3-4B) or a local model dir. "
                              "Output dirs are namespaced by its folder-safe name ('/' -> '_').")
     parser.add_argument("--config", default="config/mvp_config.yaml")
-    parser.add_argument("--dataset", default="mmlu_redux",
-                        help="Single dataset key (default: mmlu_redux). Ignored when --datasets is given.")
+    parser.add_argument("--dataset", default="mmlu_pro",
+                        help="Single dataset key (default: mmlu_pro). Ignored when --datasets is given.")
     parser.add_argument("--datasets", nargs="+", default=None,
                         help="One or more dataset keys. Model is loaded once and reused across all.")
     parser.add_argument("--hint-type", default=None, choices=HINT_TYPES,

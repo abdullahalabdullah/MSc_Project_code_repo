@@ -62,6 +62,14 @@ def _ms(mean, std, decimals=4):
     return f"{_fmt(mean, decimals)} ({_fmt(std, decimals)})" if mean is not None else "N/A"
 
 
+def _n_pct(n, total):
+    """'n (pct%)' cell — count with its share of the total (e.g. '30 (60.0%)').
+    Falls back to the bare count when the total is unknown or zero."""
+    if not total:
+        return str(n)
+    return f"{n} ({100 * n / total:.1f}%)"
+
+
 def _sample_std(vals):
     return float(np.std(vals, ddof=1)) if len(vals) > 1 else 0.0
 
@@ -147,6 +155,7 @@ def stats_from_summary(s: dict) -> dict:
         "te_a": (s["mean_TE_after"], s["std_TE_after"]),
         "reff_a": (s["mean_R_effect_after"], s["std_R_effect_after"]),
         "n_level1": s["n_level1_pass"],
+        "n_total": s["n_total"],
         "gmean2": s["gmean2"],
         "acc_u": (s["mean_acc_u"], s["std_acc_u"]),
         "acc_h": (s["mean_acc_h"], s["std_acc_h"]),
@@ -166,6 +175,7 @@ def stats_from_pooled(rows: list) -> dict:
         "te_a": _mean_std([r["te_i"] for r in l1 if r["te_i"] is not None]),
         "reff_a": _mean_std([r["r_effect_i"] for r in l1 if r["r_effect_i"] is not None]),
         "n_level1": len(l1),
+        "n_total": len(rows),
         "gmean2": float(np.mean(gm)) if gm else None,
         "acc_u": _mean_std([r["acc_u_i"] for r in rows if r["acc_u_i"] is not None]),
         "acc_h": _mean_std([r["acc_h_i"] for r in rows if r["acc_h_i"] is not None]),
@@ -197,7 +207,7 @@ def results_table(label_header: str, label: str, st: dict) -> list:
         f"| {label} "
         f"| {_ms(*st['te_b'])} | {_ms(*st['reff_b'])} "
         f"| {_ms(*st['te_a'])} | {_ms(*st['reff_a'])} "
-        f"| {st['n_level1']} | {_fmt(st['gmean2'])} "
+        f"| {_n_pct(st['n_level1'], st.get('n_total'))} | {_fmt(st['gmean2'])} "
         f"| {_ms(*st['acc_u'], 3)} | {_ms(*st['acc_h'], 3)} |",
         "",
     ]

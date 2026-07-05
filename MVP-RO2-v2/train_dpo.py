@@ -337,6 +337,37 @@ def main(script_args, training_args, model_config):
     # Remove all non-best checkpoints and rename the best to checkpoint-best
     best_checkpoint_callback.clean_checkpoints(trainer.args.output_dir)
 
+    # Record WHICH checkpoint won — including its HF repo id when checkpoints were pushed — so
+    # you can identify the best among the pushed "<hub_model_id>-step-<N>" repos after the fact.
+    pushed = getattr(training_args, "push_to_hub", False) and getattr(training_args, "hub_model_id", None)
+    best_hf_repo = f"{training_args.hub_model_id}-step-{best_step}" if (pushed and best_step is not None) else None
+    best_info_path = os.path.join(training_args.output_dir, "best_checkpoint.txt")
+    with open(best_info_path, "w", encoding="utf-8") as f:
+        f.write("Best checkpoint (selected by eval reward-accuracy; ties broken by eval loss)\n")
+        f.write(f"step: {best_step}\n")
+        f.write(f"eval_rewards/accuracies: {best_metrics.get('accuracy')}\n")
+        f.write(f"eval_loss: {best_metrics.get('loss')}\n")
+        f.write(f"local: {os.path.join(training_args.output_dir, 'checkpoint-best')}\n")
+        if best_hf_repo:
+            f.write(f"hf_repo: {best_hf_repo}\n")
+            f.write(f"hf_url: https://huggingface.co/{best_hf_repo}\n")
+        else:
+            f.write("hf_repo: (checkpoints were not pushed — run with --push_to_hub/HUB_MODEL_ID)\n")
+    print(f"Best-checkpoint info -> {best_info_path}"
+          + (f" (HF: {best_hf_repo})" if best_hf_repo else ""))
+
+    # Also surface the winner in the W&B run summary (no-op if W&B isn't the reporter).
+    try:
+        import wandb
+        if wandb.run is not None:
+            wandb.run.summary["best_step"] = best_step
+            wandb.run.summary["best_eval_rewards/accuracies"] = best_metrics.get("accuracy")
+            wandb.run.summary["best_eval_loss"] = best_metrics.get("loss")
+            if best_hf_repo:
+                wandb.run.summary["best_hf_repo"] = best_hf_repo
+    except Exception:
+        pass
+
 
 @dataclass
 class ScriptArguments:

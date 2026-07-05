@@ -36,7 +36,8 @@ bash harmlessness-eval/run_harmlessness.sh Qwen/Qwen3-4B
 ## Quick start
 
 The pipeline is two commands. Both take the same three arguments: `<model_id>`
-(an HF model ID or local model dir — **required**), a dataset key or `ALL`, and a
+(an HF model ID or local model dir — **required**), a dataset key / a
+comma-separated subset (e.g. `mmlu_pro,lexam`, no spaces) / `ALL`, and a
 hint type or `ALL`.
 
 ```bash
@@ -48,7 +49,7 @@ export OPENAI_API_KEY=sk-...
 bash monitorability-eval/run_monitor_and_results.sh Qwen/Qwen3-4B ALL professor
 ```
 
-Datasets: `mmlu_redux, gpqa_diamond, wmdp, codemmlu, lsat_ar, lsat_lr, medxpertqa`
+Datasets: `mmlu_pro, gpqa_diamond, wmdp, codemmlu, lsat_ar, lsat_lr, medxpertqa, lexam`
 (or `ALL`).
 Hint types: `professor, visual_pattern, metadata, wrong_few_shot, grader_hacking,
 unethical` (or `ALL`). Both lists come from `config/mvp_config.yaml`, so the
@@ -182,13 +183,14 @@ in `monitorability-eval/src/dataset.py` (`_LOADERS`).
 
 | key | domain | source | filter | uniform sampling | opts |
 |-----|--------|--------|--------|------------------|------|
-| `mmlu_redux` | Academic QA (broad) | HF `edinburgh-dawg/mmlu-redux` (30 subjects) | `error_type == "ok"` | by subject | 4 |
+| `mmlu_pro` | Academic QA (broad, reasoning-heavy) | HF `TIGER-Lab/MMLU-Pro` (14 categories) | options ∈ [3,10] | by category | up to 10 |
 | `gpqa_diamond` | Academic QA (science, PhD) | HF `Idavidrein/gpqa` (`gpqa_diamond`) | none | by High-level domain (all 198) | 4 |
 | `wmdp` | Safety/Security | HF `cais/wmdp` (bio/chem/cyber) | none | by subdomain (~67 each) | 4 |
 | `codemmlu` | Coding | HF `Fsoft-AIC/CodeMMLU` (9 subsets) | options ∈ [3,5] | by subset (9) | 3–5 |
 | `lsat_ar` | Applied Reasoning (analytical) | GitHub `ruixiangcui/AGIEval` (`lsat-ar.jsonl`) | options ∈ [3,5] | uniform random (~230 instances) | 5 |
 | `lsat_lr` | Applied Reasoning (logical) | GitHub `ruixiangcui/AGIEval` (`lsat-lr.jsonl`) | options ∈ [3,5] | uniform random (~510 instances) | 5 |
 | `medxpertqa` | Expert Medical | HF `TsinghuaC3I/MedXpertQA` (`Text`, test) | none | by body system (12, ~2450) | 10 |
+| `lexam` | Legal (exam) | HF `LEXam-Benchmark/LEXam` (`mcq_4_choices`, test) | `language == "en"` | by area (~619 English) | 4 |
 
 Notes:
 - **CodeMMLU mixes 3/4/5 options.** Its rare 6–7-option items (answers F/G) are
@@ -284,7 +286,9 @@ computes token-length statistics into `cot_token_stats.json`.
 
 Every report shares **one results-table format** — `Mean TE before (Std) ·
 Mean R_effect before (Std) · Mean TE after (Std) · Mean R_effect after (Std) ·
-n TE>0 (post L1) · g-mean² · Unhinted Acc (Std) · Hinted Acc (Std)` — followed by
+n TE>0 (post L1) · g-mean² · Unhinted Acc (Std) · Hinted Acc (Std)` — where the
+`n TE>0 (post L1)` cell shows the Level-1-passing count **and its share of the
+total** as `N (pct%)` (e.g. `30 (60.0%)`) — followed by
 the **transparency confusion matrix** (Followed / Did not follow ×
 Acknowledged / Not acknowledged, hinted runs with a verdict) and the **opacity
 rate** (= covert ÷ all hint-following). So every number is directly comparable

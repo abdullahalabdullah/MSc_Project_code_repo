@@ -1,0 +1,702 @@
+[
+  {
+    "instance_id": 0,
+    "question_id": "709e6351-d2cc-4024-baf3-adaf4d3b116d",
+    "subject": "Interdisciplinary",
+    "question": "Please indicate which of the following statements are correct.\n\n Swiss administrative law cases are found …:\ni. ... before the Swiss Supreme Court.\nii. ... only where cantonal law is applied.\niii. ... only where federal law is applied.\niv. ... before the Federal Administrative Court.\nv. ... before cantonal courts.",
+    "choices": {
+      "A": "iv",
+      "B": "i, iv, and v",
+      "C": "i, ii, iii, iv, and v",
+      "D": "ii, iii, and v"
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 1,
+    "question_id": "78938ce3-57e3-4cc2-bc58-08eef05507bf",
+    "subject": "Private",
+    "question": "Regarding the establishment of Foreign Invested Enterprises in 2016 the PRC introduced a new system, so-called “registration for the records”. Which change resulted from this amendment?\ni. All foreign invested companies (FIE) only need to register, but no longer require approval from the Ministry of Commerce;\nii. Since autumn 2016, the approval of the Ministry of Commerce has been required for all foreign invested companies (FIE);\niii. Those foreign invested enterprises (FIE) whose business activities are not on the negative list only have to register but no longer require a permit from the Ministry of Commerce;\niv. The negative list authorizes the local authorities to subject the establishment of foreign invested companies to the approval of the Ministry of Commerce on a case-by-case basis.",
+    "choices": {
+      "A": "i",
+      "B": "iii and iv",
+      "C": "i, iii, and iv",
+      "D": "iii"
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 2,
+    "question_id": "9975be1d-0c23-4dba-850f-b6e4319c3b4d",
+    "subject": "Public",
+    "question": "Mark the correct answer(s).\nThe concept of “public security”\ni. justifies interferences by the State with individual rights in the interest of its capacity to guarantee collective security interests.\nii. implies the obligation of the constitutional State to guarantee a certain level of security to its inhabitants.\niii. refers to a state of safety in the public sphere.\niv. is an essentially contested concept since there exists no definition of public security.",
+    "choices": {
+      "A": "i and iv",
+      "B": "i and iii",
+      "C": "iv",
+      "D": "i and ii"
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 3,
+    "question_id": "d374b70c-4036-4711-8cf2-0335fde1e47f",
+    "subject": "Interdisciplinary",
+    "question": "Which of the following statements is/are incorrect?\ni. The public prosecutor decides whether detention on remand and security detention are permitted.\nii. The “Digest” (or “Pandects”) was conceived as a short introduction to Roman Law for the students of Berytus and Constantinople.\niii. Swiss commercial law could be changed by the Responsible Business Initiative by creating potential liability for Swiss-based multinational companies in Swiss court for violations of international norms by their foreign subsidiaries.",
+    "choices": {
+      "A": "i",
+      "B": "i and ii",
+      "C": "iii",
+      "D": "ii and iii"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 4,
+    "question_id": "70d58c55-71d9-400a-938a-d79bfa9856e0",
+    "subject": "Private",
+    "question": "Who are the two so called “sisters republics”?\ni. The Netherlands and Great Britain.\nii. The United States and France.\niii. Great Britain and the United States.\niv. Switzerland and the United States.",
+    "choices": {
+      "A": "ii",
+      "B": "iv",
+      "C": "ii and iv",
+      "D": "i, ii, iii, and iv"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 5,
+    "question_id": "f0433044-c90e-480c-81f5-b766335a91d5",
+    "subject": "Public",
+    "question": "Mark the correct answer(s).\ni. The German Federal Constitutional Court developed the guarantee of the integrity and confidentiality of information technology systems based on Art. 10 of the German Basic Law on the privacy of correspondence, posts and telecommunications.\nii. Non-European States may become parties to the CCC.\niii. Cybercrime comprises offences which can only be committed by using a computer or via an information system.\niv. Art. 32 of the Council of Europe Cybercrime Convention (CCC) allows contracting States to access or receive stored computer data located in another contracting State without the authorisation of the latter.",
+    "choices": {
+      "A": "iii",
+      "B": "i",
+      "C": "iv",
+      "D": "ii, iii, and iv"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 6,
+    "question_id": "02b7efac-35c6-4dd6-bf99-dc584e28a12d",
+    "subject": "Interdisciplinary",
+    "question": "Which of the following statements is/are incorrect?\ni. With the Helvetic Republic the pre-revolutionary confederate structure was restored.\nii. A measure can still be imposed on an offender who lacks criminal capacity.\niii. It is possible for parties in Switzerland to litigate in person (i.e. without being represented by a lawyer) before all civil courts including the Federal Court.\niv. If the deceased person did not make a will and if he/she leaves his/her father and a brother, but no children, and if his mother predeceased, the father and the brother get ½ each of the estate without taking any action.\nv. The Federal Council consists of a Prime Minister and six other ministers. The Prime Minister represents Switzerland abroad and enjoys special powers. He/she can dissolve the Federal Assembly and thus trigger general elections.",
+    "choices": {
+      "A": "iv",
+      "B": "i, iii, and v",
+      "C": "i and v",
+      "D": "iii"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 7,
+    "question_id": "7326d38e-7515-4e58-963d-63a7160652d4",
+    "subject": "Private",
+    "question": "On what sources of law did the court base its decision in “Pierson v. Post”?\ni. Common law, citing prior cases decided by British courts.\nii. Common law, citing prior cases not only decided by British courts but also sources like laws made by the late Roman emperors!\niii. Common law, citing prior cases decided by US courts.\niv. Civil law.",
+    "choices": {
+      "A": "i and iii",
+      "B": "i, ii, iii, and iv",
+      "C": "ii, iii, and iv",
+      "D": "ii"
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 8,
+    "question_id": "08f7c9ed-6991-40c8-9c1f-73394173ead7",
+    "subject": "Public",
+    "question": "Mark the correct answer(s).\ni. UN Peacekeepers that become parties to an armed conflict are legitimate military targets according to international humanitarian law.\nii. UN Peacekeeping Operations are only allowed to use force in self-defense.\niii. UN Peacekeeping Operations are usually subsidiary organs of the UN Security Council.\niv. MONUSCO’s Intervention Brigade was controversial since it raised issues with regard to the UN Peacekeeping Principle of “consent of the parties”.",
+    "choices": {
+      "A": "i",
+      "B": "i and iii",
+      "C": "i, ii, and iii",
+      "D": "ii"
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 9,
+    "question_id": "a0ceda13-be3f-4b67-b94c-3abf983951be",
+    "subject": "Interdisciplinary",
+    "question": "Switzerland and international law: which of the following statments are correct?\ni. The 2014 newly introduced Article 121a of the Federal Constitution (Initiative “Stop Mass Immigration”) obliges the Confederation to restrict the number of residence permits for foreign nationals in Switzerland by annual quantitative limits and quotas. The introduction of quantitative limits and quotas would not be compatible with the Agreement on the Free Movement of Persons between Switzerland and the European Union. The termination of the Agreement on the Free Movement of Persons would mean that all the other agreements of the bilateral agreements of 1999 (Bilaterals I) would automatically be terminated as well as these agreements are interlinked with a so-called “Guillotine clause”.\nii. Switzerland is a member of the European Free Trade Association (EFTA), but not of the European Economic Area (EEA).\niii. With respect to a popular initiative to amend the Federal Constitution: A specific draft of a new provision, which does not comply with international human rights provisions (e.g., the European Convention on Human Rights, ECHR), is declared invalid.\niv. Ius cogens prevails over Swiss law in any case.\nv. Switzerland is a party to the Council of Europe, but is not bound by the European Convention on Human Rights (ECHR).",
+    "choices": {
+      "A": "ii and iii",
+      "B": "ii, iv, and v",
+      "C": "i, ii, and iv",
+      "D": "ii, iii, and v"
+    },
+    "correct_answer": "C",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 10,
+    "question_id": "e2d75efc-b65e-40d1-9fa7-e47d05b2653d",
+    "subject": "Private",
+    "question": "Which one of the following forms cannot enter into sales contracts regarding the sale of its products to its customers in China?\ni. Representative Office\nii. Joint Stock Limited Company\niii. Hybrid Co-operative Joint Venture\niv. Equity Joint Venture",
+    "choices": {
+      "A": "i, ii, iii, and iv",
+      "B": "iii",
+      "C": "i",
+      "D": "i, ii, and iv"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 11,
+    "question_id": "bd57a7a3-1247-47b8-aded-bc1e984d27da",
+    "subject": "Public",
+    "question": "Art. 31(1) of the Vienna Convention on Diplomatic Relations of 18 April 1961 (VCDR) reads: “A diplomatic agent shall enjoy immunity from the criminal jurisdiction of the receiving State. Mark the correct answer(s). Based on the definition of transnational law used in this class, Art. 31(1) VCDR\ni. concerns inter-state relations. Therefore, it regulates a “transnational legal problem”.\nii. belongs to the body of international law. As international law and transnational law are mutually exclusive, it cannot be a transnational legal norm.\niii. is a classical example of transnational law as it regulates the conduct of individuals (i.e. members of a diplomatic mission) of one State on the territory of another State.\niv. does not fulfil all conditions of transnational law.",
+    "choices": {
+      "A": "iv",
+      "B": "i, iii, and iv",
+      "C": "ii, iii, and iv",
+      "D": "i, ii, and iv"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 12,
+    "question_id": "a592da45-ba8c-498a-a79b-a9f91aedff9c",
+    "subject": "Interdisciplinary",
+    "question": "Which of the following statements is/are correct?\ni. The Swiss Broadcasting Corporation (SRG) is mainly financed by a levy, which all households in Switzerland are required to pay. This ensures the SRG to fulfil its mandate in favour of democracy, cohesion and in reaching the entire population.\nii. The marital property regime is dissolved through divorce.\niii. In Switzerland, criminal law provisions exist on a federal and on a cantonal level. However, the cantons may only legislate on contraventions that are not the subject matter of federal legislation.",
+    "choices": {
+      "A": "i and ii",
+      "B": "ii",
+      "C": "i, ii, and iii",
+      "D": "i and iii"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 13,
+    "question_id": "9299ce35-b245-4598-869e-304b3c980f00",
+    "subject": "Private",
+    "question": "During his presidency China’s President Xi Jinping has introduced various famous campaigns or innovations. Which one of the following has not been initiated by him?\ni. Anti-corruption programme\nii. Abolishment of the limited time periods (terms) of the President of the PRC\niii. One Belt One Road Initiative\niv. Introduction of open-door policy",
+    "choices": {
+      "A": "i",
+      "B": "i and iii",
+      "C": "ii, iii, and iv",
+      "D": "iv"
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 14,
+    "question_id": "34cb206d-5d3a-4d69-8005-704553310177",
+    "subject": "Public",
+    "question": "Mark the correct answer(s).\nCross-border surveillance by states\ni. usually does not violate the territorial integrity of the targeted State since measures of transnational surveillance using signals intelligence do not create a sufficient link to the foreign territory.\nii. cannot be attributed to the State if the personal data, handed over to law enforcement agencies, is collected by private actors such as Google or Facebook.\niii. violates the international law principle of non-intervention since it interferes with the internal affairs of a foreign State.\niv. may interfere with the human right to privacy in Art 17 of the Covenant on Civil and Political Rights (ICCPR) of the individuals monitored.",
+    "choices": {
+      "A": "i and iv",
+      "B": "i, ii, and iv",
+      "C": "i",
+      "D": "i, iii, and iv"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 15,
+    "question_id": "fc3cea03-5094-4426-aac6-13e558d7017a",
+    "subject": "Interdisciplinary",
+    "question": "Which of the following statements is/are incorrect?\ni. The scientification of law in Switzerland during the 19th century was most prominently promoted by Friedrich Ludwig Keller and Johann Caspar Bluntschli.\nii. With the Helvetic Republic the pre-revolutionary confederate structure was restored.\niii. The international community formally recognized the neutrality of Switzerland with the Peace of Westphalia in 1648.\niv. In legal sociology it is recommended to use incompatible theories simultaneously, which do not distinguish between “is” and “ought”.",
+    "choices": {
+      "A": "ii, iii, and iv",
+      "B": "i and iv",
+      "C": "i, ii, and iii",
+      "D": "iii"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 16,
+    "question_id": "3651f6dd-458c-4e85-8577-a4d383a0fe01",
+    "subject": "Private",
+    "question": "Before which court would you file a claim based on the Sherman Act?\ni. Depends if the defendant is from out of state. If not, before a state court.\nii. This is federal law, therefore before a federal court.\niii. This is a case of original jurisdiction of the US Supreme Court.\niv. Before a federal court, but only if the dispute is about more than $ 75’000.",
+    "choices": {
+      "A": "ii",
+      "B": "iii",
+      "C": "iv",
+      "D": "i and iii"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 17,
+    "question_id": "568814d7-2e54-41ab-ac2c-c14f7e17f054",
+    "subject": "Public",
+    "question": "Mark the correct answer(s).\n“Targeted sanctions” by the UN Security Council\ni. are targeted at individual States instead of creating obligations for all UN Member States.\nii. have prompted national and regional courts to decide on the relationship of obligations\nflowing from Security Council resolutions with national and regional human rights\nguarantees.\niii. were developed in response to the detrimental humanitarian effects upon civilians of\nSecurity Council economic sanctions, e.g., against Iraq.\niv. are provisions of a repressive nature with the aim of punishing individuals involved in\nglobal terrorism.",
+    "choices": {
+      "A": "iii",
+      "B": "i, ii, iii, and iv",
+      "C": "i and iii",
+      "D": "ii and iii"
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 18,
+    "question_id": "bd73a598-f1c8-4ddc-b9f9-218440249823",
+    "subject": "Interdisciplinary",
+    "question": "Which of the following statements is/are correct?\ni. A contract suffering from a fundamental error is voidable by the party that was acting under error.\nii. In 1874 the Federal legislative power was authorised to legislate on obligations-, commercial- and exchange law, civil capacity, copyright law, debt enforcement and bankruptcy law, according to Article 64 of the Federal constitution.\niii. It is possible to lodge an appeal directly against posters and TV-spots that are published as part of an official information campaign, as they qualify as administrative decisions.",
+    "choices": {
+      "A": "ii",
+      "B": "i, ii, and iii",
+      "C": "iii",
+      "D": "i and ii"
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 19,
+    "question_id": "9dea5f68-b7ad-4ade-90c6-5548d6850d97",
+    "subject": "Private",
+    "question": "What is meant with the “rule of reason”?\ni. Only reasonable actions under the Sherman Act are illegal.\nii. Congress has to give reasons in order to make an antitrust law.\niii. There is per se no rule of reason.\niv. This rule allows the courts not to apply the wording of the provisions of the Sherman Act to all offenses strictly but only to the so called “hard core” violations.",
+    "choices": {
+      "A": "i, iii, and iv",
+      "B": "i, ii, and iv",
+      "C": "ii and iv",
+      "D": "iv"
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 20,
+    "question_id": "b6eba8f3-a282-4ada-89de-d9320f77d416",
+    "subject": "Public",
+    "question": "Mark the correct answer(s).\ni. The Palermo Convention fully harmonizes the contracting States’ national criminal laws with regard to transnational organized crime (TOC).\nii. The Contracting States to the Palermo Convention partially define what constitutes TOC in their domestic laws.\niii. The Palermo Convention is only concerned with the repression, not the prevention of TOC.\niv. In comparison to international legal instruments on counter-terrorism, the Palermo Convention relies on more traditional ways of international cooperation (e.g., international legal assistance).",
+    "choices": {
+      "A": "i, ii, iii, and iv",
+      "B": "ii and iv",
+      "C": "i, ii, and iv",
+      "D": "i and iii"
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 21,
+    "question_id": "b9aaaac8-3ef1-42f6-a87d-6e3f24d437c8",
+    "subject": "Interdisciplinary",
+    "question": "Please indicate which of the following statements about real securities – for example, a pledge on moveable property (pignus) – are correct:\ni. Real securities followed the principle of ‘accessority’ more radically in Roman law than they do today in Swiss law.\nii. In Swiss law, real securities tend to be extinguished together with the credit only if the credit is extinguished with satisfaction of the creditor's interests.\niii. In Roman law, the existence of real securities depended on the existence of the secured debt for their effective constitution: that is to say, they followed the principle of ‘genetic’ accessority.\niv. Under Roman law, real securities tended to be extinguished together with the credit only if the credit was extinguished with satisfaction of the creditor's interests.",
+    "choices": {
+      "A": "i and ii",
+      "B": "iii and iv",
+      "C": "ii, iii, and iv",
+      "D": "none of the statements"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 22,
+    "question_id": "c6fc7ee1-1cf9-4efe-ae49-85633d998cd9",
+    "subject": "Private",
+    "question": "Which of the following legal preventive measures is the most suitable to protect a Swiss company's trademark in China?\ni. Conclusion of an exclusive agency agreement with the Chinese partner\nii. Registration of the trademark in Chinese characters in China\niii. Conclusion of written employment agreements with all the workers in the Swiss Company’s factory in China\niv. Registration of a world-wide trademark in Chinese characters",
+    "choices": {
+      "A": "ii",
+      "B": "ii, iii, and iv",
+      "C": "i, ii, and iv",
+      "D": "i"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 23,
+    "question_id": "508995cd-0d8b-49ac-8638-136bac16905c",
+    "subject": "Public",
+    "question": "Mark the correct answer(s).\nThe idea of “civilizing security”\ni. refers – in one of the meanings attributed to it by Ian Loader and Neil Walker – to the idea that security fosters solidarity among the people of a political community.\nii. refers (in one of its meanings) to the “security paradox”: the State is at the same time a “guarantor of” and a “threat to” the security of individuals.\niii. means that security can be fabricated by the State (security as techné).\niv. means that civil society, not the State, is the primary guarantor of security.",
+    "choices": {
+      "A": "ii",
+      "B": "iv",
+      "C": "i and iv",
+      "D": "i and ii"
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 24,
+    "question_id": "4d0236c9-d3f2-4c60-8257-7225cddc1be6",
+    "subject": "Interdisciplinary",
+    "question": "Which of the following statements is/are correct?\ni. In 1866, Gustave Moynier wrote Das moderne Kriegsrecht (The Modern Law of War).\nii. Human rights cannot be justified outside of the context of Western culture.\niii. With the Act of Mediation in 1803 Napoleon founded the Helvetic Republic.",
+    "choices": {
+      "A": "ii and iii",
+      "B": "none of the statements",
+      "C": "i, ii, and iii",
+      "D": "ii"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 25,
+    "question_id": "e2c094f5-fa98-4059-af81-79283eb4148e",
+    "subject": "Private",
+    "question": "How many court systems do the US have?\ni. Based on the “founding fathers” the US does not recognize any court system.\nii. The US has one court system: a federal one with state branches.\niii. The US has 3 court systems: a federal one, state ones and the US Supreme Court.\niv. The US has two court systems: a federal one and a state one (in each state one).",
+    "choices": {
+      "A": "iv",
+      "B": "iii and iv",
+      "C": "i, iii, and iv",
+      "D": "i, ii, and iv"
+    },
+    "correct_answer": "A",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 26,
+    "question_id": "72f1faaf-239d-42c8-9a5c-cf7c55206c6a",
+    "subject": "Public",
+    "question": "Mark the correct answer(s).\nThe Swiss-German Police Treaty of April 1999 (Treaty)\ni. attributes the conduct of a police official of one Member State, acting in conformity with the Treaty, to the State on whose territory the police official acts.\nii. regulates the exercise of public authority of one Member State on the territory of the other Member State.\niii. regulates international legal assistance between Switzerland and Germany.\niv. states that, as a general rule, police officers of one Member State are authorized to act within the territory of the other Member State without the latter’s prior consent.",
+    "choices": {
+      "A": "i",
+      "B": "i and iii",
+      "C": "i, ii, and iv",
+      "D": "i and ii"
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 27,
+    "question_id": "f6e17942-9bde-426e-960f-0f5b7087542b",
+    "subject": "Interdisciplinary",
+    "question": "Which of the following statements is/are incorrect?\ni. The Swiss Broadcasting Corporation (SRG) is mainly financed by a levy, which all households in Switzerland are required to pay. This ensures the SRG to fulfil its mandate in favour of democracy, cohesion and in reaching the entire population.\nii. Switzerland is a party to the Council of Europe, but is not bound by the European Convention on Human Rights (ECHR).\niii. Swiss commercial law allows companies to be registered as limited or unlimited liability companies.\niv. Ius cogens prevails over Swiss law in any case.",
+    "choices": {
+      "A": "ii and iv",
+      "B": "none of the statements",
+      "C": "iii",
+      "D": "ii"
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 28,
+    "question_id": "40debc43-a941-4597-82ae-a4830df923b8",
+    "subject": "Private",
+    "question": "What are the 5 specialties of a US civil procedure?\ni. Class action, punitive damage, lawyers fee, discovery, actions by the Supreme Court\nii. Jury, pre-trial motion, punitive damage, class action, constitutional review\niii. Jury, discovery, class action, lawyers fee, punitive damage\niv. Jury, the judge knows it always better, pre-trial conference, class action, punitive damage",
+    "choices": {
+      "A": "iv",
+      "B": "iii",
+      "C": "i and ii",
+      "D": "i, ii, and iii"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 29,
+    "question_id": "ed7b35aa-9aef-4fd4-9474-081fc908d674",
+    "subject": "Public",
+    "question": "Mark the correct answer(s). Transnational public security law\ni. is often characterized by a multi-actor approach, which e.g. comprises the collaboration of two or more States, or a State with private actors, or States with an international organization.\nii. must originate from an international law source (e.g. an international treaty). Domestic law cannot constitute transnational public security law.\niii. uses “imposition” as one of its law-making techniques which involves the unilateral transfer of a norm through a legally binding act with cross-border application.\niv. is triggered, i.a., by States’ expectation of efficiency gains through cooperative action in response to cross-border risks and threats.",
+    "choices": {
+      "A": "ii, iii, and iv",
+      "B": "i, iii, and iv",
+      "C": "i and iv",
+      "D": "iii and iv"
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 30,
+    "question_id": "debb276e-1af6-4ed0-beb1-3d03417f49af",
+    "subject": "Interdisciplinary",
+    "question": "Which of the following statements is/are incorrect?\ni. The treasure found on alien property raised in classical Roman law the question whether possession is possible without knowledge.\nii. For the creation of the Red Cross, Henri Dunant was influenced by the events of the American Civil War: when he came back to Switzerland, in 1862, he published his campaigning book entitled Memories of Solferino.\niii. The “Digest” (or “Pandects”) was compiled from works written by Roman legal experts between the 1st century BCE (Before the Common Era) and the 3rd century CE (Common Era).\niv. In Switzerland, a foreign judgment and a foreign insolvency decree can be recognised and enforced irrespective of whether Swiss judgments and Swiss insolvency decrees would also be recognised and enforced in the state of origin of the foreign judgment or decree.",
+    "choices": {
+      "A": "i and ii",
+      "B": "ii, iii, and iv",
+      "C": "ii",
+      "D": "i, ii, and iii"
+    },
+    "correct_answer": "C",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 31,
+    "question_id": "02d7f932-337e-4f51-b72b-a3054d726c48",
+    "subject": "Private",
+    "question": "Which of the following statements applies in connection with a Hybrid Co-operative Joint Venture?\ni. No local Chinese partner is required.\nii. Although a registered capital is provided for, the shareholders are also personally liable for the liabilities of the Hybrid Co-operative Joint Venture;\niii. It is not a form of investment based on consensus;\niv. The participation in the profits and liquidation proceeds of the Hybrid Co-operative Joint Venture is not necessarily based on the proportion of the participation in the registered capital;",
+    "choices": {
+      "A": "i, iii, and iv",
+      "B": "iv",
+      "C": "ii and iii",
+      "D": "i and iii"
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 32,
+    "question_id": "7f471838-cb8b-482d-8b70-a7b45c05f041",
+    "subject": "Public",
+    "question": "Mark the correct answer(s).\ni. In resolution 1816 (2008), the UN Security Council suspended the application of the United Nations Convention on the Law of the Sea with regard to the territorial waters of Somalia.\nii. The measures envisaged in the anti-piracy resolutions of the UN Security Council required the consent of the Transitional Federal Government of Somalia since otherwise they would have been contrary to the prohibition of intervention according to Art. 2 § 7 UN Charter.\niii. In its anti-piracy resolutions, the UN Security Council authorized States cooperating with the Transitional Federal Government of Somalia to use force in the territory of Somalia.\niv. The United Nations Convention on the Law of the Sea subsumes piracy under the definition of “armed robbery”.",
+    "choices": {
+      "A": "i, ii, and iv",
+      "B": "i and iv",
+      "C": "ii and iv",
+      "D": "iii"
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 33,
+    "question_id": "7020eae4-7abf-48e7-9074-d064e34d30c3",
+    "subject": "Interdisciplinary",
+    "question": "Which of the following statements is/are correct?\ni. In 1892, Eugen Huber was appointed to prepare a first draft of the Swiss Civil Code.\nii. Court hearings are of high practical importance in Switzerland: 80 percent of the opened proceedings are heard by a court.\niii. Johann Caspar Bluntschli, Gustave Moynier and Emer de Vattel were among the founding members of the Institute of International Law (Institut de Droit International) (1873).",
+    "choices": {
+      "A": "ii and iii",
+      "B": "i",
+      "C": "iii",
+      "D": "none of the statements"
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 34,
+    "question_id": "785442f0-a9d7-400d-85ff-2ef664d6e8b5",
+    "subject": "Private",
+    "question": "What are so-called \"variable equity interest structures\" used for by foreign investors?\ni. Special contractual agreements and structuring of investments that enable foreign investors to gain control over companies in industrial sectors in which foreign control is not permitted;\nii. Special provisions in the articles of association of an Equity Joint Venture which permit an ongoing adjustment of the amount of interest (variable interest) on the parties’ participation in the registered capital;\niii. The flexible duration of a Foreign Investment Enterprise, which allows the parties to agree on a specific duration of their company.\niv. Special provisions in the articles of association of an Equity Joint Venture that allow the PRC government to increase / decrease its participations in Equity Joint Ventures with foreign investors;",
+    "choices": {
+      "A": "i, iii, and iv",
+      "B": "i",
+      "C": "iii",
+      "D": "ii, iii, and iv"
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 35,
+    "question_id": "547dd938-e50a-40be-9939-1401e29974a7",
+    "subject": "Public",
+    "question": "In the Yahoo! Inc. v. La Lingue Contre Le Racisme et L’antisemitisme (LICRA); L’union Des Etudiants Juifs De France (UEJF) Case,\ni. the U.S. 9th Circuit Court denied the applicable French criminal law provision transnational effect that extended to U.S. territory.\nii. the U.S. 9th Circuit Court ruled that any legal act which is harmful to US interests triggers the personal jurisdiction of U.S. courts.\niii. at the outset, the problem was that Yahoo! had made accessible to all French Internet users via the Yahoo! France website the auction of Nazi artifacts.\niv. the U.S. 9th Circuit Court applied the Calder test and held that it had personal jurisdiction because of the interim orders obtained from the French Court and served in the US.",
+    "choices": {
+      "A": "i and iv",
+      "B": "iii and iv",
+      "C": "i, ii, and iv",
+      "D": "i"
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 36,
+    "question_id": "7d8d508f-9261-426f-91ae-7d67a1dc1f2b",
+    "subject": "Interdisciplinary",
+    "question": "Which of the following statements is/are incorrect?\ni. In Swiss civil proceedings, it is generally the task of the judge to establish the facts of the case ex officio.\nii. In Switzerland’s direct democracy, education is considered a key element for the regeneration of cultural resources. In this sense, the Swiss constitution provides for an extensive public education. \niii. If a party successfully abstractly/directly challenges legislation, the attacked legislation is rescinded. If a party, however, successfully concretely/indirectly challenges legislation, the underlying legal provision is not annulled. Only the administrative decision is repealed.",
+    "choices": {
+      "A": "i",
+      "B": "iii",
+      "C": "ii",
+      "D": "none of the statements"
+    },
+    "correct_answer": "A",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 37,
+    "question_id": "edb52e73-ac09-421c-b941-976331e85610",
+    "subject": "Private",
+    "question": "Which one is not one of the difficulties encountered by foreign investors in setting up Foreign Invested Enterprises (FIE) in the PRC?\ni. Disagreements with Chinese joint venture partners\nii. Expiry of land-use rights after a specific period of time\niii. Disclosure of intellectual property rights in connection with the approval of products on the Chinese market\niv. Many opportunities offered to foreign investors",
+    "choices": {
+      "A": "i, ii, and iii",
+      "B": "iv",
+      "C": "ii, iii, and iv",
+      "D": "iii"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 38,
+    "question_id": "a66473bb-5be0-410c-a1ea-261609e72a07",
+    "subject": "Interdisciplinary",
+    "question": "Which of the following statements is/are incorrect?\ni. The party suffering from a fundamental error must notify the other party of his or her defect in consent within one year since the defect has been discovered, otherwise the contract is deemed to have been ratified.\nii. The treasure found on alien property raised in classical Roman law the question whether possession is possible without knowledge.\niii. Swiss commercial law permits the registration of limited liability partnerships.\niv. In Switzerland, criminal law provisions exist on a federal and on a cantonal level. However, the cantons may only legislate on contraventions that are not the subject matter of federal legislation.",
+    "choices": {
+      "A": "i and iv",
+      "B": "none of the statements",
+      "C": "i, ii, and iv",
+      "D": "i and iii"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 39,
+    "question_id": "9c85cda5-ad75-4232-a317-62f9a1d740ac",
+    "subject": "Private",
+    "question": "The U.S. Congress passes a law forbidding gasoline stations from selling gasoline at more than $3 per gallon. Is this law immediately effective?\ni. No, because it has not yet been signed by the President.\nii. No, because no statute takes effect until 90 days after the law is passed.\niii. Yes, because Congress has the power to pass legislation.\niv. No, because it might be declared unconstitutional by the Supreme Court.",
+    "choices": {
+      "A": "i, ii, and iv",
+      "B": "ii and iv",
+      "C": "i, ii, iii, and iv",
+      "D": "i"
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 40,
+    "question_id": "21c4bf96-9105-4828-868a-68d1fff30bf2",
+    "subject": "Interdisciplinary",
+    "question": "Based on the following context, please select all statements that do not apply.\nContext: Eric is a Dutch citizen who accepted a job offer in Zürich. He will take up his new position in Zürich in January 2020. Before moving to Switzerland, he would like to learn more about the Swiss tax system. In particular, he has not yet decided whether he wants to rent an apartment in Zürich or outside of Zürich, maybe even in another canton.\ni. In Switzerland, regardless of the canton, Eric will be subject to a cantonal net wealth tax. On the federal level, however, no net wealth tax is levied.\nii. Eric is about to marry Clara. They plan to get married in December 2019 before moving to Zürich together. However, from a Swiss tax point of view, it may be better not to get married.",
+    "choices": {
+      "A": "ii",
+      "B": "i",
+      "C": "none of the statements",
+      "D": "i and ii"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 41,
+    "question_id": "dabf33ce-df71-441c-984b-babfe6bef369",
+    "subject": "Private",
+    "question": "In which one of the following cases is an arbitral tribunal based in Paris the competent arbitral tribunal?\ni. A Chinese company enters into a joint venture agreement with a Swiss company in which it is stated that all disputes are to be decided by the ordinary courts in Paris.\nii. An Italian company enters into a joint venture agreement with a Chinese company in which it is stated that all disputes are to be settled by an arbitration court based in Beijing under the Rules of the China International Economic Arbitration Commission (CIETAC).\niii. A company established in Shanghai whose parent company is established in Paris shall enter into a supply agreement with a company established in Beijing whose parent company is also established in Paris, in which it is agreed that all disputes relating to the supply agreement shall be settled by an arbitration tribunal established in Paris under the rules of the International Chamber of Commerce Paris.\niv. A Russian company and a Chinese company agree in their joint venture agreement that the disputes in connection with the joint venture agreement are to be settled by an arbitration court with its seat in Paris under rules of the International Chamber of Commerce Paris.",
+    "choices": {
+      "A": "ii",
+      "B": "ii and iii",
+      "C": "iv",
+      "D": "iii and iv"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 42,
+    "question_id": "cfdc3e62-108c-4a28-b803-67377adfd0bc",
+    "subject": "Interdisciplinary",
+    "question": "Y is 13 years old and attends public elementary school. The government of the Canton where Y lives issued a disciplinary code in the form of an ordinance. § 25 of the ordinance states that students “may be suspended from school for up to six months in case they disturb class.” One day, Y throws a paper plane at a classmate during class. The classmate is not injured from the incident. In the following, the headmaster of the school bans Y from school for five months. Please indicate which of the following statements are correct:\ni. As is the case with all disciplinary measures in public schools, the suspension of Y qualifies as real act. Thus, no administrative decision must be issued.\nii. There is a high chance that an appeal body finds the school suspension to violate the principle of proportionality.\niii. It is an important question under which requirements a school suspension may be ordered. Thus, these requirements must be contained in an ordinance.\niv. The general constitutional principles laid out in Article 5 of the Federal Constitution are not relevant in the case of Y because the suspension is based on cantonal law.",
+    "choices": {
+      "A": "ii, iii, and iv",
+      "B": "ii",
+      "C": "i, ii, iii, and iv",
+      "D": "i, ii, and iii"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 43,
+    "question_id": "31ae1f55-f893-4882-bdff-939f1e2286db",
+    "subject": "Private",
+    "question": "Which one of the following is not regulated under the Closer Economic Partnership Arrangement concluded between the People's Republic of China and Hong Kong regulate?\ni. Access to investment in the PRC for companies qualified under the CEPA at terms preferred compared to the WTO;\nii. Regulation of transport routes across the border between Mainland China (PRC) and the Hong Kong SAR;\niii. Liberalisation of trade in goods between Mainland China and Hong Kong;\niv. Liberalisation of trade in services between Mainland China (PRC) and Hong Kong;",
+    "choices": {
+      "A": "ii",
+      "B": "iii",
+      "C": "i, ii, and iii",
+      "D": "i, ii, iii, and iv"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 44,
+    "question_id": "72d45659-9250-4a9f-9818-3dc1132eb878",
+    "subject": "Interdisciplinary",
+    "question": "Based on the following context, please select all statements that do not apply.\nContext: Eric is a Dutch citizen who accepted a job offer in Zürich. He will take up his new position in Zürich in January 2020. Before moving to Switzerland, he would like to learn more about the Swiss tax system. In particular, he has not yet decided whether he wants to rent an apartment in Zürich or outside of Zürich, maybe even in another canton.\ni. In Switzerland, regardless of the canton, Eric will be subject to a cantonal net wealth tax. On the federal level, however, no net wealth tax is levied.\nii. In Zürich, Eric would be subject to an income tax rate of 21.6% (federal, cantonal and communal income taxes). However, if he decides to move to another canton, his income tax rate could be much lower.",
+    "choices": {
+      "A": "i and ii",
+      "B": "ii",
+      "C": "none of the statements",
+      "D": "i"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 45,
+    "question_id": "a101128b-8b73-4bdb-9bbd-e7be6a65d763",
+    "subject": "Private",
+    "question": "In relation to the Closer Economic Partnership Agreement concluded between Hong Kong SAR and the PRC, which one of the following is correct:\ni. Since the Closer Economic Partnership Agreement came into force, all foreign investment must be channelled through Hong Kong, meaning it is mandatory to first establish a holding company in Hong Kong.\nii. Together with the PRC’s Pearl River Delta Area it creates a common economic market similar to the European Union;\niii. It creates a form of free trade area in order to liberalize trade in goods, in services and investment facilitation between the PRC and Hong Kong SAR;\niv. It is an agreement on the mutual recognition and enforcement of civil and commercial cases;",
+    "choices": {
+      "A": "iii",
+      "B": "i and iv",
+      "C": "i, iii, and iv",
+      "D": "ii, iii, and iv"
+    },
+    "correct_answer": "A",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 46,
+    "question_id": "a61c321e-f27c-45e1-b2b8-5a0503930da8",
+    "subject": "Interdisciplinary",
+    "question": "Which of the following statements is/are correct?\ni. The acquisition of land ownership, including the building thereon, takes place when the acquirer gets the full possession of the building.\nii. With the Helvetic Republic the pre-revolutionary confederate structure was restored.\niii. Ius cogens prevails over Swiss law in any case.",
+    "choices": {
+      "A": "i",
+      "B": "ii",
+      "C": "iii",
+      "D": "i and iii"
+    },
+    "correct_answer": "C",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 47,
+    "question_id": "47226d5b-a091-4da6-9e24-95949cc9d7ed",
+    "subject": "Private",
+    "question": "A bicycle rider from New York who was injured in a collision with an automobile in NYC, owned by a woman from New Jersey, brings an action against that woman to recover $100,000 in damages for his injuries in a NY state court. The defendant would prefer to have the case decided in a federal court. Is this possible?\ni. No, the plaintiff gets to choose the forum.\nii. Yes, but only if the defendant does so within 5 days.\niii. No, because this is a tort action and tort law is governed by state law.\niv. Yes, if the plaintiff is seeking more than $75,000 in damages.",
+    "choices": {
+      "A": "i, iii, and iv",
+      "B": "i, ii, and iv",
+      "C": "iv",
+      "D": "i and iii"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 48,
+    "question_id": "615c354f-67cd-42a8-ab43-38ff9fb09def",
+    "subject": "Interdisciplinary",
+    "question": "Which of the following statements is/are correct?\ni. The possibility of an appeal to an administrative authority is sufficient to meet the requirements of the guarantee of access to courts as long as this authority reviews questions of administrative discretion.\nii. Swiss commercial law is based on a comprehensive codification of the civil code in the 2000s.\niii. It is a Swiss particularity that all major political parties are represented in the Federal Council. To this effect, the so-called magic formula was established (by practice, not based on an explicit provision in the Constitution). \niv. Mortgages and pledges, including the claim to be secured thereby, are rights in rem.",
+    "choices": {
+      "A": "i, ii, iii, and iv",
+      "B": "iii",
+      "C": "i, ii, and iii",
+      "D": "i and ii"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 49,
+    "question_id": "03dffd6b-ba84-401d-85a0-2a66ce1929a1",
+    "subject": "Private",
+    "question": "In relation to the Wholly Foreign-owned Enterprise (WFOE) which one of the following statements is correct:\ni. Its registered capital is held by investors with registered office outside of the PRC.\nii. The entire registered capital must be held by one single investor;\niii. It may not be used for investment in the PRC by a company with registered office in the Hong Kong SAR;\niv. It is the only available investment vehicle in the PRC’s central and Western regions;",
+    "choices": {
+      "A": "ii",
+      "B": "i, ii, and iv",
+      "C": "i",
+      "D": "i and iv"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  }
+]

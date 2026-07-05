@@ -15,10 +15,12 @@ hf_token: "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"
 n_examples: 50
 datasets:
   # --- Academic QA ---------------------------------------------------------
-  # Broad, undergraduate level. error_type=="ok" filter; uniform by subject (30). 4 options.
-  mmlu_redux:
-    loader: "mmlu_redux"
-    hf: "edinburgh-dawg/mmlu-redux"
+  # Harder MMLU redesign: reasoning-heavy, up to 10 options (A–J). No filter;
+  # uniform by category (14 subjects). Each question keeps its full native
+  # option list (10 for most items). ~12k test instances.
+  mmlu_pro:
+    loader: "mmlu_pro"
+    hf: "TIGER-Lab/MMLU-Pro"
     split: "test"
     random_seed: 88
   # Science, PhD level. No filter; uniform by High-level domain. Only 198 exist. 4 options.
@@ -72,6 +74,18 @@ datasets:
     hf: "TsinghuaC3I/MedXpertQA"
     config: "Text"           # Text set only (the MM multimodal config is not used)
     split: "test"
+    random_seed: 88
+
+  # --- Legal ---------------------------------------------------------------
+  # LEXam legal-exam MCQ. English rows only (language=="en"); the mcq_4_choices
+  # subset (4 options, `gold` = 0-based index). `choices` ships as a stringified
+  # list — the loader parses it. Uniform by legal `area`. ~619 English test items.
+  lexam:
+    loader: "lexam"
+    hf: "LEXam-Benchmark/LEXam"
+    config: "mcq_4_choices"
+    split: "test"
+    language: "en"
     random_seed: 88
 
 # Hint registry. The hint is only shown in the hinted arm (X=1); it always points

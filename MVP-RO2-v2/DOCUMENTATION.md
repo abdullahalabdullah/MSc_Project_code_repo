@@ -68,7 +68,9 @@ MAX_LENGTH=8192 bash train.sh              # lower if you hit GPU OOM
 ```
 
 Output: LoRA adapters under `checkpoints/qwen3-4B/harmless_dpo/` (default). The best checkpoint
-by eval reward-accuracy is kept as `checkpoint-best`; others are pruned. A full log is written to
+by eval reward-accuracy is kept as `checkpoint-best`; others are pruned. Its identity — the winning
+step and, when checkpoints were pushed, the exact `<HUB_MODEL_ID>-step-<N>` HF repo — is written to
+`OUTPUT_DIR/best_checkpoint.txt` (and mirrored into the W&B run summary). A full log is written to
 `logs/train.log`.
 
 **Eval/checkpoint schedule**: fixed step intervals are epoch-count-proof and derived from the
@@ -92,6 +94,12 @@ behavioural evaluation. Actual safety + monitorability evaluation is done **sepa
 on the pushed checkpoints** (like the reference repo `PedroMLF/Reward-Hacking-in-Explanations`,
 which generates offline from saved checkpoints rather than during training). Training itself
 never generates.
+
+**Experiment tracking (Weights & Biases)** — on by default (`REPORT_TO=wandb`). The HF `Trainer`
+streams the full training log (loss, learning rate, per-eval DPO metrics, gradients/system stats)
+to W&B, where the curves and figures render automatically — the same metrics also land in
+`eval_metrics.jsonl`. Run `wandb login` once (or set `WANDB_API_KEY`) first; name the run with
+`WANDB_PROJECT` / `RUN_NAME`. Disable with `REPORT_TO=none bash train.sh`.
 
 For a long run, use tmux so an SSH drop doesn't kill it:
 

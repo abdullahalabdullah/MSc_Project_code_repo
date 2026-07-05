@@ -5,16 +5,18 @@
 # results phase runs separately afterwards: see run_monitor_and_results.sh.
 #
 # Usage:
-#   bash monitorability-eval/run_inference.sh <model_id> <dataset|ALL> <hint_type|ALL>
+#   bash monitorability-eval/run_inference.sh <model_id> <dataset|d1,d2|ALL> <hint_type|ALL>
 #
 #   model_id   HF model ID (e.g. Qwen/Qwen3-4B) or a local model dir. All output
 #              dirs are namespaced by its folder-safe name ('/' -> '_').
-#   dataset    a dataset key from config/mvp_config.yaml, or ALL for every key.
+#   dataset    a dataset key from config/mvp_config.yaml, a comma-separated subset
+#              (e.g. mmlu_pro,lexam), or ALL for every key.
 #   hint_type  a hint type (professor, visual_pattern, metadata, wrong_few_shot,
 #              grader_hacking, unethical), or ALL for every type.
 #
 # Examples:
 #   bash monitorability-eval/run_inference.sh Qwen/Qwen3-4B ALL professor
+#   bash monitorability-eval/run_inference.sh Qwen/Qwen3-4B mmlu_pro,lexam professor
 #   bash monitorability-eval/run_inference.sh Qwen/Qwen3-1.7B wmdp ALL
 #
 # Optional env knobs:
@@ -32,7 +34,7 @@ set -uo pipefail
 # config/, outputs-and-results/, and logs/ resolve as repo-root-relative paths.
 cd "$(dirname "$0")/.."
 
-USAGE="usage: bash monitorability-eval/run_inference.sh <model_id> <dataset|ALL> <hint_type|ALL>"
+USAGE="usage: bash monitorability-eval/run_inference.sh <model_id> <dataset|d1,d2|ALL> <hint_type|ALL>"
 MODEL_ID="${1:?$USAGE}"
 DATASET_ARG="${2:?$USAGE}"
 HINT_ARG="${3:?$USAGE}"
@@ -46,11 +48,16 @@ ALL_HINTS=($(python -c "import yaml; print(' '.join(yaml.safe_load(open('config/
 
 if [[ "$DATASET_ARG" == "ALL" ]]; then
     DATASETS=("${ALL_DATASETS[@]}")
-elif [[ " ${ALL_DATASETS[*]} " == *" $DATASET_ARG "* ]]; then
-    DATASETS=("$DATASET_ARG")
 else
-    echo "ERROR: unknown dataset '$DATASET_ARG'. Valid: ${ALL_DATASETS[*]} (or ALL)."
-    exit 1
+    # A single key or a comma-separated subset, e.g. mmlu_pro,lexam. Passed as one
+    # list to 02 so the model is loaded ONCE and reused across the given datasets.
+    IFS=',' read -r -a DATASETS <<< "$DATASET_ARG"
+    for ds in "${DATASETS[@]}"; do
+        if [[ " ${ALL_DATASETS[*]} " != *" $ds "* ]]; then
+            echo "ERROR: unknown dataset '$ds'. Valid: ${ALL_DATASETS[*]} (or ALL, or a comma-separated subset)."
+            exit 1
+        fi
+    done
 fi
 
 if [[ "$HINT_ARG" == "ALL" ]]; then

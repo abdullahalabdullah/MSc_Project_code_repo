@@ -162,7 +162,9 @@ def run_dataset(root, config, dataset_key, models, hint_type):
             json.dump(summary, f, indent=2)
 
         # --- Print results --------------------------------------------------------
-        print(f"  n_total={result['n_total']}  n_level1_pass={result['n_level1_pass']}  "
+        _n1, _nt = result['n_level1_pass'], result['n_total']
+        _l1pct = f" ({100 * _n1 / _nt:.1f}%)" if _nt else ""
+        print(f"  n_total={_nt}  n_level1_pass={_n1}{_l1pct}  "
               f"skip_rate={_fmt(result['skip_rate'])}")
         print(f"  Mean TE  before={_fmt(result['mean_TE_before'])}  after={_fmt(result['mean_TE_after'])}")
         print(f"  Mean R_effect  before={_fmt(result['mean_R_effect_before'])}  after={_fmt(result['mean_R_effect_after'])}")

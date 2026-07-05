@@ -9,13 +9,14 @@ config/mvp_config.yaml and namespaced on disk by its key (see resolve_paths).
 The pipeline is multiple-choice with a **variable option count of 3–10 (A–J)**:
 each question keeps its own number of options. The current suite:
 
-  mmlu_redux     — HF edinburgh-dawg/mmlu-redux, error_type=="ok", uniform by subject (4 opt)
+  mmlu_pro       — HF TIGER-Lab/MMLU-Pro, reasoning-heavy MMLU, uniform by category (up to 10 opt)
   gpqa_diamond   — HF Idavidrein/gpqa (gpqa_diamond), uniform by domain, all 198 (4 opt)
   wmdp           — HF cais/wmdp, uniform by subdomain (4 opt)
   codemmlu       — HF Fsoft-AIC/CodeMMLU, options in [3,5], uniform by subset (3-5 opt)
   lsat_ar        — GitHub ruixiangcui/AGIEval raw JSONL, analytical reasoning (5 opt)
   lsat_lr        — GitHub ruixiangcui/AGIEval raw JSONL, logical reasoning (5 opt)
   medxpertqa     — HF TsinghuaC3I/MedXpertQA (Text), expert medical, uniform by body system (10 opt)
+  lexam          — HF LEXam-Benchmark/LEXam (mcq_4_choices), English legal exam, uniform by area (4 opt)
 """
 
 import json
@@ -227,26 +228,36 @@ def _stratified_sample(records: list, n: int, rng: random.Random, keys: list) ->
 # Per-dataset loaders — each returns a list of normalised records (post-filter)
 # ---------------------------------------------------------------------------
 
-def _load_mmlu_redux(ds_cfg: dict, rng: random.Random) -> list:
-    """MMLU-Redux: 30 subject configs, keep only error_type == 'ok'. 4 options."""
-    from datasets import load_dataset as hf_load_dataset, get_dataset_config_names
-    hf = ds_cfg["hf"]
-    subjects = ds_cfg.get("subjects") or get_dataset_config_names(hf)
-    split = ds_cfg.get("split", "test")
+def _load_mmlu_pro(ds_cfg: dict, rng: random.Random) -> list:
+    """MMLU-Pro: harder MMLU redesign, up to 10 options (A–J), by category.
+
+    Reasoning-heavy 10-way MCQ (TIGER-Lab/MMLU-Pro). Every question keeps its
+    full native option list — 10 for most items, a minority fewer after
+    distractor de-duplication; anything outside the pipeline's 3–10 range is
+    skipped. `answer_index` gives the 0-based gold option (falls back to the
+    `answer` letter). Grouped by `category` (14 subjects) for uniform sampling.
+    """
+    from datasets import load_dataset as hf_load_dataset
+    ds = hf_load_dataset(ds_cfg["hf"], split=ds_cfg.get("split", "test"))
     recs = []
-    for subject in subjects:
-        ds = hf_load_dataset(hf, subject, split=split)
-        for idx, row in enumerate(ds):
-            if row.get("error_type") != "ok":
-                continue
-            recs.append({
-                "question": row["question"],
-                "options": [_clean(c) for c in row["choices"]],
-                "correct_idx": int(row["answer"]),
-                "group": subject,
-                "subgroup": None,
-                "source_id": f"{subject}_{idx}",
-            })
+    for idx, row in enumerate(ds):
+        options = [_clean(o) for o in row["options"]]
+        k = len(options)
+        if not (MIN_OPTIONS <= k <= MAX_OPTIONS):
+            continue
+        correct_idx = row.get("answer_index")
+        if correct_idx is None:
+            correct_idx = _resolve_answer_idx(row.get("answer"), options)
+        if correct_idx is None or not (0 <= correct_idx < k):
+            continue
+        recs.append({
+            "question": _clean(row["question"]),
+            "options": options,
+            "correct_idx": int(correct_idx),
+            "group": row.get("category") or "unknown",
+            "subgroup": None,
+            "source_id": f"mmlu_pro_{row.get('question_id', idx)}",
+        })
     return recs
 
 
@@ -432,6 +443,44 @@ def _load_medxpertqa(ds_cfg: dict, rng: random.Random) -> list:
     return recs
 
 
+def _load_lexam(ds_cfg: dict, rng: random.Random) -> list:
+    """LEXam (mcq_4_choices): legal-exam MCQ, English only, 4 options, by area.
+
+    Only the `mcq_4_choices` config is used (from the registry). LEXam ships
+    `choices` as a *stringified* Python list and `gold` as the 0-based correct
+    index. We keep only rows whose `language` matches the config (default "en"),
+    parse the choices, and group by `area` (legal domain) for uniform stratified
+    sampling. Options outside the pipeline's 3–10 range are skipped (LEXam's
+    mcq_4_choices is always 4).
+    """
+    import ast
+    from datasets import load_dataset as hf_load_dataset
+    ds = hf_load_dataset(ds_cfg["hf"], ds_cfg["config"], split=ds_cfg.get("split", "test"))
+    language = ds_cfg.get("language", "en")
+    recs = []
+    for idx, row in enumerate(ds):
+        if language and row.get("language") != language:
+            continue
+        raw = row["choices"]
+        options = raw if isinstance(raw, list) else ast.literal_eval(raw)
+        options = [_clean(o) for o in options]
+        k = len(options)
+        if not (MIN_OPTIONS <= k <= MAX_OPTIONS):
+            continue
+        correct_idx = _resolve_answer_idx(row.get("gold"), options)
+        if correct_idx is None or not (0 <= correct_idx < k):
+            continue
+        recs.append({
+            "question": _clean(row["question"]),
+            "options": options,
+            "correct_idx": int(correct_idx),
+            "group": row.get("area") or "unknown",
+            "subgroup": None,
+            "source_id": row.get("id") or f"lexam_{idx}",
+        })
+    return recs
+
+
 def _resolve_answer_idx(gold, options: list) -> int | None:
     """Map a gold answer (letter 'A'.., int index, or the answer text) to an index."""
     if isinstance(gold, (list, tuple)):
@@ -454,12 +503,13 @@ def _resolve_answer_idx(gold, options: list) -> int | None:
 
 
 _LOADERS = {
-    "mmlu_redux": _load_mmlu_redux,
+    "mmlu_pro": _load_mmlu_pro,
     "gpqa": _load_gpqa,
     "wmdp": _load_wmdp,
     "codemmlu": _load_codemmlu,
     "agieval_gh": _load_agieval_gh,
     "medxpertqa": _load_medxpertqa,
+    "lexam": _load_lexam,
 }
 
 
