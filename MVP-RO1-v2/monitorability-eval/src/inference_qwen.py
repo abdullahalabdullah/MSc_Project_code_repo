@@ -194,10 +194,10 @@ def run_inference_qwen(config: dict, model_cfg: dict, dataset: list, base_seed: 
     wording is read from the config `hint:` block. Outputs are namespaced by hint
     type so different hints never collide.
 
-    Writes:
-      outputs/{model_name}/{hint_type}/hinted.jsonl
-      outputs/{model_name}/{hint_type}/unhinted.jsonl
-      outputs/{model_name}/{hint_type}/progress.json  (resume checkpoint)
+    Writes hinted.jsonl, unhinted.jsonl, and progress.json (resume checkpoint)
+    directly into `config["paths"]["outputs_dir"]`. The caller is responsible for
+    passing an already model/dataset/hint-namespaced directory (via resolve_paths),
+    i.e. outputs/{model_name}/{dataset}/{hint_type}/.
 
     Each JSONL line contains the same fields as src/inference.py plus `thinking`
     and `hint_type`:
@@ -216,7 +216,9 @@ def run_inference_qwen(config: dict, model_cfg: dict, dataset: list, base_seed: 
     if tokenizer is None or llm is None:
         tokenizer, llm = load_qwen_model(model_cfg)
 
-    out_dir = Path(config["paths"]["outputs_dir"]) / model_name / hint_type
+    # outputs_dir is already namespaced model/dataset/hint by the caller
+    # (resolve_paths); write straight into it — do NOT re-append model/hint.
+    out_dir = Path(config["paths"]["outputs_dir"])
     out_dir.mkdir(parents=True, exist_ok=True)
 
     hinted_path = out_dir / "hinted.jsonl"

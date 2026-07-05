@@ -102,7 +102,9 @@ def main():
     tokenizer, llm = load_qwen_model(model_cfg)
 
     for ds in datasets:
-        paths = resolve_paths(root, config, ds)
+        # Namespace outputs model-first: outputs/{model}/{ds}/{hint}/ — the
+        # canonical layout the monitor/results phase reads (resolve_paths).
+        paths = resolve_paths(root, config, ds, model_cfg["name"], hint_type)
         dataset = load_dataset_index(paths["data_index"])
         print(f"\n{'='*60}")
         print(f"Dataset: {ds}  ({len(dataset)} instances from {paths['data_index']})")
