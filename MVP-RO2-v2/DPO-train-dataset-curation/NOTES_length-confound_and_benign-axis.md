@@ -170,9 +170,12 @@ Lean **#2** for a defensible thesis result, **#1** as a fast first version.
 
 Not blocking, but worth remembering:
 
-- **No standard DPO export** ({prompt, chosen, rejected} jsonl / HF Dataset) and no explicit
-  "strip vs keep CoT" decision — `chosen`/`rejected` currently retain unverified `<think>` CoT.
-- **No train/val/test split or eval decontamination.**
+- ~~No standard DPO export~~ **RESOLVED**: stage 06 (`06_export_dpo_dataset.py`) now exports a
+  HF `DatasetDict({train,valid})` with `prompt`/`chosen`/`rejected` to `outputs/<run>/dpo_dataset/`.
+  The "strip vs keep CoT" decision defaults to **keep** (`EXPORT_FIELD=full`); set
+  `EXPORT_FIELD=answer` to export the visible post-`</think>` answer instead.
+- **No train/val/test split** beyond train/valid (stage 06 splits by `VALID_FRACTION`, no held-out
+  test split yet) **or eval decontamination.**
 - **Selection is `argmin/argmax` cost** — outlier/RM-error prone; no coherence/degeneracy/
   min-length quality floor on `chosen`.
 - **No confidence gating** (filter-4 margin is off; WildGuard confidence unused in the main path).

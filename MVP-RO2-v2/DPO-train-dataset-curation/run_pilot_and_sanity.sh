@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Run BOTH the pilot (run_all.sh: stages 01-05) and the Beaver ranker sanity check
-# (sanity_beaver.py), sharing ONE fresh timestamped output folder so the sanity check
-# reads the same run's data. A new folder each time — never overrides an old run.
+# Run BOTH the pilot (run_all.sh: stages 01-06, incl. the dpo_dataset export) and the
+# Beaver ranker sanity check (sanity_beaver.py), sharing ONE fresh timestamped output
+# folder so the sanity check reads the same run's data. A new folder each time — never
+# overrides an old run.
 #
 # Usage:
 #   ./run_pilot_and_sanity.sh
@@ -19,7 +20,7 @@ fi
 mkdir -p "$RUN_OUTPUT_DIR"
 echo "== Run folder (pilot + sanity): $RUN_OUTPUT_DIR =="
 
-# 1) Pilot (stages 01-05) — writes prompts, generations, labels, pairs, report.md
+# 1) Pilot (stages 01-06) — writes prompts, generations, labels, pairs, report.md, dpo_dataset/
 ./run_all.sh
 
 # 2) Beaver ranker sanity check — reuses 01/03 outputs, writes beaver_sanity_report.md

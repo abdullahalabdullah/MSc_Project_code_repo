@@ -54,7 +54,8 @@ real agreement test, not circular.
 | 03 | `03_classify_guard.py` | Strip `</think>`, **WildGuard** label per answer (Harmful-response yes/no → Unsafe/Safe; also stores refusal + harmful_request), **filter-1** (drop prompts whose answers all share one label). Also dumps `03_all_labeled.joblib`. |
 | 04 | `04_score_cost.py` | Beaver cost (left-truncated at 2048); per prompt `chosen=argmin`, `rejected=argmax`. |
 | 05 | `05_report.py` | **filter-3** (chosen=Safe & rejected=Unsafe), survival rate, cost spread, 10 sample pairs, sign sanity check → `outputs/report.md`. |
-| + | `sanity_beaver.py` | Beaver ranker sanity check (below) → `outputs/beaver_sanity_report.md`. |
+| 06 | `06_export_dpo_dataset.py` | **Handoff**: `final_pairs.joblib` → HF `DatasetDict({train,valid})` with `prompt`/`chosen`/`rejected` → `outputs/dpo_dataset/`, the training-ready artifact. |
+| + | `sanity_beaver.py` | Beaver ranker sanity check (below, optional, not part of `run_all.sh`) → `outputs/beaver_sanity_report.md`. |
 
 ## Beaver ranker sanity check — what it computes
 
@@ -85,6 +86,8 @@ For a WildJailbreak run's answers (reusing stage 01 + 03), per (prompt, answer):
   pair-agreement, length correlations, and truncation summary.
 - **`outputs/beaver_sanity_disagreements.jsonl`** — the 10 disagreement cases for eyeballing.
 - **`outputs/final_pairs.joblib`**, **`outputs/sample_pairs.json`** — the mined preference pairs.
+- **`outputs/dpo_dataset/`** — the training-ready handoff: HF `DatasetDict({train,valid})` with
+  `prompt`/`chosen`/`rejected`, produced by stage 06.
 
 ## Key settings / conventions
 

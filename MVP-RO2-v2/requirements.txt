@@ -1,0 +1,26 @@
+# MVP-RO2-v2 — harmlessness DPO pipeline
+#
+# Single unified environment for the whole repo — the ONLY requirements file (the
+# DPO-train-dataset-curation/ module has no separate copy). Covers end-to-end dataset
+# curation and the LoRA DPO trainer (train_dpo.py / train.sh).
+
+# ── Harmlessness DPO curation module (DPO-train-dataset-curation/) ──
+vllm>=0.8.5
+torch>=2.6.0
+transformers>=4.51.3
+accelerate>=1.4.0
+datasets>=3.2.0
+huggingface-hub>=0.30.0
+sentencepiece>=0.1.99
+joblib==1.4.2
+numpy==1.26.4
+matplotlib>=3.7.0
+python-dotenv>=1.0.1
+
+# ── DPO training (train_dpo.py / train.sh) + utilities ──
+trl==0.22.2            # LoRA DPO training (DPOTrainer / DPOConfig) — pinned exact: train_dpo.py's
+                        # CLI flags were verified against this version; TRL's DPOConfig API
+                        # changes across versions, so bump deliberately (run
+                        # `python train_dpo.py --help` after upgrading to confirm nothing broke,
+                        # then re-pin) rather than floating.
+peft>=0.14.0           # LoRA adapters (train_dpo.py --use_peft)

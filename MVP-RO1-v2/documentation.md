@@ -134,26 +134,14 @@ in `src/dataset.py` (`_LOADERS`).
 |-----|--------|--------|--------|------------------|------|
 | `mmlu_redux` | Academic QA (broad) | HF `edinburgh-dawg/mmlu-redux` (30 subjects) | `error_type == "ok"` | by subject | 4 |
 | `gpqa_diamond` | Academic QA (science, PhD) | HF `Idavidrein/gpqa` (`gpqa_diamond`) | none | by High-level domain (all 198) | 4 |
-| `mathbench_primary/middle/high/college` | Maths (by stage) | MathBench release zip, English `single_choice` (theory + application) | English only | subject-area → topic | 4 |
-| `compmath` | Maths (graduate) | HF `biancaraimondi/CompMath-MCQ` | none | by subtopic (5, 40 each) | 3 |
-| `logieval` *(disabled)* | Logic | HF gated — **not released yet** | options ∈ {3,4,5} | reasoning-type → task-format | 3/4/5 |
 | `wmdp` | Safety/Security | HF `cais/wmdp` (bio/chem/cyber) | none | by subdomain (~67 each) | 4 |
 | `codemmlu` | Coding | HF `Fsoft-AIC/CodeMMLU` (9 subsets) | options ∈ [3,5] | by subset (9) | 3–5 |
 | `lsat_ar` | Applied Reasoning (analytical) | GitHub `ruixiangcui/AGIEval` (`lsat-ar.jsonl`) | options ∈ [3,5] | uniform random (~230 instances) | 5 |
 | `lsat_lr` | Applied Reasoning (logical) | GitHub `ruixiangcui/AGIEval` (`lsat-lr.jsonl`) | options ∈ [3,5] | uniform random (~510 instances) | 5 |
 
 Notes:
-- **MathBench Arithmetic is omitted** — MathBench has no MCQ for it (cloze only).
-  Primary has only ~109 English MCQ, so it falls below the 200 budget.
-- **mathbench_* and compmath are excluded from the active eval suite** — both hinted
-  and unhinted accuracies are near-ceiling (≥ 0.90), so the hint has negligible causal
-  leverage and TE ≈ 0. They remain in the config registry but are not in `DATASETS`.
-- **CompMath is 3-option**; **CodeMMLU/LogiEval mix 3/4/5 options**. CodeMMLU's
-  rare 6–7-option items (answers F/G) are dropped to keep the pipeline at A–E.
-- **LogiEval is disabled** (commented out in the registry). The spec's dataset
-  (Westlake LogiEval, arXiv 2505.11854) is gated and not publicly released yet —
-  awaiting the authors. The loader is ready; uncomment the `logieval` block, set
-  `hf`/`fields`, and add it to the run-script `DATASETS` lists once access exists.
+- **CodeMMLU mixes 3/4/5 options.** Its rare 6–7-option items (answers F/G) are
+  dropped to keep the pipeline at A–E.
 - **AGIEval LSAT subsets (lsat_ar, lsat_lr)** are downloaded from the AGIEval
   GitHub repo (`ruixiangcui/AGIEval`, `data/v1/{name}.jsonl`) via the shared
   `agieval_gh` loader — the HF mirrors (`baber/agieval`, `hails/agieval_*`) either

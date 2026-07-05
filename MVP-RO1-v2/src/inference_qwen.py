@@ -137,11 +137,6 @@ def parse_answer_qwen(raw_output: str) -> str | None:
     return _base_parse_answer(raw_output)
 
 
-def is_no_cot(cot_text: str) -> bool:
-    """True if the extracted CoT is shorter than 100 characters."""
-    return len(cot_text) < 100
-
-
 # ---------------------------------------------------------------------------
 # Main inference function
 # ---------------------------------------------------------------------------

@@ -16,19 +16,53 @@ response as `chosen` and the most harmful as `rejected`, validated by a safety c
 | 03 | `03_classify_guard.py` (GPU) | Split on `</think>`, **WildGuard** label (Harmful-response yes/no → Unsafe/Safe; independent of the generator), **filter-1** (drop prompts whose valid responses share one label) |
 | 04 | `04_score_cost.py` (GPU) | `beaver-7b-unified-cost`; per prompt `chosen=argmin(cost)`, `rejected=argmax(cost)` |
 | 05 | `05_report.py` | **filter-3** (chosen=Safe & rejected=Unsafe), survival rate, cost-spread dist, 10 sample pairs, sign-convention sanity check |
+| 06 | `06_export_dpo_dataset.py` | **Handoff**: convert `final_pairs.joblib` → a HF `DatasetDict({train,valid})` with `prompt`/`chosen`/`rejected`, saved via `save_to_disk` |
 
 Each stage reads/writes a compressed `.joblib` in `outputs/`, so stages are independent
 and resumable.
+
+## Handoff / integration (stage 06)
+
+This module is end-to-end: `run_all.sh` finishes by writing a **training-ready DPO dataset**
+that the rest of the project consumes. Stage 06 converts the mined pairs into the standard TRL
+preference schema and saves it as a HuggingFace `DatasetDict`:
+
+```
+outputs/<run>/dpo_dataset/        # DatasetDict, save_to_disk format
+  train/   valid/
+```
+
+Schema (both splits): **`prompt`**, **`chosen`**, **`rejected`** (strings).
+- `prompt` — the harmful WildJailbreak prompt (the trainer applies its own chat template).
+- `chosen` / `rejected` — by default the **full** responses (`<think>…</think>` + answer),
+  matching what the model generates. Set `EXPORT_FIELD=answer` to export only the visible
+  post-`</think>` answer instead.
+
+Load it in the trainer with:
+
+```python
+from datasets import load_from_disk
+ds = load_from_disk("DPO-train-dataset-curation/outputs/<run>/dpo_dataset")
+train, valid = ds["train"], ds["valid"]   # columns: prompt, chosen, rejected
+```
+
+Split is deterministic (`config.SEED`); `config.VALID_FRACTION` (default `0.1`, env-overridable)
+sets the valid hold-out. DPO training itself lives in an external trainer (add `trl` to that
+environment) — this module stops at the dataset.
 
 ## Environment (single venv)
 
 Everything runs in one environment — the Beaver cost model is loaded via the self-contained
 `beaver_cost_model.py` (plain `transformers`, no `safe-rlhf`), so there is no dependency
-conflict with the Qwen3 / vLLM stack.
+conflict with the Qwen3 / vLLM stack. Dependencies are declared in the repo-root
+[`requirements.txt`](../requirements.txt) (single unified environment for the whole project,
+curation + training):
 
 ```bash
+cd ..   # repo root
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
+cd DPO-train-dataset-curation
 ```
 
 **WildJailbreak is gated** — accept the terms on its HF page, then make `HF_TOKEN` available
@@ -39,19 +73,23 @@ NOT sync via git; create it on the pod or export the token there. Also optionall
 ## Run
 
 ```bash
-./run_all.sh            # stages 01-05 + the Beaver sanity check
+./run_all.sh            # stages 01-06 (prompts -> generation -> labels -> cost -> pairs -> export)
 ```
 
 Each `./run_all.sh` writes to a **new** `outputs/run_<timestamp>/` folder (all stages share it
 via the exported `RUN_OUTPUT_DIR`), so a new run never overrides an old one. Pin a folder with
 `RUN_OUTPUT_DIR=outputs/my_run ./run_all.sh`.
 
+The Beaver ranker sanity check (`sanity_beaver.py`) is a separate, optional add-on — not run by
+`run_all.sh`. Use `run_pilot_and_sanity.sh` to run both together (see below).
+
 To run stages by hand, set the same folder yourself so they share it (otherwise they default
 to `./outputs` and would overwrite it):
 ```bash
 export RUN_OUTPUT_DIR=outputs/run_$(date +%Y%m%d_%H%M%S)
 python 01_prepare_prompts.py && python 02_generate_responses.py \
-  && python 03_classify_guard.py && python sanity_beaver.py
+  && python 03_classify_guard.py && python 04_score_cost.py \
+  && python 05_report.py && python 06_export_dpo_dataset.py
 ```
 
 ## Beaver ranker sanity check (`sanity_beaver.py`)
@@ -90,6 +128,8 @@ are produced and the sign-convention sanity check prints `PASS`.
 
 ## Key outputs (`outputs/`)
 
+- `dpo_dataset/` — **the handoff**: HF `DatasetDict({train,valid})` with `prompt`/`chosen`/`rejected`
+  (see "Handoff / integration" above). This is what the trainer loads.
 - `final_pairs.joblib` — `{prompt, subset, chosen, rejected, chosen_cost, rejected_cost, margin,
   chosen_runner_up_gap, rejected_runner_up_gap, unsafe_frac, chosen_label, rejected_label,
   chosen/rejected_full_tokens, chosen/rejected_answer_words, chosen/rejected_think_words}`

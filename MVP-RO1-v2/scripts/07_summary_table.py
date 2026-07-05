@@ -18,13 +18,10 @@ from pathlib import Path
 DATASET_ORDER = [
     "mmlu_redux",
     "gpqa_diamond",
-    "mathbench_primary",
-    "mathbench_middle",
-    "mathbench_high",
-    "mathbench_college",
-    "compmath",
     "wmdp",
     "codemmlu",
+    "lsat_ar",
+    "lsat_lr",
 ]
 
 

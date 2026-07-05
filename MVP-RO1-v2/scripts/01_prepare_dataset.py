@@ -34,9 +34,8 @@ def main():
     parser.add_argument("--config", default="config/mvp_config.yaml")
     parser.add_argument("--dataset", default="mmlu_redux",
                         help="Dataset key from the config `datasets:` registry: "
-                             "mmlu_redux, gpqa_diamond, mathbench_primary, "
-                             "mathbench_middle, mathbench_high, mathbench_college, "
-                             "compmath, logieval, wmdp, codemmlu. Default: mmlu_redux.")
+                             "mmlu_redux, gpqa_diamond, wmdp, codemmlu, lsat_ar, "
+                             "lsat_lr. Default: mmlu_redux.")
     parser.add_argument("--n-examples", type=int, default=None,
                         help="Override the config n_examples budget (e.g. 50).")
     parser.add_argument("--force", action="store_true",

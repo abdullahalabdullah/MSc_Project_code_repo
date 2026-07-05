@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Pilot runner for the harmlessness preference-pair pipeline (stages 01-05).
+# Pilot runner for the harmlessness preference-pair pipeline (stages 01-06, ending in the
+# training-ready dpo_dataset export).
 # (The Beaver ranker sanity check is separate: sanity_beaver.py — or use run_pilot_and_sanity.sh
 #  to do both.)
 #
@@ -52,4 +53,8 @@ $PY 04_score_cost.py
 echo "== Stage 05: filter-3 + reports =="
 $PY 05_report.py
 
+echo "== Stage 06: export training-ready DPO dataset (HF DatasetDict) =="
+$PY 06_export_dpo_dataset.py
+
 echo "== Pilot done. Results in: $RUN_OUTPUT_DIR/report.md =="
+echo "== DPO dataset (handoff): $RUN_OUTPUT_DIR/dpo_dataset =="

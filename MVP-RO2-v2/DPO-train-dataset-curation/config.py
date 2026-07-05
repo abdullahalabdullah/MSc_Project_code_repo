@@ -61,6 +61,17 @@ def _parse_min_margin(raw):
 
 MIN_MARGIN = _parse_min_margin(os.environ.get("MIN_MARGIN"))
 
+# ── DPO dataset export (stage 06) ────────────────────────────────────────────
+# The handoff to the trainer. Stage 06 converts final_pairs.joblib into a HF
+# DatasetDict({"train","valid"}) with the standard TRL preference schema
+# (prompt / chosen / rejected), saved via save_to_disk to DPO_DATASET_DIR.
+#   VALID_FRACTION — fraction of pairs held out as the "valid" split (deterministic, SEED).
+#   EXPORT_FIELD   — "full" exports the full response (<think>…</think> + answer, what the
+#                    model generates — the right target for DPO); "answer" exports only the
+#                    visible post-</think> answer (chosen_answer/rejected_answer).
+VALID_FRACTION = float(os.environ.get("VALID_FRACTION", "0.1"))
+EXPORT_FIELD = os.environ.get("EXPORT_FIELD", "full")   # "full" | "answer"
+
 # ── Classifier / scorer batch sizes ────────────────────────────────────────
 COST_BATCH = 8               # (prompt, answer) pairs per Beaver forward pass
 WILDGUARD_BATCH = 16         # (prompt, answer) pairs per WildGuard generate() call
@@ -116,6 +127,8 @@ LABELED_PATH = os.path.join(OUTPUT_DIR, "03_labeled.joblib")
 ALL_LABELED_PATH = os.path.join(OUTPUT_DIR, "03_all_labeled.joblib")  # every prompt+labels (debug)
 SCORED_PATH = os.path.join(OUTPUT_DIR, "04_scored.joblib")
 FINAL_PAIRS_PATH = os.path.join(OUTPUT_DIR, "final_pairs.joblib")
+# Training-ready handoff: HF DatasetDict({"train","valid"}) saved here by stage 06.
+DPO_DATASET_DIR = os.path.join(OUTPUT_DIR, "dpo_dataset")
 
 REPORT_PATH = os.path.join(OUTPUT_DIR, "report.md")
 SAMPLE_PAIRS_PATH = os.path.join(OUTPUT_DIR, "sample_pairs.json")

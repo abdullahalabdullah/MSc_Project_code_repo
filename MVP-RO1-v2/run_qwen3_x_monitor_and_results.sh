@@ -30,8 +30,7 @@ HINT_TYPE="professor"
 # Models to process — run one after the other. Must match the MODELs used in inference.
 MODELS=(qwen3_4b_saferl)
 # Active datasets for this run — must match DATASETS in run_qwen3_x_inference.sh
-# (mathbench_* and compmath excluded; logieval is commented out in the config
-# registry; aqua_rat/logiqa_en were trialled and dropped — see config/mvp_config.yaml).
+# and the `datasets:` registry in config/mvp_config.yaml.
 DATASETS=(mmlu_redux gpqa_diamond wmdp codemmlu lsat_ar lsat_lr)
 
 LOGFILE="run_monitor_and_results_$(date +%Y%m%d_%H%M%S).log"

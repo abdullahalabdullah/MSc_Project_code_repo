@@ -11,24 +11,18 @@ each question keeps its own number of options. The current suite:
 
   mmlu_redux     — HF edinburgh-dawg/mmlu-redux, error_type=="ok", uniform by subject (4 opt)
   gpqa_diamond   — HF Idavidrein/gpqa (gpqa_diamond), uniform by domain, all 198 (4 opt)
-  mathbench_*    — MathBench release zip, English single_choice (theory+application),
-                   two-level uniform: subject-area -> topic (4 opt)
-  compmath       — HF biancaraimondi/CompMath-MCQ, uniform by subtopic (3 opt)
-  logieval       — HF (gated), options in {3,4,5}, two-level: reasoning-type -> task-format
   wmdp           — HF cais/wmdp, uniform by subdomain (4 opt)
   codemmlu       — HF Fsoft-AIC/CodeMMLU, options in [3,5], uniform by subset (3-5 opt)
   lsat_ar        — GitHub ruixiangcui/AGIEval raw JSONL, analytical reasoning (5 opt)
   lsat_lr        — GitHub ruixiangcui/AGIEval raw JSONL, logical reasoning (5 opt)
 """
 
-import io
 import json
 import os
 import random
 import re
 import ssl
 import urllib.request
-import zipfile
 from collections import defaultdict
 from pathlib import Path
 
@@ -43,7 +37,7 @@ MIN_OPTIONS = 3
 # ---------------------------------------------------------------------------
 
 def ensure_hf_auth(verbose: bool = True) -> bool:
-    """Log into the HuggingFace Hub so gated assets (GPQA, LogiEval, gated models)
+    """Log into the HuggingFace Hub so gated assets (GPQA, gated models)
     download in any environment.
 
     Token resolution order (first hit wins):
@@ -139,7 +133,7 @@ def resolve_paths(root, config: dict, dataset_key: str, model_name: str | None =
 #   {"question": str, "options": [str, ...], "correct_idx": int,
 #    "group": str, "subgroup": str | None, "source_id": str}
 # `group` is the primary stratum; `subgroup` (optional) is the second level used by
-# the two-level uniform samplers (MathBench, LogiEval).
+# two-level uniform sampling when a loader sets it.
 
 # Matches an option label at the start of a choice string: "(A)" (no trailing space),
 # "A.", or "A)". Trailing whitespace optional (some sources render "(A)4").
@@ -299,23 +293,6 @@ def _load_wmdp(ds_cfg: dict, rng: random.Random) -> list:
     return recs
 
 
-def _load_compmath(ds_cfg: dict, rng: random.Random) -> list:
-    """CompMath-MCQ: 3 options, grouped by subtopic."""
-    from datasets import load_dataset as hf_load_dataset
-    ds = hf_load_dataset(ds_cfg["hf"], split=ds_cfg.get("split", "test"))
-    recs = []
-    for idx, row in enumerate(ds):
-        recs.append({
-            "question": row["question"],
-            "options": [_clean(o) for o in row["options"]],
-            "correct_idx": int(row["correct_label"]),
-            "group": row["subtopic"],
-            "subgroup": None,
-            "source_id": f"compmath_{idx}",
-        })
-    return recs
-
-
 def _load_codemmlu(ds_cfg: dict, rng: random.Random) -> list:
     """CodeMMLU: 9 subsets, keep questions with 3–5 options, grouped by subset.
 
@@ -345,54 +322,13 @@ def _load_codemmlu(ds_cfg: dict, rng: random.Random) -> list:
     return recs
 
 
-def _load_logieval(ds_cfg: dict, rng: random.Random) -> list:
-    """LogiEval (gated HF): keep options in {3,4,5}; two-level groups
-    reasoning-type -> task-format.
-
-    Field names are config-driven (LogiEval's gated schema names are confirmed at
-    access time) with sensible defaults. `gold` may be a letter, an index, or the
-    answer string — all three are handled."""
-    from datasets import load_dataset as hf_load_dataset
-    f = ds_cfg.get("fields", {})
-    f_q = f.get("question", "question")
-    f_opts = f.get("options", "options")
-    f_ans = f.get("answer", "answer")
-    f_reason = f.get("reasoning_type", "reasoning type")
-    f_task = f.get("task_format", "task format")
-
-    load_args = {"split": ds_cfg.get("split", "test")}
-    if ds_cfg.get("config"):
-        ds = hf_load_dataset(ds_cfg["hf"], ds_cfg["config"], **load_args)
-    else:
-        ds = hf_load_dataset(ds_cfg["hf"], **load_args)
-
-    recs = []
-    for idx, row in enumerate(ds):
-        options = [_clean(o) for o in row[f_opts]]
-        k = len(options)
-        if k not in (3, 4, 5):
-            continue
-        correct_idx = _resolve_answer_idx(row[f_ans], options)
-        if correct_idx is None or not (0 <= correct_idx < k):
-            continue
-        recs.append({
-            "question": row[f_q],
-            "options": options,
-            "correct_idx": correct_idx,
-            "group": str(row.get(f_reason, "unknown")),
-            "subgroup": str(row.get(f_task, "unknown")),
-            "source_id": f"logieval_{idx}",
-        })
-    return recs
-
-
 def _load_agieval_gh(ds_cfg: dict, rng: random.Random) -> list:
     """AGIEval English subset from GitHub raw JSONL (ruixiangcui/AGIEval).
 
     Serves lsat_ar and lsat_lr — both share the AGIEval schema
-    (passage/question/options/label). Downloads the JSONL directly (like
-    MathBench). Options carry '(A)' prefixes which are stripped. Passage (when
-    present) is prepended to the question. label is a 0-indexed int.
+    (passage/question/options/label). Downloads the JSONL directly. Options carry
+    '(A)' prefixes which are stripped. Passage (when present) is prepended to the
+    question. label is a 0-indexed int.
     """
     name = ds_cfg["name"]                    # "lsat_ar" / "lsat_lr"
     hf_name = name.replace("_", "-")         # "lsat-ar" / "lsat-lr"
@@ -474,73 +410,11 @@ def _resolve_answer_idx(gold, options: list) -> int | None:
     return None
 
 
-# --- MathBench (downloaded release zip) ------------------------------------
-
-def _mathbench_root(ds_cfg: dict) -> Path:
-    """Download + extract mathbench_v1.zip once into a cache dir; return its path."""
-    cache = ds_cfg.get("cache_dir")
-    cache_dir = Path(cache) if cache else (Path(__file__).resolve().parent.parent
-                                           / "data" / "_mathbench_raw")
-    cache_dir.mkdir(parents=True, exist_ok=True)
-    root = cache_dir / "mathbench_v1"
-    if root.is_dir() and any(root.iterdir()):
-        return root
-    url = ds_cfg["url"]
-    print(f"  Downloading MathBench archive from {url} ...")
-    # Use certifi's CA bundle when available — the macOS python.org build ships
-    # without system roots, so a bare urlopen() fails SSL verification.
-    try:
-        import certifi
-        ssl_ctx = ssl.create_default_context(cafile=certifi.where())
-    except Exception:
-        ssl_ctx = None
-    with urllib.request.urlopen(url, context=ssl_ctx) as resp:
-        data = resp.read()
-    with zipfile.ZipFile(io.BytesIO(data)) as zf:
-        zf.extractall(cache_dir)
-    return root
-
-
-def _load_mathbench(ds_cfg: dict, rng: random.Random) -> list:
-    """One MathBench stage: English single_choice from both the application
-    ({stage}) and theory ({stage}_knowledge) folders. The `topic` field is
-    'Stage--SubjectArea--Topic'; group = subject area, subgroup = topic. 4 options."""
-    root = _mathbench_root(ds_cfg)
-    stage = ds_cfg["stage"]
-    recs = []
-    for folder in (stage, f"{stage}_knowledge"):
-        path = root / folder / "single_choice_en.jsonl"
-        if not path.exists():
-            continue
-        for idx, line in enumerate(path.read_text(encoding="utf-8").splitlines()):
-            line = line.strip()
-            if not line:
-                continue
-            row = json.loads(line)
-            options = [_clean(o) for o in row["options"]]
-            correct_idx = LETTERS.index(str(row["answer"]).strip().upper())
-            parts = [p.strip() for p in str(row.get("topic", "")).split("--")]
-            subject_area = parts[1] if len(parts) > 1 else "unknown"
-            topic = parts[2] if len(parts) > 2 else (parts[1] if len(parts) > 1 else "unknown")
-            recs.append({
-                "question": row["question"],
-                "options": options,
-                "correct_idx": correct_idx,
-                "group": subject_area,
-                "subgroup": topic,
-                "source_id": f"mathbench_{stage}_{folder}_{idx}",
-            })
-    return recs
-
-
 _LOADERS = {
     "mmlu_redux": _load_mmlu_redux,
     "gpqa": _load_gpqa,
     "wmdp": _load_wmdp,
-    "compmath": _load_compmath,
     "codemmlu": _load_codemmlu,
-    "logieval": _load_logieval,
-    "mathbench": _load_mathbench,
     "agieval_gh": _load_agieval_gh,
 }
 
@@ -558,7 +432,7 @@ def prepare_dataset(config: dict, output_path: Path, dataset_key: str,
 
     `n_examples` overrides the config `n_examples` budget for this dataset when
     given (e.g. a smaller 50-example run); otherwise the config value is used."""
-    ensure_hf_auth()  # GPQA / LogiEval are gated; harmless no-op for public datasets
+    ensure_hf_auth()  # GPQA is gated; harmless no-op for public datasets
 
     datasets_cfg = config.get("datasets", {})
     if dataset_key not in datasets_cfg:

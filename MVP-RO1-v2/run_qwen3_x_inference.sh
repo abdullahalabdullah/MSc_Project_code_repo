@@ -53,9 +53,8 @@ N_SAMPLES=""
 # 200 examples, is replaced). Note: setting N_EXAMPLES below also forces a rebuild.
 FORCE_PREPARE="false"
 
-# Active datasets for this run (mathbench_* and compmath excluded; logieval is
-# commented out in the config registry; aqua_rat/logiqa_en were trialled and
-# dropped — see config/mvp_config.yaml).
+# Active datasets for this run — the full `datasets:` registry in
+# config/mvp_config.yaml.
 DATASETS=(mmlu_redux gpqa_diamond wmdp codemmlu lsat_ar lsat_lr)
 LOGFILE="run_inference_$(date +%Y%m%d_%H%M%S).log"
 

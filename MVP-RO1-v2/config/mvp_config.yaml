@@ -8,17 +8,18 @@ hf_token: "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"
 # analysis/{key}/{model}/, plots/{key}/. Select one with the --dataset flag on every
 # script. The pipeline is MCQ with a VARIABLE option count of 3–5 (A–E); each question
 # keeps its own options. Sampling is uniform — single-level by `group`, or two-level
-# (group -> subgroup) when the loader sets a subgroup (mathbench_*, logieval).
+# (group -> subgroup) when the loader sets a subgroup.
 # Budget is 200 per dataset; datasets with fewer eligible items use all of them.
 datasets:
-  # Academic QA — broad, undergraduate level. error_type=="ok" filter; uniform by subject (30).
+  # --- Academic QA ---------------------------------------------------------
+  # Broad, undergraduate level. error_type=="ok" filter; uniform by subject (30). 4 options.
   mmlu_redux:
     loader: "mmlu_redux"
     hf: "edinburgh-dawg/mmlu-redux"
     split: "test"
     n_examples: 50
     random_seed: 88
-  # Academic QA — science, PhD level. No filter; uniform by High-level domain. Only 198 exist.
+  # Science, PhD level. No filter; uniform by High-level domain. Only 198 exist. 4 options.
   gpqa_diamond:
     loader: "gpqa"
     hf: "Idavidrein/gpqa"
@@ -26,59 +27,9 @@ datasets:
     split: "train"            # GPQA ships only a train split
     n_examples: 50
     random_seed: 88
-  # Maths — MathBench stages. English single_choice (theory + application), both carry the
-  # `Stage--SubjectArea--Topic` taxonomy; two-level uniform: subject-area -> topic. 4 options.
-  # Arithmetic is omitted (MathBench has no MCQ for it — cloze only). Primary has only 109.
-  mathbench_primary:
-    loader: "mathbench"
-    url: "https://github.com/open-compass/MathBench/files/15384594/mathbench_v1.zip"
-    stage: "primary"
-    n_examples: 50           # only ~109 English MCQ exist -> all used
-    random_seed: 88
-  mathbench_middle:
-    loader: "mathbench"
-    url: "https://github.com/open-compass/MathBench/files/15384594/mathbench_v1.zip"
-    stage: "middle"
-    n_examples: 50
-    random_seed: 88
-  mathbench_high:
-    loader: "mathbench"
-    url: "https://github.com/open-compass/MathBench/files/15384594/mathbench_v1.zip"
-    stage: "high"
-    n_examples: 50
-    random_seed: 88
-  mathbench_college:
-    loader: "mathbench"
-    url: "https://github.com/open-compass/MathBench/files/15384594/mathbench_v1.zip"
-    stage: "college"
-    n_examples: 50
-    random_seed: 88
-  # Maths — graduate level, computational. No filter; uniform by subtopic (5). 3 options.
-  compmath:
-    loader: "compmath"
-    hf: "biancaraimondi/CompMath-MCQ"
-    split: "test"
-    n_examples: 50
-    random_seed: 88
-  # Logic — DISABLED. The dataset matching the spec (Westlake LogiEval, arXiv
-  # 2505.11854: reasoning-type -> task-format, options {3,4,5}) is gated and not
-  # publicly released yet. Awaiting the authors' response on availability. The
-  # `logieval` loader in src/dataset.py is ready; uncomment + set `hf` (and `fields`
-  # if the schema names differ) once access is granted, then add `logieval` to the
-  # DATASETS lists in the run_*.sh scripts.
-  # logieval:
-  #   loader: "logieval"
-  #   hf: "TODO-SET-GATED-LOGIEVAL-HF-ID"
-  #   split: "test"
-  #   n_examples: 50
-  #   random_seed: 88
-  #   fields:                 # override if the gated schema uses different column names
-  #     question: "question"
-  #     options: "options"
-  #     answer: "answer"
-  #     reasoning_type: "reasoning type"
-  #     task_format: "task format"
-  # Safety & Security. No filter; uniform by subdomain (bio/chem/cyber, ~67 each). 4 options.
+
+  # --- Safety & Security ---------------------------------------------------
+  # No filter; uniform by subdomain (bio/chem/cyber, ~67 each). 4 options.
   wmdp:
     loader: "wmdp"
     hf: "cais/wmdp"
@@ -86,10 +37,23 @@ datasets:
     split: "test"
     n_examples: 50
     random_seed: 88
-  # Applied Reasoning — AGIEval English LSAT subsets, downloaded from the AGIEval
-  # GitHub raw JSONL (ruixiangcui/AGIEval) via the agieval_gh loader (parquet-free
-  # JSONL, shared schema: passage/question/options/label). AQuA-RAT and LogiQA-en
-  # were trialled and dropped (aqua_rat near-ceiling acc; logiqa_en weak TE signal).
+
+  # --- Coding --------------------------------------------------------------
+  # MCQ over code. Keep options in [3,5]; uniform by subset (9). 3–5 options.
+  codemmlu:
+    loader: "codemmlu"
+    hf: "Fsoft-AIC/CodeMMLU"
+    subsets: ["programming_syntax", "execution_prediction", "software_principles",
+              "fill_in_the_middle", "others", "dbms_sql", "api_frameworks",
+              "code_repair", "code_completion"]
+    split: "test"
+    n_examples: 50
+    random_seed: 88
+
+  # --- Applied Reasoning ---------------------------------------------------
+  # AGIEval English LSAT subsets, downloaded from the AGIEval GitHub raw JSONL
+  # (ruixiangcui/AGIEval) via the agieval_gh loader (parquet-free JSONL, shared
+  # schema: passage/question/options/label).
   # LSAT-AR: analytical reasoning (logic games), 5 options, ~230 instances.
   lsat_ar:
     loader: "agieval_gh"
@@ -100,16 +64,6 @@ datasets:
   lsat_lr:
     loader: "agieval_gh"
     name: "lsat_lr"
-    n_examples: 50
-    random_seed: 88
-  # Coding — MCQ over code. Keep options in [3,5]; uniform by subset (9). 3–5 options.
-  codemmlu:
-    loader: "codemmlu"
-    hf: "Fsoft-AIC/CodeMMLU"
-    subsets: ["programming_syntax", "execution_prediction", "software_principles",
-              "fill_in_the_middle", "others", "dbms_sql", "api_frameworks",
-              "code_repair", "code_completion"]
-    split: "test"
     n_examples: 50
     random_seed: 88
 
@@ -182,10 +136,6 @@ monitor:
   max_retries: 5
   backoff_factor: 2.0
   timeout: 60
-
-analysis:
-  delta_percentile: 25
-  delta_floor: 0.20
 
 gmean2:
   # Level-2 dataset diagnostic (reported only, not auto-enforced):
