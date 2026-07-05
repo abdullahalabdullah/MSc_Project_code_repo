@@ -30,11 +30,6 @@ MAX_LENGTH="${MAX_LENGTH:-12288}"
 MAX_PROMPT_LENGTH="${MAX_PROMPT_LENGTH:-4096}"
 # Optional: set to push every checkpoint to its own private HF repo "<HUB_MODEL_ID>-step-<N>".
 HUB_MODEL_ID="${HUB_MODEL_ID:-}"
-# Per-eval generation on the valid prompts (thinking-mode sampling) → eval_generations/step-*.jsonl.gz.
-# On by default; set EVAL_GENERATE=False to skip it if the extra decode time per eval is too costly.
-EVAL_GENERATE="${EVAL_GENERATE:-True}"
-EVAL_GEN_MAX_NEW_TOKENS="${EVAL_GEN_MAX_NEW_TOKENS:-8192}"  # lower to speed up eval (may truncate CoT)
-EVAL_GEN_BATCH_SIZE="${EVAL_GEN_BATCH_SIZE:-8}"
 
 # ── Locate the exported DPO dataset ─────────────────────────────────────────
 DATASET_PATH="${1:-$(ls -dt DPO-train-dataset-curation/outputs/*/dpo_dataset 2>/dev/null | head -1 || true)}"
@@ -87,13 +82,10 @@ python -u train_dpo.py \
     --lora_r 16 \
     --lora_dropout 0.05 \
     --lora_target_modules q_proj k_proj v_proj o_proj gate_proj up_proj down_proj \
-    --eval_generate "${EVAL_GENERATE}" \
-    --eval_gen_max_new_tokens "${EVAL_GEN_MAX_NEW_TOKENS}" \
-    --eval_gen_batch_size "${EVAL_GEN_BATCH_SIZE}" \
     "${HUB_ARGS[@]+"${HUB_ARGS[@]}"}" \
     2>&1 | tee logs/train.log
 
 echo "== Done. Best adapter: ${OUTPUT_DIR}/checkpoint-best =="
 echo "   Load it on top of the base model for inference"
 echo "   (transformers PeftModel, or vLLM with --enable-lora) — base: ${MODEL}"
-echo "== Eval artifacts: ${OUTPUT_DIR}/eval_metrics.jsonl + ${OUTPUT_DIR}/eval_generations/step-*.jsonl.gz =="
+echo "== Eval metrics (per-eval DPO loss/reward curves): ${OUTPUT_DIR}/eval_metrics.jsonl =="

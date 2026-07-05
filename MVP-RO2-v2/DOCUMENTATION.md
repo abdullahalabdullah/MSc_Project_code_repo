@@ -82,31 +82,16 @@ number of steps. Eval + checkpoint fire at:
 CLI flags, so this schedule is the only thing that triggers eval/save — nothing here sets
 `num_train_epochs` early-stop behavior; the run always trains through every epoch.
 
-**Eval artifacts (saved at every eval point, under `OUTPUT_DIR`):**
+**Eval metrics** — at every eval point the trainer writes one line to `OUTPUT_DIR/eval_metrics.jsonl`
+with `step`, `epoch`, and all DPO eval metrics (`eval_loss`, `eval_rewards/accuracies`,
+`eval_rewards/margins`, `eval_logps/*`, …). Plain JSONL for easy plotting of the training curves:
+`pandas.read_json("eval_metrics.jsonl", lines=True)`.
 
-- `eval_metrics.jsonl` — one line per eval with `step`, `epoch`, and all DPO eval metrics
-  (`eval_loss`, `eval_rewards/accuracies`, `eval_rewards/margins`, `eval_logps/*`, …). Plain
-  JSONL for easy plotting: `pandas.read_json("eval_metrics.jsonl", lines=True)`.
-- `eval_generations/step-<N>.jsonl.gz` — the policy's sampled responses to **all** valid-split
-  prompts at that checkpoint (one gzipped-JSONL file per checkpoint; each line has `step`,
-  `prompt_idx`, `prompt`, `generation`, `gen_tokens`). Decoding is thinking-mode sampling
-  (temp 0.6 / top_p 0.95 / top_k 20, 1 sample/prompt), seeded from `--seed` and RNG-isolated so
-  training is unperturbed. Gzip keeps the long `<think>…</think>` text compact; read with
-  `gzip.open(path, "rt")` + `json.loads` per line.
-
-  This is the one part of the run that adds real per-eval wall-clock (a full sampling pass over
-  the valid set, up to `EVAL_GEN_MAX_NEW_TOKENS` per prompt, ×~7 eval points). Tune or disable it:
-
-  ```bash
-  EVAL_GEN_MAX_NEW_TOKENS=2048 bash train.sh   # cap generation length (may truncate CoT)
-  EVAL_GEN_BATCH_SIZE=16 bash train.sh          # larger decode batches if VRAM allows
-  EVAL_GENERATE=False bash train.sh             # skip generation; still writes eval_metrics.jsonl
-  ```
-
-  Unlike the reference repo (`PedroMLF/Reward-Hacking-in-Explanations`), which generates
-  **offline after training** from `checkpoint-best` only (merge LoRA → vLLM), this captures
-  generations **inline at every checkpoint** so per-checkpoint behaviour is recorded without a
-  separate pass. The trade-off is speed: in-training HF `generate` is slower than offline vLLM.
+These are training diagnostics for checkpoint selection and optimisation health — **not** a
+behavioural evaluation. Actual safety + monitorability evaluation is done **separately, offline,
+on the pushed checkpoints** (like the reference repo `PedroMLF/Reward-Hacking-in-Explanations`,
+which generates offline from saved checkpoints rather than during training). Training itself
+never generates.
 
 For a long run, use tmux so an SSH drop doesn't kill it:
 

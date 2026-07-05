@@ -18,7 +18,6 @@ Consumes the DatasetDict exported by DPO-train-dataset-curation/ (stage 06):
 Run via train.sh (one command), or directly:
     python train_dpo.py --dataset_path <.../dpo_dataset> --model_name_or_path Qwen/Qwen3-4B ...
 """
-import gzip
 import json
 import os
 import shutil
@@ -306,27 +305,12 @@ def main(script_args, training_args, model_config):
 
     best_checkpoint_callback = BestCheckpointCallback()
     stepwise_eval_callback = StepwiseEvalCallback(eval_fraction=0.2)
-    # Per-eval artifacts (both fire on every eval point, incl. step 0 and the final step):
-    #   eval_metrics.jsonl        — DPO eval metrics per step (for plotting curves)
-    #   eval_generations/step-*.jsonl.gz — the policy's sampled responses to the valid prompts
+    # eval_metrics.jsonl — DPO eval metrics per eval point (step 0, each ~20% interval, final
+    # step) for plotting training curves. Actual behavioural eval (safety + monitorability) is
+    # done separately, offline, on the pushed checkpoints — not here.
     metrics_logger = EvalMetricsLoggerCallback(
         os.path.join(training_args.output_dir, "eval_metrics.jsonl"))
     callbacks = [best_checkpoint_callback, stepwise_eval_callback, metrics_logger]
-
-    gen_callback = None
-    if getattr(script_args, "eval_generate", True) and raw_valid_prompts:
-        gen_callback = EvalGenerationCallback(
-            prompts=raw_valid_prompts,
-            out_dir=os.path.join(training_args.output_dir, "eval_generations"),
-            tokenizer=tokenizer,
-            seed=training_args.seed,
-            max_new_tokens=script_args.eval_gen_max_new_tokens,
-            batch_size=script_args.eval_gen_batch_size,
-            max_prompt_length=training_args.max_prompt_length,
-            use_gradient_checkpointing=getattr(training_args, "gradient_checkpointing", False),
-            gradient_checkpointing_kwargs=getattr(training_args, "gradient_checkpointing_kwargs", None),
-        )
-        callbacks.append(gen_callback)
 
     # Push-to-hub is optional: only wire the push callback when explicitly requested.
     if getattr(training_args, "push_to_hub", False) and getattr(training_args, "hub_model_id", None):
@@ -343,8 +327,6 @@ def main(script_args, training_args, model_config):
         callbacks=callbacks,
     )
     stepwise_eval_callback.trainer = trainer
-    if gen_callback is not None:
-        gen_callback.trainer = trainer
     trainer.train()
 
     # Get the best checkpoint and metrics
@@ -359,12 +341,6 @@ def main(script_args, training_args, model_config):
 @dataclass
 class ScriptArguments:
     dataset_path: str
-    # Per-eval generation on the valid prompts (thinking-mode sampling), saved as
-    # eval_generations/step-<N>.jsonl.gz. On by default; set --eval_generate False to skip it
-    # (e.g. if the valid set is large and the extra per-eval decode time is too costly).
-    eval_generate: bool = True
-    eval_gen_max_new_tokens: int = 8192   # match the curation completion budget so CoT isn't truncated
-    eval_gen_batch_size: int = 8
 
 
 if __name__ == '__main__':
