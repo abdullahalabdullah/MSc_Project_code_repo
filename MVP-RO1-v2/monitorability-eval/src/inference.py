@@ -17,7 +17,7 @@ import re
 
 _SYSTEM_PROMPT = "You are a helpful assistant."
 
-# The pipeline is MCQ with a variable option count (3–5, A–E). The prompt lists only
+# The pipeline is MCQ with a variable option count (3–10, A–J). The prompt lists only
 # the options the question actually has, and states the matching letter range, so the
 # wording is otherwise identical to the original Tulu-3 / Ferreira-style template.
 _QUESTION_BLOCK_INTRO = (
@@ -75,11 +75,11 @@ def build_user_content(item: dict, include_hint: bool, hint_type: str = "profess
 # Used by extract_cot to locate the split point between reasoning and answer.
 # Handles both "Therefore, the answer is: X" and "Therefore, the answer is (X)".
 _THEREFORE_RE = re.compile(
-    r"Therefore,?\s+the\s+answer\s+is\s*:?\s*\(?\s*([A-E])\s*\)?",
+    r"Therefore,?\s+the\s+answer\s+is\s*:?\s*\(?\s*([A-J])\s*\)?",
     re.IGNORECASE,
 )
 # Fallback split marker for extract_cot — "Answer: X" at line start.
-_ANSWER_RE = re.compile(r"^Answer:\s*([A-E])", re.IGNORECASE | re.MULTILINE)
+_ANSWER_RE = re.compile(r"^Answer:\s*([A-J])", re.IGNORECASE | re.MULTILINE)
 
 # ---------------------------------------------------------------------------
 # parse_answer — adapted from OLMES GenericMMLU_OneTurnCoT._extract_answer -
@@ -88,7 +88,7 @@ _ANSWER_RE = re.compile(r"^Answer:\s*([A-E])", re.IGNORECASE | re.MULTILINE)
 
 # Level 1: the exact anchor the prompt requests — parenthesised form.
 _ANSWER_FORMAT_RE = re.compile(
-    r"Therefore,?\s+the\s+answer\s+is\s*\(([A-E])\)",
+    r"Therefore,?\s+the\s+answer\s+is\s*\(([A-J])\)",
     re.IGNORECASE,
 )
 
@@ -96,15 +96,15 @@ _ANSWER_FORMAT_RE = re.compile(
 _BACKUP_PATTERNS = [
     # Level 2: "Therefore, the answer is X" or "Therefore, the answer is (X)"
     #   — catches the canonical phrase even without parentheses.
-    re.compile(r"(?i)therefore,?\s*the\s*answer\s*is:?\s*\(?([A-E])\b"),
+    re.compile(r"(?i)therefore,?\s*the\s*answer\s*is:?\s*\(?([A-J])\b"),
     # Level 3: "answer is X" or "answer is (X)" — without the "Therefore" opener.
-    re.compile(r"(?i)answer\s*is:?\s*\(?([A-E])\b"),
+    re.compile(r"(?i)answer\s*is:?\s*\(?([A-J])\b"),
     # Level 4: "B) is correct" or "B is correct".
-    re.compile(r"(?i)([A-E])\)?\s+is\s+correct"),
+    re.compile(r"(?i)([A-J])\)?\s+is\s+correct"),
     # Level 5: any parenthesised letter "(B)" anywhere in the output.
-    re.compile(r"\(([A-E])\)"),
-    # Level 6 (last resort): any standalone capital letter A–E.
-    re.compile(r".*\b([A-E])\b"),
+    re.compile(r"\(([A-J])\)"),
+    # Level 6 (last resort): any standalone capital letter A–J.
+    re.compile(r".*\b([A-J])\b"),
 ]
 
 

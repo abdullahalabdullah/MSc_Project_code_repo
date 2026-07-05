@@ -48,7 +48,8 @@ export OPENAI_API_KEY=sk-...
 bash monitorability-eval/run_monitor_and_results.sh Qwen/Qwen3-4B ALL professor
 ```
 
-Datasets: `mmlu_redux, gpqa_diamond, wmdp, codemmlu, lsat_ar, lsat_lr` (or `ALL`).
+Datasets: `mmlu_redux, gpqa_diamond, wmdp, codemmlu, lsat_ar, lsat_lr, medxpertqa`
+(or `ALL`).
 Hint types: `professor, visual_pattern, metadata, wrong_few_shot, grader_hacking,
 unethical` (or `ALL`). Both lists come from `config/mvp_config.yaml`, so the
 scripts stay in sync with the config automatically. Optional env knobs for
@@ -160,7 +161,7 @@ All steps **resume from checkpoints** — safe to re-run after an interruption.
 |-------|---------|
 | `hf_token` | HF token (committed for zero-setup; env `HF_TOKEN` overrides). |
 | `n_examples` | **Global** eval budget — one number for all datasets (currently 50). Override per run with `01 --n-examples`. |
-| `datasets` | Registry of all eval datasets (see the table below). Each: `random_seed: 88`, uniform sampling, **variable 3–5 options (A–E)**. |
+| `datasets` | Registry of all eval datasets (see the table below). Each: `random_seed: 88`, uniform sampling, **variable 3–10 options (A–J)**. |
 | `hint` | Hint registry: `default` (type used when `--hint-type` is omitted) + `types.<type>` wording. The hint always points at a *wrong* option (`hint_target`) and only appears in the hinted arm. See **Hint types**. |
 | `qwen_inference` | Sampling: `n_samples=4` (N, samples/arm — overridable per run with `02 --n-samples`, no fixed cap), `temperature 0.6`, `top_p 0.95`, `top_k 20`, `max_new_tokens 16384` (Qwen3 thinking-mode recipe; thinking always ON). `checkpoint_every=200` = instances per checkpoint **and** the batch handed to vLLM in one `generate` call (resume granularity; no effect on generations). |
 | `monitor` | Monitor LLM (`model`, e.g. `gpt-5-mini`) + retry/backoff/timeout. |
@@ -172,7 +173,7 @@ All steps **resume from checkpoints** — safe to re-run after an interruption.
 ## Datasets (`datasets:` registry)
 
 All datasets are MCQ and namespaced on disk by key. The pipeline supports a
-**variable option count of 3–5 (A–E)**: each question keeps its own options; the
+**variable option count of 3–10 (A–J)**: each question keeps its own options; the
 inference prompt and answer parser adapt to the letters present. The budget is the
 **global** `n_examples` (one number for all datasets, currently 50); datasets with
 fewer eligible items use all of them. Sampling is uniform —
@@ -187,10 +188,13 @@ in `monitorability-eval/src/dataset.py` (`_LOADERS`).
 | `codemmlu` | Coding | HF `Fsoft-AIC/CodeMMLU` (9 subsets) | options ∈ [3,5] | by subset (9) | 3–5 |
 | `lsat_ar` | Applied Reasoning (analytical) | GitHub `ruixiangcui/AGIEval` (`lsat-ar.jsonl`) | options ∈ [3,5] | uniform random (~230 instances) | 5 |
 | `lsat_lr` | Applied Reasoning (logical) | GitHub `ruixiangcui/AGIEval` (`lsat-lr.jsonl`) | options ∈ [3,5] | uniform random (~510 instances) | 5 |
+| `medxpertqa` | Expert Medical | HF `TsinghuaC3I/MedXpertQA` (`Text`, test) | none | by body system (12, ~2450) | 10 |
 
 Notes:
 - **CodeMMLU mixes 3/4/5 options.** Its rare 6–7-option items (answers F/G) are
-  dropped to keep the pipeline at A–E.
+  dropped — pinned to A–E (`_CODEMMLU_MAX_OPTIONS = 5` in `dataset.py`) so its
+  sampled set stays identical to earlier runs even though the pipeline now admits
+  up to 10 options (only `medxpertqa` uses the wider A–J range).
 - **AGIEval LSAT subsets (lsat_ar, lsat_lr)** are downloaded from the AGIEval
   GitHub repo (`ruixiangcui/AGIEval`, `data/v1/{name}.jsonl`) via the shared
   `agieval_gh` loader — the HF mirrors (`baber/agieval`, `hails/agieval_*`) either
@@ -200,9 +204,15 @@ Notes:
   reasoning tasks. **AQuA-RAT and LogiQA-en were trialled and dropped** — aqua_rat
   had near-ceiling unhinted accuracy (~0.96, no incentive pressure) and logiqa_en
   had weak hint signal (TE ≈ 0.04, few retained instances).
+- **MedXpertQA (medxpertqa)** uses only the `Text` config's `test` split (the `MM`
+  multimodal config is not used). Each question has all **10 options (A–J)** with a
+  single gold letter (`label`); labels are uniform across A–J, so the hint (which
+  targets a random wrong option) is unbiased. The stem repeats its choices inline
+  after an `Answer Choices:` marker — that tail is stripped so the pipeline's own
+  options block is the only listing. Sampled uniformly by `body_system` (12 systems).
 - The prepared `dataset_index.json` schema is unchanged: each instance has
   `instance_id, question_id, subject, question, choices {A:…, …}, correct_answer,
-  hint_target` — `choices` now has 3–5 entries.
+  hint_target` — `choices` now has 3–10 entries (A–J).
 
 ## Hint types (`--hint-type`, `monitorability-eval/src/hints.py`)
 
@@ -304,7 +314,7 @@ and the Phase-3 line in `run_monitor_and_results.sh` — the metric computation
 
 ## Source files (`monitorability-eval/src/`)
 
-- `dataset.py` — per-dataset loaders + filtering, uniform (one/two-level) stratified sampling, 3–5-option (A–E) normalisation, hint-*target* assignment, `model_dir_name` (folder-safe model name from an HF ID), `resolve_paths` (namespaces by **model** / dataset / **hint type**), `ensure_hf_auth`.
+- `dataset.py` — per-dataset loaders + filtering, uniform (one/two-level) stratified sampling, 3–10-option (A–J) normalisation, hint-*target* assignment, `model_dir_name` (folder-safe model name from an HF ID), `resolve_paths` (namespaces by **model** / dataset / **hint type**), `ensure_hf_auth`.
 - `hints.py` — the hint-type registry (`HINT_TYPES`) plus both prompt builders: `render_hint` (the hinted-arm inference prefix + options block) and `monitor_hint_fields` (the per-type HINT description + acknowledgment guideline used by the monitor) for each type (professor, visual_pattern, metadata, wrong_few_shot, grader_hacking, unethical). Reads per-type wording from the config `hint:` block. The unhinted arm never calls `render_hint`.
 - `inference.py` — shared prompt construction (`build_user_content`, which delegates the hint to `hints.render_hint`) and answer parsing.
 - `inference_qwen.py` — Qwen3 thinking-mode inference (chat template, `<think>` handling, vLLM). Reuses `_SYSTEM_PROMPT` / `build_user_content` / `extract_cot` / `parse_answer` from `inference.py` (shared base); threads `hint_type` into the prompt and into the output dir. **vLLM throughput:** the engine loads with `enable_prefix_caching=True` (shared system-prompt/instance prefixes reuse cached KV), and each checkpoint's full request set — `checkpoint_every × n_samples × 2 arms` — is issued in a **single `llm.generate` call** so continuous batching keeps the GPU saturated (one decode drain-tail per checkpoint, not one per sample×arm). Both are scheduling-only: per-request seeds/params and outputs are unchanged.

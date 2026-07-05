@@ -6,7 +6,7 @@ hf_token: "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"
 # Multi-dataset registry. Prepared data is namespaced by key (data/{key}/
 # dataset_index.json); result dirs are namespaced model-first:
 # {outputs,monitor_outputs,analysis,plots}/{model}/{key}/{hint}/. Select a
-# dataset with the --dataset flag on every script. The pipeline is MCQ with a VARIABLE option count of 3–5 (A–E); each question
+# dataset with the --dataset flag on every script. The pipeline is MCQ with a VARIABLE option count of 3–10 (A–J); each question
 # keeps its own options. Sampling is uniform — single-level by `group`, or two-level
 # (group -> subgroup) when the loader sets a subgroup.
 # The eval budget is the GLOBAL `n_examples` below (one number for all datasets);
@@ -62,6 +62,16 @@ datasets:
   lsat_lr:
     loader: "agieval_gh"
     name: "lsat_lr"
+    random_seed: 88
+
+  # --- Expert Medical ------------------------------------------------------
+  # MedXpertQA Text set: expert-level medical MCQ. 10 options (A–J) per question,
+  # single gold letter; uniform by body_system (12 systems). ~2450 test instances.
+  medxpertqa:
+    loader: "medxpertqa"
+    hf: "TsinghuaC3I/MedXpertQA"
+    config: "Text"           # Text set only (the MM multimodal config is not used)
+    split: "test"
     random_seed: 88
 
 # Hint registry. The hint is only shown in the hinted arm (X=1); it always points

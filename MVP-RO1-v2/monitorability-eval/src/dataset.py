@@ -6,7 +6,7 @@ uniform stratified sampling), assigns an incorrect hint target, and writes a
 dataset_index.json. Every dataset is driven by the `datasets:` registry in
 config/mvp_config.yaml and namespaced on disk by its key (see resolve_paths).
 
-The pipeline is multiple-choice with a **variable option count of 3–5 (A–E)**:
+The pipeline is multiple-choice with a **variable option count of 3–10 (A–J)**:
 each question keeps its own number of options. The current suite:
 
   mmlu_redux     — HF edinburgh-dawg/mmlu-redux, error_type=="ok", uniform by subject (4 opt)
@@ -15,6 +15,7 @@ each question keeps its own number of options. The current suite:
   codemmlu       — HF Fsoft-AIC/CodeMMLU, options in [3,5], uniform by subset (3-5 opt)
   lsat_ar        — GitHub ruixiangcui/AGIEval raw JSONL, analytical reasoning (5 opt)
   lsat_lr        — GitHub ruixiangcui/AGIEval raw JSONL, logical reasoning (5 opt)
+  medxpertqa     — HF TsinghuaC3I/MedXpertQA (Text), expert medical, uniform by body system (10 opt)
 """
 
 import json
@@ -26,8 +27,8 @@ import urllib.request
 from collections import defaultdict
 from pathlib import Path
 
-# Answer letters. The pipeline supports 3–5 options, so a question uses LETTERS[:k].
-LETTERS = ["A", "B", "C", "D", "E"]
+# Answer letters. The pipeline supports 3–10 options, so a question uses LETTERS[:k].
+LETTERS = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]
 MAX_OPTIONS = len(LETTERS)
 MIN_OPTIONS = 3
 
@@ -138,7 +139,7 @@ def resolve_paths(root, config: dict, dataset_key: str, model_name: str | None =
 
 # Matches an option label at the start of a choice string: "(A)" (no trailing space),
 # "A.", or "A)". Trailing whitespace optional (some sources render "(A)4").
-_LETTER_PREFIX_RE = re.compile(r"^\s*(?:\([A-E]\)|[A-E][.)])\s*")
+_LETTER_PREFIX_RE = re.compile(r"^\s*(?:\([A-J]\)|[A-J][.)])\s*")
 
 
 def _clean(value) -> str:
@@ -154,11 +155,11 @@ def _strip_letter_prefix(choice: str) -> str:
 
 
 def _finalize(instance_id: int, rec: dict, rng: random.Random) -> dict:
-    """Turn a normalised record into a pipeline instance dict (3–5 options, A–E)."""
+    """Turn a normalised record into a pipeline instance dict (3–10 options, A–J)."""
     options = rec["options"]
     correct_idx = rec["correct_idx"]
     k = len(options)
-    assert MIN_OPTIONS <= k <= MAX_OPTIONS, f"{rec['source_id']}: {k} options (must be 3–5)"
+    assert MIN_OPTIONS <= k <= MAX_OPTIONS, f"{rec['source_id']}: {k} options (must be 3–10)"
     assert 0 <= correct_idx < k, f"{rec['source_id']}: bad correct_idx {correct_idx} for {k} options"
 
     letters = LETTERS[:k]
@@ -294,12 +295,18 @@ def _load_wmdp(ds_cfg: dict, rng: random.Random) -> list:
     return recs
 
 
+# CodeMMLU is pinned to its historical 3–5 (A–E) range even though the pipeline now
+# admits up to 10 options — so its sampled set stays identical to earlier runs and
+# comparable. Only MedXpertQA uses the wider A–J range.
+_CODEMMLU_MAX_OPTIONS = 5
+
+
 def _load_codemmlu(ds_cfg: dict, rng: random.Random) -> list:
     """CodeMMLU: 9 subsets, keep questions with 3–5 options, grouped by subset.
 
     The dataset's `answer` is a letter; a handful of items have 6–7 options (and
-    answers F/G) — those fall outside the A–E pipeline and are dropped along with
-    1–2 option questions."""
+    answers F/G) — those are dropped (kept at A–E for comparability with earlier
+    runs) along with 1–2 option questions."""
     from datasets import load_dataset as hf_load_dataset
     recs = []
     for sub in ds_cfg["subsets"]:
@@ -307,7 +314,7 @@ def _load_codemmlu(ds_cfg: dict, rng: random.Random) -> list:
         for idx, row in enumerate(ds):
             choices = row["choices"]
             k = len(choices)
-            if not (MIN_OPTIONS <= k <= MAX_OPTIONS):
+            if not (MIN_OPTIONS <= k <= _CODEMMLU_MAX_OPTIONS):
                 continue
             correct_idx = ord(str(row["answer"]).strip().upper()) - ord("A")
             if not (0 <= correct_idx < k):       # answer letter beyond kept options
@@ -390,6 +397,41 @@ def _load_agieval_gh(ds_cfg: dict, rng: random.Random) -> list:
     return recs
 
 
+def _load_medxpertqa(ds_cfg: dict, rng: random.Random) -> list:
+    """MedXpertQA (Text): expert medical MCQ, 10 options (A–J), by body system.
+
+    Only the `Text` config's `test` split is used (both from the registry). Every
+    question ships all 10 options (A–J) populated and a single gold letter in
+    `label`. The stem repeats the choices inline after an "Answer Choices:" marker;
+    that tail is stripped so the pipeline's own options block is the only listing.
+    Grouped by `body_system` (12 systems) for uniform stratified sampling.
+    """
+    from datasets import load_dataset as hf_load_dataset
+    ds = hf_load_dataset(ds_cfg["hf"], ds_cfg["config"], split=ds_cfg["split"])
+    recs = []
+    for idx, row in enumerate(ds):
+        opts = row["options"]
+        letters = sorted(opts.keys())                      # A..J
+        options = [_clean(opts[L]) for L in letters]
+        k = len(options)
+        if not (MIN_OPTIONS <= k <= MAX_OPTIONS):
+            continue
+        correct_idx = _resolve_answer_idx(row["label"], options)
+        if correct_idx is None or not (0 <= correct_idx < k):
+            continue
+        # Drop the inline "Answer Choices: (A) ... (J) ..." tail; keep the stem only.
+        question = re.split(r"\n?\s*Answer Choices:", _clean(row["question"]))[0].strip()
+        recs.append({
+            "question": question,
+            "options": options,
+            "correct_idx": correct_idx,
+            "group": row.get("body_system") or "unknown",
+            "subgroup": None,
+            "source_id": row.get("id") or f"medxpertqa_{idx}",
+        })
+    return recs
+
+
 def _resolve_answer_idx(gold, options: list) -> int | None:
     """Map a gold answer (letter 'A'.., int index, or the answer text) to an index."""
     if isinstance(gold, (list, tuple)):
@@ -417,6 +459,7 @@ _LOADERS = {
     "wmdp": _load_wmdp,
     "codemmlu": _load_codemmlu,
     "agieval_gh": _load_agieval_gh,
+    "medxpertqa": _load_medxpertqa,
 }
 
 
