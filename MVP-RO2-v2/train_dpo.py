@@ -234,6 +234,8 @@ class EvalMetricsLoggerCallback(TrainerCallback):
 
     def __init__(self, metrics_path):
         self.metrics_path = metrics_path
+        os.makedirs(os.path.dirname(metrics_path), exist_ok=True)
+        open(metrics_path, "w").close()  # fresh file per run (this pipeline doesn't resume)
 
     def on_evaluate(self, args, state, control, metrics=None, **kwargs):
         if not metrics:
@@ -330,7 +332,9 @@ class EvalGenerationCallback(TrainerCallback):
         if self.use_gc:
             model.gradient_checkpointing_disable()
         model.config.use_cache = True
-        hf_set_seed(self.seed)
+        # Seed only torch's RNG (what generate()'s sampling draws from) — both CPU and CUDA
+        # states are captured above and restored in `finally`, so training RNG is untouched.
+        torch.manual_seed(self.seed)
         try:
             results = self._generate(model)
         finally:

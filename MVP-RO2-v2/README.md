@@ -58,9 +58,10 @@ bash train.sh                 # trains Qwen3-4B on the newest exported dataset
 ```
 
 LoRA adapters are written under `checkpoints/qwen3-4B/harmless_dpo/` (best kept as
-`checkpoint-best`). For inference, load the adapter on top of the base Qwen3-4B (transformers
-`PeftModel`, or vLLM `--enable-lora`). See [DOCUMENTATION.md](DOCUMENTATION.md) for details and
-Hub-push instructions.
+`checkpoint-best`). Each eval point also writes `eval_metrics.jsonl` (metric curves) and
+`eval_generations/step-*.jsonl.gz` (the policy's sampled responses to the valid prompts). For
+inference, load the adapter on top of the base Qwen3-4B (transformers `PeftModel`, or vLLM
+`--enable-lora`). See [DOCUMENTATION.md](DOCUMENTATION.md) for details and Hub-push instructions.
 
 ---
 
