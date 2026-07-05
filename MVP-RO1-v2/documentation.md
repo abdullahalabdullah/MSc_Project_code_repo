@@ -1,18 +1,51 @@
-# MVP-RO1 — CoT Monitorability Evaluation
+# MVP-RO1 — Evaluation Suites
+
+This repo hosts **two independent evaluation suites**, each self-contained in its
+own folder with its own `scripts/`, `src/`, `data/`, and run command:
+
+- **`monitorability-eval/`** — CoT monitorability under hint pressure (headline
+  metric g-mean²). See [Part 1](#part-1--monitorability-eval).
+- **`harmlessness-eval/`** — safety on the WildJailbreak eval set, judged by
+  WildGuard (Safety Rate + Refusal Rate). See [Part 2](#part-2--harmlessness-eval).
+
+**Shared at the repo root** (both evals use these, neither imports the other's
+code): `config/mvp_config.yaml`, `outputs-and-results/`, `requirements.txt`, this
+`documentation.md`, and the gitignored `logs/`. Both run commands take a raw HF
+`<model_id>` (or local dir) and namespace every output dir by its folder-safe
+name (`/` → `_`, e.g. `Qwen_Qwen3-4B`), are fail-soft, commit+push progress, and
+log to `logs/`.
+
+```bash
+# Monitorability (GPU box, then locally):
+bash monitorability-eval/run_inference.sh Qwen/Qwen3-4B ALL professor
+export OPENAI_API_KEY=sk-...
+bash monitorability-eval/run_monitor_and_results.sh Qwen/Qwen3-4B ALL professor
+
+# Harmlessness (single command on the GPU box):
+bash harmlessness-eval/run_harmlessness.sh Qwen/Qwen3-4B
+```
+
+---
+
+# Part 1 — Monitorability eval
+
+> All `scripts/`, `src/`, and `data/` paths in this part are relative to
+> `monitorability-eval/` (e.g. `data/{ds}/…` = `monitorability-eval/data/{ds}/…`).
+> Results are written to the shared `outputs-and-results/`.
 
 ## Quick start
 
-The whole pipeline is two commands. Both take the same three arguments:
-`<model_id>` (an HF model ID or local model dir — **required**), a dataset key
-or `ALL`, and a hint type or `ALL`.
+The pipeline is two commands. Both take the same three arguments: `<model_id>`
+(an HF model ID or local model dir — **required**), a dataset key or `ALL`, and a
+hint type or `ALL`.
 
 ```bash
 # 1) GPU box — prepare data + inference + CoT-length report:
-bash run_inference.sh Qwen/Qwen3-4B ALL professor
+bash monitorability-eval/run_inference.sh Qwen/Qwen3-4B ALL professor
 
 # 2) Locally, after pulling the inference outputs — monitor + all results:
 export OPENAI_API_KEY=sk-...
-bash run_monitor_and_results.sh Qwen/Qwen3-4B ALL professor
+bash monitorability-eval/run_monitor_and_results.sh Qwen/Qwen3-4B ALL professor
 ```
 
 Datasets: `mmlu_redux, gpqa_diamond, wmdp, codemmlu, lsat_ar, lsat_lr` (or `ALL`).
@@ -65,16 +98,16 @@ combination is an independent run. `--hint-type` defaults to `hint.default` in t
 config when omitted. See **Hint types** below.
 Step 9 is the exception — it takes only `--model` and scans every completed
 (dataset × hint-type) run under `analysis/{model}/`, regenerating every report.
-**All Markdown generation is isolated in step 9** (`src/reporting.py` +
-`scripts/09_generate_reports.py` + one driver line) and derives ONLY from the
+**All Markdown generation is isolated in step 9** (`monitorability-eval/src/reporting.py` +
+`monitorability-eval/scripts/09_generate_reports.py` + one driver line) and derives ONLY from the
 JSON/CSV artifacts of steps 4 + 8 — so every `.md` file can be deleted and
 regenerated with one 09 run (no inference/monitor re-run), and the whole
 reporting layer can be removed cleanly before a public release. Steps 1–8 never
 write `.md`.
 
 `…` = `outputs-and-results/`. Step 2 needs a GPU (vLLM); 3 needs the OpenAI API;
-4–9 are CPU-only. Helpers: `scripts/merge_and_push.py` merges a LoRA/DPO adapter
-into the base model and pushes it to the Hub; `scripts/archive_results.sh` snapshots
+4–9 are CPU-only. Helpers: `monitorability-eval/scripts/merge_and_push.py` merges a LoRA/DPO adapter
+into the base model and pushes it to the Hub; `monitorability-eval/scripts/archive_results.sh` snapshots
 the result dirs into `outputs-and-results/Old-Results/{timestamp}/` and clears them
 for a fresh run.
 
@@ -104,13 +137,13 @@ are namespaced by its folder-safe name (`/` → `_`, e.g. `Qwen_Qwen3-4B`).
 Any step can also be run manually — every step takes the same `--model`:
 
 ```bash
-python scripts/01_prepare_dataset.py    --dataset gpqa_diamond                          # full config budget
-python scripts/01_prepare_dataset.py    --dataset gpqa_diamond --n-examples 50 --force  # smaller run, regenerate
-python scripts/02_run_inference_qwen.py --model Qwen/Qwen3-4B --dataset gpqa_diamond --hint-type professor
-python scripts/03_run_monitor.py        --model Qwen/Qwen3-4B --dataset gpqa_diamond --hint-type professor
-python scripts/04_compute_gmean2.py     --model Qwen/Qwen3-4B --dataset gpqa_diamond --hint-type professor
-python scripts/05_analyze_gmean2.py     --model Qwen/Qwen3-4B --dataset gpqa_diamond --hint-type professor
-python scripts/09_generate_reports.py   --model Qwen/Qwen3-4B      # all .md reports, every completed run
+python monitorability-eval/scripts/01_prepare_dataset.py    --dataset gpqa_diamond                          # full config budget
+python monitorability-eval/scripts/01_prepare_dataset.py    --dataset gpqa_diamond --n-examples 50 --force  # smaller run, regenerate
+python monitorability-eval/scripts/02_run_inference_qwen.py --model Qwen/Qwen3-4B --dataset gpqa_diamond --hint-type professor
+python monitorability-eval/scripts/03_run_monitor.py        --model Qwen/Qwen3-4B --dataset gpqa_diamond --hint-type professor
+python monitorability-eval/scripts/04_compute_gmean2.py     --model Qwen/Qwen3-4B --dataset gpqa_diamond --hint-type professor
+python monitorability-eval/scripts/05_analyze_gmean2.py     --model Qwen/Qwen3-4B --dataset gpqa_diamond --hint-type professor
+python monitorability-eval/scripts/09_generate_reports.py   --model Qwen/Qwen3-4B      # all .md reports, every completed run
 ```
 
 `--hint-type` must be consistent across steps 2–6/8 (it namespaces the paths). Omit
@@ -144,7 +177,7 @@ inference prompt and answer parser adapt to the letters present. The budget is t
 **global** `n_examples` (one number for all datasets, currently 50); datasets with
 fewer eligible items use all of them. Sampling is uniform —
 single-level by `group`, or two-level (`group → subgroup`) where noted. Loaders live
-in `src/dataset.py` (`_LOADERS`).
+in `monitorability-eval/src/dataset.py` (`_LOADERS`).
 
 | key | domain | source | filter | uniform sampling | opts |
 |-----|--------|--------|--------|------------------|------|
@@ -171,14 +204,14 @@ Notes:
   `instance_id, question_id, subject, question, choices {A:…, …}, correct_answer,
   hint_target` — `choices` now has 3–5 entries.
 
-## Hint types (`--hint-type`, `src/hints.py`)
+## Hint types (`--hint-type`, `monitorability-eval/src/hints.py`)
 
 The hint is shown **only in the hinted arm (X=1)** and always points at the
 instance's `hint_target` (a wrong option, assigned once at dataset prep). The
 unhinted control arm (X=0) is byte-for-byte identical across all hint types
 (plain options, no hint material), so `TNR_X=0` stays comparable. Pick a type with
 `--hint-type`; per-type wording lives under `hint.types.<type>` in the config and
-falls back to the built-in defaults in `src/hints.py`.
+falls back to the built-in defaults in `monitorability-eval/src/hints.py`.
 
 | `--hint-type` | Category | What the hinted arm shows |
 |---------------|----------|---------------------------|
@@ -195,7 +228,7 @@ per-hint-type.** The monitor still reads only the model's response + the
 saw and what acknowledging it looks like (e.g. a `grader_hacking` run is monitored
 for references to the grader, a `metadata` run for the embedded `<answer>` tag) —
 so it never looks for "the professor" in a non-professor run. Both prompts are
-defined in `src/hints.py` (`render_hint` for inference, `monitor_hint_fields` for
+defined in `monitorability-eval/src/hints.py` (`render_hint` for inference, `monitor_hint_fields` for
 the monitor) and the wording is overridable per type in the config
 (`hint.types.<type>.template` / `.note`, and `.monitor.{description,acknowledgment}`).
 
@@ -237,7 +270,7 @@ Step 4 computes all of this into machine-readable artifacts
 budgets, and monitor model — plus `results_per_instance.{csv,json}`). Step 8
 computes token-length statistics into `cot_token_stats.json`.
 
-## Reports (step 9 — `scripts/09_generate_reports.py`, `src/reporting.py`)
+## Reports (step 9 — `monitorability-eval/scripts/09_generate_reports.py`, `monitorability-eval/src/reporting.py`)
 
 Every report shares **one results-table format** — `Mean TE before (Std) ·
 Mean R_effect before (Std) · Mean TE after (Std) · Mean R_effect after (Std) ·
@@ -263,13 +296,13 @@ step 8's `cot_token_stats.json`; use the truncation rate to set `max_new_tokens`
 Roll-ups **pool the per-instance rows / run-level token counts** across the
 averaged dimension (not means-of-means), sum the run-level matrix and bucket
 counts, and recompute rates from the sums. **To strip all `.md` generation for
-a public release**, delete `src/reporting.py`, `scripts/09_generate_reports.py`,
+a public release**, delete `monitorability-eval/src/reporting.py`, `monitorability-eval/scripts/09_generate_reports.py`,
 and the Phase-3 line in `run_monitor_and_results.sh` — the metric computation
 (steps 4 + 8) is untouched.
 
 ---
 
-## Source files (`src/`)
+## Source files (`monitorability-eval/src/`)
 
 - `dataset.py` — per-dataset loaders + filtering, uniform (one/two-level) stratified sampling, 3–5-option (A–E) normalisation, hint-*target* assignment, `model_dir_name` (folder-safe model name from an HF ID), `resolve_paths` (namespaces by **model** / dataset / **hint type**), `ensure_hf_auth`.
 - `hints.py` — the hint-type registry (`HINT_TYPES`) plus both prompt builders: `render_hint` (the hinted-arm inference prefix + options block) and `monitor_hint_fields` (the per-type HINT description + acknowledgment guideline used by the monitor) for each type (professor, visual_pattern, metadata, wrong_few_shot, grader_hacking, unethical). Reads per-type wording from the config `hint:` block. The unhinted arm never calls `render_hint`.
@@ -336,3 +369,113 @@ and the Phase-3 line in `run_monitor_and_results.sh` — the metric computation
 - `metrics/g-mean² Filtering Levels.md` — Level-1 (applied) / Level-2 (reported) rules.
 - Ferreira et al. (2025), *Truthful or Fabricated?* — monitor design (response-only Eval LLM).
 - Xiong et al. (2025); Guan et al. (2025) — g-mean² monitorability metric.
+
+---
+
+# Part 2 — Harmlessness eval
+
+> All `scripts/`, `src/`, and `data/` paths in this part are relative to
+> `harmlessness-eval/`. Results are written to the shared
+> `outputs-and-results/harmlessness/`.
+
+Measures **harmlessness** the Qwen3Guard way: prompt the target model with the
+`allenai/wildjailbreak` **eval** set (2000 adversarial *harmful* + 210
+adversarial *benign* queries), then have **WildGuard** (`allenai/wildguard`, an
+independent 7B safety classifier) judge each response. WildGuard is used
+precisely because Qwen3Guard labelled the user's own training data and so cannot
+be an impartial assessor.
+
+- **Safety Rate** — fraction of responses judged *not harmful*. Headline on the
+  harmful subset (does the model resist jailbreaks?).
+- **Refusal Rate** — fraction of responses judged *refusals*. On the benign
+  subset a low rate means little over-refusal.
+
+Both are reported **overall and per subset**. The target model runs in **Qwen3
+thinking mode ON** (same as Part 1); WildGuard judges the **final visible answer
+only** (the text after `</think>`, via `split_thinking`), **1 response per
+prompt**. All of `enable_thinking`, `n_samples`, and `classify_target` are in the
+config `harmlessness:` block.
+
+## Quick start
+
+WildGuard is a local model, so generation **and** classification both need a GPU
+— the whole eval is one command on the GPU box:
+
+```bash
+bash harmlessness-eval/run_harmlessness.sh Qwen/Qwen3-4B
+```
+
+## Pipeline at a glance
+
+| Step | Script | In → Out |
+|------|--------|----------|
+| 1 | `01_prepare_wildjailbreak.py` | WildJailbreak eval → `data/wildjailbreak_eval/prompts.jsonl` (idempotent) |
+| 2 | `02_run_inference.py` | prompts → `…/harmlessness/responses/{model}/responses.jsonl` (GPU) |
+| 3 | `03_run_wildguard.py` | responses → `…/harmlessness/wildguard/{model}/classifications.jsonl` (GPU) |
+| 4 | `04_compute_metrics.py` | classifications → `…/harmlessness/analysis/{model}/metrics.json`, `per_prompt.csv` |
+| 5 | `05_generate_reports.py` | `metrics.json` → `…/harmlessness/analysis/{model}/harmlessness_summary.md` |
+
+`…` = `outputs-and-results/`. Each script takes `--model <hf_id>` (steps 2–5);
+`{model}` is its folder-safe name. Step 1 has no model. **Markdown generation is
+isolated in step 5** (`src/reporting.py` + `05_generate_reports.py` + one driver
+line) and derives only from `metrics.json`, so the `.md` regenerates from the
+JSON alone and the reporting layer can be removed cleanly for a public release —
+steps 1–4 never write `.md`.
+
+Run any step manually:
+
+```bash
+python harmlessness-eval/scripts/01_prepare_wildjailbreak.py                 # full eval set
+python harmlessness-eval/scripts/01_prepare_wildjailbreak.py --limit 20 --force  # quick smoke test
+python harmlessness-eval/scripts/02_run_inference.py   --model Qwen/Qwen3-4B  # GPU
+python harmlessness-eval/scripts/03_run_wildguard.py   --model Qwen/Qwen3-4B  # GPU
+python harmlessness-eval/scripts/04_compute_metrics.py --model Qwen/Qwen3-4B
+python harmlessness-eval/scripts/05_generate_reports.py --model Qwen/Qwen3-4B
+```
+
+## Config (`harmlessness:` block)
+
+| Key | Purpose |
+|-----|---------|
+| `benchmark` | WildJailbreak `hf`/`config` (`eval`), the TSV `delimiter`, and the `prompt_field` (`adversarial`) / `subset_field` (`data_type`). |
+| `limit` | `null` = full eval set; an int caps the prompt count for a quick test. |
+| `generation` | `enable_thinking: true`, `n_samples: 1`. Temperature/top_p/top_k/max_new_tokens are reused from the `qwen_inference` block so both evals generate identically. |
+| `classify_target` | `answer` (visible response after `</think>`, default) or `full` (whole generation). |
+| `classifier` | WildGuard `hf_id` + `max_new_tokens`. |
+| `paths` | `data_dir` (`harmlessness-eval/data`) + the three shared result dirs under `outputs-and-results/harmlessness/`. |
+
+## Source files (`harmlessness-eval/src/`)
+
+- `dataset.py` — own `ensure_hf_auth` + `model_dir_name` (no import from the
+  monitorability eval), and `load_wildjailbreak_eval` / `prepare_prompts` /
+  `load_prompts`.
+- `inference.py` — `load_qwen_model` and `split_thinking` copied verbatim from
+  the monitorability inference; `generate_responses` does free-form thinking-mode
+  generation and keeps the visible answer.
+- `wildguard.py` — `load_wildguard`, the exact WildGuard instruction template,
+  and `parse_verdict` / `classify` (three yes/no lines → booleans).
+- `metrics.py` — Safety Rate + Refusal Rate, overall and per subset.
+- `reporting.py` — the only `.md` writer (separable; deletable for a public release).
+
+## Outputs layout
+
+```
+harmlessness-eval/data/wildjailbreak_eval/prompts.jsonl   # prepared prompts (NOT a result)
+outputs-and-results/harmlessness/
+├── responses/{model}/responses.jsonl          # one record per (prompt, sample): raw_output, thinking, answer, ...
+├── wildguard/{model}/classifications.jsonl     # per response: prompt_harmful / refusal / response_harmful
+└── analysis/{model}/metrics.json, per_prompt.csv, harmlessness_summary.md
+```
+
+## Independence & shared resources
+
+The harmlessness code **never imports** the monitorability code (the small shared
+helpers — HF auth, model-name sanitising, model loading, thinking split — are
+duplicated on purpose). The two evals share only the config file, this doc,
+`requirements.txt`, `outputs-and-results/`, and `logs/`.
+
+## References
+
+- Qwen3Guard technical report — the safety-eval methodology followed here.
+- `allenai/wildjailbreak` — adversarial harmful/benign eval prompts.
+- `allenai/wildguard` — independent safety + refusal classifier.

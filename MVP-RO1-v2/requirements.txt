@@ -1,5 +1,10 @@
 # =============================================================================
-# MVP-RO1 environment — Qwen3 (thinking-model) evaluation pipeline.
+# MVP-RO1 environment — shared by BOTH eval suites (monitorability-eval/ and
+# harmlessness-eval/). The harmlessness eval adds no new dependencies: WildGuard
+# (Mistral-7B) is served by the same vLLM pin below and WildJailbreak loads via
+# `datasets`; huggingface_hub (used by ensure_hf_auth) comes in transitively.
+#
+# Qwen3 (thinking-model) evaluation pipeline.
 #
 # Qwen3 (model_type "qwen3") requires transformers >= 4.51.0 and vLLM >= 0.8.5,
 # which in turn require torch >= 2.6. Install into a FRESH virtualenv (needs
