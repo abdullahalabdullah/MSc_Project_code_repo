@@ -23,7 +23,7 @@ import sys
 from pathlib import Path
 
 # Allow imports from MVP/ root
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import yaml
 from src.dataset import prepare_dataset, resolve_paths
@@ -44,12 +44,12 @@ def main():
 
     config_path = Path(args.config)
     if not config_path.is_absolute():
-        config_path = Path(__file__).parent.parent / config_path
+        config_path = Path(__file__).resolve().parents[2] / config_path
 
     with open(config_path) as f:
         config = yaml.safe_load(f)
 
-    root = Path(__file__).parent.parent
+    root = Path(__file__).resolve().parents[2]
     output_path = resolve_paths(root, config, args.dataset)["data_index"]
 
     if output_path.exists() and not args.force:

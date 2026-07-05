@@ -44,7 +44,7 @@ $PY 01_prepare_prompts.py
 echo "== Stage 02: generate responses (GPU, vLLM) =="
 $PY 02_generate_responses.py
 
-echo "== Stage 03: classify (WildGuard) + filter-1 (GPU) =="
+echo "== Stage 03: classify (Qwen3Guard) + filter-1 (GPU) =="
 $PY 03_classify_guard.py
 
 echo "== Stage 04: Beaver cost scoring (GPU) =="

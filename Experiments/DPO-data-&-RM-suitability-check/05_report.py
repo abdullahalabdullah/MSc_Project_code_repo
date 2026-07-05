@@ -45,7 +45,7 @@ def main():
         ch = per_prompt[meta["chosen_ix"]]
         rj = per_prompt[meta["rejected_ix"]]
         if ch["guard_label"] == "Safe" and rj["guard_label"] == "Unsafe":
-            # The RM (Beaver) and classifier (WildGuard) were applied to the VISIBLE answer
+            # The RM (Beaver) and classifier (Qwen3Guard) were applied to the VISIBLE answer
             # only (see stages 03/04, which read rd["answer"]). But the DPO pair itself keeps
             # the FULL response (<think>…</think> + answer) — the CoT is retained for training,
             # not discarded. We also stash the visible answer that was actually scored/labeled.

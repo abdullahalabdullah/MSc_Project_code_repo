@@ -24,15 +24,14 @@ Each row is also tagged with a `category`, used to split rows across sheets:
   - Invalid_Truncated                truncated or unparseable response
 
 Usage:
-    python scripts/06_export_excel.py                              # all models, every dataset
-    python scripts/06_export_excel.py --dataset wmdp               # all models, one dataset
-    python scripts/06_export_excel.py --model qwen3_1_7b   # single model
+    python scripts/06_export_excel.py --model Qwen/Qwen3-4B                   # every dataset
+    python scripts/06_export_excel.py --model Qwen/Qwen3-4B --dataset wmdp   # one dataset
 
     Options:
       --config   path to config YAML (default: config/mvp_config.yaml)
       --dataset  restrict to one dataset key (default: every dataset in config)
-      --output   output .xlsx path (only valid with --model and --dataset; default:
-                 analysis/{dataset}/{model}/qualitative_export.xlsx)
+      --output   output .xlsx path (only valid with --dataset; default:
+                 analysis/{model}/{dataset}/{hint}/qualitative_export.xlsx)
 
 Input:
     data/dataset_index.json
@@ -50,13 +49,13 @@ import json
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import pandas as pd
 import yaml
 
 from src.gmean2_metrics import load_jsonl, compute_gmean2
-from src.dataset import resolve_paths
+from src.dataset import model_dir_name, resolve_paths
 from src.hints import HINT_TYPES
 
 
@@ -242,8 +241,8 @@ def run_dataset(root, config, dataset_key, models, output_override, hint_type):
 
 def main():
     parser = argparse.ArgumentParser(description="Export per-record qualitative data to a multi-sheet Excel workbook.")
-    parser.add_argument("--model", default=None,
-                        help="Model name (default: all models in config, combined into one workbook)")
+    parser.add_argument("--model", required=True,
+                        help="HF model ID used at inference (e.g. Qwen/Qwen3-4B).")
     parser.add_argument("--config", default="config/mvp_config.yaml")
     parser.add_argument("--dataset", default=None,
                         help="Restrict to one dataset key (default: every dataset in config). "
@@ -253,27 +252,22 @@ def main():
                              "Must match the inference/monitor run. Namespaces I/O paths.")
     parser.add_argument("--output", default=None,
                         help="Output .xlsx path (only valid with --model and --dataset; default: "
-                             "outputs-and-results/analysis/{dataset}/{model}/qualitative_export.xlsx)")
+                             "outputs-and-results/analysis/{model}/{dataset}/{hint}/qualitative_export.xlsx)")
     args = parser.parse_args()
 
-    if args.output and (not args.model or not args.dataset):
-        print("ERROR: --output requires --model and --dataset "
+    if args.output and not args.dataset:
+        print("ERROR: --output requires --dataset "
               "(each dataset/model pair gets its own workbook).")
         sys.exit(1)
 
-    root = Path(__file__).parent.parent
+    root = Path(__file__).resolve().parents[2]
     config_path = root / args.config
 
     with open(config_path) as f:
         config = yaml.safe_load(f)
 
     hint_type = args.hint_type or config.get("hint", {}).get("default", "professor")
-    models = config["models"]
-    if args.model:
-        models = [m for m in models if m["name"] == args.model]
-        if not models:
-            print(f"ERROR: model '{args.model}' not found in config.")
-            sys.exit(1)
+    models = [{"name": model_dir_name(args.model), "hf_id": args.model}]
 
     if args.dataset:
         datasets = [args.dataset]

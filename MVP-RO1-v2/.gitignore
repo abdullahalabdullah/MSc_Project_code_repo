@@ -10,6 +10,9 @@ dist/
 build/
 .eggs/
 
+# Run logs (written by run_inference.sh / run_monitor_and_results.sh)
+logs/
+
 # Environment
 .env
 *.env
@@ -19,9 +22,6 @@ build/
 
 # Jupyter
 .ipynb_checkpoints/
-
-# MathBench raw release cache (downloaded on demand by src/dataset.py)
-data/_mathbench_raw/
 
 # OS
 .DS_Store

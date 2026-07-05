@@ -52,7 +52,7 @@ def ensure_hf_auth(verbose: bool = True) -> bool:
              or os.environ.get("HUGGINGFACE_HUB_TOKEN"))
     source = "env"
     if not token:
-        cfg_path = Path(__file__).resolve().parent.parent / "config" / "mvp_config.yaml"
+        cfg_path = Path(__file__).resolve().parents[2] / "config" / "mvp_config.yaml"
         if cfg_path.exists():
             try:
                 import yaml
@@ -82,46 +82,47 @@ def ensure_hf_auth(verbose: bool = True) -> bool:
 # Path namespacing
 # ---------------------------------------------------------------------------
 
+def model_dir_name(model_id: str) -> str:
+    """Folder-safe name for a model ID: 'Qwen/Qwen3-4B' -> 'Qwen_Qwen3-4B'.
+
+    The pipeline takes raw HF model IDs (or local paths) on the command line and
+    namespaces all output dirs by this name. Kept trivially simple ('/' -> '_')
+    so the shell drivers can mirror it with ${MODEL_ID//\\//_}."""
+    return model_id.strip().strip("/").replace("/", "_")
+
+
 def resolve_paths(root, config: dict, dataset_key: str, model_name: str | None = None,
                   hint_type: str | None = None) -> dict:
-    """Resolve all on-disk paths for a (dataset, model, hint_type) triple.
+    """Resolve all on-disk paths for a (model, dataset, hint_type) triple.
 
-    Every dataset is namespaced by its key, and — when a `hint_type` is given —
-    the result dirs are further namespaced by the hint type, so different hints
-    never overwrite each other:
+    Result dirs are namespaced model-first, then dataset, then hint type, so
+    different models/hints never overwrite each other:
         data/{ds}/dataset_index.json
-        outputs/{ds}/{model}/{hint}/, monitor_outputs/{ds}/{model}/{hint}/,
-        analysis/{ds}/{model}/{hint}/, plots/{ds}/{hint}/
+        outputs/{model}/{ds}/{hint}/, monitor_outputs/{model}/{ds}/{hint}/,
+        analysis/{model}/{ds}/{hint}/, plots/{model}/{ds}/{hint}/
 
-    `model_name` is appended to the per-model dirs (outputs/monitor/analysis) only
-    when provided. `hint_type` is appended to those dirs and to plots_dir when
-    provided. `data_index` is never model- or hint-specific (the hint_target is
-    assigned once at prep time and shared by every hint type).
+    `model_name` and `hint_type` are appended only when provided. `data_index`
+    is never model- or hint-specific (the hint_target is assigned once at prep
+    time and shared by every model and hint type).
     """
     root = Path(root)
     p = config["paths"]
 
-    def base(d):
-        return root / d / dataset_key
-
-    def model_dir(d):
-        b = base(d)
+    def result_dir(d):
+        b = root / d
         if model_name:
             b = b / model_name
+        b = b / dataset_key
         if hint_type:
             b = b / hint_type
         return b
 
-    plots_dir = base(p["plots_dir"])
-    if hint_type:
-        plots_dir = plots_dir / hint_type
-
     return {
-        "data_index":  base(p["data_dir"]) / "dataset_index.json",
-        "outputs_dir": model_dir(p["outputs_dir"]),
-        "monitor_dir": model_dir(p["monitor_outputs_dir"]),
-        "analysis_dir": model_dir(p["analysis_dir"]),
-        "plots_dir":   plots_dir,
+        "data_index":  root / p["data_dir"] / dataset_key / "dataset_index.json",
+        "outputs_dir": result_dir(p["outputs_dir"]),
+        "monitor_dir": result_dir(p["monitor_outputs_dir"]),
+        "analysis_dir": result_dir(p["analysis_dir"]),
+        "plots_dir":   result_dir(p["plots_dir"]),
     }
 
 
@@ -430,8 +431,8 @@ def prepare_dataset(config: dict, output_path: Path, dataset_key: str,
     All datasets are resolved through the `datasets:` registry. Sampling is
     uniform; two-level (group -> subgroup) when the loader sets `subgroup`.
 
-    `n_examples` overrides the config `n_examples` budget for this dataset when
-    given (e.g. a smaller 50-example run); otherwise the config value is used."""
+    `n_examples` overrides the global config `n_examples` budget for this run
+    when given; otherwise the config value (shared by all datasets) is used."""
     ensure_hf_auth()  # GPQA is gated; harmless no-op for public datasets
 
     datasets_cfg = config.get("datasets", {})
@@ -452,7 +453,7 @@ def prepare_dataset(config: dict, output_path: Path, dataset_key: str,
     normalised = loader(ds_cfg, rng)
     print(f"  Loaded {len(normalised)} records (post-filter).")
 
-    n = n_examples if n_examples is not None else ds_cfg["n_examples"]
+    n = n_examples if n_examples is not None else config["n_examples"]
     if len(normalised) == 0:
         raise ValueError(f"dataset '{dataset_key}': no records after filtering.")
     if len(normalised) < n:

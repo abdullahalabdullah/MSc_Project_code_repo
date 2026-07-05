@@ -2,19 +2,17 @@
 """
 Step 5: Generate plots for the g-mean^2 monitorability evaluation.
 
-Reads analysis/{model}/gmean2_per_instance.csv and gmean2_summary.json
-(produced by 04_compute_gmean2.py) for each model, and writes:
+Reads analysis/{model}/{dataset}/{hint}/results_per_instance.csv (produced by
+04_compute_gmean2.py) and writes to plots/{model}/{dataset}/{hint}/:
 
-  plots/{model}_gmean2_te_distribution.png
-  plots/{model}_gmean2_distribution.png
-  plots/{model}_tpr_tnr_scatter.png
-  plots/{model}_cot_length_distribution.png
-  plots/gmean2_summary_table.json   (combined summaries across all models)
+  gmean2_te_distribution.png
+  gmean2_distribution.png
+  tpr_tnr_scatter.png
+  cot_length_distribution.png
 
 Usage:
-    python scripts/05_analyze_gmean2.py                       # all models, every dataset
-    python scripts/05_analyze_gmean2.py --dataset wmdp        # all models, one dataset
-    python scripts/05_analyze_gmean2.py --model qwen3_1_7b
+    python scripts/05_analyze_gmean2.py --model Qwen/Qwen3-4B                    # every dataset
+    python scripts/05_analyze_gmean2.py --model Qwen/Qwen3-4B --dataset wmdp    # one dataset
 
     Options:
       --config   path to config YAML (default: config/mvp_config.yaml)
@@ -23,14 +21,13 @@ Usage:
 
 import argparse
 import csv
-import json
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import yaml
-from src.dataset import resolve_paths
+from src.dataset import model_dir_name, resolve_paths
 from src.hints import HINT_TYPES
 from src.gmean2_analysis import (
     plot_te_distribution,
@@ -84,48 +81,35 @@ def run_dataset(root, config, dataset_key, models, hint_type):
     """Generate plots for every given model on a single dataset."""
     print(f"\n=== dataset: {dataset_key}  (hint: {hint_type}) ===")
 
-    plots_dir = resolve_paths(root, config, dataset_key, hint_type=hint_type)["plots_dir"]
-    plots_dir.mkdir(parents=True, exist_ok=True)
-
-    summaries = []
-
     for model_cfg in models:
         model_name = model_cfg["name"]
-        analysis_dir = resolve_paths(root, config, dataset_key, model_name, hint_type)["analysis_dir"]
+        paths = resolve_paths(root, config, dataset_key, model_name, hint_type)
+        analysis_dir = paths["analysis_dir"]
+        plots_dir = paths["plots_dir"]
 
-        csv_path = analysis_dir / "gmean2_per_instance.csv"
-        summary_path = analysis_dir / "gmean2_summary.json"
+        csv_path = analysis_dir / "results_per_instance.csv"
 
-        if not csv_path.exists() or not summary_path.exists():
-            print(f"  Skipping {model_name}: {csv_path} or {summary_path} not found "
+        if not csv_path.exists():
+            print(f"  Skipping {model_name}: {csv_path} not found "
                   f"(run 04_compute_gmean2.py first).")
             continue
 
         print(f"\n--- {model_name} ---")
         per_instance = _load_per_instance(csv_path)
+        plots_dir.mkdir(parents=True, exist_ok=True)
 
-        with open(summary_path, encoding="utf-8") as f:
-            summary = json.load(f)
-        summaries.append(summary)
-
-        plot_te_distribution(per_instance, plots_dir / f"{model_name}_gmean2_te_distribution.png")
-        plot_gmean2_distribution(per_instance, plots_dir / f"{model_name}_gmean2_distribution.png")
-        plot_tpr_tnr_scatter(per_instance, plots_dir / f"{model_name}_tpr_tnr_scatter.png")
-        plot_cot_length_distribution(per_instance, plots_dir / f"{model_name}_cot_length_distribution.png")
+        plot_te_distribution(per_instance, plots_dir / "gmean2_te_distribution.png")
+        plot_gmean2_distribution(per_instance, plots_dir / "gmean2_distribution.png")
+        plot_tpr_tnr_scatter(per_instance, plots_dir / "tpr_tnr_scatter.png")
+        plot_cot_length_distribution(per_instance, plots_dir / "cot_length_distribution.png")
 
         print(f"  Wrote plots for {model_name} to {plots_dir}")
-
-    if summaries:
-        table_path = plots_dir / "gmean2_summary_table.json"
-        with open(table_path, "w", encoding="utf-8") as f:
-            json.dump(summaries, f, indent=2)
-        print(f"\nWritten combined summary table: {table_path}")
 
 
 def main():
     parser = argparse.ArgumentParser(description="Generate g-mean^2 plots.")
-    parser.add_argument("--model", default=None,
-                        help="Model name (default: run all models in config)")
+    parser.add_argument("--model", required=True,
+                        help="HF model ID used at inference (e.g. Qwen/Qwen3-4B).")
     parser.add_argument("--config", default="config/mvp_config.yaml")
     parser.add_argument("--dataset", default=None,
                         help="Restrict to one dataset key (default: every dataset in config). "
@@ -135,19 +119,14 @@ def main():
                              "Must match the inference/monitor run. Namespaces I/O paths.")
     args = parser.parse_args()
 
-    root = Path(__file__).parent.parent
+    root = Path(__file__).resolve().parents[2]
     config_path = root / args.config
 
     with open(config_path) as f:
         config = yaml.safe_load(f)
 
     hint_type = args.hint_type or config.get("hint", {}).get("default", "professor")
-    models = config["models"]
-    if args.model:
-        models = [m for m in models if m["name"] == args.model]
-        if not models:
-            print(f"ERROR: model '{args.model}' not found in config.")
-            sys.exit(1)
+    models = [{"name": model_dir_name(args.model), "hf_id": args.model}]
 
     if args.dataset:
         datasets = [args.dataset]

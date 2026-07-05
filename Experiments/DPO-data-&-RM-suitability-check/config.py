@@ -41,7 +41,9 @@ MAX_MODEL_LEN = MAX_TOKENS + PROMPT_TOKEN_BUDGET
 GEN_MODEL = "Qwen/Qwen3-4B"
 GUARD_MODEL = "Qwen/Qwen3Guard-Gen-4B"
 COST_MODEL = "PKU-Alignment/beaver-7b-unified-cost"
-WILDGUARD_MODEL = "allenai/wildguard"   # sanity-check reference ranker (Mistral-7B based)
+# WildGuard is HELD OUT as the independent verifier for later evaluation — never used for
+# labelling/training. It appears only in sanity_beaver.py as a one-off cross-check ranker.
+WILDGUARD_MODEL = "allenai/wildguard"   # (Mistral-7B based)
 
 # beaver-7b-unified-cost is LLaMA-1 based: a 2048-token context. Inputs longer than this
 # are LEFT-truncated (drop the prompt head, keep the ASSISTANT answer + final token that
@@ -50,7 +52,7 @@ BEAVER_MAX_CTX = 2048
 
 # ── Optional minimum-margin filter (filter-4, off by default) ────────────────
 # After filter-3, optionally drop pairs whose cost margin (rejected_cost - chosen_cost)
-# is below this floor. For HARMLESSNESS this is redundant with filter-3 (WildGuard's label
+# is below this floor. For HARMLESSNESS this is redundant with filter-3 (Qwen3Guard's label
 # opposition is the real signal) — leave it OFF. It exists mainly for the HELPFULNESS
 # pipeline, where there is no categorical labeler and the reward margin is the ONLY quality
 # gate. Set via the MIN_MARGIN env var (run_all.sh forwards it). Empty/unset = not applied.

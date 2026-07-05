@@ -49,7 +49,7 @@ def main():
         # this prompt (available here, discarded after we keep only chosen/rejected):
         #   runner-up gaps  = how isolated the extreme picks are from the 2nd-best/2nd-worst;
         #                     a tiny gap ⇒ the chosen/rejected choice was nearly a tie (fragile).
-        #   unsafe_frac     = WildGuard decisiveness on the prompt (fraction Unsafe; ~0.5 = split).
+        #   unsafe_frac     = Qwen3Guard decisiveness on the prompt (fraction Unsafe; ~0.5 = split).
         valid_rds = [rd for rd in per_prompt if not rd["invalid"] and "cost" in rd]
         sorted_costs = sorted(rd["cost"] for rd in valid_rds)
         chosen_gap = sorted_costs[1] - sorted_costs[0] if len(sorted_costs) >= 2 else 0.0
@@ -58,7 +58,7 @@ def main():
         unsafe_frac = (sum(l == "Unsafe" for l in prompt_labels) / len(prompt_labels)
                        if prompt_labels else float("nan"))
         if ch["guard_label"] == "Safe" and rj["guard_label"] == "Unsafe":
-            # The RM (Beaver) and classifier (WildGuard) were applied to the VISIBLE answer
+            # The RM (Beaver) and classifier (Qwen3Guard) were applied to the VISIBLE answer
             # only (see stages 03/04, which read rd["answer"]). But the DPO pair itself keeps
             # the FULL response (<think>…</think> + answer) — the CoT is retained for training,
             # not discarded. We also stash the visible answer that was actually scored/labeled.
@@ -168,9 +168,9 @@ def main():
         rej_gap = np.array([p["rejected_runner_up_gap"] for p in final_pairs], dtype=float)
         unsafe_fracs = np.array([p["unsafe_frac"] for p in final_pairs], dtype=float)
 
-    # ── labeler agreement: Beaver argmin/argmax vs WildGuard, over filter-1 survivors ──
-    # chosen-side agree = Beaver's safest (min-cost) response is also WildGuard-Safe;
-    # rejected-side agree = Beaver's harshest (max-cost) response is also WildGuard-Unsafe;
+    # ── labeler agreement: Beaver argmin/argmax vs Qwen3Guard, over filter-1 survivors ──
+    # chosen-side agree = Beaver's safest (min-cost) response is also Qwen3Guard-Safe;
+    # rejected-side agree = Beaver's harshest (max-cost) response is also Qwen3Guard-Unsafe;
     # both = the pair the two labelers agree on end-to-end (== filter-3 survivors).
     agree_chosen = agree_rejected = agree_both = 0
     for per_prompt in survivors:
@@ -196,7 +196,7 @@ def main():
     mean_unsafe = float(np.mean(unsafe_costs)) if unsafe_costs else float("nan")
 
     # point-biserial r(cost, label=Unsafe) over all scored responses: one number for how well
-    # Beaver's continuous cost separates WildGuard's Safe/Unsafe classes (+1 = perfect, 0 = none).
+    # Beaver's continuous cost separates Qwen3Guard's Safe/Unsafe classes (+1 = perfect, 0 = none).
     all_c = np.array(safe_costs + unsafe_costs, dtype=float)
     all_y = np.array([0] * len(safe_costs) + [1] * len(unsafe_costs), dtype=float)
     if len(all_c) >= 2 and np.std(all_c) > 0 and np.std(all_y) > 0:
@@ -254,16 +254,16 @@ def main():
                      f"{final_mix.get(s, 0)} | {surv:.1f} |")
     lines.append(f"| **all** | {config.SAMPLE} | {n_enter_stage4} | {n_after_f3} | "
                  f"{n_final} | {survival:.1f} |\n")
-    lines.append("## Labeler agreement (Beaver argmin/argmax vs WildGuard)")
-    lines.append(f"- chosen-side (Beaver-safest is WildGuard-Safe): "
+    lines.append("## Labeler agreement (Beaver argmin/argmax vs Qwen3Guard)")
+    lines.append(f"- chosen-side (Beaver-safest is Qwen3Guard-Safe): "
                  f"**{100.0 * agree_chosen / n_surv:.1f}%** ({agree_chosen}/{n_enter_stage4})")
-    lines.append(f"- rejected-side (Beaver-harshest is WildGuard-Unsafe): "
+    lines.append(f"- rejected-side (Beaver-harshest is Qwen3Guard-Unsafe): "
                  f"**{100.0 * agree_rejected / n_surv:.1f}%** ({agree_rejected}/{n_enter_stage4})")
     lines.append(f"- both agree (→ filter-3 survivors): "
                  f"**{100.0 * agree_both / n_surv:.1f}%** ({agree_both}/{n_enter_stage4})")
     pb_str = "n/a" if np.isnan(point_biserial) else f"{point_biserial:+.3f}"
     lines.append(f"- point-biserial r(cost, Unsafe) over all scored responses: **{pb_str}** "
-                 f"(+1 = cost perfectly separates WildGuard classes; 0 = no separation)\n")
+                 f"(+1 = cost perfectly separates Qwen3Guard classes; 0 = no separation)\n")
     lines.append("## Margin calibration (isolation of the chosen/rejected picks)")
     if n_final:
         lines.append(f"- **chosen runner-up gap** (2nd-safest − safest cost): mean "
@@ -274,7 +274,7 @@ def main():
             s_margins = [p["margin"] for p in final_pairs if p["subset"] == s]
             if s_margins:
                 lines.append(f"- mean margin ({s}): {float(np.mean(s_margins)):.3f} (n={len(s_margins)})")
-        lines.append(f"- **WildGuard decisiveness** (mean Unsafe fraction per surviving prompt): "
+        lines.append(f"- **Qwen3Guard decisiveness** (mean Unsafe fraction per surviving prompt): "
                      f"{np.nanmean(unsafe_fracs):.2f} (0.5 = maximally split)\n")
     else:
         lines.append("- (no surviving pairs)\n")
@@ -365,7 +365,7 @@ def main():
         "margin_median": _f(round(float(np.median(spreads)), 4)) if len(spreads) else None,
         "chosen_runner_up_gap_mean": _f(round(float(cho_gap.mean()), 4)) if n_final else None,
         "rejected_runner_up_gap_mean": _f(round(float(rej_gap.mean()), 4)) if n_final else None,
-        "wildguard_decisiveness_mean_unsafe_frac":
+        "guard_decisiveness_mean_unsafe_frac":
             _f(round(float(np.nanmean(unsafe_fracs)), 4)) if n_final else None,
         "per_subset_mean_margin": {
             s: round(float(np.mean([p["margin"] for p in final_pairs if p["subset"] == s])), 4)

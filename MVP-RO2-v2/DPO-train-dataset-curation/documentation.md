@@ -37,13 +37,17 @@ rescues it.
 | Model | Role |
 |---|---|
 | `Qwen/Qwen3-4B` | Generator — produces N responses per prompt (thinking mode). |
-| `allenai/wildguard` | **Labeler** — binary Harmful-response (yes→Unsafe / no→Safe) per answer; also emits `refusal` + `harmful_request`. Purpose-built for WildJailbreak and independent of the generator. Gates filter-1/filter-3. |
+| `Qwen/Qwen3Guard-Gen-4B` | **Labeler** — 3-way Safety verdict (Safe/Unsafe/Controversial) per answer, Controversial folded into Unsafe; also emits `refusal` (same pass) + `harmful_request` (separate prompt-only pass, deduped per unique prompt). Gates filter-1/filter-3. |
 | `PKU-Alignment/beaver-7b-unified-cost` | **Ranker** — scalar cost (higher = more harmful) to pick chosen/rejected. |
-| `Qwen/Qwen3Guard-Gen-4B` | Available as an independent reference/validator (different model from the labeler). |
+| `allenai/wildguard` | Independent reference labeler used only by `sanity_beaver.py`, not stage 03. |
 
-The labeler (WildGuard) is a *different* model from the generator (Qwen3-4B), so labels are
-not self-graded; and a *different* model again (Beaver) does the ranking, so filter-3 is a
-real agreement test, not circular.
+Note on independence: Qwen3Guard-Gen-4B is a *different checkpoint* from the generator
+(Qwen3-4B), so labels are not literally self-graded, but both are Qwen3-family models from the
+same lab with overlapping alignment data — see `labeler_comparison.md` for the earlier
+WildGuard-vs-Qwen3Guard comparison and the non-circularity tradeoff it raises (kept as a
+historical record; not updated when this switch was made). A *different* model again (Beaver)
+does the ranking, so filter-3 is still a real cost-vs-label agreement test, not circular on
+that axis.
 
 ## Pipeline (each stage reads/writes a joblib in `outputs/`)
 
@@ -51,7 +55,7 @@ real agreement test, not circular.
 |---|---|---|
 | 01 | `01_prepare_prompts.py` | Load WildJailbreak `vanilla_harmful` + `adversarial_harmful`, dedup, sample `SAMPLE=300` (seed 0). Also saves per-prompt `{subset, vanilla seed}`. |
 | 02 | `02_generate_responses.py` | Qwen3-4B, N=10, temp 0.6 / top_p 0.95 / top_k 20, `max_tokens=8192`; tuned vLLM (prefix caching, capped `max_model_len`, 0.90 VRAM); live truncation reporting. |
-| 03 | `03_classify_guard.py` | Strip `</think>`, **WildGuard** label per answer (Harmful-response yes/no → Unsafe/Safe; also stores refusal + harmful_request), **filter-1** (drop prompts whose answers all share one label). Also dumps `03_all_labeled.joblib`. |
+| 03 | `03_classify_guard.py` | Strip `</think>`, **Qwen3Guard** label per answer (3-way Safe/Unsafe/Controversial → Controversial folded into Unsafe; also stores refusal + harmful_request), **filter-1** (drop prompts whose answers all share one label). Also dumps `03_all_labeled.joblib`. |
 | 04 | `04_score_cost.py` | Beaver cost (left-truncated at 2048); per prompt `chosen=argmin`, `rejected=argmax`. |
 | 05 | `05_report.py` | **filter-3** (chosen=Safe & rejected=Unsafe), survival rate, cost spread, 10 sample pairs, sign sanity check → `outputs/report.md`. |
 | 06 | `06_export_dpo_dataset.py` | **Handoff**: `final_pairs.joblib` → HF `DatasetDict({train,valid})` with `prompt`/`chosen`/`rejected` → `outputs/dpo_dataset/`, the training-ready artifact. |

@@ -14,7 +14,7 @@ instance's hint_target, even for unhinted responses, so that TNR_X=0 / TNR_X=1
 are comparable. Supports resume-on-restart. Requires OPENAI_API_KEY in the env.
 
 Usage:
-    OPENAI_API_KEY=<key> python scripts/03_run_monitor.py --model qwen3_1_7b \
+    OPENAI_API_KEY=<key> python scripts/03_run_monitor.py --model Qwen/Qwen3-4B \
         --dataset wmdp --hint-type professor
 
     Options:
@@ -24,12 +24,12 @@ Usage:
                    the inference run). Namespaces I/O paths.
 
 Input:
-    outputs/{dataset}/{model_name}/{hint_type}/hinted.jsonl
-    outputs/{dataset}/{model_name}/{hint_type}/unhinted.jsonl
+    outputs/{model_name}/{dataset}/{hint_type}/hinted.jsonl
+    outputs/{model_name}/{dataset}/{hint_type}/unhinted.jsonl
 
 Output:
-    monitor_outputs/{dataset}/{model_name}/{hint_type}/monitor_results.jsonl
-    monitor_outputs/{dataset}/{model_name}/{hint_type}/monitor_progress.json
+    monitor_outputs/{model_name}/{dataset}/{hint_type}/monitor_results.jsonl
+    monitor_outputs/{model_name}/{dataset}/{hint_type}/monitor_progress.json
 """
 
 import argparse
@@ -40,14 +40,14 @@ import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import yaml
 from openai import OpenAI
 from tqdm import tqdm
 from src.monitor import classify
 from src.gmean2_metrics import load_jsonl
-from src.dataset import resolve_paths
+from src.dataset import model_dir_name, resolve_paths
 from src.hints import HINT_TYPES
 
 NUM_WORKERS = 16
@@ -57,16 +57,17 @@ MIN_WORKERS = 8  # floor for automatic rate-limit back-off
 def main():
     parser = argparse.ArgumentParser(description="Run monitor (both arms) for one model.")
     parser.add_argument("--model", required=True,
-                        help="Model name as defined in config (e.g. qwen3_1_7b)")
+                        help="HF model ID used at inference (e.g. Qwen/Qwen3-4B). "
+                             "Resolves the same output dirs as step 02.")
     parser.add_argument("--config", default="config/mvp_config.yaml")
-    parser.add_argument("--dataset", default="mmlu",
-                        help="Dataset key (default: mmlu). Namespaces I/O paths.")
+    parser.add_argument("--dataset", default="mmlu_redux",
+                        help="Dataset key (default: mmlu_redux). Namespaces I/O paths.")
     parser.add_argument("--hint-type", default=None, choices=HINT_TYPES,
                         help="Hint type to monitor (default: config hint.default). "
                              "Must match the inference run. Namespaces I/O paths.")
     args = parser.parse_args()
 
-    root = Path(__file__).parent.parent
+    root = Path(__file__).resolve().parents[2]
     config_path = root / args.config
 
     with open(config_path) as f:
@@ -81,7 +82,7 @@ def main():
 
     client = OpenAI(api_key=api_key)
     mon_cfg = config["monitor"]
-    model_name = args.model
+    model_name = model_dir_name(args.model)
 
     paths = resolve_paths(root, config, args.dataset, model_name, hint_type)
     out_dir = paths["outputs_dir"]

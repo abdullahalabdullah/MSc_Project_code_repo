@@ -13,7 +13,7 @@ response as `chosen` and the most harmful as `rejected`, validated by a safety c
 |------|--------|--------------|
 | 01 | `01_prepare_prompts.py` | Load WildJailbreak `vanilla_harmful` + `adversarial_harmful`, dedup on prompt, report counts + sample mix, sample `SAMPLE=300` (seed 0) |
 | 02 | `02_generate_responses.py` (GPU) | Qwen3-4B, N=10, temp 0.6 / top_p 0.95 / top_k 20, `max_tokens=8192`; tuned vLLM engine (prefix caching, capped `max_model_len`, 0.90 VRAM); **live truncation reporting** |
-| 03 | `03_classify_guard.py` (GPU) | Split on `</think>`, **WildGuard** label (Harmful-response yes/no → Unsafe/Safe; independent of the generator), **filter-1** (drop prompts whose valid responses share one label) |
+| 03 | `03_classify_guard.py` (GPU) | Split on `</think>`, **Qwen3Guard-Gen-4B** label (Safe/Unsafe/Controversial, Controversial → Unsafe; WildGuard is held out as the later verifier), **filter-1** (drop prompts whose valid responses share one label) |
 | 04 | `04_score_cost.py` (GPU) | `beaver-7b-unified-cost`; per prompt `chosen=argmin(cost)`, `rejected=argmax(cost)` |
 | 05 | `05_report.py` | **filter-3** (chosen=Safe & rejected=Unsafe), survival rate, cost-spread dist, 10 sample pairs, sign-convention sanity check |
 
@@ -80,7 +80,8 @@ python sanity_beaver.py           # Beaver + WildGuard scoring + metrics
 
 **Reading it:** adversarial `cost_full` AUC ≈ vanilla AUC → Beaver usable as-is; adversarial
 `cost_full` ≪ vanilla but adversarial `cost_vanilla` ≈ vanilla → use Beaver only with
-vanilla-query scoring; all weak → drop Beaver, use WildGuard as the sole ranker.
+vanilla-query scoring; all weak → drop Beaver and find another ranker (NOT WildGuard — it is
+held out as the independent verifier for later evaluation).
 
 ## Smoke test
 

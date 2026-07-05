@@ -1,10 +1,17 @@
-"""Stage 03 — Split CoT/answer, classify with WildGuard, apply filter-1.
+"""Stage 03 — Split CoT/answer, classify with Qwen3Guard, apply filter-1.
 
-Labeler: **allenai/wildguard** (binary, purpose-built for WildJailbreak). It is independent
-of the generator (Qwen3-4B), so labels are not self-graded. We read its verdict lines:
-  - "Harmful response: yes/no"  -> guard_label: yes -> "Unsafe", no -> "Safe"
-  - "Response refusal: yes/no"   -> stored as `refusal`        (for the future benign axis)
-  - "Harmful request: yes/no"    -> stored as `harmful_request`
+Labeler: **Qwen/Qwen3Guard-Gen-4B**, a chat model that frames safety classification as an
+instruction-following task (see model card). Given a two-turn conversation (user prompt +
+assistant response) it generates:
+    Safety: Safe|Unsafe|Controversial
+    Categories: ...
+    Refusal: Yes|No
+Qwen3Guard's Safety verdict is 3-way; we COLLAPSE Controversial -> Unsafe so `guard_label`
+stays binary Safe/Unsafe (what filter-1/filter-3 need). "Refusal" is stored as `refusal` (for
+the future benign axis). Request-only harmfulness ("Harmful request" in the old WildGuard
+sense) needs a *separate* prompt-only generation (Qwen3Guard has no single-pass three-verdict
+mode); we run that once per UNIQUE prompt (not once per response) and store it as
+`harmful_request`.
 
 For each response: strip everything up to and including </think>; the remainder is the
 `answer`. Responses truncated mid-think (no </think>) have no visible answer -> invalid.
@@ -26,34 +33,45 @@ from utils import (
     set_seed, extract_visible_response, think_answer_word_counts, update_diagnostics,
 )
 
-HARMFUL_RESP_RE = re.compile(r"Harmful response:\s*(yes|no)", re.IGNORECASE)
-REFUSAL_RE = re.compile(r"Response refusal:\s*(yes|no)", re.IGNORECASE)
-HARMFUL_REQ_RE = re.compile(r"Harmful request:\s*(yes|no)", re.IGNORECASE)
+SAFETY_RE = re.compile(r"Safety:\s*(Safe|Unsafe|Controversial)", re.IGNORECASE)
+REFUSAL_RE = re.compile(r"Refusal:\s*(yes|no)", re.IGNORECASE)
 
 
 def _yn(m):
     return None if m is None else (m.group(1).lower() == "yes")
 
 
-def parse_wildguard(text):
-    """Return (guard_label, refusal, harmful_request) from a WildGuard generation."""
-    hr = _yn(HARMFUL_RESP_RE.search(text))
-    guard_label = None if hr is None else ("Unsafe" if hr else "Safe")
+def _binary_safety(m):
+    """Safe -> 'Safe'; Unsafe or Controversial -> 'Unsafe'; unparsed -> None."""
+    if m is None:
+        return None
+    return "Safe" if m.group(1).lower() == "safe" else "Unsafe"
+
+
+def parse_qwen3guard_response(text):
+    """Return (guard_label, refusal) from a two-turn (prompt+response) Qwen3Guard generation."""
+    guard_label = _binary_safety(SAFETY_RE.search(text))
     refusal = _yn(REFUSAL_RE.search(text))
-    harmful_request = _yn(HARMFUL_REQ_RE.search(text))
-    return guard_label, refusal, harmful_request
+    return guard_label, refusal
 
 
-def classify_batch(model, tokenizer, pairs):
-    """pairs: list of (prompt, answer). Returns list of raw WildGuard generations (str)."""
-    rendered = [config.WILDGUARD_INPUT.format(prompt=p, response=a) for p, a in pairs]
+def parse_qwen3guard_prompt(text):
+    """Return harmful_request (bool | None) from a prompt-only Qwen3Guard generation."""
+    label = _binary_safety(SAFETY_RE.search(text))
+    return None if label is None else (label == "Unsafe")
+
+
+def classify_batch(model, tokenizer, conversations, max_new_tokens):
+    """conversations: list of chat-message lists (Qwen3Guard's chat template appends the
+    right assessment cue based on whether the last turn is user-only or user+assistant, so no
+    add_generation_prompt is needed). Returns list of raw Qwen3Guard generations (str)."""
+    rendered = [tokenizer.apply_chat_template(msgs, tokenize=False) for msgs in conversations]
     enc = tokenizer(
-        rendered, return_tensors="pt", padding=True, add_special_tokens=False,
-        truncation=True, max_length=8192,
+        rendered, return_tensors="pt", padding=True, truncation=True, max_length=8192,
     ).to(model.device)
     with torch.no_grad():
         gen = model.generate(
-            **enc, max_new_tokens=config.WILDGUARD_MAX_NEW_TOKENS, do_sample=False,
+            **enc, max_new_tokens=max_new_tokens, do_sample=False,
             pad_token_id=tokenizer.pad_token_id,
         )
     new_tokens = gen[:, enc["input_ids"].shape[1]:]
@@ -89,43 +107,64 @@ def main():
     print(f"Invalid (no visible answer): {n_invalid} / {n_total} "
           f"({100.0 * n_invalid / n_total:.1f}%)")
 
-    # 2) Flatten all valid (prompt, answer) pairs and classify with WildGuard.
+    # 2) Flatten all valid (prompt, answer) pairs and classify with Qwen3Guard.
     flat = [(pi, ri) for pi, pp in enumerate(all_responses)
             for ri, rd in enumerate(pp) if not rd["invalid"]]
-    print(f"Classifying {len(flat)} valid (prompt, answer) pairs with {config.WILDGUARD_MODEL} ...")
+    print(f"Classifying {len(flat)} valid (prompt, answer) pairs with {config.GUARD_MODEL} ...")
 
-    tokenizer = AutoTokenizer.from_pretrained(config.WILDGUARD_MODEL)
+    tokenizer = AutoTokenizer.from_pretrained(config.GUARD_MODEL)
     tokenizer.padding_side = "left"      # batched generation
-    tokenizer.truncation_side = "left"   # if over-long, keep the answer + "Answers: [/INST]" scaffold
+    tokenizer.truncation_side = "left"   # if over-long, keep the answer + assessment scaffold
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token = tokenizer.eos_token
     model = AutoModelForCausalLM.from_pretrained(
-        config.WILDGUARD_MODEL, torch_dtype="auto", device_map="auto"
+        config.GUARD_MODEL, torch_dtype="auto", device_map="auto"
     ).eval()
 
-    for b in range(0, len(flat), config.WILDGUARD_BATCH):
-        chunk = flat[b:b + config.WILDGUARD_BATCH]
-        pairs = [(all_responses[pi][ri]["prompt"], all_responses[pi][ri]["answer"])
-                 for pi, ri in chunk]
-        raw_outs = classify_batch(model, tokenizer, pairs)
+    for b in range(0, len(flat), config.GUARD_BATCH):
+        chunk = flat[b:b + config.GUARD_BATCH]
+        conversations = [
+            [
+                {"role": "user", "content": all_responses[pi][ri]["prompt"]},
+                {"role": "assistant", "content": all_responses[pi][ri]["answer"]},
+            ]
+            for pi, ri in chunk
+        ]
+        raw_outs = classify_batch(model, tokenizer, conversations, config.GUARD_MAX_NEW_TOKENS)
         for (pi, ri), raw in zip(chunk, raw_outs):
-            label, refusal, harmful_request = parse_wildguard(raw)
+            label, refusal = parse_qwen3guard_response(raw)
             rd = all_responses[pi][ri]
             rd["guard_raw"] = raw
-            rd["guard_label"] = label            # 'Safe' | 'Unsafe' | None (unparsed)
+            rd["guard_label"] = label            # 'Safe' | 'Unsafe' | None (unparsed); Controversial folded into Unsafe
             rd["refusal"] = refusal              # bool | None  (for the future benign axis)
-            rd["harmful_request"] = harmful_request
-        if (b // config.WILDGUARD_BATCH) % 20 == 0:
-            print(f"  {min(b + config.WILDGUARD_BATCH, len(flat))}/{len(flat)}")
+        if (b // config.GUARD_BATCH) % 20 == 0:
+            print(f"  {min(b + config.GUARD_BATCH, len(flat))}/{len(flat)}")
 
-    # Label distribution — confirms WildGuard is emitting parseable verdicts, not None.
+    # 2b) Request-only harmfulness ("harmful_request"): a separate prompt-only generation,
+    # since Qwen3Guard needs a distinct pass for this (no single-call 3-verdict mode like
+    # WildGuard had). Run once per UNIQUE prompt — all N responses to a prompt share the same
+    # request, so this is n_prompts calls, not n_prompts * N.
+    unique_prompts = [per_prompt[0]["prompt"] for per_prompt in all_responses]
+    print(f"Classifying {len(unique_prompts)} unique prompts for request harmfulness ...")
+    prompt_harmful = [None] * n_prompts
+    for b in range(0, len(unique_prompts), config.GUARD_BATCH):
+        chunk_prompts = unique_prompts[b:b + config.GUARD_BATCH]
+        conversations = [[{"role": "user", "content": p}] for p in chunk_prompts]
+        raw_outs = classify_batch(model, tokenizer, conversations, config.GUARD_MAX_NEW_TOKENS)
+        for offset, raw in enumerate(raw_outs):
+            prompt_harmful[b + offset] = parse_qwen3guard_prompt(raw)
+    for pi, per_prompt in enumerate(all_responses):
+        for rd in per_prompt:
+            rd["harmful_request"] = prompt_harmful[pi]   # bool | None
+
+    # Label distribution — confirms Qwen3Guard is emitting parseable verdicts, not None.
     from collections import Counter
     dist = Counter(all_responses[pi][ri]["guard_label"] for pi, ri in flat)
     n_safe, n_unsafe, n_none = dist.get("Safe", 0), dist.get("Unsafe", 0), dist.get(None, 0)
-    print(f"\nWildGuard label distribution: Safe={n_safe} Unsafe={n_unsafe} unparsed(None)={n_none}")
+    print(f"\nQwen3Guard label distribution: Safe={n_safe} Unsafe={n_unsafe} unparsed(None)={n_none}")
     if flat and n_none == len(flat):
-        print("  WARNING: EVERY WildGuard output was unparsed — check the config.WILDGUARD_INPUT "
-              "template / parsing, and eyeball a guard_raw string in 03_all_labeled.joblib.")
+        print("  WARNING: EVERY Qwen3Guard output was unparsed — check the chat-template "
+              "rendering / SAFETY_RE parsing, and eyeball a guard_raw string in 03_all_labeled.joblib.")
 
     joblib.dump(all_responses, config.ALL_LABELED_PATH, compress=True)
     print(f"Saved (debug, all prompts) -> {config.ALL_LABELED_PATH}")
@@ -150,7 +189,7 @@ def main():
     print(f"Saved -> {config.LABELED_PATH}")
 
     update_diagnostics(config.DIAGNOSTICS_PATH, "classification", {
-        "labeler": config.WILDGUARD_MODEL,
+        "labeler": config.GUARD_MODEL,
         "n_prompts": n_prompts,
         "responses_per_prompt": len(all_responses[0]),
         "invalid_no_answer": n_invalid,

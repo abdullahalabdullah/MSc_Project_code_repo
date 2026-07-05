@@ -1,28 +1,22 @@
 #!/usr/bin/env python3
 """
-Step 2 (Qwen3 variant): Run hinted and unhinted inference for one Qwen3 checkpoint.
+Step 2: Run hinted and unhinted inference for one Qwen3 (thinking-mode) checkpoint.
 
-Identical role to scripts/02_run_inference.py, but uses src/inference_qwen.py so
-the model's `<think>...</think>` reasoning is generated (thinking mode) and
-handled correctly, with Qwen3-recommended sampling read from the `qwen_inference:`
-block of the config.
-
-Use this script for Qwen3 (and other thinking models); use 02_run_inference.py
-for the Llama/Tulu checkpoints. Steps 03–06 (monitor, metrics, analysis, excel)
-are model-agnostic and the same for both.
+Uses src/inference_qwen.py so the model's `<think>...</think>` reasoning is
+generated (thinking mode) and handled correctly, with Qwen3-recommended sampling
+read from the `qwen_inference:` block of the config.
 
 Usage:
-    # single dataset (original behaviour)
-    python scripts/02_run_inference_qwen.py --model qwen3_4b --dataset mmlu
+    # single dataset
+    python scripts/02_run_inference_qwen.py --model Qwen/Qwen3-4B --dataset mmlu_redux
 
     # multiple datasets — model loaded ONCE, weights shared across all datasets
-    python scripts/02_run_inference_qwen.py --model qwen3_4b --datasets mmlu gpqa wmdp agieval
+    python scripts/02_run_inference_qwen.py --model Qwen/Qwen3-4B --datasets mmlu_redux gpqa_diamond wmdp
 
 Options:
     --config        path to config YAML (default: config/mvp_config.yaml)
     --seed          base random seed (default: 88)
-    --hf-id         override hf_id from config (e.g. a local merged model dir)
-    --dataset       single dataset key (default: mmlu)
+    --dataset       single dataset key (default: mmlu_redux)
     --datasets      one or more dataset keys; overrides --dataset when given
     --hint-type     hint shown in the hinted arm (default: config hint.default).
                     One of: professor, visual_pattern, metadata, wrong_few_shot,
@@ -34,19 +28,19 @@ Input:
     data/{dataset}/dataset_index.json
 
 Output:
-    outputs/{dataset}/{model_name}/{hint_type}/hinted.jsonl
-    outputs/{dataset}/{model_name}/{hint_type}/unhinted.jsonl
-    outputs/{dataset}/{model_name}/{hint_type}/progress.json
+    outputs/{model_name}/{dataset}/{hint_type}/hinted.jsonl
+    outputs/{model_name}/{dataset}/{hint_type}/unhinted.jsonl
+    outputs/{model_name}/{dataset}/{hint_type}/progress.json
 """
 
 import argparse
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import yaml
-from src.dataset import ensure_hf_auth, load_dataset_index, resolve_paths
+from src.dataset import ensure_hf_auth, load_dataset_index, model_dir_name, resolve_paths
 from src.hints import HINT_TYPES
 from src.inference_qwen import load_qwen_model, run_inference_qwen
 
@@ -54,10 +48,11 @@ from src.inference_qwen import load_qwen_model, run_inference_qwen
 def main():
     parser = argparse.ArgumentParser(description="Run Qwen3 (thinking) inference for one model.")
     parser.add_argument("--model", required=True,
-                        help="Model name as defined in config (e.g. qwen3_4b)")
+                        help="HF model ID (e.g. Qwen/Qwen3-4B) or a local model dir. "
+                             "Output dirs are namespaced by its folder-safe name ('/' -> '_').")
     parser.add_argument("--config", default="config/mvp_config.yaml")
-    parser.add_argument("--dataset", default="mmlu",
-                        help="Single dataset key (default: mmlu). Ignored when --datasets is given.")
+    parser.add_argument("--dataset", default="mmlu_redux",
+                        help="Single dataset key (default: mmlu_redux). Ignored when --datasets is given.")
     parser.add_argument("--datasets", nargs="+", default=None,
                         help="One or more dataset keys. Model is loaded once and reused across all.")
     parser.add_argument("--hint-type", default=None, choices=HINT_TYPES,
@@ -67,13 +62,11 @@ def main():
                         help="Samples (N) per arm per instance (default: config "
                              "qwen_inference.n_samples). Overrides the config value for this run.")
     parser.add_argument("--seed", type=int, default=88)
-    parser.add_argument("--hf-id", default=None,
-                        help="Override hf_id from config (e.g. a local merged model dir).")
     args = parser.parse_args()
 
     datasets = args.datasets if args.datasets else [args.dataset]
 
-    root = Path(__file__).parent.parent
+    root = Path(__file__).resolve().parents[2]
     config_path = root / args.config
 
     with open(config_path) as f:
@@ -95,14 +88,7 @@ def main():
 
     ensure_hf_auth()  # log in for gated model downloads (env var or config hf_token)
 
-    model_cfg = next((m for m in config["models"] if m["name"] == args.model), None)
-    if model_cfg is None:
-        available = [m["name"] for m in config["models"]]
-        print(f"ERROR: model '{args.model}' not found in config. Available: {available}")
-        sys.exit(1)
-
-    if args.hf_id:
-        model_cfg = dict(model_cfg, hf_id=args.hf_id)
+    model_cfg = {"name": model_dir_name(args.model), "hf_id": args.model}
 
     # Validate all dataset indexes exist before loading the model.
     for ds in datasets:

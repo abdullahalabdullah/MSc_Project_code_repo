@@ -5,13 +5,14 @@
 # then clear the source dirs (except .gitkeep) for a fresh run.
 #
 # Usage:
-#   ./scripts/archive_results.sh
+#   ./monitorability-eval/scripts/archive_results.sh
 #
 # Run from anywhere — it cd's to the repo root itself.
 
 set -euo pipefail
 
-cd "$(dirname "$0")/.."
+# This script lives in monitorability-eval/scripts/, so climb two levels to the repo root.
+cd "$(dirname "$0")/../.."
 
 ROOT="outputs-and-results"
 TS=$(date +%Y-%m-%d_%H-%M-%S)

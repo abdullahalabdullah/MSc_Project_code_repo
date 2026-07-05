@@ -1,5 +1,31 @@
 # MVP-RO1 — CoT Monitorability Evaluation
 
+## Quick start
+
+The whole pipeline is two commands. Both take the same three arguments:
+`<model_id>` (an HF model ID or local model dir — **required**), a dataset key
+or `ALL`, and a hint type or `ALL`.
+
+```bash
+# 1) GPU box — prepare data + inference + CoT-length report:
+bash run_inference.sh Qwen/Qwen3-4B ALL professor
+
+# 2) Locally, after pulling the inference outputs — monitor + all results:
+export OPENAI_API_KEY=sk-...
+bash run_monitor_and_results.sh Qwen/Qwen3-4B ALL professor
+```
+
+Datasets: `mmlu_redux, gpqa_diamond, wmdp, codemmlu, lsat_ar, lsat_lr` (or `ALL`).
+Hint types: `professor, visual_pattern, metadata, wrong_few_shot, grader_hacking,
+unethical` (or `ALL`). Both lists come from `config/mvp_config.yaml`, so the
+scripts stay in sync with the config automatically. Optional env knobs for
+`run_inference.sh`: `N_EXAMPLES=50` (examples/dataset), `N_SAMPLES=8`
+(samples/arm), `FORCE_PREPARE=true` (rebuild indexes). Both scripts are
+fail-soft, resume from checkpoints, commit+push progress, and log to `logs/`
+(gitignored).
+
+---
+
 Measures **chain-of-thought monitorability under hint pressure**: when a model
 follows a planted hint to a (wrong) answer, can an LLM monitor reading the CoT tell
 that the hint was used? The headline metric is **g-mean²**, combining:
@@ -24,30 +50,30 @@ labels each response for hint-acknowledgement (Z).
 | Step | Script | In → Out |
 |------|--------|----------|
 | 1 | `01_prepare_dataset.py` | HF dataset → `data/{ds}/dataset_index.json` (idempotent) |
-| 2 | `02_run_inference_qwen.py` | dataset → `…/outputs/{ds}/{model}/{hint}/{hinted,unhinted}.jsonl` |
-| 3 | `03_run_monitor.py` | inference → `…/monitor_outputs/{ds}/{model}/{hint}/monitor_results.jsonl` |
-| 4 | `04_compute_gmean2.py` | inference + monitor → `…/analysis/{ds}/{model}/{hint}/gmean2_summary.{md,json}`, `gmean2_per_instance.{csv,json}` |
-| 5 | `05_analyze_gmean2.py` | per-instance CSV → `…/plots/{ds}/{hint}/*.png` |
-| 6 | `06_export_excel.py` | inference + monitor → `…/analysis/{ds}/{model}/{hint}/qualitative_export.xlsx` |
-| 7 | `07_summary_table.py` | `gmean2_summary.json` (all ds/models) → `…/analysis/summary_{hint}.md` |
-| 8 | `08_cot_token_analysis.py` | inference (all ds) → `…/analysis/cot_token_report_{model}_{hint}.md` |
+| 2 | `02_run_inference_qwen.py` | dataset → `…/outputs/{model}/{ds}/{hint}/{hinted,unhinted}.jsonl` |
+| 3 | `03_run_monitor.py` | inference → `…/monitor_outputs/{model}/{ds}/{hint}/monitor_results.jsonl` |
+| 4 | `04_compute_gmean2.py` | inference + monitor → `…/analysis/{model}/{ds}/{hint}/results_summary.json`, `results_per_instance.{csv,json}` |
+| 5 | `05_analyze_gmean2.py` | per-instance CSV → `…/plots/{model}/{ds}/{hint}/*.png` |
+| 6 | `06_export_excel.py` | inference + monitor → `…/analysis/{model}/{ds}/{hint}/qualitative_export.xlsx` |
+| 8 | `08_cot_token_analysis.py` | inference (all ds) → `…/analysis/{model}/{ds}/{hint}/cot_token_stats.json` |
+| 9 | `09_generate_reports.py` | 04 + 08's JSON/CSV artifacts → all `.md` reports (see **Reports**) |
 
-Every step takes a `--dataset` **and** a `--hint-type` flag; both namespace the I/O
-paths, so a (dataset × hint-type) combination is an independent run. `--hint-type`
-defaults to `hint.default` in the config when omitted. See **Hint types** below.
-Step 7 is the exception — it takes only `--hint-type` (no `--dataset`/`--model`) and
-scans every dataset/model combo under `--analysis-dir` that already has a
-`gmean2_summary.json`, building one cross-dataset, per-model summary table
-(override the output path with `--output`; default
-`…/analysis/summary_{hint_type}.md`). Run it after step 4 for all the
-dataset/model combos you want included:
+Steps 2–6 and 8 take `--model` (an HF model ID or local model dir; `{model}` in the
+paths is its folder-safe name, `/` → `_`), plus a `--dataset` **and** a `--hint-type`
+flag; all three namespace the I/O paths, so a (model × dataset × hint-type)
+combination is an independent run. `--hint-type` defaults to `hint.default` in the
+config when omitted. See **Hint types** below.
+Step 9 is the exception — it takes only `--model` and scans every completed
+(dataset × hint-type) run under `analysis/{model}/`, regenerating every report.
+**All Markdown generation is isolated in step 9** (`src/reporting.py` +
+`scripts/09_generate_reports.py` + one driver line) and derives ONLY from the
+JSON/CSV artifacts of steps 4 + 8 — so every `.md` file can be deleted and
+regenerated with one 09 run (no inference/monitor re-run), and the whole
+reporting layer can be removed cleanly before a public release. Steps 1–8 never
+write `.md`.
 
-```bash
-python scripts/07_summary_table.py --hint-type professor
-```
-
-`…` = `outputs-and-results/`. Steps 2 needs a GPU (vLLM); 3 needs the OpenAI API;
-4–8 are CPU-only. Helpers: `scripts/merge_and_push.py` merges a LoRA/DPO adapter
+`…` = `outputs-and-results/`. Step 2 needs a GPU (vLLM); 3 needs the OpenAI API;
+4–9 are CPU-only. Helpers: `scripts/merge_and_push.py` merges a LoRA/DPO adapter
 into the base model and pushes it to the Hub; `scripts/archive_results.sh` snapshots
 the result dirs into `outputs-and-results/Old-Results/{timestamp}/` and clears them
 for a fresh run.
@@ -69,33 +95,22 @@ HuggingFace auth (gated GPQA / Qwen3) is handled in-code: `ensure_hf_auth()` rea
 
 ## Running it
 
-Two driver scripts (fail-soft, log to a timestamped file, commit+push after phases):
+The two driver scripts (see **Quick start**) cover the whole pipeline:
+`run_inference.sh` = steps 1, 2, 8 (GPU); `run_monitor_and_results.sh` =
+steps 3–6 + 9 (OpenAI API, no GPU). The `<model_id>` is any HF model ID or a local
+model dir (e.g. a DPO checkpoint merged with `merge_and_push.py`); output dirs
+are namespaced by its folder-safe name (`/` → `_`, e.g. `Qwen_Qwen3-4B`).
+
+Any step can also be run manually — every step takes the same `--model`:
 
 ```bash
-# A) GPU box — prepare data, run inference, CoT-length analysis (no monitor):
-bash run_qwen3_x_inference.sh
-
-# B) Monitor + results (needs OPENAI_API_KEY, no GPU):
-export OPENAI_API_KEY=sk-...
-bash run_qwen3_x_monitor_and_results.sh
-```
-
-Script A's knobs (top of file): `MODEL`, `HINT_TYPE`, `N_EXAMPLES` (examples/dataset;
-empty = config budget), `N_SAMPLES` (samples/arm N; empty = config default),
-`FORCE_PREPARE` (rebuild indexes), `DATASETS`. Leaving `N_EXAMPLES`/`N_SAMPLES` empty
-reproduces the full-budget config defaults; set them for a smaller/larger run.
-
-Edit `MODEL` / `DATASETS` at the top of each script. `MODEL=qwen3_1_7b` (base) by
-default; for the DPO variant set `MODEL=aqua_dpo_qwen3_1_7b_s0` (merge it first with
-`merge_and_push.py`). Or run any step manually:
-
-```bash
-python scripts/01_prepare_dataset.py    --dataset gpqa                       # full config budget
-python scripts/01_prepare_dataset.py    --dataset gpqa --n-examples 50 --force  # smaller run, regenerate
-python scripts/02_run_inference_qwen.py  --model qwen3_1_7b --dataset gpqa --hint-type professor
-python scripts/03_run_monitor.py         --model qwen3_1_7b --dataset gpqa --hint-type professor
-python scripts/04_compute_gmean2.py      --model qwen3_1_7b --dataset gpqa --hint-type professor
-python scripts/05_analyze_gmean2.py      --model qwen3_1_7b --dataset gpqa --hint-type professor
+python scripts/01_prepare_dataset.py    --dataset gpqa_diamond                          # full config budget
+python scripts/01_prepare_dataset.py    --dataset gpqa_diamond --n-examples 50 --force  # smaller run, regenerate
+python scripts/02_run_inference_qwen.py --model Qwen/Qwen3-4B --dataset gpqa_diamond --hint-type professor
+python scripts/03_run_monitor.py        --model Qwen/Qwen3-4B --dataset gpqa_diamond --hint-type professor
+python scripts/04_compute_gmean2.py     --model Qwen/Qwen3-4B --dataset gpqa_diamond --hint-type professor
+python scripts/05_analyze_gmean2.py     --model Qwen/Qwen3-4B --dataset gpqa_diamond --hint-type professor
+python scripts/09_generate_reports.py   --model Qwen/Qwen3-4B      # all .md reports, every completed run
 ```
 
 `--hint-type` must be consistent across steps 2–6/8 (it namespaces the paths). Omit
@@ -111,8 +126,8 @@ All steps **resume from checkpoints** — safe to re-run after an interruption.
 | Block | Purpose |
 |-------|---------|
 | `hf_token` | HF token (committed for zero-setup; env `HF_TOKEN` overrides). |
-| `datasets` | Registry of all eval datasets (see the table below). Each: `n_examples: 200` budget, `random_seed: 88`, uniform sampling, **variable 3–5 options (A–E)**. |
-| `models` | Model registry (`name` → `hf_id`). Runnable here: `qwen3_4b`, `qwen3_4b_saferl`, `qwen3_1_7b`, `aqua_dpo_qwen3_1_7b_s0`. |
+| `n_examples` | **Global** eval budget — one number for all datasets (currently 50). Override per run with `01 --n-examples`. |
+| `datasets` | Registry of all eval datasets (see the table below). Each: `random_seed: 88`, uniform sampling, **variable 3–5 options (A–E)**. |
 | `hint` | Hint registry: `default` (type used when `--hint-type` is omitted) + `types.<type>` wording. The hint always points at a *wrong* option (`hint_target`) and only appears in the hinted arm. See **Hint types**. |
 | `qwen_inference` | Sampling: `n_samples=4` (N, samples/arm — overridable per run with `02 --n-samples`, no fixed cap), `temperature 0.6`, `top_p 0.95`, `top_k 20`, `max_new_tokens 16384` (Qwen3 thinking-mode recipe; thinking always ON). `checkpoint_every=200` = instances per checkpoint **and** the batch handed to vLLM in one `generate` call (resume granularity; no effect on generations). |
 | `monitor` | Monitor LLM (`model`, e.g. `gpt-5-mini`) + retry/backoff/timeout. |
@@ -125,8 +140,9 @@ All steps **resume from checkpoints** — safe to re-run after an interruption.
 
 All datasets are MCQ and namespaced on disk by key. The pipeline supports a
 **variable option count of 3–5 (A–E)**: each question keeps its own options; the
-inference prompt and answer parser adapt to the letters present. Budget is 200 per
-dataset; datasets with fewer eligible items use all of them. Sampling is uniform —
+inference prompt and answer parser adapt to the letters present. The budget is the
+**global** `n_examples` (one number for all datasets, currently 50); datasets with
+fewer eligible items use all of them. Sampling is uniform —
 single-level by `group`, or two-level (`group → subgroup`) where noted. Loaders live
 in `src/dataset.py` (`_LOADERS`).
 
@@ -186,20 +202,23 @@ the monitor) and the wording is overridable per type in the config
 ## Outputs layout
 
 ```
-data/{ds}/dataset_index.json              # prepared eval input (NOT a result; shared by all hint types)
+data/{ds}/dataset_index.json              # prepared eval input (NOT a result; shared by all models/hints)
 outputs-and-results/
-├── outputs/{ds}/{model}/{hint}/{hinted,unhinted}.jsonl   # one record per (instance, sample, arm)
-├── monitor_outputs/{ds}/{model}/{hint}/monitor_results.jsonl
-├── analysis/{ds}/{model}/{hint}/gmean2_summary.{md,json}, gmean2_per_instance.{csv,json}, qualitative_export.xlsx
-├── analysis/cot_token_report_{model}_{hint}.md          # cross-dataset (step 8)
-└── plots/{ds}/{hint}/*.png
+├── outputs/{model}/{ds}/{hint}/{hinted,unhinted}.jsonl   # one record per (instance, sample, arm)
+├── monitor_outputs/{model}/{ds}/{hint}/monitor_results.jsonl
+├── analysis/{model}/{ds}/{hint}/results_summary.{json,md}, results_per_instance.{csv,json},
+│                                 cot_token_stats.json, qualitative_export.xlsx
+├── analysis/{model}/results_{overall,dataset_level,hint_type_level,aggregate}_summary.md   # roll-ups (step 9)
+├── analysis/{model}/cot_{overall,dataset_level,hint_type_level,aggregate}_summary.md       # CoT roll-ups (step 9)
+└── plots/{model}/{ds}/{hint}/*.png
 ```
 
-`{hint}` is the `--hint-type`. Each inference record also carries a `hint_type` field.
+`{model}` is the folder-safe model ID (`/` → `_`); `{hint}` is the `--hint-type`.
+Each inference record also carries a `hint_type` field.
 
 ---
 
-## The metric & the `gmean2_summary.md` report
+## The metric
 
 Per instance `i` (over N valid samples per arm; "valid" = not truncated, answer
 parsed):
@@ -213,22 +232,46 @@ parsed):
   X=1,Y=0 population) `TNR_X=1_i = 1` by vacuous-truth convention.
 - `g-mean²_i = TPR_mc_i · √(TNR_X=0_i · TNR_X=1_i)`, averaged over Level-1 instances.
 
-The report (`04_compute_gmean2.py`) has five sections:
+Step 4 computes all of this into machine-readable artifacts
+(`results_summary.json` — including a config snapshot of the sampling recipe,
+budgets, and monitor model — plus `results_per_instance.{csv,json}`). Step 8
+computes token-length statistics into `cot_token_stats.json`.
 
-1. **g-mean²** (headline) + component means (TPR_mc, TNR_X=0, TNR_X=1) + contributing count.
-2. **Filtering** — n / TE / R_effect before vs after Level-1 (TE rows over all n;
-   R_effect rows over `p1>0` only — denominators are labelled), TE-sign breakdown, Level-2 gate.
-3. **Transparency confusion matrix** — hinted runs cross-tabbed by following × acknowledgement
-   (Transparent / Covert / Spurious / Rejection) + **opacity rate** = covert ÷ all hint-following.
-4. **Monitor coverage** — per-condition run counts + missing-verdict rate.
-5. **Confounds** — unhinted & hinted accuracy (macro; mean ± std over instances/runs),
-   and CoT token length (run-level, pooled per condition).
+## Reports (step 9 — `scripts/09_generate_reports.py`, `src/reporting.py`)
+
+Every report shares **one results-table format** — `Mean TE before (Std) ·
+Mean R_effect before (Std) · Mean TE after (Std) · Mean R_effect after (Std) ·
+n TE>0 (post L1) · g-mean² · Unhinted Acc (Std) · Hinted Acc (Std)` — followed by
+the **transparency confusion matrix** (Followed / Did not follow ×
+Acknowledged / Not acknowledged, hinted runs with a verdict) and the **opacity
+rate** (= covert ÷ all hint-following). So every number is directly comparable
+across files:
+
+| File (under `analysis/{model}/`) | Scope |
+|---|---|
+| `{ds}/{hint}/results_summary.md` | one (dataset, hint) run — config header (model, sampling recipe, budgets, monitor model), results table + matrix first, then detail sections (g-mean² components, Level-1/Level-2 filtering, monitor coverage, CoT length) |
+| `results_overall_summary.md` | one section per (dataset × hint type) |
+| `results_dataset_level_summary.md` | per dataset — instances pooled across hint types |
+| `results_hint_type_level_summary.md` | per hint type — instances pooled across datasets |
+| `results_aggregate_summary.md` | one section — pooled across everything |
+
+The CoT token-length reports mirror the same four scopes —
+`cot_{overall,dataset_level,hint_type_level,aggregate}_summary.md` — each
+section showing the 4-condition token table plus a bucket/truncation row (from
+step 8's `cot_token_stats.json`; use the truncation rate to set `max_new_tokens`).
+
+Roll-ups **pool the per-instance rows / run-level token counts** across the
+averaged dimension (not means-of-means), sum the run-level matrix and bucket
+counts, and recompute rates from the sums. **To strip all `.md` generation for
+a public release**, delete `src/reporting.py`, `scripts/09_generate_reports.py`,
+and the Phase-3 line in `run_monitor_and_results.sh` — the metric computation
+(steps 4 + 8) is untouched.
 
 ---
 
 ## Source files (`src/`)
 
-- `dataset.py` — per-dataset loaders + filtering, uniform (one/two-level) stratified sampling, 3–5-option (A–E) normalisation, hint-*target* assignment, `resolve_paths` (namespaces by dataset / model / **hint type**), `ensure_hf_auth`.
+- `dataset.py` — per-dataset loaders + filtering, uniform (one/two-level) stratified sampling, 3–5-option (A–E) normalisation, hint-*target* assignment, `model_dir_name` (folder-safe model name from an HF ID), `resolve_paths` (namespaces by **model** / dataset / **hint type**), `ensure_hf_auth`.
 - `hints.py` — the hint-type registry (`HINT_TYPES`) plus both prompt builders: `render_hint` (the hinted-arm inference prefix + options block) and `monitor_hint_fields` (the per-type HINT description + acknowledgment guideline used by the monitor) for each type (professor, visual_pattern, metadata, wrong_few_shot, grader_hacking, unethical). Reads per-type wording from the config `hint:` block. The unhinted arm never calls `render_hint`.
 - `inference.py` — shared prompt construction (`build_user_content`, which delegates the hint to `hints.render_hint`) and answer parsing.
 - `inference_qwen.py` — Qwen3 thinking-mode inference (chat template, `<think>` handling, vLLM). Reuses `_SYSTEM_PROMPT` / `build_user_content` / `extract_cot` / `parse_answer` from `inference.py` (shared base); threads `hint_type` into the prompt and into the output dir. **vLLM throughput:** the engine loads with `enable_prefix_caching=True` (shared system-prompt/instance prefixes reuse cached KV), and each checkpoint's full request set — `checkpoint_every × n_samples × 2 arms` — is issued in a **single `llm.generate` call** so continuous batching keeps the GPU saturated (one decode drain-tail per checkpoint, not one per sample×arm). Both are scheduling-only: per-request seeds/params and outputs are unchanged.
@@ -241,7 +284,10 @@ The report (`04_compute_gmean2.py`) has five sections:
 - `gmean2_metrics.py` — per-instance TE / R_effect / TPR_mc / TNR / g-mean², the
   transparency matrix, accuracy, CoT pools, and dataset-level aggregates.
 - `gmean2_analysis.py` — plots (TE dist, g-mean² dist, TPR/TNR scatter, CoT length).
-- `cot_tokens.py` — token-length buckets / truncation stats for step 8.
+- `cot_tokens.py` — token-length buckets / truncation stats for step 8. `token_count`
+  is the full completion (thinking trace + final answer).
+- `reporting.py` — ALL Markdown report generation (step 9); deletable as a unit
+  for a public release (see **Reports**).
 
 ---
 

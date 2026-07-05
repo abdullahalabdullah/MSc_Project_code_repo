@@ -71,6 +71,17 @@ Output: LoRA adapters under `checkpoints/qwen3-4B/harmless_dpo/` (default). The 
 by eval reward-accuracy is kept as `checkpoint-best`; others are pruned. A full log is written to
 `logs/train.log`.
 
+**Eval/checkpoint schedule**: fixed step intervals are epoch-count-proof and derived from the
+trainer's own total-step count (dataset size × epochs × batch/grad-accum settings), not a fixed
+number of steps. Eval + checkpoint fire at:
+- step 0 (a pre-training baseline, before any optimizer step)
+- every ~20% of total training steps (so ~5 evals spread across the run)
+- the final training step, always — even if it doesn't land on a 20%-boundary
+
+`--eval_strategy` / `--save_strategy` are forced to `"no"` inside `train_dpo.py` regardless of
+CLI flags, so this schedule is the only thing that triggers eval/save — nothing here sets
+`num_train_epochs` early-stop behavior; the run always trains through every epoch.
+
 For a long run, use tmux so an SSH drop doesn't kill it:
 
 ```bash
@@ -81,14 +92,16 @@ bash train.sh
 
 ### Optional: push adapters to the Hugging Face Hub
 
-Hub pushing is off by default. To push each saved checkpoint to its own repo, pass through the
-trainer flags (train.sh forwards nothing extra, so call the trainer directly):
+Hub pushing is off by default. Set `HUB_MODEL_ID` and `train.sh` forwards `--push_to_hub
+--hub_model_id`:
 
 ```bash
-python train_dpo.py --dataset_path <.../dpo_dataset> --model_name_or_path Qwen/Qwen3-4B \
-  --output_dir checkpoints/run1 --use_peft --lora_r 16 --lora_alpha 32 \
-  --push_to_hub --hub_model_id <your-namespace>/harmless-dpo-qwen3-4B
+HUB_MODEL_ID=<your-namespace>/harmless-dpo-qwen3-4B bash train.sh
 ```
+
+Every checkpoint the schedule above produces (step 0, each ~20%-interval checkpoint, and the
+final step) is pushed to its own private repo `<HUB_MODEL_ID>-step-<N>` — none are skipped, even
+though `clean_checkpoints()` later prunes all but `checkpoint-best` locally.
 
 ## 3. Inference (external)
 

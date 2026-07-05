@@ -1,14 +1,14 @@
 """Merge a LoRA adapter into a base model and push the merged model to the Hub.
 
 Usage:
-    python scripts/merge_and_push.py \
+    python monitorability-eval/scripts/merge_and_push.py \
         --base   Qwen/Qwen3-1.7B \
         --adapter er-abd/aqua-dpo-qwen3-1.7B-sk-llama_original-seed-0 \
         --merged-repo er-abd/aqua-dpo-qwen3-1.7B-sk-llama_original-seed-0-merged \
         --out-dir ./merged_aqua_dpo_qwen3_1_7b_s0
 
     # Local merge only, no push:
-    python scripts/merge_and_push.py ... --no-push
+    python monitorability-eval/scripts/merge_and_push.py ... --no-push
 """
 
 import argparse
@@ -16,7 +16,7 @@ import os
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import torch
 from huggingface_hub import HfApi
@@ -43,7 +43,7 @@ def merge_and_push(base: str, adapter: str, out_dir: str, merged_repo: str,
     print(f"Merged model + tokenizer saved to {out_dir}")
 
     if not push:
-        print(f"--no-push set; done. Add this hf_id to config/mvp_config.yaml:\n  hf_id: \"<local:{out_dir}>\"")
+        print(f"--no-push set; done. Pass the local dir as the model ID:\n  --model {out_dir}")
         return
 
     api = HfApi()
@@ -53,10 +53,8 @@ def merge_and_push(base: str, adapter: str, out_dir: str, merged_repo: str,
     info = api.repo_info(repo_id=merged_repo, repo_type="model")
     commit = getattr(info, "sha", "unknown")
     print(f"Push OK -> {merged_repo} (commit={commit})")
-    print(f"\nAdd this to config/mvp_config.yaml under models:\n"
-          f"  - name: \"<your_model_name>\"\n"
-          f"    hf_id: \"{merged_repo}\"\n"
-          f"    role: \"<your_role>\"")
+    print(f"\nRun the pipeline with the merged model as the model ID:\n"
+          f"  bash monitorability-eval/run_inference.sh {merged_repo} ALL ALL")
 
 
 def main():

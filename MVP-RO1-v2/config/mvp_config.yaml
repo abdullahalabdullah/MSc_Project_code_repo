@@ -3,13 +3,16 @@
 # any public release.
 hf_token: "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"
 
-# Multi-dataset registry. Every dataset is namespaced by key on disk:
-# data/{key}/dataset_index.json, outputs/{key}/{model}/, monitor_outputs/{key}/{model}/,
-# analysis/{key}/{model}/, plots/{key}/. Select one with the --dataset flag on every
-# script. The pipeline is MCQ with a VARIABLE option count of 3–5 (A–E); each question
+# Multi-dataset registry. Prepared data is namespaced by key (data/{key}/
+# dataset_index.json); result dirs are namespaced model-first:
+# {outputs,monitor_outputs,analysis,plots}/{model}/{key}/{hint}/. Select a
+# dataset with the --dataset flag on every script. The pipeline is MCQ with a VARIABLE option count of 3–5 (A–E); each question
 # keeps its own options. Sampling is uniform — single-level by `group`, or two-level
 # (group -> subgroup) when the loader sets a subgroup.
-# Budget is 200 per dataset; datasets with fewer eligible items use all of them.
+# The eval budget is the GLOBAL `n_examples` below (one number for all datasets);
+# datasets with fewer eligible items use all of them. Override per run with
+# `01_prepare_dataset.py --n-examples`.
+n_examples: 50
 datasets:
   # --- Academic QA ---------------------------------------------------------
   # Broad, undergraduate level. error_type=="ok" filter; uniform by subject (30). 4 options.
@@ -17,7 +20,6 @@ datasets:
     loader: "mmlu_redux"
     hf: "edinburgh-dawg/mmlu-redux"
     split: "test"
-    n_examples: 50
     random_seed: 88
   # Science, PhD level. No filter; uniform by High-level domain. Only 198 exist. 4 options.
   gpqa_diamond:
@@ -25,7 +27,6 @@ datasets:
     hf: "Idavidrein/gpqa"
     config: "gpqa_diamond"
     split: "train"            # GPQA ships only a train split
-    n_examples: 50
     random_seed: 88
 
   # --- Safety & Security ---------------------------------------------------
@@ -35,7 +36,6 @@ datasets:
     hf: "cais/wmdp"
     configs: ["wmdp-bio", "wmdp-chem", "wmdp-cyber"]
     split: "test"
-    n_examples: 50
     random_seed: 88
 
   # --- Coding --------------------------------------------------------------
@@ -47,7 +47,6 @@ datasets:
               "fill_in_the_middle", "others", "dbms_sql", "api_frameworks",
               "code_repair", "code_completion"]
     split: "test"
-    n_examples: 50
     random_seed: 88
 
   # --- Applied Reasoning ---------------------------------------------------
@@ -58,28 +57,12 @@ datasets:
   lsat_ar:
     loader: "agieval_gh"
     name: "lsat_ar"
-    n_examples: 50
     random_seed: 88
   # LSAT-LR: logical reasoning (argument analysis), 5 options, ~510 instances.
   lsat_lr:
     loader: "agieval_gh"
     name: "lsat_lr"
-    n_examples: 50
     random_seed: 88
-
-models:
-  - name: "qwen3_4b"
-    hf_id: "Qwen/Qwen3-4B"
-    role: "standalone"          # Qwen3-4B (thinking) — run with scripts/02_run_inference_qwen.py
-  - name: "qwen3_4b_saferl"
-    hf_id: "Qwen/Qwen3-4B-SafeRL"
-    role: "standalone"          # Qwen3-4B-SafeRL (thinking) — run with scripts/02_run_inference_qwen.py
-  - name: "qwen3_1_7b"
-    hf_id: "Qwen/Qwen3-1.7B"
-    role: "standalone"          # Qwen3-1.7B (thinking) — the default eval model
-  - name: "aqua_dpo_qwen3_1_7b_s0"
-    hf_id: "er-abd/aqua-dpo-qwen3-1.7B-sk-llama_original-seed-0-merged"
-    role: "+dpo_aqua"           # Qwen3-1.7B merged with DPO adapter (aqua, llama_original reward, seed 0)
 
 # Hint registry. The hint is only shown in the hinted arm (X=1); it always points
 # at the instance's `hint_target` (a WRONG option). Pick a type per run with the
@@ -125,7 +108,7 @@ qwen_inference:
   max_new_tokens: 16384
   # Instances per checkpoint. The whole checkpoint (checkpoint_every × n_samples ×
   # 2 arms requests) is sent to vLLM in ONE generate call, so this also sets the
-  # batch handed to the scheduler. 200 = our per-dataset budget, so each dataset
+  # batch handed to the scheduler. 200 ≥ every per-dataset budget, so each dataset
   # runs as a single fully-saturated batch. Resume granularity is one checkpoint:
   # a mid-dataset crash re-runs that dataset (cheap on a 1.7B). Lower it if a run
   # is unreliable and you want finer resume points; it does not affect generations.
@@ -144,10 +127,46 @@ gmean2:
   level2_te_threshold: 0.05
 
 paths:
-  # `data` is the prepared eval input; the four result dirs live under
-  # outputs-and-results/. resolve_paths() joins root / <these> / {dataset} / {model}.
-  data_dir: "data"
+  # All values are relative to the REPO ROOT (scripts anchor root =
+  # Path(__file__).resolve().parents[2]). The prepared eval input lives inside
+  # the monitorability-eval folder; the four result dirs are shared under the
+  # repo-root outputs-and-results/. resolve_paths() joins
+  # root / <these> / {model} / {dataset} / {hint}.
+  data_dir: "monitorability-eval/data"
   outputs_dir: "outputs-and-results/outputs"
   monitor_outputs_dir: "outputs-and-results/monitor_outputs"
   analysis_dir: "outputs-and-results/analysis"
   plots_dir: "outputs-and-results/plots"
+
+# ===========================================================================
+# HARMLESSNESS EVAL (harmlessness-eval/) — separate, self-contained pipeline.
+# Shares this config file, outputs-and-results/, requirements.txt and the docs,
+# but its own code never imports the monitorability-eval code. Follows the
+# Qwen3Guard methodology: generate responses to WildJailbreak adversarial
+# prompts, then classify each with WildGuard (independent judge) for
+# safety + refusal. Target-model sampling reuses the qwen_inference block above
+# so both evals generate identically.
+# ===========================================================================
+harmlessness:
+  benchmark:
+    hf: "allenai/wildjailbreak"
+    config: "eval"             # eval suite (2000 adversarial_harmful + 210 adversarial_benign)
+    delimiter: "\t"            # WildJailbreak ships the eval config as TSV
+    prompt_field: "adversarial"   # the adversarial jailbreak query sent to the target model
+    subset_field: "data_type"     # adversarial_harmful | adversarial_benign
+  limit: null                  # null = full eval set; set an int for a quick smoke-test run
+  generation:
+    enable_thinking: true      # Qwen3 thinking mode ON (matches the monitorability suite)
+    n_samples: 1               # one response per prompt
+    # temperature / top_p / top_k / max_new_tokens are taken from qwen_inference.
+  classify_target: "answer"    # classify the visible answer only (post-</think>); "full" = whole output
+  classifier:
+    hf_id: "allenai/wildguard"   # independent 7B safety classifier (Mistral-7B-v0.3 fine-tune)
+    max_new_tokens: 128          # WildGuard emits 3 short yes/no lines
+  paths:
+    # Relative to the REPO ROOT. Prepared prompts live inside harmlessness-eval/;
+    # results are shared under outputs-and-results/harmlessness/.
+    data_dir: "harmlessness-eval/data"
+    responses_dir: "outputs-and-results/harmlessness/responses"
+    wildguard_dir: "outputs-and-results/harmlessness/wildguard"
+    analysis_dir: "outputs-and-results/harmlessness/analysis"

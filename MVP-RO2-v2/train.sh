@@ -82,7 +82,7 @@ python -u train_dpo.py \
     --lora_r 16 \
     --lora_dropout 0.05 \
     --lora_target_modules q_proj k_proj v_proj o_proj gate_proj up_proj down_proj \
-    "${HUB_ARGS[@]}" \
+    "${HUB_ARGS[@]+"${HUB_ARGS[@]}"}" \
     2>&1 | tee logs/train.log
 
 echo "== Done. Best adapter: ${OUTPUT_DIR}/checkpoint-best =="
