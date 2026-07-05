@@ -246,117 +246,6 @@ class EvalMetricsLoggerCallback(TrainerCallback):
             f.write(json.dumps(row, ensure_ascii=False) + "\n")
 
 
-class EvalGenerationCallback(TrainerCallback):
-    """At every eval point, generate the policy's responses to the valid-split prompts and
-    save them to a gzipped JSONL, one file per checkpoint: eval_generations/step-<N>.jsonl.gz.
-
-    Decoding: thinking-mode sampling (temp 0.6 / top_p 0.95 / top_k 20, 1 sample/prompt) — the
-    same preset the curation module used to generate the DPO data, so eval generations reflect
-    real deployment behaviour. Seeded from training_args.seed each time (and the RNG state is
-    saved/restored around generation) so training is not perturbed and the sampling is
-    reproducible across checkpoints — differences then reflect the weights, plus sampling noise.
-
-    Gzipped JSONL keeps the (long, repetitive <think>…</think>) text compact on disk while
-    staying streamable and human-inspectable:
-        import gzip, json
-        with gzip.open(path, "rt") as f:
-            rows = [json.loads(l) for l in f]
-    """
-
-    # Qwen3 thinking-mode decoding preset (matches DPO-train-dataset-curation/config.py).
-    TEMPERATURE = 0.6
-    TOP_P = 0.95
-    TOP_K = 20
-
-    def __init__(self, prompts, out_dir, tokenizer, seed, max_new_tokens, batch_size,
-                 max_prompt_length, use_gradient_checkpointing, gradient_checkpointing_kwargs):
-        self.prompts = prompts
-        self.out_dir = out_dir
-        self.tokenizer = tokenizer
-        self.seed = seed
-        self.max_new_tokens = max_new_tokens
-        self.batch_size = max(1, batch_size)
-        self.max_prompt_length = max_prompt_length
-        self.use_gc = bool(use_gradient_checkpointing)
-        self.gc_kwargs = gradient_checkpointing_kwargs
-        self.trainer = None  # wired in by main() right after DPOTrainer construction
-        os.makedirs(out_dir, exist_ok=True)
-
-    def _render(self, prompt):
-        # add_generation_prompt=True appends the assistant turn header so the model continues
-        # as the assistant; enable_thinking=True keeps Qwen3 free to emit <think>…</think>.
-        return self.tokenizer.apply_chat_template(
-            [{"role": "user", "content": prompt}],
-            tokenize=False, add_generation_prompt=True, enable_thinking=True,
-        )
-
-    def _generate(self, model):
-        device = next(model.parameters()).device
-        outputs = []
-        for b in range(0, len(self.prompts), self.batch_size):
-            batch = self.prompts[b:b + self.batch_size]
-            rendered = [self._render(p) for p in batch]
-            enc = self.tokenizer(
-                rendered, return_tensors="pt", padding=True, add_special_tokens=False,
-                truncation=True, max_length=self.max_prompt_length,
-            ).to(device)
-            with torch.no_grad():
-                gen = model.generate(
-                    **enc, max_new_tokens=self.max_new_tokens, do_sample=True,
-                    temperature=self.TEMPERATURE, top_p=self.TOP_P, top_k=self.TOP_K,
-                    pad_token_id=self.tokenizer.pad_token_id,
-                )
-            new_tokens = gen[:, enc["input_ids"].shape[1]:]
-            for row_ids in new_tokens:
-                text = self.tokenizer.decode(row_ids, skip_special_tokens=True)
-                n_tok = int((row_ids != self.tokenizer.pad_token_id).sum())
-                outputs.append((text, n_tok))
-        return outputs
-
-    def on_evaluate(self, args, state, control, **kwargs):
-        if not self.prompts:
-            return
-        model = self.trainer.model
-        step = state.global_step
-
-        print(f"[eval-gen] step {step}: generating {len(self.prompts)} responses "
-              f"(thinking-mode sampling, max_new_tokens={self.max_new_tokens}) ...")
-
-        # Preserve training state: eval mode, KV cache on, gradient checkpointing off (it forces
-        # use_cache=False → very slow generation), and the RNG. All restored in `finally`.
-        was_training = model.training
-        prev_use_cache = getattr(model.config, "use_cache", None)
-        cpu_rng = torch.get_rng_state()
-        cuda_rng = torch.cuda.get_rng_state_all() if torch.cuda.is_available() else None
-        model.eval()
-        if self.use_gc:
-            model.gradient_checkpointing_disable()
-        model.config.use_cache = True
-        # Seed only torch's RNG (what generate()'s sampling draws from) — both CPU and CUDA
-        # states are captured above and restored in `finally`, so training RNG is untouched.
-        torch.manual_seed(self.seed)
-        try:
-            results = self._generate(model)
-        finally:
-            if cuda_rng is not None:
-                torch.cuda.set_rng_state_all(cuda_rng)
-            torch.set_rng_state(cpu_rng)
-            model.config.use_cache = prev_use_cache
-            if self.use_gc:
-                model.gradient_checkpointing_enable(gradient_checkpointing_kwargs=self.gc_kwargs)
-            if was_training:
-                model.train()
-
-        path = os.path.join(self.out_dir, f"step-{step}.jsonl.gz")
-        with gzip.open(path, "wt", encoding="utf-8") as f:
-            for i, (prompt, (gen_text, n_tok)) in enumerate(zip(self.prompts, results)):
-                f.write(json.dumps({
-                    "step": step, "prompt_idx": i,
-                    "prompt": prompt, "generation": gen_text, "gen_tokens": n_tok,
-                }, ensure_ascii=False) + "\n")
-        print(f"[eval-gen] step {step}: saved -> {path}")
-
-
 def main(script_args, training_args, model_config):
 
     set_seed(training_args.seed, full_determinism=True)
@@ -399,11 +288,6 @@ def main(script_args, training_args, model_config):
         chosen = format_assistant_turn(sample["chosen"])
         rejected = format_assistant_turn(sample["rejected"])
         return {"prompt": prompt, "chosen": chosen, "rejected": rejected}
-
-    # Capture the RAW valid prompts BEFORE the map: EvalGenerationCallback re-templates them
-    # with add_generation_prompt=True to sample fresh responses, whereas the mapped `prompt`
-    # column ends right before the assistant turn (so it can be concatenated with chosen/rejected).
-    raw_valid_prompts = list(dataset["valid"]["prompt"]) if "valid" in dataset else []
 
     dataset = dataset.map(format_dpo_sample)
     dataset = dataset.select_columns(['prompt', 'chosen', 'rejected'])
