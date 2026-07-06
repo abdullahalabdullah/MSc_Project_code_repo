@@ -53,13 +53,14 @@ that axis.
 
 | Stage | Script | What it does |
 |---|---|---|
-| 01 | `01_prepare_prompts.py` | Load WildJailbreak `vanilla_harmful` + `adversarial_harmful`, dedup, sample `SAMPLE=300` (seed 0). Also saves per-prompt `{subset, vanilla seed}`. |
+| 01 | `01_prepare_prompts.py` | Load WildJailbreak `vanilla_harmful` + `adversarial_harmful` (train config), dedup. Default `SAMPLE=ALL` keeps every unique prompt; `SAMPLE=<int>` (env var) draws a seeded sample. Also saves per-prompt `{subset, vanilla seed}`. |
 | 02 | `02_generate_responses.py` | Qwen3-4B, N=10, temp 0.6 / top_p 0.95 / top_k 20, `max_tokens=8192`; tuned vLLM (prefix caching, capped `max_model_len`, 0.90 VRAM); live truncation reporting. |
 | 03 | `03_classify_guard.py` | Strip `</think>`, **Qwen3Guard** label per answer (3-way Safe/Unsafe/Controversial → Controversial folded into Unsafe; also stores refusal + harmful_request), **filter-1** (drop prompts whose answers all share one label). Also dumps `03_all_labeled.joblib`. |
 | 04 | `04_score_cost.py` | Beaver cost (left-truncated at 2048); per prompt `chosen=argmin`, `rejected=argmax`. |
 | 05 | `05_report.py` | **filter-3** (chosen=Safe & rejected=Unsafe), survival rate, cost spread, 10 sample pairs, sign sanity check → `outputs/report.md`. |
-| 06 | `06_export_dpo_dataset.py` | **Handoff**: `final_pairs.joblib` → HF `DatasetDict({train,valid})` with `prompt`/`chosen`/`rejected` → `outputs/dpo_dataset/`, the training-ready artifact. |
+| 06 | `06_export_dpo_dataset.py` | **Handoff**: `final_pairs.joblib` → HF `DatasetDict({train,valid})` with `prompt`/`chosen`/`rejected` → `outputs/dpo_dataset/`, the training-ready artifact. Valid holdout (`VALID_FRACTION`, default 0.1) is drawn from the final pairs — seeded random by default; `STRATIFY_VALID=true` for a 50/50 vanilla/adversarial mix (best-effort). |
 | + | `sanity_beaver.py` | Beaver ranker sanity check (below, optional, not part of `run_all.sh`) → `outputs/beaver_sanity_report.md`. |
+| + | `merge_runs.py` | Combine multiple runs' `final_pairs.joblib` into one dataset (dedup on prompt, fresh seeded split via stage 06). Pairs with `EXCLUDE_RUNS` (stage 01 env var) for a disjoint pilot + top-up workflow. |
 
 ## Beaver ranker sanity check — what it computes
 
@@ -95,7 +96,8 @@ For a WildJailbreak run's answers (reusing stage 01 + 03), per (prompt, answer):
 
 ## Key settings / conventions
 
-- `SAMPLE=300`, `N=10`, `MAX_TOKENS=8192`, seed `0`.
+- `SAMPLE=ALL` (default — every unique harmful prompt; env-overridable to an integer for pilots), `N=10`, `MAX_TOKENS=8192`.
+- **One seed everywhere**: the `SEED` env var (default `0`) drives prompt sampling, vLLM generation, every stage's `set_seed`, and the stratified train/valid split — and is the same variable `train.sh` reads, so the full curation+training chain reproduces from a single value.
 - Cost sign: higher Beaver cost = more harmful ⇒ `chosen=min`, `rejected=max`.
 - Qwen3Guard **Controversial** → treated as **Unsafe**.
 - Answers truncated mid-`<think>` (no visible answer) are marked invalid and excluded.

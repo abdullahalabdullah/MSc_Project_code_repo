@@ -27,6 +27,7 @@ train_dpo.py                  # LoRA DPO trainer (TRL DPOTrainer) — self-conta
 train.sh                      # one-command training wrapper (auto-finds the exported dataset)
 requirements.txt              # unified environment for the whole repo
 DOCUMENTATION.md              # end-to-end runbook (commands + options)
+SMOKE_RUN_LOG-template.md     # fill-in log for the small-scale HP-validation run
 ```
 
 ## Setup
@@ -34,9 +35,12 @@ DOCUMENTATION.md              # end-to-end runbook (commands + options)
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-export HF_TOKEN=hf_xxx        # or put it in .env — WildJailbreak/WildGuard are gated. Never hard-code it.
-# optional: export HF_MODELS_CACHE_DIR=/path/to/cache
 ```
+
+The HF token (write access, `er-abd` account) ships in the **committed `.env`** (this repo is
+private — see the note inside `.env` before ever making it public), so no token setup is
+needed after cloning. On a pod, uncomment `HF_MODELS_CACHE_DIR=/workspace/hf_cache` in `.env`
+so model caches land on the volume disk.
 
 Requires a CUDA GPU (vLLM generation, Beaver/WildGuard scoring, DPO training).
 
@@ -46,8 +50,14 @@ Requires a CUDA GPU (vLLM generation, Beaver/WildGuard scoring, DPO training).
 bash DPO-train-dataset-curation/run_all.sh    # stages 01–06; writes outputs/run_<timestamp>/
 ```
 
-The handoff is `DPO-train-dataset-curation/outputs/<run>/dpo_dataset/` — a HuggingFace
-`DatasetDict({train,valid})` with columns `prompt` / `chosen` / `rejected`. See the module's
+By default this curates **ALL** unique WildJailbreak harmful prompts (`vanilla_harmful` +
+`adversarial_harmful`, train config); set `SAMPLE=<int>` for a seeded pilot. The handoff is
+`DPO-train-dataset-curation/outputs/<run>/dpo_dataset/` — a HuggingFace
+`DatasetDict({train,valid})` with columns `prompt` / `chosen` / `rejected` (valid holdout: a
+seeded random 10% of the final pairs; `STRATIFY_VALID=true` for a 50/50
+vanilla/adversarial mix instead) — saved locally so future
+training runs reuse it without re-running curation. Stats land in the run folder's
+`report.md` + `diagnostics.json`. See the module's
 [README](DPO-train-dataset-curation/README.md) for the full pipeline, config knobs, and schema.
 
 ## 2. Train
@@ -58,11 +68,13 @@ bash train.sh                 # trains Qwen3-4B on the newest exported dataset
 ```
 
 LoRA adapters are written under `checkpoints/qwen3-4B/harmless_dpo/` (best kept as
-`checkpoint-best`). Each eval point also appends to `eval_metrics.jsonl` (DPO loss / reward-accuracy
-curves for checkpoint selection; behavioural safety + monitorability eval is run separately,
-offline, on the pushed checkpoints). For inference, load the adapter on top of the base Qwen3-4B
-(transformers `PeftModel`, or vLLM `--enable-lora`). See [DOCUMENTATION.md](DOCUMENTATION.md) for
-details and Hub-push instructions.
+`checkpoint-best`). Every checkpoint (step 0, each ~20% interval, final step) is **always pushed**
+to its own private HF repo `<HUB_MODEL_ID>-step-<N>` (`HUB_MODEL_ID` defaults to
+`er-abd/harmless-dpo-qwen3-4B`). Each eval point also appends to
+`eval_metrics.jsonl` (DPO loss / reward-accuracy curves for checkpoint selection; behavioural
+safety + monitorability eval is run separately, offline, on the pushed checkpoints). For
+inference, load the adapter on top of the base Qwen3-4B (transformers `PeftModel`, or vLLM
+`--enable-lora`). See [DOCUMENTATION.md](DOCUMENTATION.md) for details.
 
 ---
 

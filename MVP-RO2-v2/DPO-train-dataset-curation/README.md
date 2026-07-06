@@ -11,7 +11,7 @@ response as `chosen` and the most harmful as `rejected`, validated by a safety c
 
 | Stage | Script | What it does |
 |------|--------|--------------|
-| 01 | `01_prepare_prompts.py` | Load WildJailbreak `vanilla_harmful` + `adversarial_harmful`, dedup on prompt, report counts + sample mix, sample `SAMPLE=300` (seed 0) |
+| 01 | `01_prepare_prompts.py` | Load WildJailbreak `vanilla_harmful` + `adversarial_harmful` (train config), dedup on prompt, report counts + mix. Default `SAMPLE=ALL` keeps **every** unique prompt; `SAMPLE=<int>` (env var) draws a seeded pilot sample |
 | 02 | `02_generate_responses.py` (GPU) | Qwen3-4B, N=10, temp 0.6 / top_p 0.95 / top_k 20, `max_tokens=8192`; tuned vLLM engine (prefix caching, capped `max_model_len`, 0.90 VRAM); **live truncation reporting** |
 | 03 | `03_classify_guard.py` (GPU) | Split on `</think>`, **Qwen3Guard** label (3-way Safe/Unsafe/Controversial per answer, Controversial folded into Unsafe), **filter-1** (drop prompts whose valid responses share one label) |
 | 04 | `04_score_cost.py` (GPU) | `beaver-7b-unified-cost`; per prompt `chosen=argmin(cost)`, `rejected=argmax(cost)` |
@@ -47,8 +47,13 @@ train, valid = ds["train"], ds["valid"]   # columns: prompt, chosen, rejected
 ```
 
 Split is deterministic (`config.SEED`); `config.VALID_FRACTION` (default `0.1`, env-overridable)
-sets the valid hold-out. DPO training itself lives in an external trainer (add `trl` to that
-environment) — this module stops at the dataset.
+sets the valid hold-out, drawn from the final (post-filtering) pairs. By default it is a plain
+**seeded random sample** (representative of the training distribution — the right basis for
+checkpoint selection); set `STRATIFY_VALID=true` to instead target a **50/50
+vanilla/adversarial mix** (best-effort — if one subset runs out the shortfall is filled from
+the other). Either way the realised mix is printed and stored in `diagnostics.json` under
+`export`. DPO training itself lives in an external trainer (add `trl` to that environment) —
+this module stops at the dataset.
 
 ## Environment (single venv)
 
@@ -65,10 +70,9 @@ pip install -r requirements.txt
 cd DPO-train-dataset-curation
 ```
 
-**WildJailbreak is gated** — accept the terms on its HF page, then make `HF_TOKEN` available
-(shell `export`, a `.env` file, or `huggingface-cli login`). `.env` is gitignored, so it does
-NOT sync via git; create it on the pod or export the token there. Also optionally set
-`HF_MODELS_CACHE_DIR`.
+**WildJailbreak is gated** — the `er-abd` account has accepted its terms, and the HF token
+ships in the repo-root **committed `.env`** (private repo), so cloning is enough — no token
+setup on the pod. On a pod, uncomment `HF_MODELS_CACHE_DIR=/workspace/hf_cache` in `.env`.
 
 ## Run
 
@@ -82,6 +86,28 @@ via the exported `RUN_OUTPUT_DIR`), so a new run never overrides an old one. Pin
 
 The Beaver ranker sanity check (`sanity_beaver.py`) is a separate, optional add-on — not run by
 `run_all.sh`. Use `run_pilot_and_sanity.sh` to run both together (see below).
+
+`check_max_tokens.py` is a **standalone one-off diagnostic** (imports nothing from the
+pipeline — safe to delete): run it on a finished run dir
+(`python check_max_tokens.py outputs/<run>`) to judge from the smoke/pilot data whether
+`MAX_TOKENS` was too high/low and whether the trainer's `MAX_LENGTH` fits the surviving pairs.
+
+### Two-phase curation: pilot + top-up, then merge
+
+Every run records the exact prompts it consumed (`01_prompts_meta.joblib`). A later run can
+**exclude** those prompts (`EXCLUDE_RUNS`, comma-separated run dirs), so the two runs curate
+disjoint prompt sets; `merge_runs.py` then combines their final pairs into one
+training-ready dataset (dedup on prompt, fresh seeded train/valid split over the merged pool):
+
+```bash
+SAMPLE=4500 RUN_OUTPUT_DIR=outputs/pilot ./run_all.sh          # phase 1: ~1k pairs to smoke-test training
+SAMPLE=22500 EXCLUDE_RUNS=outputs/pilot RUN_OUTPUT_DIR=outputs/main ./run_all.sh   # phase 2: new prompts only
+python merge_runs.py outputs/pilot outputs/main --out outputs/merged               # combine -> merged/dpo_dataset
+```
+
+Note: the merged split is a *new* split over all pairs — it does not preserve the source
+runs' train/valid boundaries (fine when the merged dataset trains from scratch, which is
+the standard flow).
 
 To run stages by hand, set the same folder yourself so they share it (otherwise they default
 to `./outputs` and would overwrite it):
@@ -122,7 +148,9 @@ vanilla-query scoring; all weak → drop Beaver, use WildGuard as the sole ranke
 
 ## Smoke test
 
-Edit `config.py`: `SAMPLE=8`, `N=3`, `MAX_TOKENS=1024`, then run the pipeline end-to-end.
+Run `SAMPLE=8 ./run_all.sh` to run the pipeline end-to-end on a tiny prompt sample.
+Do NOT lower `N` or `MAX_TOKENS` — generation settings are fixed across all runs (smoke,
+pilot, full) so that runs stay mergeable/comparable; `SAMPLE` is the only smoke-test knob.
 Confirm `outputs/report.md`, `outputs/sample_pairs.json`, and `outputs/cost_spread.png`
 are produced and the sign-convention sanity check prints `PASS`.
 
@@ -164,4 +192,6 @@ are produced and the sign-convention sanity check prints `PASS`.
 - Responses truncated mid-`<think>` have no visible answer → marked invalid, excluded from candidates.
 - Prompts come from WildJailbreak `vanilla_harmful` (the plain request) and
   `adversarial_harmful` (the jailbreak-wrapped request); stage 01 prints the sample's mix.
-- Survival is reported **overall**; survival denominator is the **300** sampled prompts.
+- Survival is reported **overall**; the survival denominator is the number of prompts that
+  entered the pipeline (every unique harmful prompt under the default `SAMPLE=ALL`, or the
+  sampled count when `SAMPLE=<int>` is set).

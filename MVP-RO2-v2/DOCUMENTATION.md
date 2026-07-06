@@ -17,13 +17,12 @@ python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Provide a Hugging Face token (WildJailbreak and WildGuard are gated) via the environment or a
-`.env` file — never hard-code it:
-
-```bash
-export HF_TOKEN=hf_xxx          # or put HF_TOKEN=... in .env
-# optional: export HF_MODELS_CACHE_DIR=/path/to/cache
-```
+The Hugging Face token (write access, `er-abd` account; needed for the gated
+WildJailbreak/WildGuard and for checkpoint pushes) ships in the **committed `.env`** — this
+repo is private, so a fresh pod works straight after `git clone` with no token setup. If the
+repo is ever made public: rotate the token and re-add `.env` to `.gitignore` first (see the
+note inside `.env`). On a pod, uncomment `HF_MODELS_CACHE_DIR=/workspace/hf_cache` in `.env`
+so model caches land on the volume disk.
 
 Requires a CUDA GPU (vLLM generation + Beaver/WildGuard scoring + DPO training).
 
@@ -34,7 +33,9 @@ bash DPO-train-dataset-curation/run_all.sh
 ```
 
 Runs stages 01→06 (prepare prompts → generate Qwen3-4B responses → WildGuard labels →
-Beaver cost scoring → filter/report → **export**). Writes a fresh
+Beaver cost scoring → filter/report → **export**). By default it curates **ALL** unique
+WildJailbreak harmful prompts (`vanilla_harmful` + `adversarial_harmful`, train config);
+set `SAMPLE=<int>` for a smaller seeded pilot. Writes a fresh
 `DPO-train-dataset-curation/outputs/run_<timestamp>/` containing, among the diagnostics:
 
 - **`dpo_dataset/`** — the handoff: a HF `DatasetDict({train,valid})` with columns
@@ -43,13 +44,29 @@ Beaver cost scoring → filter/report → **export**). Writes a fresh
 Useful knobs (env vars, all optional):
 
 ```bash
+SAMPLE=300 bash DPO-train-dataset-curation/run_all.sh                      # pilot sample instead of ALL prompts
+SEED=1 bash DPO-train-dataset-curation/run_all.sh                          # single seed for every stage (default 0; same var train.sh uses)
 RUN_OUTPUT_DIR=outputs/my_run bash DPO-train-dataset-curation/run_all.sh   # pin the output folder
-VALID_FRACTION=0.1  bash DPO-train-dataset-curation/run_all.sh             # valid split size
+VALID_FRACTION=0.1  bash DPO-train-dataset-curation/run_all.sh             # valid split size (seeded random sample of the final pairs)
+STRATIFY_VALID=true bash DPO-train-dataset-curation/run_all.sh             # 50/50 vanilla/adversarial valid mix instead of random
 EXPORT_FIELD=answer bash DPO-train-dataset-curation/run_all.sh             # export visible answer only (default: full, with CoT)
+EXCLUDE_RUNS=outputs/pilot bash DPO-train-dataset-curation/run_all.sh      # skip prompts a previous run already used
 ```
 
-Smoke test first (edit `DPO-train-dataset-curation/config.py`: `SAMPLE=8, N=3, MAX_TOKENS=1024`)
-to confirm the whole chain produces `dpo_dataset/` before a full run.
+**Two-phase curation** (pilot for a training smoke test, then a top-up of *new* prompts,
+merged into one dataset):
+
+```bash
+cd DPO-train-dataset-curation
+SAMPLE=4500 RUN_OUTPUT_DIR=outputs/pilot bash run_all.sh
+SAMPLE=22500 EXCLUDE_RUNS=outputs/pilot RUN_OUTPUT_DIR=outputs/main bash run_all.sh
+python merge_runs.py outputs/pilot outputs/main --out outputs/merged
+cd .. && bash train.sh DPO-train-dataset-curation/outputs/merged/dpo_dataset
+```
+
+Smoke test first (`SAMPLE=8 bash DPO-train-dataset-curation/run_all.sh`) to confirm the
+whole chain produces `dpo_dataset/` before a full run. `SAMPLE` is the only smoke-test
+knob — `N` and `MAX_TOKENS` are fixed across all runs so runs stay mergeable/comparable.
 
 ## 2. Train — one command
 
@@ -69,7 +86,7 @@ MAX_LENGTH=8192 bash train.sh              # lower if you hit GPU OOM
 
 Output: LoRA adapters under `checkpoints/qwen3-4B/harmless_dpo/` (default). The best checkpoint
 by eval reward-accuracy is kept as `checkpoint-best`; others are pruned. Its identity — the winning
-step and, when checkpoints were pushed, the exact `<HUB_MODEL_ID>-step-<N>` HF repo — is written to
+step and the exact `<HUB_MODEL_ID>-step-<N>` HF repo it was pushed to — is written to
 `OUTPUT_DIR/best_checkpoint.txt` (and mirrored into the W&B run summary). A full log is written to
 `logs/train.log`.
 
@@ -91,7 +108,15 @@ with `step`, `epoch`, and all DPO eval metrics (`eval_loss`, `eval_rewards/accur
 
 `OUTPUT_DIR/train_log_history.json` is the **complete** structured record (every logging-step
 training loss / LR / grad-norm plus every eval point) for offline curves without W&B;
-`eval_metrics.jsonl` is the eval-only subset.
+`eval_metrics.jsonl` is the eval-only subset. Each eval row also carries GPU memory snapshots
+(`gpu_mem_peak_reserved_gb` vs `gpu_mem_total_gb`), and a final summary lands in
+`OUTPUT_DIR/gpu_memory.json` — read the peak-reserved headroom after a smoke run to decide
+whether `per_device_train_batch_size` can be raised.
+
+Both `run_all.sh` and `train.sh` run a **preflight** before any GPU work: `run_all.sh` verifies
+the HF token is valid and the account can read the gated `allenai/wildjailbreak`; `train.sh`
+verifies the HF credentials exist and the token is not read-only (checkpoint pushing is
+always on).
 
 These are training diagnostics for checkpoint selection and optimisation health — **not** a
 behavioural evaluation. Actual safety + monitorability evaluation is done **separately, offline,
@@ -113,10 +138,11 @@ bash train.sh
 # detach: Ctrl-b then d   |   reattach: tmux attach -t train
 ```
 
-### Optional: push adapters to the Hugging Face Hub
+### Push adapters to the Hugging Face Hub (always on)
 
-Hub pushing is off by default. Set `HUB_MODEL_ID` and `train.sh` forwards `--push_to_hub
---hub_model_id`:
+Hub pushing is **always enabled**. `train.sh` defaults `HUB_MODEL_ID` to
+`er-abd/harmless-dpo-qwen3-4B` (the write token ships in the committed `.env`) and forwards
+`--push_to_hub --hub_model_id`. Override the repo prefix with:
 
 ```bash
 HUB_MODEL_ID=<your-namespace>/harmless-dpo-qwen3-4B bash train.sh

@@ -35,8 +35,13 @@ def main():
     survivors = joblib.load(config.SCORED_PATH)
     n_enter_stage4 = len(survivors)
 
-    # SAMPLE is the end-to-end denominator; filter-1 dropped (SAMPLE - survivors).
-    n_dropped_f1 = config.SAMPLE - n_enter_stage4
+    # The stage-01 meta file records exactly which prompts entered the pipeline — its length
+    # is the end-to-end denominator (works for both SAMPLE=ALL and integer SAMPLE runs).
+    prompt_meta = joblib.load(config.PROMPTS_META_PATH)
+    n_sampled = len(prompt_meta)
+
+    # filter-1 dropped (sampled - survivors).
+    n_dropped_f1 = n_sampled - n_enter_stage4
 
     # ── filter-3 + build final pairs ───────────────────────────────────────
     final_pairs = []
@@ -97,7 +102,6 @@ def main():
     # Subset travels on every response dict (attached in stage 02), so each stage's mix is a
     # plain Counter. filter-1 is measured against the sampled set via the meta file (stage 05
     # only receives filter-1 survivors, so the dropped prompts are not otherwise visible here).
-    prompt_meta = joblib.load(config.PROMPTS_META_PATH)
     subsets = sorted({m["subset"] for m in prompt_meta})
     sampled_mix = Counter(m["subset"] for m in prompt_meta)
     f1_mix = Counter(pp[0].get("subset") for pp in survivors)         # after filter-1
@@ -114,7 +118,7 @@ def main():
         final_pairs = kept
 
     n_final = len(final_pairs)
-    survival = 100.0 * n_final / config.SAMPLE
+    survival = 100.0 * n_final / n_sampled
     final_mix = Counter(p["subset"] for p in final_pairs)             # after filter-4 (== f3 if off)
 
     joblib.dump(final_pairs, config.FINAL_PAIRS_PATH, compress=True)
@@ -230,11 +234,12 @@ def main():
     # ── assemble report ────────────────────────────────────────────────────
     lines = []
     lines.append("# Harmlessness preference-pair pipeline — report\n")
-    lines.append(f"- Sampled prompts (denominator): **{config.SAMPLE}**")
+    sample_mode = "ALL" if config.SAMPLE is None else config.SAMPLE
+    lines.append(f"- Sampled prompts (denominator): **{n_sampled}** (SAMPLE={sample_mode})")
     lines.append(f"- Responses per prompt (N): {config.N}, max_tokens: {config.MAX_TOKENS}\n")
     lines.append("## Filtering funnel")
-    lines.append(f"- filter-1 (safety-label diversity): dropped **{n_dropped_f1} / {config.SAMPLE}** "
-                 f"({100.0 * n_dropped_f1 / config.SAMPLE:.1f}%) → {n_enter_stage4} enter scoring")
+    lines.append(f"- filter-1 (safety-label diversity): dropped **{n_dropped_f1} / {n_sampled}** "
+                 f"({100.0 * n_dropped_f1 / n_sampled:.1f}%) → {n_enter_stage4} enter scoring")
     lines.append(f"- filter-3 (chosen=Safe & rejected=Unsafe): dropped **{n_dropped_f3} / "
                  f"{n_enter_stage4}** ({pct_f3:.1f}%) → {n_after_f3} pairs")
     if config.MIN_MARGIN is not None:
@@ -243,7 +248,7 @@ def main():
                      f"{n_after_f3}** ({pct_f4:.1f}%)")
     else:
         lines.append("- filter-4 (minimum margin): **not applied** (MIN_MARGIN unset)")
-    lines.append(f"- **End-to-end survival rate: {n_final} / {config.SAMPLE} = {survival:.1f}%**\n")
+    lines.append(f"- **End-to-end survival rate: {n_final} / {n_sampled} = {survival:.1f}%**\n")
     lines.append("## Per-subset funnel (sample mix after each filter)")
     lines.append("| subset | sampled | after filter-1 | after filter-3 | final | survival % |")
     lines.append("|---|---|---|---|---|---|")
@@ -252,7 +257,7 @@ def main():
         surv = 100.0 * final_mix.get(s, 0) / s_samp if s_samp else float("nan")
         lines.append(f"| {s} | {s_samp} | {f1_mix.get(s, 0)} | {f3_mix.get(s, 0)} | "
                      f"{final_mix.get(s, 0)} | {surv:.1f} |")
-    lines.append(f"| **all** | {config.SAMPLE} | {n_enter_stage4} | {n_after_f3} | "
+    lines.append(f"| **all** | {n_sampled} | {n_enter_stage4} | {n_after_f3} | "
                  f"{n_final} | {survival:.1f} |\n")
     lines.append("## Labeler agreement (Beaver argmin/argmax vs Qwen3Guard)")
     lines.append(f"- chosen-side (Beaver-safest is Qwen3Guard-Safe): "
@@ -332,7 +337,8 @@ def main():
         return None if (isinstance(x, float) and np.isnan(x)) else x
 
     update_diagnostics(config.DIAGNOSTICS_PATH, "funnel", {
-        "sampled": config.SAMPLE,
+        "sample_mode": "ALL" if config.SAMPLE is None else config.SAMPLE,
+        "sampled": n_sampled,
         "after_filter1": n_enter_stage4,
         "after_filter3": n_after_f3,
         "min_margin_filter4": config.MIN_MARGIN,

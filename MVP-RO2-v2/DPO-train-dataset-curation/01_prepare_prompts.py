@@ -1,4 +1,11 @@
-"""Stage 01 — Load WildJailbreak harmful prompts, deduplicate, sample SAMPLE prompts.
+"""Stage 01 — Load WildJailbreak harmful prompts, deduplicate, select the prompt set.
+
+config.SAMPLE controls the selection: None ("ALL", the default) keeps EVERY unique
+harmful prompt; an integer draws a seeded random sample of that size (smoke/pilot runs).
+
+config.EXCLUDE_RUNS (comma-separated run dirs) removes prompts already consumed by
+previous runs from the pool BEFORE selection — so a pilot and a follow-up full run never
+overlap, and their final pairs can later be combined with merge_runs.py.
 
 Uses only the two harmful subsets of allenai/wildjailbreak (config in config.py):
   - vanilla_harmful      -> prompt text from the `vanilla` column
@@ -70,15 +77,37 @@ def main():
     n_unique = len(unique_prompts)
     print(f"\n>> Unique harmful prompts (after dedup): {n_unique}")
 
-    if n_unique < config.SAMPLE:
-        raise ValueError(
-            f"Requested SAMPLE={config.SAMPLE} but only {n_unique} unique prompts available."
-        )
+    # Exclude prompts already consumed by previous runs (EXCLUDE_RUNS env var), so this
+    # run samples only NEW prompts and the runs' outputs can later be merged.
+    if config.EXCLUDE_RUNS:
+        excluded = set()
+        for run_dir in config.EXCLUDE_RUNS:
+            meta_path = os.path.join(run_dir, os.path.basename(config.PROMPTS_META_PATH))
+            if not os.path.exists(meta_path):
+                raise FileNotFoundError(
+                    f"EXCLUDE_RUNS: no {os.path.basename(config.PROMPTS_META_PATH)} in {run_dir!r}"
+                )
+            run_prompts = {m["prompt"] for m in joblib.load(meta_path)}
+            print(f"   excluding {len(run_prompts)} prompts from previous run: {run_dir}")
+            excluded |= run_prompts
+        before = len(unique_prompts)
+        unique_prompts = [p for p in unique_prompts if p not in excluded]
+        n_unique = len(unique_prompts)
+        print(f">> After excluding {before - n_unique} previously-used prompts: {n_unique} remain")
 
-    # Randomly sample SAMPLE unique prompts with the fixed seed.
-    sampled = random.sample(unique_prompts, config.SAMPLE)
+    if config.SAMPLE is None:
+        # SAMPLE=ALL — keep every unique harmful prompt (full-dataset curation run).
+        sampled = unique_prompts
+        print(f">> Using ALL {len(sampled)} unique prompts (SAMPLE=ALL)")
+    else:
+        if n_unique < config.SAMPLE:
+            raise ValueError(
+                f"Requested SAMPLE={config.SAMPLE} but only {n_unique} unique prompts available."
+            )
+        # Randomly sample SAMPLE unique prompts with the fixed seed.
+        sampled = random.sample(unique_prompts, config.SAMPLE)
+        print(f">> Sampled {len(sampled)} unique prompts (seed={config.SEED})")
     mix = Counter(seen[p][0] for p in sampled)
-    print(f">> Sampled {len(sampled)} unique prompts (seed={config.SEED})")
     print("   sample mix: " + ", ".join(f"{s}={mix.get(s, 0)}" for s in ("vanilla", "adversarial")))
 
     # PROMPTS_PATH stays a plain list[str] (stage 02 input, unchanged). PROMPTS_META_PATH

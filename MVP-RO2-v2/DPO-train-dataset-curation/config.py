@@ -1,24 +1,52 @@
 """Central configuration for the harmlessness preference-pair pipeline.
 
-All stages import their constants from here so a smoke run only needs edits in one
-place (drop SAMPLE / N / MAX_TOKENS). Paths are all relative to this file's dir so the
-pipeline runs the same on a laptop or a RunPod box.
+All stages import their constants from here. A smoke run changes ONLY the prompt count
+(SAMPLE=<small int>, env var) — generation settings (N, MAX_TOKENS) are fixed across all
+runs. Paths are all relative to this file's dir so the pipeline runs the same on a laptop
+or a RunPod box.
 """
 import os
 
 # ── Reproducibility ────────────────────────────────────────────────────────
-SEED = 0                      # RHiE convention (utils.set_seed)
+# ONE seed for everything: prompt sampling (01), vLLM generation (02), every stage's
+# set_seed, the stratified train/valid split (06), and the sanity check. Reads the same
+# SEED env var train.sh uses, so `export SEED=n` reproduces the full curation+training
+# chain end to end. Default 0 (RHiE convention).
+SEED = int(os.environ.get("SEED", "0"))
 
 # ── Sampling / generation ──────────────────────────────────────────────────
-SAMPLE = 300                  # number of unique prompts to sample
+# SAMPLE: how many unique harmful prompts to draw from WildJailbreak (train config,
+# vanilla_harmful + adversarial_harmful, deduplicated). "ALL" (default) = keep every
+# unique prompt; an integer = random sample of that size (seeded — use for smoke/pilot
+# runs). Env-overridable: SAMPLE=300 bash run_all.sh
+def _parse_sample(raw):
+    if str(raw).strip().upper() == "ALL":
+        return None               # None = use all unique prompts
+    return int(raw)
+
+
+SAMPLE = _parse_sample(os.environ.get("SAMPLE", "ALL"))
+
+# EXCLUDE_RUNS: comma-separated previous run output dirs (each containing
+# 01_prompts_meta.joblib). Stage 01 removes those runs' prompts from the pool BEFORE
+# sampling, so a follow-up run never re-curates prompts a pilot already consumed.
+# The runs' final pairs can then be combined with merge_runs.py.
+#   e.g. EXCLUDE_RUNS=outputs/pilot_run SAMPLE=22500 bash run_all.sh
+EXCLUDE_RUNS = [s.strip() for s in os.environ.get("EXCLUDE_RUNS", "").split(",") if s.strip()]
+# N and MAX_TOKENS are FIXED across ALL runs (smoke, pilot, full): merge_runs.py combines
+# pairs from different runs, and the funnel stats are compared across runs — both are only
+# valid when every run generated under identical settings. Do NOT lower these for smoke
+# tests (use a small SAMPLE instead); change them only as a deliberate global decision.
 N = 10                        # responses generated per prompt
 MAX_TOKENS = 8192             # per-response token budget (truncation surfaced live)
 
 # Prompts per vLLM generate() call. Large so vLLM's continuous batching keeps the GPU
-# saturated and we pay only one decode drain-tail per batch (not per prompt). Truncation
-# is still reported after each batch, so 300/100 = 3 batches gives periodic live feedback
-# while staying near single-call throughput.
-GEN_BATCH_PROMPTS = 100
+# saturated and we pay only one decode drain-tail (waiting for the batch's longest
+# response) per batch, not per prompt. Batch composition does NOT change outputs (vLLM
+# seeds sampling per request), so this is a pure throughput knob. 500 keeps the tail
+# overhead negligible at full scale (27k prompts -> 54 batches) while still giving
+# periodic live truncation feedback.
+GEN_BATCH_PROMPTS = 500
 
 # Qwen3 thinking-mode decoding preset (official recommendation).
 TEMPERATURE = 0.6
@@ -72,11 +100,18 @@ MIN_MARGIN = _parse_min_margin(os.environ.get("MIN_MARGIN"))
 # The handoff to the trainer. Stage 06 converts final_pairs.joblib into a HF
 # DatasetDict({"train","valid"}) with the standard TRL preference schema
 # (prompt / chosen / rejected), saved via save_to_disk to DPO_DATASET_DIR.
-#   VALID_FRACTION — fraction of pairs held out as the "valid" split (deterministic, SEED).
+#   VALID_FRACTION — fraction of the FINAL (post-filtering) pairs held out as the "valid"
+#                    split (deterministic, SEED). Random by default, i.e. representative of
+#                    the training distribution — the right basis for checkpoint selection.
+#   STRATIFY_VALID — set to true/1 to instead stratify the holdout to a 50/50
+#                    vanilla/adversarial mix (best-effort — shortfall filled from the other
+#                    subset). Either way the realised mix is reported in diagnostics.json
+#                    "export" (train_mix / valid_mix).
 #   EXPORT_FIELD   — "full" exports the full response (<think>…</think> + answer, what the
 #                    model generates — the right target for DPO); "answer" exports only the
 #                    visible post-</think> answer (chosen_answer/rejected_answer).
 VALID_FRACTION = float(os.environ.get("VALID_FRACTION", "0.1"))
+STRATIFY_VALID = os.environ.get("STRATIFY_VALID", "").strip().lower() in ("1", "true", "yes")
 EXPORT_FIELD = os.environ.get("EXPORT_FIELD", "full")   # "full" | "answer"
 
 # ── Classifier / scorer batch sizes ────────────────────────────────────────

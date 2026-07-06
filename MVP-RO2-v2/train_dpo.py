@@ -83,6 +83,26 @@ def setup_hf_env():
 setup_hf_env()
 
 
+def gpu_memory_stats():
+    """Current + peak CUDA memory (GB). Cheap; returns {} on CPU-only.
+
+    peak_reserved is the number that matters for OOM headroom: it includes allocator
+    fragmentation and is what actually competes with new allocations. Read it after a run
+    to decide whether per_device_train_batch_size can go up.
+    """
+    if not torch.cuda.is_available():
+        return {}
+    dev = torch.cuda.current_device()
+    total = torch.cuda.get_device_properties(dev).total_memory
+    return {
+        "gpu_mem_alloc_gb": round(torch.cuda.memory_allocated(dev) / 1e9, 2),
+        "gpu_mem_peak_alloc_gb": round(torch.cuda.max_memory_allocated(dev) / 1e9, 2),
+        "gpu_mem_reserved_gb": round(torch.cuda.memory_reserved(dev) / 1e9, 2),
+        "gpu_mem_peak_reserved_gb": round(torch.cuda.max_memory_reserved(dev) / 1e9, 2),
+        "gpu_mem_total_gb": round(total / 1e9, 2),
+    }
+
+
 def push_checkpoint_to_hub(args, ckpt_dir, step):
     """Push a single checkpoint dir to its own HF repo: <hub_model_id>-step-<N>."""
     from huggingface_hub import HfApi
@@ -241,6 +261,10 @@ class EvalMetricsLoggerCallback(TrainerCallback):
             return
         row = {"step": state.global_step, "epoch": state.epoch}
         row.update(metrics)
+        # GPU memory alongside each eval point: after a (smoke) run, compare
+        # gpu_mem_peak_reserved_gb against gpu_mem_total_gb to judge whether
+        # per_device_train_batch_size can be raised.
+        row.update(gpu_memory_stats())
         with open(self.metrics_path, "a", encoding="utf-8") as f:
             f.write(json.dumps(row, ensure_ascii=False) + "\n")
 
@@ -337,6 +361,18 @@ def main(script_args, training_args, model_config):
     with open(log_history_path, "w", encoding="utf-8") as f:
         json.dump(trainer.state.log_history, f, indent=2)
     print(f"Full training log history -> {log_history_path}")
+
+    # GPU memory summary for batch-size decisions: peak reserved vs total is the OOM-relevant
+    # headroom. Saved to gpu_memory.json (per-eval snapshots are in eval_metrics.jsonl).
+    mem = gpu_memory_stats()
+    if mem:
+        mem_path = os.path.join(training_args.output_dir, "gpu_memory.json")
+        with open(mem_path, "w", encoding="utf-8") as f:
+            json.dump(mem, f, indent=2)
+        headroom = mem["gpu_mem_total_gb"] - mem["gpu_mem_peak_reserved_gb"]
+        print(f"GPU memory: peak reserved {mem['gpu_mem_peak_reserved_gb']} GB / "
+              f"{mem['gpu_mem_total_gb']} GB total -> {headroom:.1f} GB headroom "
+              f"(details: {mem_path})")
 
     # Get the best checkpoint and metrics
     best_step = best_checkpoint_callback.get_best_checkpoint()

@@ -3,6 +3,9 @@
 # Single unified environment for the whole repo — the ONLY requirements file (the
 # DPO-train-dataset-curation/ module has no separate copy). Covers end-to-end dataset
 # curation and the LoRA DPO trainer (train_dpo.py / train.sh).
+#
+# System packages (NOT pip) — install on a fresh pod before long runs:
+#   apt-get update && apt-get install -y tmux
 
 # ── Harmlessness DPO curation module (DPO-train-dataset-curation/) ──
 vllm>=0.8.5

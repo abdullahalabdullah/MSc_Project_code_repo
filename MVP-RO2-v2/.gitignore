@@ -122,7 +122,11 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
+# MVP-RO2-v2/.env is COMMITTED on purpose (private repo; holds the HF token so a fresh pod
+# works straight after `git clone`). The `!.env` re-includes it against the repo-root
+# .gitignore — it is scoped to THIS folder only (other modules' .env stay ignored).
+# Delete the `!.env` line and rotate the token before ever making the repo public.
+!.env
 .venv
 env/
 venv/
