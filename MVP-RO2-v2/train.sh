@@ -61,7 +61,9 @@ echo "== Preflight: checking Hugging Face credentials (checkpoint push is always
 python - <<'PY'
 import os, sys
 try:
-    from dotenv import load_dotenv; load_dotenv()
+    # Explicit path: parameterless load_dotenv() inspects the caller's file, which does
+    # not exist for stdin scripts (heredoc) and crashes. cwd is the repo root here.
+    from dotenv import load_dotenv; load_dotenv(".env")
 except ImportError:
     pass
 try:

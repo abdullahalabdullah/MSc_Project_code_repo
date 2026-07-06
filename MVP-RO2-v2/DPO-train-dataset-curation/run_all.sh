@@ -59,7 +59,10 @@ echo "== Preflight: checking HF token + gated WildJailbreak access =="
 $PY - <<'PYEOF'
 import os, sys
 try:
-    from dotenv import load_dotenv; load_dotenv()
+    # Explicit path: parameterless load_dotenv() inspects the caller's file, which does
+    # not exist for stdin scripts (heredoc) and crashes. cwd is this module dir, so the
+    # repo-root .env is one level up.
+    from dotenv import load_dotenv; load_dotenv("../.env")
 except ImportError:
     pass
 token = os.environ.get("HF_TOKEN") or None
