@@ -173,8 +173,20 @@ checkpoints
 figures_poster/
 ignore/*
 wandb/
+# HuggingFace .map() caches (regenerated every run — never commit)
+cache-*.arrow
 
 # Track this run's experiment outputs + logs (override the broad *.joblib / *.log
 # ignores above so the full run's results get committed/pushed).
 !outputs/**
 !logs/**
+# Track the SMALL training-result files under checkpoints/ (metrics, memory, best-ckpt
+# pointer, log history) — but NOT the heavy adapter weights, which live on HF.
+# Re-include the dirs first (a file cannot be un-ignored while its parent dir is ignored),
+# then the specific small files.
+!checkpoints/
+!checkpoints/**/
+!checkpoints/**/eval_metrics.jsonl
+!checkpoints/**/gpu_memory.json
+!checkpoints/**/best_checkpoint.txt
+!checkpoints/**/train_log_history.json
