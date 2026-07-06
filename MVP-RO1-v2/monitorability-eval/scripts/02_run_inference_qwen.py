@@ -23,6 +23,12 @@ Options:
                     grader_hacking, unethical. Output is namespaced by hint type.
     --n-samples     samples (N) per arm per instance (default: config
                     qwen_inference.n_samples). No fixed cap.
+    --merge         default False. Treat --model as a LoRA ADAPTER repo
+                    (adapter-only push, no config.json): merge it into the fixed
+                    base from the config `merge:` block (always the same base),
+                    save the merged model locally under merge.out_root, and run
+                    inference on that. Output dirs stay namespaced by the
+                    ADAPTER id, so downstream steps use the same --model.
 
 Input:
     data/{dataset}/dataset_index.json
@@ -61,6 +67,10 @@ def main():
     parser.add_argument("--n-samples", type=int, default=None,
                         help="Samples (N) per arm per instance (default: config "
                              "qwen_inference.n_samples). Overrides the config value for this run.")
+    parser.add_argument("--merge", action="store_true", default=False,
+                        help="Treat --model as a LoRA adapter repo and merge it into the "
+                             "fixed base from the config 'merge:' block before inference. "
+                             "Outputs stay namespaced by the adapter id.")
     parser.add_argument("--seed", type=int, default=88)
     args = parser.parse_args()
 
@@ -88,15 +98,33 @@ def main():
 
     ensure_hf_auth()  # log in for gated model downloads (env var or config hf_token)
 
-    model_cfg = {"name": model_dir_name(args.model), "hf_id": args.model}
-
-    # Validate all dataset indexes exist before loading the model.
+    # Validate all dataset indexes exist before any model work.
     for ds in datasets:
         paths = resolve_paths(root, config, ds)
         if not paths["data_index"].exists():
             print(f"ERROR: dataset_index.json not found at {paths['data_index']}.")
             print(f"Run 01_prepare_dataset.py --dataset {ds} first.")
             sys.exit(1)
+
+    # With --merge, args.model is an adapter-only repo: merge it into the fixed
+    # base (config merge.base — the same base for every adapter) and point vLLM
+    # at the local merged dir. The output namespace stays the ADAPTER id so all
+    # downstream steps (03–09) are run with the same --model.
+    model_id = args.model
+    if args.merge:
+        from src.merge import merge_adapter
+        merge_cfg = config.get("merge", {})
+        if not merge_cfg.get("base"):
+            print("ERROR: --merge requires a 'merge:' block with 'base:' in the config.")
+            sys.exit(1)
+        merged_dir = merge_adapter(
+            base=merge_cfg["base"],
+            adapter=args.model,
+            out_dir=root / merge_cfg.get("out_root", "merged-models") / model_dir_name(args.model),
+        )
+        model_id = str(merged_dir)
+
+    model_cfg = {"name": model_dir_name(args.model), "hf_id": model_id}
 
     # Load model once — reused across all datasets.
     tokenizer, llm = load_qwen_model(model_cfg)

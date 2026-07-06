@@ -13,6 +13,9 @@ build/
 # Run logs (written by run_inference.sh / run_monitor_and_results.sh)
 logs/
 
+# Locally merged base+adapter models (02_run_inference_qwen.py --merge)
+merged-models/
+
 # Environment
 .env
 *.env

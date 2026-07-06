@@ -55,6 +55,10 @@ vllm==0.8.5
 # removed all_special_tokens_extended and breaks vLLM 0.8.5's tokenizer cache.
 transformers==4.51.3
 
+# LoRA-adapter merging (src/merge.py — 02 --merge / merge_and_push.py).
+# 0.15.x is the last line tested against transformers 4.51.3.
+peft>=0.15,<0.16
+
 # Dataset loading
 datasets>=2.18.0
 

@@ -5,10 +5,15 @@
 # results phase runs separately afterwards: see run_monitor_and_results.sh.
 #
 # Usage:
-#   bash monitorability-eval/run_inference.sh <model_id> --dataset <d1 [d2 ...]|ALL> --hint <h1 [h2 ...]|ALL>
+#   bash monitorability-eval/run_inference.sh <model_id> --dataset <d1 [d2 ...]|ALL> --hint <h1 [h2 ...]|ALL> [--merge]
 #
 #   model_id   HF model ID (e.g. Qwen/Qwen3-4B) or a local model dir. FIRST arg.
 #              All output dirs are namespaced by its folder-safe name ('/' -> '_').
+#   --merge    OPTIONAL (default: off). Treat model_id as a LoRA ADAPTER repo
+#              (adapter-only push, no config.json — vLLM can't load it directly):
+#              step 2 merges it into the fixed base from the config merge: block
+#              (always the same base) and runs inference on the local merged
+#              model. Output dirs stay namespaced by the ADAPTER id.
 #   --dataset  REQUIRED. One or more dataset keys from config/mvp_config.yaml.
 #              Every token after --dataset (until --hint) is a dataset; tokens may
 #              be space- and/or comma-separated (mmlu_pro lexam == mmlu_pro,lexam).
@@ -38,8 +43,9 @@ set -uo pipefail
 # config/, outputs-and-results/, and logs/ resolve as repo-root-relative paths.
 cd "$(dirname "$0")/.."
 
-USAGE="usage: bash monitorability-eval/run_inference.sh <model_id> --dataset <d1 [d2 ...]|ALL> --hint <h1 [h2 ...]|ALL>
-       datasets/hints are space- and/or comma-separated, e.g. --dataset mmlu_pro,lexam --hint professor metadata"
+USAGE="usage: bash monitorability-eval/run_inference.sh <model_id> --dataset <d1 [d2 ...]|ALL> --hint <h1 [h2 ...]|ALL> [--merge]
+       datasets/hints are space- and/or comma-separated, e.g. --dataset mmlu_pro,lexam --hint professor metadata
+       --merge: model_id is a LoRA adapter repo — merge into the config merge.base before inference"
 
 # First positional is the model id; --dataset / --hint follow (either order).
 MODEL_ID="${1:-}"
@@ -50,12 +56,13 @@ shift
 
 # Collect every token after --dataset into DATASET_ARGS and after --hint into
 # HINT_ARGS, until the next flag. Tokens may themselves be comma-separated.
-DATASET_ARGS=(); HINT_ARGS=()
+DATASET_ARGS=(); HINT_ARGS=(); MERGE=false
 saw_dataset=false; saw_hint=false; mode=""
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --dataset|--datasets)        mode="dataset"; saw_dataset=true ;;
         --hint|--hints|--hint-type)  mode="hint";    saw_hint=true ;;
+        --merge)                     MERGE=true ;;
         --*) echo "ERROR: unknown flag '$1'."; echo "$USAGE"; exit 1 ;;
         *)
             IFS=',' read -r -a _parts <<< "$1"
@@ -118,10 +125,12 @@ PREP_FLAGS=""
 { [[ -n "$N_EXAMPLES" ]] || [[ "$FORCE_PREPARE" == "true" ]]; } && PREP_FLAGS+=" --force"
 INFER_FLAGS=""
 [[ -n "$N_SAMPLES" ]] && INFER_FLAGS+=" --n-samples $N_SAMPLES"
+[[ "$MERGE" == "true" ]] && INFER_FLAGS+=" --merge"
 # n/N suffix appended to commit messages for traceability.
 NN_TAG=""
 [[ -n "$N_EXAMPLES" ]] && NN_TAG+=", n=$N_EXAMPLES"
 [[ -n "$N_SAMPLES" ]]  && NN_TAG+=", N=$N_SAMPLES"
+[[ "$MERGE" == "true" ]] && NN_TAG+=", merged"
 
 # --- Fail-soft command runner --------------------------------------------------
 SUMMARY=()
@@ -162,6 +171,11 @@ exec > >(tee -a "$LOGFILE") 2>&1
 
 echo "Inference run started: $(date)"
 echo "Model:       $MODEL_ID (dirs namespaced as '$MODEL_NAME')"
+if [[ "$MERGE" == "true" ]]; then
+    echo "Merge:       true — model_id is a LoRA adapter, merged into config merge.base before inference"
+else
+    echo "Merge:       false"
+fi
 echo "Datasets:    ${DATASETS[*]}"
 echo "Hint types:  ${HINT_TYPES[*]}"
 echo "N examples:  ${N_EXAMPLES:-config default} per dataset"

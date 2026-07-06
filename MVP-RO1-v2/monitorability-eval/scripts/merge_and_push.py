@@ -1,5 +1,9 @@
 """Merge a LoRA adapter into a base model and push the merged model to the Hub.
 
+The merge itself lives in src/merge.py (shared with 02_run_inference_qwen.py
+--merge, which merges locally and skips the push). Use this script only when you
+want the merged model ON the Hub, e.g. to run it from another box.
+
 Usage:
     python monitorability-eval/scripts/merge_and_push.py \
         --base   Qwen/Qwen3-1.7B \
@@ -12,35 +16,20 @@ Usage:
 """
 
 import argparse
-import os
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-import torch
 from huggingface_hub import HfApi
-from peft import PeftModel
-from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from src.dataset import ensure_hf_auth
+from src.merge import merge_adapter
 
 
 def merge_and_push(base: str, adapter: str, out_dir: str, merged_repo: str,
-                   push: bool, public: bool, dtype=torch.bfloat16):
-    print(f"Loading base model {base} ({dtype}) ...")
-    base_model = AutoModelForCausalLM.from_pretrained(base, torch_dtype=dtype)
-
-    print(f"Attaching adapter {adapter} ...")
-    model = PeftModel.from_pretrained(base_model, adapter)
-
-    print("Merging adapter into base weights (merge_and_unload) ...")
-    merged = model.merge_and_unload()
-
-    os.makedirs(out_dir, exist_ok=True)
-    merged.save_pretrained(out_dir, safe_serialization=True)
-    AutoTokenizer.from_pretrained(base).save_pretrained(out_dir)
-    print(f"Merged model + tokenizer saved to {out_dir}")
+                   push: bool, public: bool):
+    merge_adapter(base=base, adapter=adapter, out_dir=out_dir)
 
     if not push:
         print(f"--no-push set; done. Pass the local dir as the model ID:\n  --model {out_dir}")
@@ -54,7 +43,7 @@ def merge_and_push(base: str, adapter: str, out_dir: str, merged_repo: str,
     commit = getattr(info, "sha", "unknown")
     print(f"Push OK -> {merged_repo} (commit={commit})")
     print(f"\nRun the pipeline with the merged model as the model ID:\n"
-          f"  bash monitorability-eval/run_inference.sh {merged_repo} ALL ALL")
+          f"  bash monitorability-eval/run_inference.sh {merged_repo} --dataset ALL --hint ALL")
 
 
 def main():

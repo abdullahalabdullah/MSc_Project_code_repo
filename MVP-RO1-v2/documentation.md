@@ -59,7 +59,13 @@ Datasets: `mmlu_pro, gpqa_diamond, wmdp, codemmlu, lsat_ar, lsat_lr, medxpertqa,
 (or `ALL`).
 Hint types: `professor, visual_pattern, metadata, wrong_few_shot, grader_hacking,
 unethical` (or `ALL`). Both lists come from `config/mvp_config.yaml`, so the
-scripts stay in sync with the config automatically. Optional env knobs for
+scripts stay in sync with the config automatically. If `<model_id>` is a **LoRA
+adapter-only repo** (the RO2 push format — no `config.json`, so vLLM can't load
+it), add `--merge` (default: off) to `run_inference.sh`: step 2 then merges the
+adapter into the fixed base from the config `merge:` block (always the same
+base) into a local dir and runs inference on that; output dirs stay namespaced
+by the **adapter** id, so `run_monitor_and_results.sh` takes the same
+`<model_id>` unchanged. Optional env knobs for
 `run_inference.sh`: `N_EXAMPLES=50` (examples/dataset), `N_SAMPLES=8`
 (samples/arm), `FORCE_PREPARE=true` (rebuild indexes). Both scripts are
 fail-soft, resume from checkpoints, commit+push progress, and log to `logs/`
@@ -114,8 +120,14 @@ reporting layer can be removed cleanly before a public release. Steps 1–8 neve
 write `.md`.
 
 `…` = `outputs-and-results/`. Step 2 needs a GPU (vLLM); 3 needs the OpenAI API;
-4–9 are CPU-only. Helpers: `monitorability-eval/scripts/merge_and_push.py` merges a LoRA/DPO adapter
-into the base model and pushes it to the Hub; `monitorability-eval/scripts/archive_results.sh` snapshots
+4–9 are CPU-only. Step 2 also takes `--merge` (default: off) for adapter-only
+`--model` repos: the adapter is merged into the config `merge.base` (via
+`monitorability-eval/src/merge.py`) into a local gitignored dir
+(`merge.out_root`, default `merged-models/`) and inference runs on the merged
+model, while outputs stay namespaced by the adapter id. Helpers:
+`monitorability-eval/scripts/merge_and_push.py` merges a LoRA/DPO adapter
+into an explicitly given base model (same `src/merge.py` core) and pushes the
+merged model to the Hub; `monitorability-eval/scripts/archive_results.sh` snapshots
 the result dirs into `outputs-and-results/Old-Results/{timestamp}/` and clears them
 for a fresh run.
 
@@ -141,6 +153,8 @@ The two driver scripts (see **Quick start**) cover the whole pipeline:
 steps 3–6 + 9 (OpenAI API, no GPU). The `<model_id>` is any HF model ID or a local
 model dir (e.g. a DPO checkpoint merged with `merge_and_push.py`); output dirs
 are namespaced by its folder-safe name (`/` → `_`, e.g. `Qwen_Qwen3-4B`).
+Adapter-only checkpoints don't need a pre-merged repo: pass the adapter id plus
+`--merge` and step 2 merges it into the config `merge.base` locally first.
 
 Any step can also be run manually — every step takes the same `--model`:
 
@@ -171,6 +185,7 @@ All steps **resume from checkpoints** — safe to re-run after an interruption.
 | `datasets` | Registry of all eval datasets (see the table below). Each: `random_seed: 88`, uniform sampling, **variable 3–10 options (A–J)**. |
 | `hint` | Hint registry: `default` (type used when `--hint-type` is omitted) + `types.<type>` wording. The hint always points at a *wrong* option (`hint_target`) and only appears in the hinted arm. See **Hint types**. |
 | `qwen_inference` | Sampling: `n_samples=4` (N, samples/arm — overridable per run with `02 --n-samples`, no fixed cap), `temperature 0.6`, `top_p 0.95`, `top_k 20`, `max_new_tokens 16384` (Qwen3 thinking-mode recipe; thinking always ON). `checkpoint_every=200` = instances per checkpoint **and** the batch handed to vLLM in one `generate` call (resume granularity; no effect on generations). |
+| `merge` | Adapter merging for `02 --merge`: `base` (the fixed base model every adapter is merged into, currently `Qwen/Qwen3-4B`) and `out_root` (repo-root-relative dir for local merged models, default `merged-models/`, gitignored). |
 | `monitor` | Monitor LLM (`model`, e.g. `gpt-5-mini`) + retry/backoff/timeout. |
 | `gmean2` | `level2_te_threshold` (reported-only population gate). |
 | `paths` | `data` + the four result dirs under `outputs-and-results/`. |
@@ -327,6 +342,7 @@ and the Phase-3 line in `run_monitor_and_results.sh` — the metric computation
 - `dataset.py` — per-dataset loaders + filtering, uniform (one/two-level) stratified sampling, 3–10-option (A–J) normalisation, hint-*target* assignment, `model_dir_name` (folder-safe model name from an HF ID), `resolve_paths` (namespaces by **model** / dataset / **hint type**), `ensure_hf_auth`.
 - `hints.py` — the hint-type registry (`HINT_TYPES`) plus both prompt builders: `render_hint` (the hinted-arm inference prefix + options block) and `monitor_hint_fields` (the per-type HINT description + acknowledgment guideline used by the monitor) for each type (professor, visual_pattern, metadata, wrong_few_shot, grader_hacking, unethical). Reads per-type wording from the config `hint:` block. The unhinted arm never calls `render_hint`.
 - `inference.py` — shared prompt construction (`build_user_content`, which delegates the hint to `hints.render_hint`) and answer parsing.
+- `merge.py` — `merge_adapter(base, adapter, out_dir)`: merges a LoRA adapter-only checkpoint into a base model (PEFT `merge_and_unload`) and saves a full vLLM-loadable model + tokenizer (adapter's tokenizer preferred, base fallback) to `out_dir`; idempotent (an existing merge is reused unless `force=True`). Backs both `02 --merge` (local merge, base from config `merge.base`) and `scripts/merge_and_push.py` (explicit base, then Hub push).
 - `inference_qwen.py` — Qwen3 thinking-mode inference (chat template, `<think>` handling, vLLM). Reuses `_SYSTEM_PROMPT` / `build_user_content` / `extract_cot` / `parse_answer` from `inference.py` (shared base); threads `hint_type` into the prompt and into the output dir. **vLLM throughput:** the engine loads with `enable_prefix_caching=True` (shared system-prompt/instance prefixes reuse cached KV), and each checkpoint's full request set — `checkpoint_every × n_samples × 2 arms` — is issued in a **single `llm.generate` call** so continuous batching keeps the GPU saturated (one decode drain-tail per checkpoint, not one per sample×arm). Both are scheduling-only: per-request seeds/params and outputs are unchanged.
 - `monitor.py` — calls the monitor LLM on **every** response in **both** arms
   (`hint_answer = hint_target` even for X=0), seeing only the model's response text

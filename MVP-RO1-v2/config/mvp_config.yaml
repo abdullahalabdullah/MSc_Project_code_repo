@@ -138,6 +138,15 @@ qwen_inference:
   # is unreliable and you want finer resume points; it does not affect generations.
   checkpoint_every: 200
 
+# Adapter merging (02_run_inference_qwen.py --merge). RO2 checkpoints are pushed
+# as adapter-only repos, which vLLM cannot load; with --merge the --model arg is
+# treated as a LoRA adapter and merged into THIS base (always the same base) into
+# a local dir under out_root (repo-root-relative, gitignored) before inference.
+# Output dirs stay namespaced by the ADAPTER id, not the merged dir.
+merge:
+  base: "Qwen/Qwen3-4B"
+  out_root: "merged-models"
+
 monitor:
   model: "gpt-5-mini"
   max_retries: 5
