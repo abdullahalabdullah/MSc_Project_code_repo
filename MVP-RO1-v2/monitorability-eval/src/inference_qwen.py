@@ -141,7 +141,7 @@ def parse_answer_qwen(raw_output: str) -> str | None:
 # Main inference function
 # ---------------------------------------------------------------------------
 
-def load_qwen_model(model_cfg: dict, max_model_len: int = 24576, gpu_memory_utilization: float = 0.90):
+def load_qwen_model(model_cfg: dict, max_model_len: int = 24576, gpu_memory_utilization: float = 0.95):
     """Load tokenizer and vLLM engine for a Qwen3 model. Call once; reuse across datasets.
 
     max_model_len: hard cap on prompt_tokens + output_tokens per sequence. Set to
@@ -150,8 +150,9 @@ def load_qwen_model(model_cfg: dict, max_model_len: int = 24576, gpu_memory_util
         KV-cache concurrency from ~8x (native 40960 limit) to ~14x on a 48GB GPU.
         Do NOT reduce below 16384 + observed_max_prompt_len or outputs will be silently
         truncated (finish_reason="length"), which would be a confound.
-    gpu_memory_utilization: fraction of VRAM given to vLLM. 0.90 is safe for a dedicated
-        inference pod with no other GPU workloads.
+    gpu_memory_utilization: fraction of VRAM given to vLLM. 0.95 is safe for a dedicated
+        inference pod with no other GPU workloads; the headroom above the weights goes
+        to KV cache, so this directly raises how many sequences decode concurrently.
 
     Prefix caching is enabled: every prompt shares the identical system-prompt prefix
     (and, within an instance, the hinted/unhinted prompts share a long common prefix),

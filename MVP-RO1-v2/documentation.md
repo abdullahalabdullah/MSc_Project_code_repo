@@ -41,8 +41,9 @@ local model dir — **required**). They differ in how datasets/hints are passed:
 - **`run_inference.sh`** uses **required `--dataset` and `--hint` flags**. Every
   token after `--dataset` (until the next flag) is a dataset, and likewise for
   `--hint`; tokens are space- and/or comma-separated (`mmlu_pro lexam` ==
-  `mmlu_pro,lexam`), and `ALL` selects the whole registry. The two flags may
-  appear in either order.
+  `mmlu_pro,lexam`), and `ALL` selects the whole registry. An optional
+  `--N <int>` flag sets N (samples per arm per instance, positive integer).
+  The flags may appear in any order.
 - **`run_monitor_and_results.sh`** takes the dataset and hint **positionally**:
   a key, a comma-separated subset (e.g. `mmlu_pro,lexam`, no spaces), or `ALL`.
 
@@ -67,7 +68,8 @@ base) into a local dir and runs inference on that; output dirs stay namespaced
 by the **adapter** id, so `run_monitor_and_results.sh` takes the same
 `<model_id>` unchanged. Optional env knobs for
 `run_inference.sh`: `N_EXAMPLES=50` (examples/dataset), `N_SAMPLES=8`
-(samples/arm), `FORCE_PREPARE=true` (rebuild indexes). Both scripts are
+(samples/arm; the `--N` flag takes precedence over the env var),
+`FORCE_PREPARE=true` (rebuild indexes). Both scripts are
 fail-soft, resume from checkpoints, commit+push progress, and log to `logs/`
 (gitignored).
 

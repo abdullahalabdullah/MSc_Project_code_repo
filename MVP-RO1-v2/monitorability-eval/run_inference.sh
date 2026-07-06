@@ -5,7 +5,7 @@
 # results phase runs separately afterwards: see run_monitor_and_results.sh.
 #
 # Usage:
-#   bash monitorability-eval/run_inference.sh <model_id> --dataset <d1 [d2 ...]|ALL> --hint <h1 [h2 ...]|ALL> [--merge]
+#   bash monitorability-eval/run_inference.sh <model_id> --dataset <d1 [d2 ...]|ALL> --hint <h1 [h2 ...]|ALL> [--N <int>] [--merge]
 #
 #   model_id   HF model ID (e.g. Qwen/Qwen3-4B) or a local model dir. FIRST arg.
 #              All output dirs are namespaced by its folder-safe name ('/' -> '_').
@@ -21,21 +21,28 @@
 #   --hint     REQUIRED. One or more hint types (professor, visual_pattern,
 #              metadata, wrong_few_shot, grader_hacking, unethical); same
 #              space/comma rules. ALL selects every type.
-#   (--dataset and --hint may appear in either order.)
+#   --N        OPTIONAL. N — samples per arm per instance (positive integer).
+#              Overrides config qwen_inference.n_samples and the N_SAMPLES env
+#              var. Example: --N 8
+#   (--dataset, --hint, and --N may appear in any order.)
 #
 # Examples:
 #   bash monitorability-eval/run_inference.sh Qwen/Qwen3-4B --dataset ALL --hint professor
 #   bash monitorability-eval/run_inference.sh Qwen/Qwen3-4B --dataset mmlu_pro lexam --hint professor metadata
 #   bash monitorability-eval/run_inference.sh Qwen/Qwen3-4B --dataset mmlu_pro,lexam --hint ALL
+#   bash monitorability-eval/run_inference.sh Qwen/Qwen3-4B --dataset ALL --hint ALL --N 8
 #
 # Optional env knobs:
 #   N_EXAMPLES=50        override each dataset's config n_examples budget
-#   N_SAMPLES=8          override config qwen_inference.n_samples (N per arm)
+#   N_SAMPLES=8          override config qwen_inference.n_samples (N per arm);
+#                        the --N flag takes precedence over this
 #   FORCE_PREPARE=true   regenerate dataset indexes (implied when N_EXAMPLES is set)
 #
 # Fail-soft: a failing step is logged as FAIL and the run continues (no set -e).
-# Progress is committed + pushed after each phase so a crash/spot reclaim never
-# loses results. Output is mirrored to logs/ (gitignored).
+# Progress is committed + pushed after each phase, and DURING inference each
+# dataset's outputs are auto-committed + pushed as soon as that dataset finishes
+# (background watcher on progress.json) — so a crash/spot reclaim loses at most
+# the dataset currently generating. Output is mirrored to logs/ (gitignored).
 
 set -uo pipefail
 
@@ -43,8 +50,9 @@ set -uo pipefail
 # config/, outputs-and-results/, and logs/ resolve as repo-root-relative paths.
 cd "$(dirname "$0")/.."
 
-USAGE="usage: bash monitorability-eval/run_inference.sh <model_id> --dataset <d1 [d2 ...]|ALL> --hint <h1 [h2 ...]|ALL> [--merge]
+USAGE="usage: bash monitorability-eval/run_inference.sh <model_id> --dataset <d1 [d2 ...]|ALL> --hint <h1 [h2 ...]|ALL> [--N <int>] [--merge]
        datasets/hints are space- and/or comma-separated, e.g. --dataset mmlu_pro,lexam --hint professor metadata
+       --N <int>: samples per arm per instance (positive integer; overrides config + N_SAMPLES env var)
        --merge: model_id is a LoRA adapter repo — merge into the config merge.base before inference"
 
 # First positional is the model id; --dataset / --hint follow (either order).
@@ -56,12 +64,17 @@ shift
 
 # Collect every token after --dataset into DATASET_ARGS and after --hint into
 # HINT_ARGS, until the next flag. Tokens may themselves be comma-separated.
-DATASET_ARGS=(); HINT_ARGS=(); MERGE=false
+DATASET_ARGS=(); HINT_ARGS=(); MERGE=false; N_SAMPLES_CLI=""
 saw_dataset=false; saw_hint=false; mode=""
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --dataset|--datasets)        mode="dataset"; saw_dataset=true ;;
         --hint|--hints|--hint-type)  mode="hint";    saw_hint=true ;;
+        --N)
+            if [[ $# -lt 2 || ! "$2" =~ ^[1-9][0-9]*$ ]]; then
+                echo "ERROR: --N requires a positive integer (got '${2:-}')."; echo "$USAGE"; exit 1
+            fi
+            N_SAMPLES_CLI="$2"; shift ;;
         --merge)                     MERGE=true ;;
         --*) echo "ERROR: unknown flag '$1'."; echo "$USAGE"; exit 1 ;;
         *)
@@ -115,8 +128,10 @@ else
 fi
 
 # --- Optional knobs -> CLI flags ----------------------------------------------
+# Precedence for N: --N flag > N_SAMPLES env var > config default.
+# (Line below still passes --n-samples: that's the 02 python script's flag name.)
 N_EXAMPLES="${N_EXAMPLES:-}"
-N_SAMPLES="${N_SAMPLES:-}"
+N_SAMPLES="${N_SAMPLES_CLI:-${N_SAMPLES:-}}"
 FORCE_PREPARE="${FORCE_PREPARE:-false}"
 
 PREP_FLAGS=""
@@ -164,6 +179,54 @@ commit_push() {
     run git push
 }
 
+# --- Per-dataset auto-push (phase 2) ---------------------------------------------
+# 02 runs ALL datasets in one python process (model loads once), so bash can't
+# commit between datasets directly. Instead a background watcher polls each
+# dataset's progress.json and commits + pushes THAT dataset's output dir as soon
+# as all its instances are done — a crash/spot reclaim then loses at most the
+# dataset currently generating. The watcher stops via a stop-file (never killed
+# mid-git, so no stale .git/index.lock is left behind); the phase-level
+# commit_push after 02 stays as the catch-all for anything it missed.
+
+_dataset_complete() {  # $1 = outputs dir, $2 = dataset key -> exit 0 iff all instances done
+    python3 - "$1/progress.json" "monitorability-eval/data/$2/dataset_index.json" 2>/dev/null <<'PYEOF'
+import json, sys
+try:
+    done = len(json.load(open(sys.argv[1])).get("completed_instance_ids", []))
+    total = len(json.load(open(sys.argv[2])))
+except Exception:
+    sys.exit(1)
+sys.exit(0 if total and done >= total else 1)
+PYEOF
+}
+
+autopush_watcher() {  # $1 = stop file, $2 = hint type, $3.. = datasets
+    local stop_file="$1" hint="$2"; shift 2
+    local pushed=" " ds dir
+    while [[ ! -f "$stop_file" ]]; do
+        for ds in "$@"; do
+            [[ "$pushed" == *" $ds "* ]] && continue
+            # Mirrors resolve_paths() in src/dataset.py: outputs/{model}/{ds}/{hint}.
+            dir="outputs-and-results/outputs/$MODEL_NAME/$ds/$hint"
+            [[ -f "$dir/progress.json" ]] || continue
+            _dataset_complete "$dir" "$ds" || continue
+            echo "[auto-push] $ds complete — committing + pushing its outputs"
+            git add "$dir"
+            if git diff --cached --quiet; then
+                echo "[auto-push] $ds: nothing new to commit"
+                pushed+="$ds "
+            elif git commit -q -m "$MODEL_NAME inference ($hint$NN_TAG) — $ds [auto-push]"; then
+                git push -q && echo "[auto-push] $ds pushed" \
+                            || echo "[auto-push] $ds committed; push failed (final push will retry)"
+                pushed+="$ds "
+            else
+                echo "[auto-push] $ds: commit failed — retrying next pass"
+            fi
+        done
+        sleep 20
+    done
+}
+
 # Mirror all output to a timestamped log file (logs/ is gitignored).
 mkdir -p logs
 LOGFILE="logs/inference_${MODEL_NAME}_$(date +%Y%m%d_%H%M%S).log"
@@ -204,7 +267,14 @@ commit_push "dataset indexes${NN_TAG} — ${DATASETS[*]}"
 for hint in "${HINT_TYPES[@]}"; do
     echo ""
     echo "########## PHASE 2: inference — $MODEL_ID ($hint) ##########"
+    AUTOPUSH_STOP="logs/.autopush_stop_$$"
+    rm -f "$AUTOPUSH_STOP"
+    autopush_watcher "$AUTOPUSH_STOP" "$hint" "${DATASETS[@]}" &
+    AUTOPUSH_PID=$!
     run python monitorability-eval/scripts/02_run_inference_qwen.py --model "$MODEL_ID" --datasets "${DATASETS[@]}" --hint-type "$hint" $INFER_FLAGS
+    touch "$AUTOPUSH_STOP"
+    wait "$AUTOPUSH_PID" 2>/dev/null
+    rm -f "$AUTOPUSH_STOP"
     commit_push "$MODEL_NAME inference ($hint$NN_TAG) — ${DATASETS[*]}"
 
     echo ""
