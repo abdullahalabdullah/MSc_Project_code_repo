@@ -22,6 +22,10 @@
 set -euo pipefail
 cd "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Git identity for commits made from a fresh pod (idempotent; no-op if git is absent).
+git config --global user.email "abd@example.com" 2>/dev/null || true
+git config --global user.name "abd" 2>/dev/null || true
+
 # ── Config (override via env) ───────────────────────────────────────────────
 MODEL="${MODEL:-Qwen/Qwen3-4B}"
 EPOCHS="${EPOCHS:-3}"

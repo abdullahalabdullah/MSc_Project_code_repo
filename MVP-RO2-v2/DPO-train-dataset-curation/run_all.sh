@@ -26,6 +26,13 @@ set -euo pipefail
 cd "$(dirname "$0")"
 
 PY="${PY:-python}"
+# Stage output goes through a tee pipe (see below), which makes Python block-buffer its
+# prints — progress lines could sit invisible for minutes. Force unbuffered stdout.
+export PYTHONUNBUFFERED=1
+
+# Git identity for commits made from a fresh pod (idempotent; no-op if git is absent).
+git config --global user.email "abd@example.com" 2>/dev/null || true
+git config --global user.name "abd" 2>/dev/null || true
 
 # ── Optional minimum-margin filter (filter-4) ───────────────────────────────
 # EDIT THIS VALUE to turn the filter on. Leave EMPTY ("") = filter not applied (default).

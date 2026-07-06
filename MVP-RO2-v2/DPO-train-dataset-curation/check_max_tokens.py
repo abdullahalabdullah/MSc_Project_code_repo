@@ -18,15 +18,29 @@ What it reports:
   - final-pair lengths vs the trainer's MAX_LENGTH: the longest completion that actually
     survives into the DPO dataset bounds what training needs to fit.
 
+The full report is printed AND saved to <run_dir>/max_tokens_check.txt (so it travels with
+the run folder when uploaded to HF). Disable the file with --no-save.
+
 Usage:
   python check_max_tokens.py outputs/run_<timestamp> \
-      [--max-tokens 8192] [--prompt-budget 4096] [--train-max-length 12288]
+      [--max-tokens 8192] [--prompt-budget 4096] [--train-max-length 12288] [--no-save]
 """
 import argparse
+import builtins
 import os
 
 import joblib
 import numpy as np
+
+# Tee every print() into a buffer so the whole report can also be written to a file.
+_LINES = []
+_real_print = builtins.print
+
+
+def print(*args, **kwargs):  # noqa: A001 — intentional shadow, tees to buffer + stdout
+    _real_print(*args, **kwargs)
+    sep = kwargs.get("sep", " ")
+    _LINES.append(sep.join(str(a) for a in args))
 
 
 def pctl(a, q):
@@ -48,6 +62,8 @@ def main():
                    help="prompt token budget used for max_model_len / MAX_PROMPT_LENGTH (default 4096)")
     p.add_argument("--train-max-length", type=int, default=12288,
                    help="the trainer's MAX_LENGTH (default 12288)")
+    p.add_argument("--no-save", action="store_true",
+                   help="print only; do not write <run_dir>/max_tokens_check.txt")
     args = p.parse_args()
 
     resp_path = os.path.join(args.run_dir, "02_responses.joblib")
@@ -120,6 +136,12 @@ def main():
             print("\n(final_pairs.joblib is empty — no trainer-side check)")
     else:
         print("\n(final_pairs.joblib not found — skipping the trainer MAX_LENGTH check)")
+
+    if not args.no_save:
+        out_path = os.path.join(args.run_dir, "max_tokens_check.txt")
+        with open(out_path, "w") as f:
+            f.write("\n".join(_LINES) + "\n")
+        _real_print(f"\nSaved report -> {out_path}")
 
 
 if __name__ == "__main__":
