@@ -40,6 +40,8 @@ set `SAMPLE=<int>` for a smaller seeded pilot. Writes a fresh
 
 - **`dpo_dataset/`** — the handoff: a HF `DatasetDict({train,valid})` with columns
   `prompt` / `chosen` / `rejected`. This is what training consumes.
+- **`run_all.log`** — the run's complete console output (all stages, stdout+stderr),
+  appended live, so the log survives closed terminals and ships with the run folder.
 
 Useful knobs (env vars, all optional):
 

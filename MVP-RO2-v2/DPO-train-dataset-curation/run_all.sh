@@ -41,6 +41,13 @@ if [ -z "${RUN_OUTPUT_DIR:-}" ]; then
 fi
 export RUN_OUTPUT_DIR
 mkdir -p "$RUN_OUTPUT_DIR"
+
+# Mirror ALL stage output (stdout+stderr) into the run folder, so the full console log
+# survives closed terminals / dead SSH sessions — and travels with the run dir when it
+# is uploaded to HF. Appends, so a resumed/re-run stage extends the same log.
+exec > >(tee -a "$RUN_OUTPUT_DIR/run_all.log") 2>&1
+echo "== Run started: $(date '+%Y-%m-%d %H:%M:%S') (log: $RUN_OUTPUT_DIR/run_all.log) =="
+
 echo "== Output folder for this run: $RUN_OUTPUT_DIR =="
 echo "== Prompt selection: SAMPLE=${SAMPLE:-ALL} =="
 echo "== Seed (all stages): SEED=${SEED:-0} =="

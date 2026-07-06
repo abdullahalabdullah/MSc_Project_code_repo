@@ -82,7 +82,9 @@ setup on the pod. On a pod, uncomment `HF_MODELS_CACHE_DIR=/workspace/hf_cache` 
 
 Each `./run_all.sh` writes to a **new** `outputs/run_<timestamp>/` folder (all stages share it
 via the exported `RUN_OUTPUT_DIR`), so a new run never overrides an old one. Pin a folder with
-`RUN_OUTPUT_DIR=outputs/my_run ./run_all.sh`.
+`RUN_OUTPUT_DIR=outputs/my_run ./run_all.sh`. The full console output (all stages,
+stdout+stderr) is also appended to `<run folder>/run_all.log`, so everything is reviewable
+after the terminal is gone.
 
 The Beaver ranker sanity check (`sanity_beaver.py`) is a separate, optional add-on — not run by
 `run_all.sh`. Use `run_pilot_and_sanity.sh` to run both together (see below).
