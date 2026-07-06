@@ -17,7 +17,7 @@ log to `logs/`.
 
 ```bash
 # Monitorability (GPU box, then locally):
-bash monitorability-eval/run_inference.sh Qwen/Qwen3-4B ALL professor
+bash monitorability-eval/run_inference.sh Qwen/Qwen3-4B --dataset ALL --hint professor
 export OPENAI_API_KEY=sk-...
 bash monitorability-eval/run_monitor_and_results.sh Qwen/Qwen3-4B ALL professor
 
@@ -35,18 +35,24 @@ bash harmlessness-eval/run_harmlessness.sh Qwen/Qwen3-4B
 
 ## Quick start
 
-The pipeline is two commands. Both take the same three arguments: `<model_id>`
-(an HF model ID or local model dir — **required**), a dataset key / a
-comma-separated subset (e.g. `mmlu_pro,lexam`, no spaces) / `ALL`, and a
-hint type or `ALL`.
+The pipeline is two commands. Both take `<model_id>` first (an HF model ID or
+local model dir — **required**). They differ in how datasets/hints are passed:
+
+- **`run_inference.sh`** uses **required `--dataset` and `--hint` flags**. Every
+  token after `--dataset` (until the next flag) is a dataset, and likewise for
+  `--hint`; tokens are space- and/or comma-separated (`mmlu_pro lexam` ==
+  `mmlu_pro,lexam`), and `ALL` selects the whole registry. The two flags may
+  appear in either order.
+- **`run_monitor_and_results.sh`** takes the dataset and hint **positionally**:
+  a key, a comma-separated subset (e.g. `mmlu_pro,lexam`, no spaces), or `ALL`.
 
 ```bash
 # 1) GPU box — prepare data + inference + CoT-length report:
-bash monitorability-eval/run_inference.sh Qwen/Qwen3-4B ALL professor
+bash monitorability-eval/run_inference.sh Qwen/Qwen3-4B --dataset mmlu_pro lexam --hint professor
 
 # 2) Locally, after pulling the inference outputs — monitor + all results:
 export OPENAI_API_KEY=sk-...
-bash monitorability-eval/run_monitor_and_results.sh Qwen/Qwen3-4B ALL professor
+bash monitorability-eval/run_monitor_and_results.sh Qwen/Qwen3-4B mmlu_pro,lexam professor
 ```
 
 Datasets: `mmlu_pro, gpqa_diamond, wmdp, codemmlu, lsat_ar, lsat_lr, medxpertqa, lexam`

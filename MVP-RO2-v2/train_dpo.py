@@ -329,6 +329,15 @@ def main(script_args, training_args, model_config):
     stepwise_eval_callback.trainer = trainer
     trainer.train()
 
+    # Dump the trainer's FULL structured log history — every logging-step training loss +
+    # learning rate + grad norm, and every eval point — as one JSON. This is the complete,
+    # W&B-independent record for offline loss/LR/eval curves (eval_metrics.jsonl is the
+    # eval-only subset; logs/train.log is the same data but unstructured text).
+    log_history_path = os.path.join(training_args.output_dir, "train_log_history.json")
+    with open(log_history_path, "w", encoding="utf-8") as f:
+        json.dump(trainer.state.log_history, f, indent=2)
+    print(f"Full training log history -> {log_history_path}")
+
     # Get the best checkpoint and metrics
     best_step = best_checkpoint_callback.get_best_checkpoint()
     best_metrics = best_checkpoint_callback.get_best_metrics()

@@ -89,6 +89,10 @@ with `step`, `epoch`, and all DPO eval metrics (`eval_loss`, `eval_rewards/accur
 `eval_rewards/margins`, `eval_logps/*`, …). Plain JSONL for easy plotting of the training curves:
 `pandas.read_json("eval_metrics.jsonl", lines=True)`.
 
+`OUTPUT_DIR/train_log_history.json` is the **complete** structured record (every logging-step
+training loss / LR / grad-norm plus every eval point) for offline curves without W&B;
+`eval_metrics.jsonl` is the eval-only subset.
+
 These are training diagnostics for checkpoint selection and optimisation health — **not** a
 behavioural evaluation. Actual safety + monitorability evaluation is done **separately, offline,
 on the pushed checkpoints** (like the reference repo `PedroMLF/Reward-Hacking-in-Explanations`,

@@ -6,12 +6,13 @@
 #
 # Usage:
 #   export OPENAI_API_KEY=sk-...
-#   bash monitorability-eval/run_monitor_and_results.sh <model_id> <dataset|d1,d2|ALL> <hint_type|ALL>
+#   bash monitorability-eval/run_monitor_and_results.sh <model_id> <dataset|d1,d2|ALL> <hint_type|h1,h2|ALL>
 #
 #   model_id   the SAME model ID used with run_inference.sh (resolves the same dirs).
 #   dataset    a dataset key from config/mvp_config.yaml, a comma-separated subset
 #              (e.g. mmlu_pro,lexam), or ALL for every key.
-#   hint_type  a hint type, or ALL for every type.
+#   hint_type  a hint type, a comma-separated subset (e.g. professor,metadata),
+#              or ALL for every type.
 #
 # Examples:
 #   bash monitorability-eval/run_monitor_and_results.sh Qwen/Qwen3-4B ALL professor
@@ -27,7 +28,7 @@ set -uo pipefail
 # config/, outputs-and-results/, and logs/ resolve as repo-root-relative paths.
 cd "$(dirname "$0")/.."
 
-USAGE="usage: bash monitorability-eval/run_monitor_and_results.sh <model_id> <dataset|d1,d2|ALL> <hint_type|ALL>"
+USAGE="usage: bash monitorability-eval/run_monitor_and_results.sh <model_id> <dataset|d1,d2|ALL> <hint_type|h1,h2|ALL>"
 MODEL_ID="${1:?$USAGE}"
 DATASET_ARG="${2:?$USAGE}"
 HINT_ARG="${3:?$USAGE}"
@@ -54,11 +55,15 @@ fi
 
 if [[ "$HINT_ARG" == "ALL" ]]; then
     HINT_TYPES=("${ALL_HINTS[@]}")
-elif [[ " ${ALL_HINTS[*]} " == *" $HINT_ARG "* ]]; then
-    HINT_TYPES=("$HINT_ARG")
 else
-    echo "ERROR: unknown hint type '$HINT_ARG'. Valid: ${ALL_HINTS[*]} (or ALL)."
-    exit 1
+    # A single hint type or a comma-separated subset, e.g. professor,metadata.
+    IFS=',' read -r -a HINT_TYPES <<< "$HINT_ARG"
+    for hint in "${HINT_TYPES[@]}"; do
+        if [[ " ${ALL_HINTS[*]} " != *" $hint "* ]]; then
+            echo "ERROR: unknown hint type '$hint'. Valid: ${ALL_HINTS[*]} (or ALL, or a comma-separated subset)."
+            exit 1
+        fi
+    done
 fi
 
 # --- Preflight: API key ---------------------------------------------------------
