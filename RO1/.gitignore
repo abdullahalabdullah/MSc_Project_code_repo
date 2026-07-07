@@ -1,0 +1,34 @@
+# Runtime artifacts — large / regeneratable
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Run logs (written by run_inference.sh / run_monitor_and_results.sh)
+logs/
+
+# Locally merged base+adapter models (02_run_inference_qwen.py --merge)
+merged-models/
+
+# Environment
+.env
+*.env
+
+# Secrets — HuggingFace token (read from env var first, this file as fallback)
+.hf_token
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
