@@ -11,9 +11,9 @@ Usage:
     python harmlessness-eval/scripts/03_run_wildguard.py --model Qwen/Qwen3-4B
 
 Input:
-    outputs-and-results/harmlessness/responses/{model}/responses.jsonl
+    outputs-and-results/harmlessness-results/responses/{model}/responses.jsonl
 Output:
-    outputs-and-results/harmlessness/wildguard/{model}/classifications.jsonl
+    outputs-and-results/harmlessness-results/wildguard/{model}/classifications.jsonl
 """
 
 import argparse

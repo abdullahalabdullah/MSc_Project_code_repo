@@ -34,7 +34,7 @@ MODEL_NAME="${MODEL_ID//\//_}"
 SCRIPTS="harmlessness-eval/scripts"
 
 # --- Preflight: phase-2 responses must already exist -------------------------
-RESPONSES="outputs-and-results/harmlessness/responses/${MODEL_NAME}/responses.jsonl"
+RESPONSES="outputs-and-results/harmlessness-results/responses/${MODEL_NAME}/responses.jsonl"
 if [[ ! -f "$RESPONSES" ]]; then
     echo "ERROR: $RESPONSES not found."
     echo "Nothing to resume from — run harmlessness-eval/run_harmlessness.sh first."

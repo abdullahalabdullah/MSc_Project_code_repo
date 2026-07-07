@@ -12,7 +12,14 @@ hf_token: "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"
 # The eval budget is the GLOBAL `n_examples` below (one number for all datasets);
 # datasets with fewer eligible items use all of them. Override per run with
 # `01_prepare_dataset.py --n-examples`.
-n_examples: 50
+# 200 = the main-run test-split budget (power analysis, notes/2026-07-07):
+# gpqa_diamond (198 total) uses its whole pool.
+n_examples: 200
+# Datasets NEVER given an eval split (--data eval): their pools are too small
+# to hold a disjoint eval set on top of the n=200 test split (gpqa_diamond has
+# 198 questions total, lsat_ar ~230). Enforced by 01_prepare_dataset.py and the
+# two driver scripts.
+eval_exclude_datasets: [gpqa_diamond, lsat_ar]
 datasets:
   # --- Academic QA ---------------------------------------------------------
   # Harder MMLU redesign: reasoning-heavy, up to 10 options (A–J). No filter;
@@ -125,18 +132,19 @@ hint:
 # Thinking is always ON. max_new_tokens is large because the <think> trace is
 # generated inline and 2048 truncates it heavily.
 qwen_inference:
-  n_samples: 4
+  # 8 = the main-run design (N samples/arm; power analysis, notes/2026-07-07).
+  n_samples: 8
   temperature: 0.6
   top_p: 0.95
   top_k: 20
   max_new_tokens: 16384
   # Instances per checkpoint. The whole checkpoint (checkpoint_every × n_samples ×
   # 2 arms requests) is sent to vLLM in ONE generate call, so this also sets the
-  # batch handed to the scheduler. 200 ≥ every per-dataset budget, so each dataset
-  # runs as a single fully-saturated batch. Resume granularity is one checkpoint:
-  # a mid-dataset crash re-runs that dataset (cheap on a 1.7B). Lower it if a run
-  # is unreliable and you want finer resume points; it does not affect generations.
-  checkpoint_every: 200
+  # batch handed to the scheduler. At n=200/N=8, 100 = two checkpoints per
+  # dataset (100 × 8 × 2 = 1600 requests per generate call — still a saturated
+  # batch), so a mid-dataset crash/spot reclaim loses at most half a dataset.
+  # Lower it for finer resume points; it does not affect generations.
+  checkpoint_every: 100
 
 # Adapter merging (02_run_inference_qwen.py --merge). RO2 checkpoints are pushed
 # as adapter-only repos, which vLLM cannot load; with --merge the --model arg is
@@ -166,9 +174,9 @@ paths:
   # repo-root outputs-and-results/. resolve_paths() joins
   # root / <these> / {model} / {dataset} / {hint}.
   data_dir: "monitorability-eval/data"
-  outputs_dir: "outputs-and-results/outputs"
+  outputs_dir: "outputs-and-results/inference-outputs"
   monitor_outputs_dir: "outputs-and-results/monitor_outputs"
-  analysis_dir: "outputs-and-results/analysis"
+  analysis_dir: "outputs-and-results/monitorability-results"
   plots_dir: "outputs-and-results/plots"
 
 # ===========================================================================
@@ -200,8 +208,8 @@ harmlessness:
                                   # truncated to fit (see src/wildguard.py classify())
   paths:
     # Relative to the REPO ROOT. Prepared prompts live inside harmlessness-eval/;
-    # results are shared under outputs-and-results/harmlessness/.
+    # results are shared under outputs-and-results/harmlessness-results/.
     data_dir: "harmlessness-eval/data"
-    responses_dir: "outputs-and-results/harmlessness/responses"
-    wildguard_dir: "outputs-and-results/harmlessness/wildguard"
-    analysis_dir: "outputs-and-results/harmlessness/analysis"
+    responses_dir: "outputs-and-results/harmlessness-results/responses"
+    wildguard_dir: "outputs-and-results/harmlessness-results/wildguard"
+    analysis_dir: "outputs-and-results/harmlessness-results/analysis"

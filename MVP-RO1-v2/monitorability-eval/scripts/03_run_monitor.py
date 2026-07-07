@@ -47,7 +47,7 @@ from openai import OpenAI
 from tqdm import tqdm
 from src.monitor import classify
 from src.gmean2_metrics import load_jsonl
-from src.dataset import model_dir_name, resolve_paths
+from src.dataset import SPLITS, model_dir_name, resolve_paths
 from src.hints import HINT_TYPES
 
 NUM_WORKERS = 16
@@ -64,6 +64,9 @@ def main():
                         help="Dataset key (default: mmlu_pro). Namespaces I/O paths.")
     parser.add_argument("--hint-type", default=None, choices=HINT_TYPES,
                         help="Hint type to monitor (default: config hint.default). "
+                             "Must match the inference run. Namespaces I/O paths.")
+    parser.add_argument("--data", default="test", choices=SPLITS,
+                        help="Data split to monitor: test (default) or eval. "
                              "Must match the inference run. Namespaces I/O paths.")
     args = parser.parse_args()
 
@@ -84,7 +87,7 @@ def main():
     mon_cfg = config["monitor"]
     model_name = model_dir_name(args.model)
 
-    paths = resolve_paths(root, config, args.dataset, model_name, hint_type)
+    paths = resolve_paths(root, config, args.dataset, model_name, hint_type, split=args.data)
     out_dir = paths["outputs_dir"]
     hinted_path = out_dir / "hinted.jsonl"
     unhinted_path = out_dir / "unhinted.jsonl"

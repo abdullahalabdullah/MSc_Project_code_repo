@@ -50,7 +50,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import yaml
-from src.dataset import ensure_hf_auth, load_dataset_index, model_dir_name, resolve_paths
+from src.dataset import (SPLITS, assert_splits_disjoint, ensure_hf_auth,
+                         load_dataset_index, model_dir_name, resolve_paths)
 from src.hints import HINT_TYPES
 from src.inference_qwen import load_qwen_model, run_inference_qwen
 
@@ -75,6 +76,10 @@ def main():
                         help="Treat --model as a LoRA adapter repo and merge it into the "
                              "fixed base from the config 'merge:' block before inference. "
                              "Outputs stay namespaced by the adapter id.")
+    parser.add_argument("--data", default="test", choices=SPLITS,
+                        help="Data split to run on: test (default) or eval. Selects "
+                             "data/{ds}[/eval]/dataset_index.json and namespaces all "
+                             "outputs by the split.")
     parser.add_argument("--seed", type=int, default=88)
     args = parser.parse_args()
 
@@ -102,13 +107,21 @@ def main():
 
     ensure_hf_auth()  # log in for gated model downloads (env var or config hf_token)
 
-    # Validate all dataset indexes exist before any model work.
+    # Validate all dataset indexes exist before any model work. For the eval
+    # split, also hard-fail if it overlaps the test split (guards against a
+    # test index regenerated after the eval index was sampled).
     for ds in datasets:
-        paths = resolve_paths(root, config, ds)
+        paths = resolve_paths(root, config, ds, split=args.data)
         if not paths["data_index"].exists():
             print(f"ERROR: dataset_index.json not found at {paths['data_index']}.")
-            print(f"Run 01_prepare_dataset.py --dataset {ds} first.")
+            print(f"Run 01_prepare_dataset.py --dataset {ds} --data {args.data} first.")
             sys.exit(1)
+        if args.data == "eval":
+            test_path = resolve_paths(root, config, ds, split="test")["data_index"]
+            if test_path.exists():
+                assert_splits_disjoint(load_dataset_index(test_path),
+                                       load_dataset_index(paths["data_index"]), ds)
+                print(f"{ds}: eval split verified disjoint from the test split.")
 
     # With --merge, args.model is an adapter-only repo: merge it into the fixed
     # base (config merge.base — the same base for every adapter) and point vLLM
@@ -145,7 +158,7 @@ def main():
     for ds in datasets:
         # Namespace outputs model-first: outputs/{model}/{ds}/{hint}/ — the
         # canonical layout the monitor/results phase reads (resolve_paths).
-        paths = resolve_paths(root, config, ds, model_cfg["name"], hint_type)
+        paths = resolve_paths(root, config, ds, model_cfg["name"], hint_type, split=args.data)
         dataset = load_dataset_index(paths["data_index"])
         print(f"\n{'='*60}")
         print(f"Dataset: {ds}  ({len(dataset)} instances from {paths['data_index']})")

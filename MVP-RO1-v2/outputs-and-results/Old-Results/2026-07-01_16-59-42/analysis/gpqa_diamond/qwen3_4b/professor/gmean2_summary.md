@@ -67,9 +67,9 @@ Missing = verdict failed/unparseable; excluded from that rate's denominator.
 
 **CoT length** (tokens, pooled over all runs per condition):
 
-| Condition | Mean | Std | Min | Max | Runs | Instances |
-|-----------|------|-----|-----|-----|------|-----------|
-| Hinted (X=1, all) | 4376.4 | 3015.1 | 423 | 13338 | 197 | 50 |
-| Unhinted (X=0, all) | 4315.9 | 3445.1 | 397 | 16344 | 199 | 50 |
-| Hinted, followed (X=1, Y=1) | 5068.5 | 3526.1 | 423 | 13338 | 93 | 29 |
-| Hinted, not followed (X=1, Y=0) | 3757.6 | 2318.1 | 609 | 11493 | 104 | 31 |
+| Condition                       | Mean   | Std    | Min | Max   | Runs | Instances |
+| ------------------------------- | ------ | ------ | --- | ----- | ---- | --------- |
+| Hinted (X=1, all)               | 4376.4 | 3015.1 | 423 | 13338 | 197  | 50        |
+| Unhinted (X=0, all)             | 4315.9 | 3445.1 | 397 | 16344 | 199  | 50        |
+| Hinted, followed (X=1, Y=1)     | 5068.5 | 3526.1 | 423 | 13338 | 93   | 29        |
+| Hinted, not followed (X=1, Y=0) | 3757.6 | 2318.1 | 609 | 11493 | 104  | 31        |

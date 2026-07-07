@@ -41,8 +41,9 @@ flags** with the same shape on both scripts: every token after `--dataset`
 (until the next flag) is a dataset, and likewise for `--hint`; tokens are
 space- and/or comma-separated (`mmlu_pro lexam` == `mmlu_pro,lexam`), and `ALL`
 selects the whole registry. The flags may appear in any order.
-`run_inference.sh` additionally accepts an optional `--N <int>` flag (samples
-per arm per instance, positive integer) and `--merge` (see below).
+Both scripts accept an optional `--data test|eval` flag (default `test`; see
+**Data splits**). `run_inference.sh` additionally accepts an optional `--N <int>`
+flag (samples per arm per instance, positive integer) and `--merge` (see below).
 
 ```bash
 # 1) GPU box — prepare data + inference + CoT-length report:
@@ -69,7 +70,7 @@ model's HF cache and the local merged dir are both **freed automatically**
 tradeoff so `--merge` doesn't need a large container disk; re-running
 `--merge` for the same adapter re-downloads/re-merges rather than reusing a
 cached copy. Optional env knobs for
-`run_inference.sh`: `N_EXAMPLES=50` (examples/dataset), `N_SAMPLES=8`
+`run_inference.sh`: `N_EXAMPLES=100` (examples/dataset), `N_SAMPLES=4`
 (samples/arm; the `--N` flag takes precedence over the env var),
 `FORCE_PREPARE=true` (rebuild indexes). Both scripts are
 fail-soft, resume from checkpoints, commit+push progress, and log to `logs/`
@@ -101,21 +102,23 @@ labels each response for hint-acknowledgement (Z).
 | Step | Script | In → Out |
 |------|--------|----------|
 | 1 | `01_prepare_dataset.py` | HF dataset → `data/{ds}/dataset_index.json` (idempotent) |
-| 2 | `02_run_inference_qwen.py` | dataset → `…/outputs/{model}/{ds}/{hint}/{hinted,unhinted}.jsonl` |
+| 2 | `02_run_inference_qwen.py` | dataset → `…/inference-outputs/{model}/{ds}/{hint}/{hinted,unhinted}.jsonl` |
 | 3 | `03_run_monitor.py` | inference → `…/monitor_outputs/{model}/{ds}/{hint}/monitor_results.jsonl` |
-| 4 | `04_compute_gmean2.py` | inference + monitor → `…/analysis/{model}/{ds}/{hint}/results_summary.json`, `results_per_instance.{csv,json}` |
+| 4 | `04_compute_gmean2.py` | inference + monitor → `…/monitorability-results/{model}/{ds}/{hint}/results_summary.json`, `results_per_instance.{csv,json}` |
 | 5 | `05_analyze_gmean2.py` | per-instance CSV → `…/plots/{model}/{ds}/{hint}/*.png` |
-| 6 | `06_export_excel.py` | inference + monitor → `…/analysis/{model}/{ds}/{hint}/qualitative_export.xlsx` |
-| 8 | `08_cot_token_analysis.py` | inference (all ds) → `…/analysis/{model}/{ds}/{hint}/cot_token_stats.json` |
+| 6 | `06_export_excel.py` | inference + monitor → `…/monitorability-results/{model}/{ds}/{hint}/qualitative_export.xlsx` |
+| 8 | `08_cot_token_analysis.py` | inference (all ds) → `…/monitorability-results/{model}/{ds}/{hint}/cot_token_stats.json` |
 | 9 | `09_generate_reports.py` | 04 + 08's JSON/CSV artifacts → all `.md` reports (see **Reports**) |
 
 Steps 2–6 and 8 take `--model` (an HF model ID or local model dir; `{model}` in the
 paths is its folder-safe name, `/` → `_`), plus a `--dataset` **and** a `--hint-type`
 flag; all three namespace the I/O paths, so a (model × dataset × hint-type)
-combination is an independent run. `--hint-type` defaults to `hint.default` in the
+combination is an independent run. Every step (1–9) also takes `--data test|eval`
+(default `test`; see **Data splits** — `eval` inserts an `eval/` path segment
+after the dataset key everywhere). `--hint-type` defaults to `hint.default` in the
 config when omitted. See **Hint types** below.
 Step 9 is the exception — it takes only `--model` and scans every completed
-(dataset × hint-type) run under `analysis/{model}/`, regenerating every report.
+(dataset × hint-type) run under `monitorability-results/{model}/`, regenerating every report.
 **All Markdown generation is isolated in step 9** (`monitorability-eval/src/reporting.py` +
 `monitorability-eval/scripts/09_generate_reports.py` + one driver line) and derives ONLY from the
 JSON/CSV artifacts of steps 4 + 8 — so every `.md` file can be deleted and
@@ -132,8 +135,9 @@ model, while outputs stay namespaced by the adapter id. Helpers:
 `monitorability-eval/scripts/merge_and_push.py` merges a LoRA/DPO adapter
 into an explicitly given base model (same `src/merge.py` core) and pushes the
 merged model to the Hub; `monitorability-eval/scripts/archive_results.sh` snapshots
-the result dirs into `outputs-and-results/Old-Results/{timestamp}/` and clears them
-for a fresh run.
+the result dirs (`monitorability-results/`, `inference-outputs/`, `monitor_outputs/`,
+`plots/`, and `harmlessness-results/`) into `outputs-and-results/Old-Results/{timestamp}/`
+and clears them for a fresh run.
 
 ---
 
@@ -174,9 +178,47 @@ python monitorability-eval/scripts/09_generate_reports.py   --model Qwen/Qwen3-4
 
 `--hint-type` must be consistent across steps 2–6/8 (it namespaces the paths). Omit
 it to use `hint.default`. Step 1 has no hint type — `dataset_index.json` (incl. the
-`hint_target`) is shared by every hint type.
+`hint_target`) is shared by every hint type. `--data` must likewise be consistent
+across all steps of a run (it also namespaces the paths).
 
 All steps **resume from checkpoints** — safe to re-run after an interruption.
+
+---
+
+## Data splits (`--data test|eval`)
+
+Every script and both drivers take `--data test|eval` (default: `test`).
+
+- **`test`** (default) — the main split used to compare base vs trained models.
+  Uses the original path layout (`data/{ds}/dataset_index.json`,
+  `outputs/{model}/{ds}/{hint}/`, …), so existing runs are all test-split runs.
+- **`eval`** — a second, **disjoint** split (e.g. for checkpoint selection
+  during training). Namespaced by an `eval/` segment after the dataset key
+  everywhere: `data/{ds}/eval/dataset_index.json`,
+  `…/{model}/{ds}/eval/{hint}/`, and step 9's roll-up reports under
+  `analysis/{model}/eval/`. The two splits can never overwrite each other.
+
+**Ordering: finalize the test split first (all top-ups done), then prepare eval.**
+`01 --data eval` requires the test index to exist; it samples from the pool
+**minus** the test split's questions (matched on source id and question text —
+disjoint by construction) and defaults to **half the test split's size**
+(override with `--n-examples`). Same seeded, stratified sampling as test.
+
+Guard: `02_run_inference_qwen.py --data eval` re-verifies eval-vs-test
+disjointness at run time and hard-fails on overlap (catches a test index
+regenerated *after* the eval index was sampled — regenerate eval with
+`01 --data eval --force` from the final test index if that happens).
+
+```bash
+# eval-split end-to-end (after the test split is final):
+python monitorability-eval/scripts/01_prepare_dataset.py --dataset wmdp --data eval   # defaults to len(test)//2
+bash monitorability-eval/run_inference.sh Qwen/Qwen3-4B --dataset wmdp --hint professor --N 8 --data eval
+bash monitorability-eval/run_monitor_and_results.sh Qwen/Qwen3-4B --dataset wmdp --hint professor --data eval
+```
+
+Note: pool-capped datasets constrain the split sizes — `n_test + n_eval` can't
+exceed the post-filter pool (gpqa_diamond 198 total; a test split using all of
+it leaves nothing for eval).
 
 ---
 
@@ -185,10 +227,11 @@ All steps **resume from checkpoints** — safe to re-run after an interruption.
 | Block | Purpose |
 |-------|---------|
 | `hf_token` | HF token (committed for zero-setup; env `HF_TOKEN` overrides). |
-| `n_examples` | **Global** eval budget — one number for all datasets (currently 50). Override per run with `01 --n-examples`. |
+| `n_examples` | **Global** eval budget — one number for all datasets (currently 200, the main-run test-split design; gpqa_diamond's 198-question pool uses all of it). Override per run with `01 --n-examples`. |
+| `eval_exclude_datasets` | Datasets with **no eval split** (`gpqa_diamond`, `lsat_ar` — pools too small for a disjoint eval set on top of the n=200 test split). `01 --data eval` errors on them; the drivers' `ALL` expansion skips them (explicitly requesting one is an error). |
 | `datasets` | Registry of all eval datasets (see the table below). Each: `random_seed: 88`, uniform sampling, **variable 3–10 options (A–J)**. |
 | `hint` | Hint registry: `default` (type used when `--hint-type` is omitted) + `types.<type>` wording. The hint always points at a *wrong* option (`hint_target`) and only appears in the hinted arm. See **Hint types**. |
-| `qwen_inference` | Sampling: `n_samples=4` (N, samples/arm — overridable per run with `02 --n-samples`, no fixed cap), `temperature 0.6`, `top_p 0.95`, `top_k 20`, `max_new_tokens 16384` (Qwen3 thinking-mode recipe; thinking always ON). `checkpoint_every=200` = instances per checkpoint **and** the batch handed to vLLM in one `generate` call (resume granularity; no effect on generations). |
+| `qwen_inference` | Sampling: `n_samples=8` (N, samples/arm, the main-run design — overridable per run with `02 --n-samples`, no fixed cap), `temperature 0.6`, `top_p 0.95`, `top_k 20`, `max_new_tokens 16384` (Qwen3 thinking-mode recipe; thinking always ON). `checkpoint_every=100` = instances per checkpoint **and** the batch handed to vLLM in one `generate` call (two checkpoints per n=200 dataset; resume granularity; no effect on generations). |
 | `merge` | Adapter merging for `02 --merge`: `base` (the fixed base model every adapter is merged into, currently `Qwen/Qwen3-4B`) and `out_root` (repo-root-relative dir for local merged models, default `merged-models/`, gitignored). |
 | `monitor` | Monitor LLM (`model`, e.g. `gpt-5-mini`) + retry/backoff/timeout. |
 | `gmean2` | `level2_te_threshold` (reported-only population gate). |
@@ -274,17 +317,20 @@ the monitor) and the wording is overridable per type in the config
 ```
 data/{ds}/dataset_index.json              # prepared eval input (NOT a result; shared by all models/hints)
 outputs-and-results/
-├── outputs/{model}/{ds}/{hint}/{hinted,unhinted}.jsonl   # one record per (instance, sample, arm)
+├── inference-outputs/{model}/{ds}/{hint}/{hinted,unhinted}.jsonl   # one record per (instance, sample, arm)
 ├── monitor_outputs/{model}/{ds}/{hint}/monitor_results.jsonl
-├── analysis/{model}/{ds}/{hint}/results_summary.{json,md}, results_per_instance.{csv,json},
+├── monitorability-results/{model}/{ds}/{hint}/results_summary.{json,md}, results_per_instance.{csv,json},
 │                                 cot_token_stats.json, qualitative_export.xlsx
-├── analysis/{model}/results_{overall,dataset_level,hint_type_level,aggregate}_summary.md   # roll-ups (step 9)
-├── analysis/{model}/cot_{overall,dataset_level,hint_type_level,aggregate}_summary.md       # CoT roll-ups (step 9)
+├── monitorability-results/{model}/results_{overall,dataset_level,hint_type_level,aggregate}_summary.md   # roll-ups (step 9)
+├── monitorability-results/{model}/cot_{overall,dataset_level,hint_type_level,aggregate}_summary.md       # CoT roll-ups (step 9)
 └── plots/{model}/{ds}/{hint}/*.png
 ```
 
 `{model}` is the folder-safe model ID (`/` → `_`); `{hint}` is the `--hint-type`.
-Each inference record also carries a `hint_type` field.
+Each inference record also carries a `hint_type` field. The layout above is the
+`test` split; `--data eval` inserts an `eval/` segment after `{ds}` in every
+path (and step 9's roll-ups move to `monitorability-results/{model}/eval/`) —
+see **Data splits**.
 
 ---
 
@@ -319,7 +365,7 @@ Acknowledged / Not acknowledged, hinted runs with a verdict) and the **opacity
 rate** (= covert ÷ all hint-following). So every number is directly comparable
 across files:
 
-| File (under `analysis/{model}/`) | Scope |
+| File (under `monitorability-results/{model}/`) | Scope |
 |---|---|
 | `{ds}/{hint}/results_summary.md` | one (dataset, hint) run — config header (model, sampling recipe, budgets, monitor model), results table + matrix first, then detail sections (g-mean² components, Level-1/Level-2 filtering, monitor coverage, CoT length) |
 | `results_overall_summary.md` | one section per (dataset × hint type) |
@@ -327,10 +373,28 @@ across files:
 | `results_hint_type_level_summary.md` | per hint type — instances pooled across datasets |
 | `results_aggregate_summary.md` | one section — pooled across everything |
 
+`results_overall_summary.md`, `results_dataset_level_summary.md`, and
+`results_hint_type_level_summary.md` each end with a `## Summary` roll-up
+table that puts every section's row side by side for quick scanning: one row
+per section (keyed by `Dataset` for the dataset-level file, `Hint type` for
+the hint-type-level file, `Dataset` + `Hint type` for the overall file),
+followed by the shared 8 result columns plus 4 confusion-matrix count/share
+columns — `Acknowledged & followed`, `Acknowledged & not followed`,
+`Not Acknowledged & followed`, `Not Acknowledged & not followed` — read off
+the same `confusion_matrix` counts as that section's matrix block.
+
 The CoT token-length reports mirror the same four scopes —
 `cot_{overall,dataset_level,hint_type_level,aggregate}_summary.md` — each
 section showing the 4-condition token table plus a bucket/truncation row (from
 step 8's `cot_token_stats.json`; use the truncation rate to set `max_new_tokens`).
+
+`cot_overall_summary.md`, `cot_dataset_level_summary.md`, and
+`cot_hint_type_level_summary.md` each end with a `## Summary` roll-up table:
+one row per section (keyed by `Dataset` for the dataset-level file, `Hint
+type` for the hint-type-level file, `Dataset` + `Hint type` for the overall
+file), followed by one `mean (std)` column per condition — `Hinted`,
+`Unhinted`, `Hinted & followed`, `Hinted & not followed` — read off the same
+`condition_stats` used by that section's condition table.
 
 Roll-ups **pool the per-instance rows / run-level token counts** across the
 averaged dimension (not means-of-means), sum the run-level matrix and bucket
@@ -416,7 +480,7 @@ and the Phase-3 line in `run_monitor_and_results.sh` — the metric computation
 
 > All `scripts/`, `src/`, and `data/` paths in this part are relative to
 > `harmlessness-eval/`. Results are written to the shared
-> `outputs-and-results/harmlessness/`.
+> `outputs-and-results/harmlessness-results/`.
 
 Measures **harmlessness** the Qwen3Guard way: prompt the target model with the
 `allenai/wildjailbreak` **eval** set (2000 adversarial *harmful* + 210
@@ -469,7 +533,7 @@ responses from scratch. Instead resume from WildGuard onward:
 bash harmlessness-eval/resume_from_wildguard.sh er-abd/harmless-dpo-qwen3-4B-pilot
 ```
 
-It requires `…/harmlessness/responses/{model}/responses.jsonl` to already
+It requires `…/harmlessness-results/responses/{model}/responses.jsonl` to already
 exist, then runs steps 3-5 (WildGuard classification, metrics, report) and
 commits + pushes, same fail-soft/logging conventions as `run_harmlessness.sh`.
 
@@ -478,10 +542,10 @@ commits + pushes, same fail-soft/logging conventions as `run_harmlessness.sh`.
 | Step | Script | In → Out |
 |------|--------|----------|
 | 1 | `01_prepare_wildjailbreak.py` | WildJailbreak eval → `data/wildjailbreak_eval/prompts.jsonl` (idempotent) |
-| 2 | `02_run_inference.py` | prompts → `…/harmlessness/responses/{model}/responses.jsonl` (GPU) |
-| 3 | `03_run_wildguard.py` | responses → `…/harmlessness/wildguard/{model}/classifications.jsonl` (GPU) |
-| 4 | `04_compute_metrics.py` | classifications → `…/harmlessness/analysis/{model}/metrics.json`, `per_prompt.csv` |
-| 5 | `05_generate_reports.py` | `metrics.json` → `…/harmlessness/analysis/{model}/harmlessness_summary.md` |
+| 2 | `02_run_inference.py` | prompts → `…/harmlessness-results/responses/{model}/responses.jsonl` (GPU) |
+| 3 | `03_run_wildguard.py` | responses → `…/harmlessness-results/wildguard/{model}/classifications.jsonl` (GPU) |
+| 4 | `04_compute_metrics.py` | classifications → `…/harmlessness-results/analysis/{model}/metrics.json`, `per_prompt.csv` |
+| 5 | `05_generate_reports.py` | `metrics.json` → `…/harmlessness-results/analysis/{model}/harmlessness_summary.md` |
 
 `…` = `outputs-and-results/`. Each script takes `--model <hf_id>` (steps 2–5);
 `{model}` is its folder-safe name. Step 1 has no model. **Markdown generation is
@@ -511,7 +575,7 @@ python harmlessness-eval/scripts/05_generate_reports.py --model Qwen/Qwen3-4B
 | `generation` | `enable_thinking: true`, `n_samples: 1`. Temperature/top_p/top_k/max_new_tokens are reused from the `qwen_inference` block so both evals generate identically. |
 | `classify_target` | `answer` (visible response after `</think>`, default) or `full` (whole generation). |
 | `classifier` | WildGuard `hf_id`, `max_new_tokens`, and `max_model_len` (vLLM context window — records whose (prompt, response) would exceed it are truncated to fit; see `src/wildguard.py`). |
-| `paths` | `data_dir` (`harmlessness-eval/data`) + the three shared result dirs under `outputs-and-results/harmlessness/`. |
+| `paths` | `data_dir` (`harmlessness-eval/data`) + the three shared result dirs under `outputs-and-results/harmlessness-results/`. |
 
 ## Source files (`harmlessness-eval/src/`)
 
@@ -545,7 +609,7 @@ python harmlessness-eval/scripts/05_generate_reports.py --model Qwen/Qwen3-4B
 
 ```
 harmlessness-eval/data/wildjailbreak_eval/prompts.jsonl   # prepared prompts (NOT a result)
-outputs-and-results/harmlessness/
+outputs-and-results/harmlessness-results/
 ├── responses/{model}/responses.jsonl          # one record per (prompt, sample): raw_output, thinking, answer, ...
 ├── wildguard/{model}/classifications.jsonl     # per response: prompt_harmful / refusal / response_harmful / wildguard_truncated
 └── analysis/{model}/metrics.json, per_prompt.csv, harmlessness_summary.md

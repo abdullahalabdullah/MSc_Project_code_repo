@@ -32,7 +32,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import yaml
-from src.dataset import model_dir_name
+from src.dataset import SPLITS, model_dir_name
 from src.hints import HINT_TYPES
 from src.reporting import (
     discover_runs,
@@ -52,6 +52,9 @@ def main():
     parser.add_argument("--model", required=True,
                         help="HF model ID used at inference (e.g. Qwen/Qwen3-4B).")
     parser.add_argument("--config", default="config/mvp_config.yaml")
+    parser.add_argument("--data", default="test", choices=SPLITS,
+                        help="Data split to report on: test (default) or eval. Eval "
+                             "roll-ups are written under analysis/{model}/eval/.")
     args = parser.parse_args()
 
     root = Path(__file__).resolve().parents[2]
@@ -60,12 +63,19 @@ def main():
 
     model_name = model_dir_name(args.model)
     model_root = root / config["paths"]["analysis_dir"] / model_name
+    # Roll-up .md files go next to the per-run dirs: analysis/{model}/ for the
+    # test split, analysis/{model}/eval/ for the eval split (no dataset is
+    # named "eval", so the two never collide).
+    summary_root = model_root if args.data == "test" else model_root / "eval"
     level2_threshold = config.get("gmean2", {}).get("level2_te_threshold", 0.05)
 
-    run_dirs = discover_runs(model_root, list(config.get("datasets", {})), HINT_TYPES)
+    run_dirs = discover_runs(model_root, list(config.get("datasets", {})), HINT_TYPES,
+                             split=args.data)
     if not run_dirs:
-        print(f"No results_summary.json files found under {model_root} — run 04_compute_gmean2.py first.")
+        print(f"No results_summary.json files found under {model_root} "
+              f"(split: {args.data}) — run 04_compute_gmean2.py first.")
         sys.exit(1)
+    summary_root.mkdir(parents=True, exist_ok=True)
 
     # {(dataset, hint): {"summary", "rows", "cot"}}, in registry order.
     runs = {}
@@ -86,30 +96,30 @@ def main():
     hf_id = next(iter(runs.values()))["summary"].get("hf_id", args.model)
 
     # --- Results roll-ups -----------------------------------------------------
-    path = model_root / "results_overall_summary.md"
+    path = summary_root / "results_overall_summary.md"
     write_results_overall_summary(runs, model_name, hf_id, path)
     print(f"  Written: {path}")
     for filename, level in [("results_dataset_level_summary.md", "dataset"),
                             ("results_hint_type_level_summary.md", "hint_type")]:
-        path = model_root / filename
+        path = summary_root / filename
         write_results_level_summary(runs, model_name, hf_id, path, level)
         print(f"  Written: {path}")
-    path = model_root / "results_aggregate_summary.md"
+    path = summary_root / "results_aggregate_summary.md"
     write_results_aggregate_summary(runs, model_name, hf_id, path)
     print(f"  Written: {path}")
 
     # --- CoT token-length roll-ups (need step 08's cot_token_stats.json) -------
     cot_runs = {key: run["cot"] for key, run in runs.items() if run["cot"] is not None}
     if cot_runs:
-        path = model_root / "cot_overall_summary.md"
+        path = summary_root / "cot_overall_summary.md"
         write_cot_overall_summary(cot_runs, model_name, hf_id, path)
         print(f"  Written: {path}")
         for filename, level in [("cot_dataset_level_summary.md", "dataset"),
                                 ("cot_hint_type_level_summary.md", "hint_type")]:
-            path = model_root / filename
+            path = summary_root / filename
             write_cot_level_summary(cot_runs, model_name, hf_id, path, level)
             print(f"  Written: {path}")
-        path = model_root / "cot_aggregate_summary.md"
+        path = summary_root / "cot_aggregate_summary.md"
         write_cot_aggregate_summary(cot_runs, model_name, hf_id, path)
         print(f"  Written: {path}")
     else:

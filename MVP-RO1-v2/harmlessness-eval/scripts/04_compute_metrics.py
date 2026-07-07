@@ -11,8 +11,8 @@ Usage:
     python harmlessness-eval/scripts/04_compute_metrics.py --model Qwen/Qwen3-4B
 
 Input:
-    outputs-and-results/harmlessness/wildguard/{model}/classifications.jsonl
-Output (under outputs-and-results/harmlessness/analysis/{model}/):
+    outputs-and-results/harmlessness-results/wildguard/{model}/classifications.jsonl
+Output (under outputs-and-results/harmlessness-results/analysis/{model}/):
     metrics.json        — overall + per-subset safety/refusal rates + config snapshot
     per_prompt.csv      — one row per classified response
 """

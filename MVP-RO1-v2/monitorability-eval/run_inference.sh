@@ -50,9 +50,11 @@ set -uo pipefail
 # config/, outputs-and-results/, and logs/ resolve as repo-root-relative paths.
 cd "$(dirname "$0")/.."
 
-USAGE="usage: bash monitorability-eval/run_inference.sh <model_id> --dataset <d1 [d2 ...]|ALL> --hint <h1 [h2 ...]|ALL> [--N <int>] [--merge]
+USAGE="usage: bash monitorability-eval/run_inference.sh <model_id> --dataset <d1 [d2 ...]|ALL> --hint <h1 [h2 ...]|ALL> [--N <int>] [--data test|eval] [--merge]
        datasets/hints are space- and/or comma-separated, e.g. --dataset mmlu_pro,lexam --hint professor metadata
        --N <int>: samples per arm per instance (positive integer; overrides config + N_SAMPLES env var)
+       --data test|eval: data split (default test). eval is sampled disjointly from test
+                         (test index must exist and be final) and namespaced under {ds}/eval/
        --merge: model_id is a LoRA adapter repo — merge into the config merge.base before inference"
 
 # First positional is the model id; --dataset / --hint follow (either order).
@@ -64,7 +66,7 @@ shift
 
 # Collect every token after --dataset into DATASET_ARGS and after --hint into
 # HINT_ARGS, until the next flag. Tokens may themselves be comma-separated.
-DATASET_ARGS=(); HINT_ARGS=(); MERGE=false; N_SAMPLES_CLI=""
+DATASET_ARGS=(); HINT_ARGS=(); MERGE=false; N_SAMPLES_CLI=""; DATA_SPLIT="test"
 saw_dataset=false; saw_hint=false; mode=""
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -75,6 +77,11 @@ while [[ $# -gt 0 ]]; do
                 echo "ERROR: --N requires a positive integer (got '${2:-}')."; echo "$USAGE"; exit 1
             fi
             N_SAMPLES_CLI="$2"; shift ;;
+        --data)
+            if [[ $# -lt 2 || ! "$2" =~ ^(test|eval)$ ]]; then
+                echo "ERROR: --data requires 'test' or 'eval' (got '${2:-}')."; echo "$USAGE"; exit 1
+            fi
+            DATA_SPLIT="$2"; shift ;;
         --merge)                     MERGE=true ;;
         --*) echo "ERROR: unknown flag '$1'."; echo "$USAGE"; exit 1 ;;
         *)
@@ -127,6 +134,30 @@ else
     done
 fi
 
+# --data eval: some datasets have no eval split (config eval_exclude_datasets —
+# pool too small for a disjoint set on top of the test split). Explicitly
+# requesting one is an error; ALL just skips them with a note.
+if [[ "$DATA_SPLIT" == "eval" ]]; then
+    EVAL_EXCLUDE=($(python -c "import yaml; print(' '.join(yaml.safe_load(open('config/mvp_config.yaml')).get('eval_exclude_datasets') or []))"))
+    if [[ ${#EVAL_EXCLUDE[@]} -gt 0 ]]; then
+        _KEPT=()
+        for ds in "${DATASETS[@]}"; do
+            if [[ " ${EVAL_EXCLUDE[*]} " == *" $ds "* ]]; then
+                if printf '%s\n' "${DATASET_ARGS[@]}" | grep -qx "$ds"; then
+                    echo "ERROR: dataset '$ds' has no eval split (config eval_exclude_datasets: ${EVAL_EXCLUDE[*]})."; exit 1
+                fi
+                echo "NOTE: skipping '$ds' — no eval split (config eval_exclude_datasets)."
+            else
+                _KEPT+=("$ds")
+            fi
+        done
+        DATASETS=("${_KEPT[@]}")
+        if [[ ${#DATASETS[@]} -eq 0 ]]; then
+            echo "ERROR: no datasets left after eval-split exclusions."; exit 1
+        fi
+    fi
+fi
+
 # --- Optional knobs -> CLI flags ----------------------------------------------
 # Precedence for N: --N flag > N_SAMPLES env var > config default.
 # (Line below still passes --n-samples: that's the 02 python script's flag name.)
@@ -134,17 +165,21 @@ N_EXAMPLES="${N_EXAMPLES:-}"
 N_SAMPLES="${N_SAMPLES_CLI:-${N_SAMPLES:-}}"
 FORCE_PREPARE="${FORCE_PREPARE:-false}"
 
-PREP_FLAGS=""
+PREP_FLAGS=" --data $DATA_SPLIT"
 [[ -n "$N_EXAMPLES" ]] && PREP_FLAGS+=" --n-examples $N_EXAMPLES"
 # A changed N_EXAMPLES needs a rebuild; honour an explicit FORCE_PREPARE too.
 { [[ -n "$N_EXAMPLES" ]] || [[ "$FORCE_PREPARE" == "true" ]]; } && PREP_FLAGS+=" --force"
-INFER_FLAGS=""
+INFER_FLAGS=" --data $DATA_SPLIT"
 [[ -n "$N_SAMPLES" ]] && INFER_FLAGS+=" --n-samples $N_SAMPLES"
 [[ "$MERGE" == "true" ]] && INFER_FLAGS+=" --merge"
+# Split path segment mirroring resolve_paths(): "" for test, "/eval" for eval.
+SPLIT_SEG=""
+[[ "$DATA_SPLIT" == "eval" ]] && SPLIT_SEG="/eval"
 # n/N suffix appended to commit messages for traceability.
 NN_TAG=""
 [[ -n "$N_EXAMPLES" ]] && NN_TAG+=", n=$N_EXAMPLES"
 [[ -n "$N_SAMPLES" ]]  && NN_TAG+=", N=$N_SAMPLES"
+[[ "$DATA_SPLIT" == "eval" ]] && NN_TAG+=", eval-split"
 [[ "$MERGE" == "true" ]] && NN_TAG+=", merged"
 
 # --- Fail-soft command runner --------------------------------------------------
@@ -189,7 +224,7 @@ commit_push() {
 # commit_push after 02 stays as the catch-all for anything it missed.
 
 _dataset_complete() {  # $1 = outputs dir, $2 = dataset key -> exit 0 iff all instances done
-    python3 - "$1/progress.json" "monitorability-eval/data/$2/dataset_index.json" 2>/dev/null <<'PYEOF'
+    python3 - "$1/progress.json" "monitorability-eval/data/$2$SPLIT_SEG/dataset_index.json" 2>/dev/null <<'PYEOF'
 import json, sys
 try:
     done = len(json.load(open(sys.argv[1])).get("completed_instance_ids", []))
@@ -206,8 +241,8 @@ autopush_watcher() {  # $1 = stop file, $2 = hint type, $3.. = datasets
     while [[ ! -f "$stop_file" ]]; do
         for ds in "$@"; do
             [[ "$pushed" == *" $ds "* ]] && continue
-            # Mirrors resolve_paths() in src/dataset.py: outputs/{model}/{ds}/{hint}.
-            dir="outputs-and-results/outputs/$MODEL_NAME/$ds/$hint"
+            # Mirrors resolve_paths() in src/dataset.py: outputs/{model}/{ds}[/eval]/{hint}.
+            dir="outputs-and-results/inference-outputs/$MODEL_NAME/$ds$SPLIT_SEG/$hint"
             [[ -f "$dir/progress.json" ]] || continue
             _dataset_complete "$dir" "$ds" || continue
             echo "[auto-push] $ds complete — committing + pushing its outputs"
@@ -241,6 +276,7 @@ else
 fi
 echo "Datasets:    ${DATASETS[*]}"
 echo "Hint types:  ${HINT_TYPES[*]}"
+echo "Data split:  $DATA_SPLIT"
 echo "N examples:  ${N_EXAMPLES:-config default} per dataset"
 echo "N samples:   ${N_SAMPLES:-config default} per arm per instance"
 echo "Force prep:  $FORCE_PREPARE"
@@ -279,7 +315,7 @@ for hint in "${HINT_TYPES[@]}"; do
 
     echo ""
     echo "########## PHASE 3: CoT token-length analysis — $MODEL_ID ($hint) ##########"
-    run python monitorability-eval/scripts/08_cot_token_analysis.py --model "$MODEL_ID" --datasets "${DATASETS[@]}" --hint-type "$hint"
+    run python monitorability-eval/scripts/08_cot_token_analysis.py --model "$MODEL_ID" --datasets "${DATASETS[@]}" --hint-type "$hint" --data "$DATA_SPLIT"
     commit_push "$MODEL_NAME CoT token-length analysis ($hint$NN_TAG)"
 done
 
@@ -305,4 +341,6 @@ echo "Total commands: ${#SUMMARY[@]}  |  Failed: $fail_count"
 echo "Full log: $LOGFILE"
 _DS_CSV=$(IFS=,; echo "${DATASETS[*]}")
 _HINT_CSV=$(IFS=,; echo "${HINT_TYPES[*]}")
-echo "Next: pull locally, then  bash monitorability-eval/run_monitor_and_results.sh $MODEL_ID --dataset $_DS_CSV --hint $_HINT_CSV"
+_DATA_FLAG=""
+[[ "$DATA_SPLIT" == "eval" ]] && _DATA_FLAG=" --data eval"
+echo "Next: pull locally, then  bash monitorability-eval/run_monitor_and_results.sh $MODEL_ID --dataset $_DS_CSV --hint $_HINT_CSV$_DATA_FLAG"

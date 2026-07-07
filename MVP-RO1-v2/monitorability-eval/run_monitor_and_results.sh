@@ -33,8 +33,9 @@ set -uo pipefail
 # config/, outputs-and-results/, and logs/ resolve as repo-root-relative paths.
 cd "$(dirname "$0")/.."
 
-USAGE="usage: bash monitorability-eval/run_monitor_and_results.sh <model_id> --dataset <d1 [d2 ...]|ALL> --hint <h1 [h2 ...]|ALL>
-       datasets/hints are space- and/or comma-separated, e.g. --dataset mmlu_pro,lexam --hint professor metadata"
+USAGE="usage: bash monitorability-eval/run_monitor_and_results.sh <model_id> --dataset <d1 [d2 ...]|ALL> --hint <h1 [h2 ...]|ALL> [--data test|eval]
+       datasets/hints are space- and/or comma-separated, e.g. --dataset mmlu_pro,lexam --hint professor metadata
+       --data test|eval: data split (default test); must match the run_inference.sh split"
 
 # First positional is the model id; --dataset / --hint follow (either order).
 MODEL_ID="${1:-}"
@@ -45,12 +46,17 @@ shift
 
 # Collect every token after --dataset into DATASET_ARGS and after --hint into
 # HINT_ARGS, until the next flag. Tokens may themselves be comma-separated.
-DATASET_ARGS=(); HINT_ARGS=()
+DATASET_ARGS=(); HINT_ARGS=(); DATA_SPLIT="test"
 saw_dataset=false; saw_hint=false; mode=""
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --dataset|--datasets)        mode="dataset"; saw_dataset=true ;;
         --hint|--hints|--hint-type)  mode="hint";    saw_hint=true ;;
+        --data)
+            if [[ $# -lt 2 || ! "$2" =~ ^(test|eval)$ ]]; then
+                echo "ERROR: --data requires 'test' or 'eval' (got '${2:-}')."; echo "$USAGE"; exit 1
+            fi
+            DATA_SPLIT="$2"; shift ;;
         --*) echo "ERROR: unknown flag '$1'."; echo "$USAGE"; exit 1 ;;
         *)
             IFS=',' read -r -a _parts <<< "$1"
@@ -100,6 +106,30 @@ else
     done
 fi
 
+# --data eval: some datasets have no eval split (config eval_exclude_datasets —
+# pool too small for a disjoint set on top of the test split). Explicitly
+# requesting one is an error; ALL just skips them with a note.
+if [[ "$DATA_SPLIT" == "eval" ]]; then
+    EVAL_EXCLUDE=($(python -c "import yaml; print(' '.join(yaml.safe_load(open('config/mvp_config.yaml')).get('eval_exclude_datasets') or []))"))
+    if [[ ${#EVAL_EXCLUDE[@]} -gt 0 ]]; then
+        _KEPT=()
+        for ds in "${DATASETS[@]}"; do
+            if [[ " ${EVAL_EXCLUDE[*]} " == *" $ds "* ]]; then
+                if printf '%s\n' "${DATASET_ARGS[@]}" | grep -qx "$ds"; then
+                    echo "ERROR: dataset '$ds' has no eval split (config eval_exclude_datasets: ${EVAL_EXCLUDE[*]})."; exit 1
+                fi
+                echo "NOTE: skipping '$ds' — no eval split (config eval_exclude_datasets)."
+            else
+                _KEPT+=("$ds")
+            fi
+        done
+        DATASETS=("${_KEPT[@]}")
+        if [[ ${#DATASETS[@]} -eq 0 ]]; then
+            echo "ERROR: no datasets left after eval-split exclusions."; exit 1
+        fi
+    fi
+fi
+
 # --- Preflight: API key ---------------------------------------------------------
 if [[ -z "${OPENAI_API_KEY:-}" ]]; then
     echo "ERROR: OPENAI_API_KEY is not set. Run:  export OPENAI_API_KEY=<your-key>"
@@ -109,10 +139,12 @@ fi
 # --- Preflight: inference outputs must exist -------------------------------------
 echo "Checking inference outputs for $MODEL_ID ..."
 missing=0
+SPLIT_SEG=""
+[[ "$DATA_SPLIT" == "eval" ]] && SPLIT_SEG="/eval"
 for hint in "${HINT_TYPES[@]}"; do
     for ds in "${DATASETS[@]}"; do
         for arm in hinted unhinted; do
-            f="outputs-and-results/outputs/${MODEL_NAME}/${ds}/${hint}/${arm}.jsonl"
+            f="outputs-and-results/inference-outputs/${MODEL_NAME}/${ds}${SPLIT_SEG}/${hint}/${arm}.jsonl"
             if [[ -f "$f" ]]; then
                 echo "  OK  $f"
             else
@@ -168,6 +200,7 @@ echo "Monitor + results run started: $(date)"
 echo "Model:      $MODEL_ID (dirs namespaced as '$MODEL_NAME')"
 echo "Datasets:   ${DATASETS[*]}"
 echo "Hint types: ${HINT_TYPES[*]}"
+echo "Data split: $DATA_SPLIT"
 echo "Log file:   $LOGFILE"
 
 # --- Phase 0: git identity ---------------------------------------------------
@@ -181,7 +214,7 @@ for hint in "${HINT_TYPES[@]}"; do
     echo ""
     echo "########## PHASE 1: monitor ($hint) ##########"
     for ds in "${DATASETS[@]}"; do
-        run python monitorability-eval/scripts/03_run_monitor.py --model "$MODEL_ID" --dataset "$ds" --hint-type "$hint"
+        run python monitorability-eval/scripts/03_run_monitor.py --model "$MODEL_ID" --dataset "$ds" --hint-type "$hint" --data "$DATA_SPLIT"
     done
 done
 
@@ -190,9 +223,9 @@ for hint in "${HINT_TYPES[@]}"; do
     echo ""
     echo "########## PHASE 2: results calculation ($hint) ##########"
     for ds in "${DATASETS[@]}"; do
-        run python monitorability-eval/scripts/04_compute_gmean2.py --model "$MODEL_ID" --dataset "$ds" --hint-type "$hint"
-        run python monitorability-eval/scripts/05_analyze_gmean2.py --model "$MODEL_ID" --dataset "$ds" --hint-type "$hint"
-        run python monitorability-eval/scripts/06_export_excel.py   --model "$MODEL_ID" --dataset "$ds" --hint-type "$hint"
+        run python monitorability-eval/scripts/04_compute_gmean2.py --model "$MODEL_ID" --dataset "$ds" --hint-type "$hint" --data "$DATA_SPLIT"
+        run python monitorability-eval/scripts/05_analyze_gmean2.py --model "$MODEL_ID" --dataset "$ds" --hint-type "$hint" --data "$DATA_SPLIT"
+        run python monitorability-eval/scripts/06_export_excel.py   --model "$MODEL_ID" --dataset "$ds" --hint-type "$hint" --data "$DATA_SPLIT"
     done
 done
 
@@ -201,9 +234,11 @@ done
 # and src/reporting.py) to strip all .md report generation for a public release.
 echo ""
 echo "########## PHASE 3: markdown reports ##########"
-run python monitorability-eval/scripts/09_generate_reports.py --model "$MODEL_ID"
+run python monitorability-eval/scripts/09_generate_reports.py --model "$MODEL_ID" --data "$DATA_SPLIT"
 
-commit_push "monitor + results (${HINT_TYPES[*]}) — $MODEL_NAME"
+_SPLIT_TAG=""
+[[ "$DATA_SPLIT" == "eval" ]] && _SPLIT_TAG=", eval-split"
+commit_push "monitor + results (${HINT_TYPES[*]}$_SPLIT_TAG) — $MODEL_NAME"
 
 # --- Summary -----------------------------------------------------------------
 echo ""

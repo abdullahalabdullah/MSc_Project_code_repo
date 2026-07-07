@@ -93,9 +93,12 @@ def model_dir_name(model_id: str) -> str:
     return model_id.strip().strip("/").replace("/", "_")
 
 
+SPLITS = ("test", "eval")
+
+
 def resolve_paths(root, config: dict, dataset_key: str, model_name: str | None = None,
-                  hint_type: str | None = None) -> dict:
-    """Resolve all on-disk paths for a (model, dataset, hint_type) triple.
+                  hint_type: str | None = None, split: str = "test") -> dict:
+    """Resolve all on-disk paths for a (model, dataset, hint_type, split) tuple.
 
     Result dirs are namespaced model-first, then dataset, then hint type, so
     different models/hints never overwrite each other:
@@ -103,24 +106,34 @@ def resolve_paths(root, config: dict, dataset_key: str, model_name: str | None =
         outputs/{model}/{ds}/{hint}/, monitor_outputs/{model}/{ds}/{hint}/,
         analysis/{model}/{ds}/{hint}/, plots/{model}/{ds}/{hint}/
 
+    `split` selects the data split: "test" (default) keeps the layout above
+    unchanged; "eval" inserts an `eval/` segment after the dataset key
+    everywhere (data/{ds}/eval/dataset_index.json, outputs/{model}/{ds}/eval/
+    {hint}/, ...), so the two splits never overwrite each other. The eval
+    split's index is sampled disjointly from the test split (see
+    prepare_dataset's `exclude`).
+
     `model_name` and `hint_type` are appended only when provided. `data_index`
     is never model- or hint-specific (the hint_target is assigned once at prep
     time and shared by every model and hint type).
     """
+    if split not in SPLITS:
+        raise ValueError(f"split must be one of {SPLITS}, got '{split}'")
     root = Path(root)
     p = config["paths"]
+    ds_seg = Path(dataset_key) if split == "test" else Path(dataset_key) / "eval"
 
     def result_dir(d):
         b = root / d
         if model_name:
             b = b / model_name
-        b = b / dataset_key
+        b = b / ds_seg
         if hint_type:
             b = b / hint_type
         return b
 
     return {
-        "data_index":  root / p["data_dir"] / dataset_key / "dataset_index.json",
+        "data_index":  root / p["data_dir"] / ds_seg / "dataset_index.json",
         "outputs_dir": result_dir(p["outputs_dir"]),
         "monitor_dir": result_dir(p["monitor_outputs_dir"]),
         "analysis_dir": result_dir(p["analysis_dir"]),
@@ -518,14 +531,19 @@ _LOADERS = {
 # ---------------------------------------------------------------------------
 
 def prepare_dataset(config: dict, output_path: Path, dataset_key: str,
-                    n_examples: int | None = None) -> list:
+                    n_examples: int | None = None, exclude: list | None = None) -> list:
     """Prepare a dataset_index.json for `dataset_key` and write it to output_path.
 
     All datasets are resolved through the `datasets:` registry. Sampling is
     uniform; two-level (group -> subgroup) when the loader sets `subgroup`.
 
     `n_examples` overrides the global config `n_examples` budget for this run
-    when given; otherwise the config value (shared by all datasets) is used."""
+    when given; otherwise the config value (shared by all datasets) is used.
+
+    `exclude` (optional) is a list of already-prepared instance dicts (another
+    split's dataset_index.json). Any pool record matching one of them — by
+    source id or by question text — is removed BEFORE sampling, so the
+    resulting index is disjoint from the excluded split by construction."""
     ensure_hf_auth()  # GPQA is gated; harmless no-op for public datasets
 
     datasets_cfg = config.get("datasets", {})
@@ -545,6 +563,16 @@ def prepare_dataset(config: dict, output_path: Path, dataset_key: str,
     print(f"Loading dataset '{dataset_key}' via loader '{ds_cfg['loader']}' ...")
     normalised = loader(ds_cfg, rng)
     print(f"  Loaded {len(normalised)} records (post-filter).")
+
+    if exclude:
+        used_ids = {r["question_id"] for r in exclude}
+        used_questions = {r["question"] for r in exclude}
+        before = len(normalised)
+        normalised = [r for r in normalised
+                      if r["source_id"] not in used_ids
+                      and _clean(r["question"]) not in used_questions]
+        print(f"  Excluded {before - len(normalised)} records already used by the "
+              f"other split; {len(normalised)} remain in the pool.")
 
     n = n_examples if n_examples is not None else config["n_examples"]
     if len(normalised) == 0:
@@ -580,3 +608,23 @@ def load_dataset_index(path: Path) -> list:
     """Load dataset_index.json and return list of instance dicts."""
     with open(path, encoding="utf-8") as f:
         return json.load(f)
+
+
+def assert_splits_disjoint(test_records: list, eval_records: list, dataset_key: str) -> None:
+    """Hard-fail if the test and eval splits share any question.
+
+    Guards against the one way disjointness can silently break: the test index
+    being regenerated/topped-up AFTER the eval index was sampled. Compared on
+    both question_id and question text."""
+    test_ids = {r["question_id"] for r in test_records}
+    test_questions = {r["question"] for r in test_records}
+    overlap = [r["instance_id"] for r in eval_records
+               if r["question_id"] in test_ids or r["question"] in test_questions]
+    if overlap:
+        raise ValueError(
+            f"dataset '{dataset_key}': eval split overlaps the test split on "
+            f"{len(overlap)} instance(s) (eval instance_ids {overlap[:10]}...). "
+            f"The test index was probably regenerated after the eval index was "
+            f"sampled. Regenerate the eval index (01_prepare_dataset.py --data "
+            f"eval --force) from the FINAL test index."
+        )

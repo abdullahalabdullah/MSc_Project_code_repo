@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 #
-# Snapshot the result dirs (analysis, outputs, monitor_outputs, plots) under
-# outputs-and-results/ into a timestamped outputs-and-results/Old-Results/ folder,
-# then clear the source dirs (except .gitkeep) for a fresh run.
+# Snapshot the result dirs (monitorability-results, inference-outputs, monitor_outputs,
+# plots, harmlessness-results) under outputs-and-results/ into a timestamped
+# outputs-and-results/Old-Results/ folder, then clear the source dirs (except
+# .gitkeep) for a fresh run.
 #
 # Usage:
 #   ./monitorability-eval/scripts/archive_results.sh
@@ -18,9 +19,10 @@ ROOT="outputs-and-results"
 TS=$(date +%Y-%m-%d_%H-%M-%S)
 DEST="$ROOT/Old-Results/$TS"
 
-mkdir -p "$DEST"/{analysis,outputs,monitor_outputs,plots}
+mkdir -p "$DEST"/{monitorability-results,inference-outputs,monitor_outputs,plots,harmlessness-results}
 
-for d in analysis outputs monitor_outputs plots; do
+for d in monitorability-results inference-outputs monitor_outputs plots harmlessness-results; do
+  [ -d "$ROOT/$d" ] || continue
   find "$ROOT/$d" -mindepth 1 -maxdepth 1 ! -name '.gitkeep' -exec mv {} "$DEST/$d/" \;
 done
 

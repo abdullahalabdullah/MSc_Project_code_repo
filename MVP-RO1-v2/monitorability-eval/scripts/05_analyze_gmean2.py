@@ -27,7 +27,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import yaml
-from src.dataset import model_dir_name, resolve_paths
+from src.dataset import SPLITS, model_dir_name, resolve_paths
 from src.hints import HINT_TYPES
 from src.gmean2_analysis import (
     plot_te_distribution,
@@ -77,13 +77,13 @@ def _load_per_instance(csv_path: Path) -> list:
     return per_instance
 
 
-def run_dataset(root, config, dataset_key, models, hint_type):
+def run_dataset(root, config, dataset_key, models, hint_type, split="test"):
     """Generate plots for every given model on a single dataset."""
-    print(f"\n=== dataset: {dataset_key}  (hint: {hint_type}) ===")
+    print(f"\n=== dataset: {dataset_key}  (hint: {hint_type}, split: {split}) ===")
 
     for model_cfg in models:
         model_name = model_cfg["name"]
-        paths = resolve_paths(root, config, dataset_key, model_name, hint_type)
+        paths = resolve_paths(root, config, dataset_key, model_name, hint_type, split=split)
         analysis_dir = paths["analysis_dir"]
         plots_dir = paths["plots_dir"]
 
@@ -117,6 +117,9 @@ def main():
     parser.add_argument("--hint-type", default=None, choices=HINT_TYPES,
                         help="Hint type to read (default: config hint.default). "
                              "Must match the inference/monitor run. Namespaces I/O paths.")
+    parser.add_argument("--data", default="test", choices=SPLITS,
+                        help="Data split to read: test (default) or eval. "
+                             "Must match the inference/monitor run. Namespaces I/O paths.")
     args = parser.parse_args()
 
     root = Path(__file__).resolve().parents[2]
@@ -137,7 +140,7 @@ def main():
             sys.exit(1)
 
     for dataset_key in datasets:
-        run_dataset(root, config, dataset_key, models, hint_type)
+        run_dataset(root, config, dataset_key, models, hint_type, split=args.data)
 
     print("\nDone.")
 

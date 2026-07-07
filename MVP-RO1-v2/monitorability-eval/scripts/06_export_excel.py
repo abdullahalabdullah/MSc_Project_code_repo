@@ -55,7 +55,7 @@ import pandas as pd
 import yaml
 
 from src.gmean2_metrics import load_jsonl, compute_gmean2
-from src.dataset import model_dir_name, resolve_paths
+from src.dataset import SPLITS, model_dir_name, resolve_paths
 from src.hints import HINT_TYPES
 
 
@@ -181,14 +181,14 @@ def build_summary_rows(model_name, dataset_by_id, per_example_metrics):
     return rows
 
 
-def run_dataset(root, config, dataset_key, models, output_override, hint_type):
+def run_dataset(root, config, dataset_key, models, output_override, hint_type, split="test"):
     """Export a qualitative workbook for every given model on a single dataset."""
-    print(f"\n=== dataset: {dataset_key}  (hint: {hint_type}) ===")
+    print(f"\n=== dataset: {dataset_key}  (hint: {hint_type}, split: {split}) ===")
 
-    dataset_path = resolve_paths(root, config, dataset_key)["data_index"]
+    dataset_path = resolve_paths(root, config, dataset_key, split=split)["data_index"]
     if not dataset_path.exists():
         print(f"  Skipping: {dataset_path} not found. "
-              f"Run 01_prepare_dataset.py --dataset {dataset_key} first.")
+              f"Run 01_prepare_dataset.py --dataset {dataset_key} --data {split} first.")
         return
     with open(dataset_path, encoding="utf-8") as f:
         dataset_index = json.load(f)
@@ -197,7 +197,7 @@ def run_dataset(root, config, dataset_key, models, output_override, hint_type):
     for model_cfg in models:
         model_name = model_cfg["name"]
 
-        mpaths = resolve_paths(root, config, dataset_key, model_name, hint_type)
+        mpaths = resolve_paths(root, config, dataset_key, model_name, hint_type, split=split)
         out_dir = mpaths["outputs_dir"]
         mon_dir = mpaths["monitor_dir"]
 
@@ -252,7 +252,10 @@ def main():
                              "Must match the inference/monitor run. Namespaces I/O paths.")
     parser.add_argument("--output", default=None,
                         help="Output .xlsx path (only valid with --model and --dataset; default: "
-                             "outputs-and-results/analysis/{model}/{dataset}/{hint}/qualitative_export.xlsx)")
+                             "outputs-and-results/monitorability-results/{model}/{dataset}/{hint}/qualitative_export.xlsx)")
+    parser.add_argument("--data", default="test", choices=SPLITS,
+                        help="Data split to read: test (default) or eval. "
+                             "Must match the inference/monitor run. Namespaces I/O paths.")
     args = parser.parse_args()
 
     if args.output and not args.dataset:
@@ -278,7 +281,7 @@ def main():
             sys.exit(1)
 
     for dataset_key in datasets:
-        run_dataset(root, config, dataset_key, models, args.output, hint_type)
+        run_dataset(root, config, dataset_key, models, args.output, hint_type, split=args.data)
 
     print("\nDone.")
 

@@ -45,12 +45,24 @@ RESULT_COLUMNS = ("Mean TE before (Std)", "Mean R_effect before (Std)",
                   "n TE>0 (post L1)", "g-mean²", "Unhinted Acc (Std)",
                   "Hinted Acc (Std)")
 
+# Confusion-matrix columns for the roll-up summary table, in (acknowledged?,
+# followed?) order matching the labels the user sees; keys map onto
+# sum_matrices()'s cm dict.
+CONFUSION_COLUMNS = ("Acknowledged & followed", "Acknowledged & not followed",
+                    "Not Acknowledged & followed", "Not Acknowledged & not followed")
+CONFUSION_KEYS = ("foll_ack", "notfoll_ack", "foll_noack", "notfoll_noack")
+
 COT_CONDITIONS = (
     ("hinted",            "Hinted (X=1, all)"),
     ("unhinted",          "Unhinted (X=0, all)"),
     ("hint_followed",     "Hinted, followed (X=1, Y=1)"),
     ("hint_not_followed", "Hinted, not followed (X=1, Y=0)"),
 )
+
+# Columns for the CoT roll-up summary table — same 4 conditions as
+# COT_CONDITIONS, one "mean (std)" cell each.
+COT_SUMMARY_COLUMNS = ("Hinted (mean and std)", "Unhinted (mean and std)",
+                      "Hinted & followed (mean and std)", "Hinted & not followed (mean and std)")
 
 
 def _fmt(v, decimals=4):
@@ -116,17 +128,22 @@ def load_run(analysis_dir: Path) -> dict | None:
     return {"summary": summary, "rows": rows, "cot": cot}
 
 
-def discover_runs(model_analysis_root: Path, dataset_order: list, hint_order: list) -> dict:
+def discover_runs(model_analysis_root: Path, dataset_order: list, hint_order: list,
+                  split: str = "test") -> dict:
     """Find every (dataset, hint) with a results_summary.json under analysis/{model}/.
 
-    Returns an ordered {(dataset, hint): analysis_dir} following the given
-    config/registry orders, with any unknown keys appended alphabetically."""
+    `split` selects the data split: "test" scans {ds}/{hint}/, "eval" scans
+    {ds}/eval/{hint}/ (the eval-split layout from resolve_paths). Returns an
+    ordered {(dataset, hint): analysis_dir} following the given config/registry
+    orders, with any unknown keys appended alphabetically."""
     found = {}
     if not model_analysis_root.is_dir():
         return found
-    for summary_path in sorted(model_analysis_root.glob("*/*/results_summary.json")):
+    pattern = "*/*/results_summary.json" if split == "test" else "*/eval/*/results_summary.json"
+    for summary_path in sorted(model_analysis_root.glob(pattern)):
         hint_dir = summary_path.parent
-        found[(hint_dir.parent.name, hint_dir.name)] = hint_dir
+        ds_dir = hint_dir.parent if split == "test" else hint_dir.parent.parent
+        found[(ds_dir.name, hint_dir.name)] = hint_dir
 
     def order(seq, known):
         known_idx = {k: i for i, k in enumerate(known)}
@@ -232,6 +249,38 @@ def matrix_block(cm: dict) -> list:
         f"{cm['n_followed']} hint-following runs (covert / all hint-following).",
         "",
     ]
+
+
+def _cm_cells(cm: dict) -> list:
+    """The 4 confusion-matrix cells as 'count (pct%)', in CONFUSION_KEYS order."""
+    total = cm.get("total", 0)
+
+    def _cell(count):
+        return f"{count} ({100 * count / total:.1f}%)" if total else str(count)
+
+    return [_cell(cm.get(k, 0)) for k in CONFUSION_KEYS]
+
+
+def summary_table(label_headers: list, rows: list) -> list:
+    """Consolidated roll-up table (one row per group), appended at the end of
+    a report: `label_headers` columns + the shared RESULT_COLUMNS + the 4
+    CONFUSION_COLUMNS. `rows` is a list of (label_values, st, cm) tuples."""
+    headers = list(label_headers) + list(RESULT_COLUMNS) + list(CONFUSION_COLUMNS)
+    lines = [
+        "## Summary\n",
+        "| " + " | ".join(headers) + " |",
+        "|" + "---|" * len(headers),
+    ]
+    for label_values, st, cm in rows:
+        cells = list(label_values) + [
+            _ms(*st['te_b']), _ms(*st['reff_b']),
+            _ms(*st['te_a']), _ms(*st['reff_a']),
+            _n_pct(st['n_level1'], st.get('n_total')), _fmt(st['gmean2']),
+            _ms(*st['acc_u'], 3), _ms(*st['acc_h'], 3),
+        ] + _cm_cells(cm)
+        lines.append("| " + " | ".join(cells) + " |")
+    lines.append("")
+    return lines
 
 
 def cot_condition_table(cot: dict) -> list:
@@ -381,10 +430,13 @@ def write_results_overall_summary(runs: dict, model_name: str, hf_id: str, path:
     datasets, hints = _run_keys(runs)
     lines = _file_header("Results overall summary — per (dataset × hint type)",
                          model_name, hf_id, datasets, hints)
+    summary_rows = []
     for (ds, hint), run in runs.items():
         s = run["summary"]
-        lines += _results_section(f"{ds} × {hint}", "Dataset", ds,
-                                  stats_from_summary(s), s.get("confusion_matrix", {}))
+        st, cm = stats_from_summary(s), s.get("confusion_matrix", {})
+        lines += _results_section(f"{ds} × {hint}", "Dataset", ds, st, cm)
+        summary_rows.append(([ds, hint], st, cm))
+    lines += summary_table(["Dataset", "Hint type"], summary_rows)
     path.write_text("\n".join(lines), encoding="utf-8")
 
 
@@ -404,6 +456,7 @@ def write_results_level_summary(runs: dict, model_name: str, hf_id: str, path: P
         member = lambda key, ds, hint: hint == key
 
     lines = _file_header(title, model_name, hf_id, datasets, hints)
+    summary_rows = []
     for key in keys:
         group = [run for (ds, hint), run in runs.items() if member(key, ds, hint)]
         pooled_rows = [r for run in group for r in run["rows"]]
@@ -411,6 +464,8 @@ def write_results_level_summary(runs: dict, model_name: str, hf_id: str, path: P
         cm = sum_matrices([run["summary"] for run in group])
         lines += _results_section(f"{key} (pooled over {len(group)} {pooled_over})",
                                   label_header, key, st, cm)
+        summary_rows.append(([key], st, cm))
+    lines += summary_table([label_header], summary_rows)
     path.write_text("\n".join(lines), encoding="utf-8")
 
 
@@ -457,10 +512,36 @@ def _summed_buckets(cots: list) -> tuple[dict, dict, float | None]:
     return buckets, trunc, (max(maxes) if maxes else None)
 
 
+def _cot_condition_stats(cots: list) -> dict:
+    """Pooled 4-condition stats dict, or the single run's own stats when only
+    one run is in the group (avoids re-pooling a single pool)."""
+    return _pooled_cot_stats(cots) if len(cots) > 1 else cots[0]["condition_stats"]
+
+
+def cot_summary_table(label_headers: list, rows: list) -> list:
+    """Consolidated CoT roll-up table (one row per group), appended at the end
+    of a report: `label_headers` columns + COT_SUMMARY_COLUMNS. `rows` is a
+    list of (label_values, cond) tuples, `cond` shaped like `condition_stats`."""
+    headers = list(label_headers) + list(COT_SUMMARY_COLUMNS)
+    lines = [
+        "## Summary\n",
+        "| " + " | ".join(headers) + " |",
+        "|" + "---|" * len(headers),
+    ]
+    for label_values, cond in rows:
+        cells = list(label_values) + [
+            _ms(cond.get(f"{prefix}_mean"), cond.get(f"{prefix}_std"), 1)
+            for prefix, _ in COT_CONDITIONS
+        ]
+        lines.append("| " + " | ".join(cells) + " |")
+    lines.append("")
+    return lines
+
+
 def _cot_section(heading: str, cots: list) -> list:
     """One CoT report section: condition table + bucket/truncation row."""
     buckets, trunc, max_tok = _summed_buckets(cots)
-    cond = _pooled_cot_stats(cots) if len(cots) > 1 else cots[0]["condition_stats"]
+    cond = _cot_condition_stats(cots)
     lines = [f"## {heading}\n"]
     lines += cot_condition_table(cond)
     lines += ["Responses per token-length bucket (every response, both arms; "
@@ -485,8 +566,11 @@ def write_cot_overall_summary(cot_runs: dict, model_name: str, hf_id: str, path:
     datasets, hints = _run_keys(cot_runs)
     lines = _cot_file_header("CoT token-length overall summary — per (dataset × hint type)",
                              model_name, hf_id, datasets, hints)
+    summary_rows = []
     for (ds, hint), cot in cot_runs.items():
         lines += _cot_section(f"{ds} × {hint}", [cot])
+        summary_rows.append(([ds, hint], cot["condition_stats"]))
+    lines += cot_summary_table(["Dataset", "Hint type"], summary_rows)
     path.write_text("\n".join(lines), encoding="utf-8")
 
 
@@ -496,18 +580,21 @@ def write_cot_level_summary(cot_runs: dict, model_name: str, hf_id: str, path: P
     (pooled across datasets)."""
     datasets, hints = _run_keys(cot_runs)
     if level == "dataset":
-        keys, pooled_over = datasets, "hint types"
+        keys, label_header, pooled_over = datasets, "Dataset", "hint types"
         title = "CoT token-length dataset-level summary — runs pooled across hint types"
         member = lambda key, ds, hint: ds == key
     else:
-        keys, pooled_over = hints, "datasets"
+        keys, label_header, pooled_over = hints, "Hint type", "datasets"
         title = "CoT token-length hint-type-level summary — runs pooled across datasets"
         member = lambda key, ds, hint: hint == key
 
     lines = _cot_file_header(title, model_name, hf_id, datasets, hints)
+    summary_rows = []
     for key in keys:
         group = [cot for (ds, hint), cot in cot_runs.items() if member(key, ds, hint)]
         lines += _cot_section(f"{key} (pooled over {len(group)} {pooled_over})", group)
+        summary_rows.append(([key], _cot_condition_stats(group)))
+    lines += cot_summary_table([label_header], summary_rows)
     path.write_text("\n".join(lines), encoding="utf-8")
 
 

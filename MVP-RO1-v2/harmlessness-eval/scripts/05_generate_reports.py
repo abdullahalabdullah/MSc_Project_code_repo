@@ -10,7 +10,7 @@ Usage:
     python harmlessness-eval/scripts/05_generate_reports.py --model Qwen/Qwen3-4B
 
 Output:
-    outputs-and-results/harmlessness/analysis/{model}/harmlessness_summary.md
+    outputs-and-results/harmlessness-results/analysis/{model}/harmlessness_summary.md
 """
 
 import argparse

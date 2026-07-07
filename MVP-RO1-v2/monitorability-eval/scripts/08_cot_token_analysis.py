@@ -40,7 +40,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import yaml
 from src.gmean2_metrics import load_jsonl, compute_gmean2
-from src.dataset import model_dir_name, resolve_paths
+from src.dataset import SPLITS, model_dir_name, resolve_paths
 from src.hints import HINT_TYPES
 from src.cot_tokens import bucket_counts, raw_token_stats, truncation_stats
 
@@ -55,6 +55,9 @@ def main():
     parser.add_argument("--hint-type", default=None, choices=HINT_TYPES,
                         help="Hint type to read (default: config hint.default). "
                              "Must match the inference run. Namespaces I/O paths.")
+    parser.add_argument("--data", default="test", choices=SPLITS,
+                        help="Data split to read: test (default) or eval. "
+                             "Must match the inference run. Namespaces I/O paths.")
     args = parser.parse_args()
 
     root = Path(__file__).resolve().parents[2]
@@ -67,7 +70,7 @@ def main():
 
     wrote_any = False
     for ds in dataset_keys:
-        paths = resolve_paths(root, config, ds, model_name, hint_type)
+        paths = resolve_paths(root, config, ds, model_name, hint_type, split=args.data)
         out_dir = paths["outputs_dir"]
         hinted_path = out_dir / "hinted.jsonl"
         unhinted_path = out_dir / "unhinted.jsonl"

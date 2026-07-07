@@ -43,7 +43,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import yaml
 from src.gmean2_metrics import load_jsonl, compute_gmean2
-from src.dataset import model_dir_name, resolve_paths
+from src.dataset import SPLITS, model_dir_name, resolve_paths
 from src.hints import HINT_TYPES
 
 
@@ -51,15 +51,15 @@ def _fmt(v, decimals=4):
     return f"{v:.{decimals}f}" if v is not None else "N/A"
 
 
-def run_dataset(root, config, dataset_key, models, hint_type):
+def run_dataset(root, config, dataset_key, models, hint_type, split="test"):
     """Compute g-mean^2 for every given model on a single dataset."""
-    print(f"\n=== dataset: {dataset_key}  (hint: {hint_type}) ===")
+    print(f"\n=== dataset: {dataset_key}  (hint: {hint_type}, split: {split}) ===")
 
     for model_cfg in models:
         model_name = model_cfg["name"]
         print(f"\n--- {model_name} ---")
 
-        paths = resolve_paths(root, config, dataset_key, model_name, hint_type)
+        paths = resolve_paths(root, config, dataset_key, model_name, hint_type, split=split)
         out_dir = paths["outputs_dir"]
         mon_dir = paths["monitor_dir"]
         analysis_dir = paths["analysis_dir"]
@@ -188,6 +188,9 @@ def main():
     parser.add_argument("--hint-type", default=None, choices=HINT_TYPES,
                         help="Hint type to read (default: config hint.default). "
                              "Must match the inference/monitor run. Namespaces I/O paths.")
+    parser.add_argument("--data", default="test", choices=SPLITS,
+                        help="Data split to read: test (default) or eval. "
+                             "Must match the inference/monitor run. Namespaces I/O paths.")
     args = parser.parse_args()
 
     root = Path(__file__).resolve().parents[2]
@@ -208,7 +211,7 @@ def main():
             sys.exit(1)
 
     for dataset_key in datasets:
-        run_dataset(root, config, dataset_key, models, hint_type)
+        run_dataset(root, config, dataset_key, models, hint_type, split=args.data)
 
     print("\nDone.")
 

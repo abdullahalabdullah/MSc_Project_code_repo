@@ -26,7 +26,7 @@ Options:
 Input:
     harmlessness-eval/data/wildjailbreak_eval/prompts.jsonl
 Output:
-    outputs-and-results/harmlessness/responses/{model}/responses.jsonl
+    outputs-and-results/harmlessness-results/responses/{model}/responses.jsonl
 """
 
 import argparse
