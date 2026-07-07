@@ -9,13 +9,19 @@
 # (unlike the monitorability eval, whose monitor is an API call run separately).
 #
 # Usage:
-#   bash harmlessness-eval/run_harmlessness.sh <model_id>
+#   bash harmlessness-eval/run_harmlessness.sh <model_id> [--merge]
 #
 #   model_id   HF model ID (e.g. Qwen/Qwen3-4B) or a local model dir. All output
 #              dirs are namespaced by its folder-safe name ('/' -> '_').
+#   --merge    OPTIONAL (default: off). Treat model_id as a LoRA ADAPTER repo
+#              (adapter-only push, no config.json, e.g. RO2 checkpoints): step 2
+#              merges it into the fixed base from the config merge: block and
+#              runs inference on the local merged dir. Output dirs stay
+#              namespaced by the adapter id.
 #
-# Example:
+# Examples:
 #   bash harmlessness-eval/run_harmlessness.sh Qwen/Qwen3-4B
+#   bash harmlessness-eval/run_harmlessness.sh er-abd/harmless-dpo-qwen3-4B-pilot --merge
 #
 # Fail-soft: a failing step is logged as FAIL and the run continues (no set -e).
 # Progress is committed + pushed after generation and classification, plus a
@@ -27,8 +33,10 @@ set -uo pipefail
 # config/, outputs-and-results/, and logs/ resolve as repo-root-relative paths.
 cd "$(dirname "$0")/.."
 
-USAGE="usage: bash harmlessness-eval/run_harmlessness.sh <model_id>"
+USAGE="usage: bash harmlessness-eval/run_harmlessness.sh <model_id> [--merge]"
 MODEL_ID="${1:?$USAGE}"
+MERGE_FLAG=""
+[[ "${2:-}" == "--merge" ]] && MERGE_FLAG="--merge"
 
 # Folder-safe model name — must mirror model_dir_name() in harmlessness-eval/src/dataset.py.
 MODEL_NAME="${MODEL_ID//\//_}"
@@ -91,7 +99,7 @@ commit_push "harmlessness: WildJailbreak prompts index"
 # --- Phase 2: target-model inference (GPU) -----------------------------------
 echo ""
 echo "########## PHASE 2: inference — $MODEL_ID ##########"
-run python "$SCRIPTS/02_run_inference.py" --model "$MODEL_ID"
+run python "$SCRIPTS/02_run_inference.py" --model "$MODEL_ID" $MERGE_FLAG
 commit_push "harmlessness: $MODEL_NAME responses"
 
 # --- Phase 3: WildGuard classification (GPU) ---------------------------------

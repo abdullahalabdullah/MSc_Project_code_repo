@@ -9,6 +9,14 @@ WildGuard classifier will judge.
 
 Usage:
     python harmlessness-eval/scripts/02_run_inference.py --model Qwen/Qwen3-4B
+    python harmlessness-eval/scripts/02_run_inference.py --model er-abd/some-adapter --merge
+
+Options:
+    --merge    default False. Treat --model as a LoRA ADAPTER repo (adapter-only
+               push, no config.json): merge it into the fixed base from the
+               config `merge:` block, save the merged model locally under
+               merge.out_root, and run inference on that. Output dirs stay
+               namespaced by the ADAPTER id.
 
 Input:
     harmlessness-eval/data/wildjailbreak_eval/prompts.jsonl
@@ -35,6 +43,10 @@ def main():
     parser.add_argument("--model", required=True,
                         help="HF model ID (e.g. Qwen/Qwen3-4B) or local model dir.")
     parser.add_argument("--config", default="config/mvp_config.yaml")
+    parser.add_argument("--merge", action="store_true", default=False,
+                        help="Treat --model as a LoRA adapter repo and merge it into the "
+                             "fixed base from the config 'merge:' block before inference. "
+                             "Outputs stay namespaced by the adapter id.")
     args = parser.parse_args()
 
     config_path = Path(args.config)
@@ -58,7 +70,26 @@ def main():
     out_path = out_dir / "responses.jsonl"
 
     ensure_hf_auth()
-    tokenizer, llm = load_qwen_model(args.model)
+
+    # With --merge, args.model is an adapter-only repo: merge it into the fixed
+    # base (config merge.base) and point vLLM at the local merged dir. The
+    # output namespace stays the ADAPTER id (model_name, above) so downstream
+    # steps (03-05) are run with the same --model.
+    model_id = args.model
+    if args.merge:
+        from src.merge import merge_adapter
+        merge_cfg = config.get("merge", {})
+        if not merge_cfg.get("base"):
+            print("ERROR: --merge requires a 'merge:' block with 'base:' in the config.")
+            sys.exit(1)
+        merged_dir = merge_adapter(
+            base=merge_cfg["base"],
+            adapter=args.model,
+            out_dir=REPO_ROOT / merge_cfg.get("out_root", "merged-models") / model_name,
+        )
+        model_id = str(merged_dir)
+
+    tokenizer, llm = load_qwen_model(model_id)
 
     records = generate_responses(
         tokenizer, llm, prompts,

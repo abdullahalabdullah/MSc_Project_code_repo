@@ -441,7 +441,17 @@ WildGuard is a local model, so generation **and** classification both need a GPU
 
 ```bash
 bash harmlessness-eval/run_harmlessness.sh Qwen/Qwen3-4B
+bash harmlessness-eval/run_harmlessness.sh er-abd/harmless-dpo-qwen3-4B-pilot --merge
 ```
+
+`--merge` (optional, default off): treat `model_id` as a LoRA **adapter-only**
+repo (e.g. an RO2 checkpoint pushed without merging — no `config.json`, just
+`adapter_config.json`/`adapter_model.safetensors`, which vLLM cannot load
+directly). Step 2 merges it locally into the fixed base from the config
+`merge:` block (`src/merge.py`, duplicated from monitorability-eval's on
+purpose — same independence rule as the rest of `src/`) and runs inference on
+the merged dir; outputs stay namespaced by the adapter id so steps 3-5 are run
+with the same `--model`.
 
 ## Pipeline at a glance
 
@@ -466,6 +476,7 @@ Run any step manually:
 python harmlessness-eval/scripts/01_prepare_wildjailbreak.py                 # full eval set
 python harmlessness-eval/scripts/01_prepare_wildjailbreak.py --limit 20 --force  # quick smoke test
 python harmlessness-eval/scripts/02_run_inference.py   --model Qwen/Qwen3-4B  # GPU
+python harmlessness-eval/scripts/02_run_inference.py   --model er-abd/some-adapter --merge  # GPU, adapter-only checkpoint
 python harmlessness-eval/scripts/03_run_wildguard.py   --model Qwen/Qwen3-4B  # GPU
 python harmlessness-eval/scripts/04_compute_metrics.py --model Qwen/Qwen3-4B
 python harmlessness-eval/scripts/05_generate_reports.py --model Qwen/Qwen3-4B
@@ -490,6 +501,9 @@ python harmlessness-eval/scripts/05_generate_reports.py --model Qwen/Qwen3-4B
 - `inference.py` — `load_qwen_model` and `split_thinking` copied verbatim from
   the monitorability inference; `generate_responses` does free-form thinking-mode
   generation and keeps the visible answer.
+- `merge.py` — `merge_adapter`, copied verbatim from the monitorability eval's
+  `src/merge.py`. Merges an adapter-only checkpoint into its base model locally
+  so vLLM can load it; used by `02_run_inference.py --merge`.
 - `wildguard.py` — `load_wildguard`, the exact WildGuard instruction template,
   and `parse_verdict` / `classify` (three yes/no lines → booleans).
 - `metrics.py` — Safety Rate + Refusal Rate, overall and per subset.
