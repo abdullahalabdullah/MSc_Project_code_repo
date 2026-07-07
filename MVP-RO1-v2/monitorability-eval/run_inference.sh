@@ -305,4 +305,4 @@ echo "Total commands: ${#SUMMARY[@]}  |  Failed: $fail_count"
 echo "Full log: $LOGFILE"
 _DS_CSV=$(IFS=,; echo "${DATASETS[*]}")
 _HINT_CSV=$(IFS=,; echo "${HINT_TYPES[*]}")
-echo "Next: pull locally, then  bash monitorability-eval/run_monitor_and_results.sh $MODEL_ID $_DS_CSV $_HINT_CSV"
+echo "Next: pull locally, then  bash monitorability-eval/run_monitor_and_results.sh $MODEL_ID --dataset $_DS_CSV --hint $_HINT_CSV"

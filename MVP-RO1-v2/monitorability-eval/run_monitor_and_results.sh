@@ -6,17 +6,22 @@
 #
 # Usage:
 #   export OPENAI_API_KEY=sk-...
-#   bash monitorability-eval/run_monitor_and_results.sh <model_id> <dataset|d1,d2|ALL> <hint_type|h1,h2|ALL>
+#   bash monitorability-eval/run_monitor_and_results.sh <model_id> --dataset <d1 [d2 ...]|ALL> --hint <h1 [h2 ...]|ALL>
 #
-#   model_id   the SAME model ID used with run_inference.sh (resolves the same dirs).
-#   dataset    a dataset key from config/mvp_config.yaml, a comma-separated subset
-#              (e.g. mmlu_pro,lexam), or ALL for every key.
-#   hint_type  a hint type, a comma-separated subset (e.g. professor,metadata),
-#              or ALL for every type.
+#   model_id   the SAME model ID used with run_inference.sh (resolves the same dirs). FIRST arg.
+#   --dataset  REQUIRED. One or more dataset keys from config/mvp_config.yaml.
+#              Every token after --dataset (until --hint) is a dataset; tokens may
+#              be space- and/or comma-separated (mmlu_pro lexam == mmlu_pro,lexam).
+#              ALL selects every key.
+#   --hint     REQUIRED. One or more hint types (professor, visual_pattern,
+#              metadata, wrong_few_shot, grader_hacking, unethical); same
+#              space/comma rules. ALL selects every type.
+#   (--dataset and --hint may appear in any order.)
 #
 # Examples:
-#   bash monitorability-eval/run_monitor_and_results.sh Qwen/Qwen3-4B ALL professor
-#   bash monitorability-eval/run_monitor_and_results.sh Qwen/Qwen3-4B mmlu_pro,lexam professor
+#   bash monitorability-eval/run_monitor_and_results.sh Qwen/Qwen3-4B --dataset ALL --hint professor
+#   bash monitorability-eval/run_monitor_and_results.sh Qwen/Qwen3-4B --dataset mmlu_pro lexam --hint professor
+#   bash monitorability-eval/run_monitor_and_results.sh Qwen/Qwen3-4B --dataset mmlu_pro,lexam --hint ALL
 #
 # Per (hint type x dataset): monitor (03), g-mean^2 metrics (04), plots (05),
 # Excel export (06); then one cross-dataset summary table (07) per hint type.
@@ -28,10 +33,43 @@ set -uo pipefail
 # config/, outputs-and-results/, and logs/ resolve as repo-root-relative paths.
 cd "$(dirname "$0")/.."
 
-USAGE="usage: bash monitorability-eval/run_monitor_and_results.sh <model_id> <dataset|d1,d2|ALL> <hint_type|h1,h2|ALL>"
-MODEL_ID="${1:?$USAGE}"
-DATASET_ARG="${2:?$USAGE}"
-HINT_ARG="${3:?$USAGE}"
+USAGE="usage: bash monitorability-eval/run_monitor_and_results.sh <model_id> --dataset <d1 [d2 ...]|ALL> --hint <h1 [h2 ...]|ALL>
+       datasets/hints are space- and/or comma-separated, e.g. --dataset mmlu_pro,lexam --hint professor metadata"
+
+# First positional is the model id; --dataset / --hint follow (either order).
+MODEL_ID="${1:-}"
+if [[ -z "$MODEL_ID" || "$MODEL_ID" == --* ]]; then
+    echo "ERROR: the first argument must be the model id."; echo "$USAGE"; exit 1
+fi
+shift
+
+# Collect every token after --dataset into DATASET_ARGS and after --hint into
+# HINT_ARGS, until the next flag. Tokens may themselves be comma-separated.
+DATASET_ARGS=(); HINT_ARGS=()
+saw_dataset=false; saw_hint=false; mode=""
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --dataset|--datasets)        mode="dataset"; saw_dataset=true ;;
+        --hint|--hints|--hint-type)  mode="hint";    saw_hint=true ;;
+        --*) echo "ERROR: unknown flag '$1'."; echo "$USAGE"; exit 1 ;;
+        *)
+            IFS=',' read -r -a _parts <<< "$1"
+            case "$mode" in
+                dataset) DATASET_ARGS+=("${_parts[@]}") ;;
+                hint)    HINT_ARGS+=("${_parts[@]}") ;;
+                *) echo "ERROR: '$1' appears before --dataset/--hint."; echo "$USAGE"; exit 1 ;;
+            esac ;;
+    esac
+    shift
+done
+
+# Both flags are REQUIRED and must carry at least one value.
+if ! $saw_dataset || [[ ${#DATASET_ARGS[@]} -eq 0 ]]; then
+    echo "ERROR: --dataset is required with at least one dataset (or ALL)."; echo "$USAGE"; exit 1
+fi
+if ! $saw_hint || [[ ${#HINT_ARGS[@]} -eq 0 ]]; then
+    echo "ERROR: --hint is required with at least one hint type (or ALL)."; echo "$USAGE"; exit 1
+fi
 
 # Folder-safe model name — must mirror model_dir_name() in src/dataset.py.
 MODEL_NAME="${MODEL_ID//\//_}"
@@ -40,28 +78,24 @@ MODEL_NAME="${MODEL_ID//\//_}"
 ALL_DATASETS=($(python -c "import yaml; print(' '.join(yaml.safe_load(open('config/mvp_config.yaml'))['datasets']))"))
 ALL_HINTS=($(python -c "import yaml; print(' '.join(yaml.safe_load(open('config/mvp_config.yaml'))['hint']['types']))"))
 
-if [[ "$DATASET_ARG" == "ALL" ]]; then
+if printf '%s\n' "${DATASET_ARGS[@]}" | grep -qx "ALL"; then
     DATASETS=("${ALL_DATASETS[@]}")
 else
-    # A single key or a comma-separated subset, e.g. mmlu_pro,lexam.
-    IFS=',' read -r -a DATASETS <<< "$DATASET_ARG"
+    DATASETS=("${DATASET_ARGS[@]}")
     for ds in "${DATASETS[@]}"; do
         if [[ " ${ALL_DATASETS[*]} " != *" $ds "* ]]; then
-            echo "ERROR: unknown dataset '$ds'. Valid: ${ALL_DATASETS[*]} (or ALL, or a comma-separated subset)."
-            exit 1
+            echo "ERROR: unknown dataset '$ds'. Valid: ${ALL_DATASETS[*]} (or ALL)."; exit 1
         fi
     done
 fi
 
-if [[ "$HINT_ARG" == "ALL" ]]; then
+if printf '%s\n' "${HINT_ARGS[@]}" | grep -qx "ALL"; then
     HINT_TYPES=("${ALL_HINTS[@]}")
 else
-    # A single hint type or a comma-separated subset, e.g. professor,metadata.
-    IFS=',' read -r -a HINT_TYPES <<< "$HINT_ARG"
+    HINT_TYPES=("${HINT_ARGS[@]}")
     for hint in "${HINT_TYPES[@]}"; do
         if [[ " ${ALL_HINTS[*]} " != *" $hint "* ]]; then
-            echo "ERROR: unknown hint type '$hint'. Valid: ${ALL_HINTS[*]} (or ALL, or a comma-separated subset)."
-            exit 1
+            echo "ERROR: unknown hint type '$hint'. Valid: ${ALL_HINTS[*]} (or ALL)."; exit 1
         fi
     done
 fi
