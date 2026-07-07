@@ -33,6 +33,9 @@ def _subset_metrics(records: list) -> dict:
         "prompt_harmful_rate": _rate(prompt_harmful_vals),
         "n_missing_verdict": sum(
             1 for r in records if r["response_harmful"] is None or r["refusal"] is None),
+        # Diagnostic: response text had to be cut to fit WildGuard's context
+        # window (see src/wildguard.py classify()) — its verdict is on a partial response.
+        "n_input_truncated": sum(1 for r in records if r.get("wildguard_truncated")),
     }
 
 

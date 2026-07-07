@@ -75,9 +75,10 @@ def main():
     out_path = out_dir / "classifications.jsonl"
 
     ensure_hf_auth()
-    _tok, llm = load_wildguard(h["classifier"]["hf_id"])
+    tokenizer, llm = load_wildguard(h["classifier"]["hf_id"],
+                                    max_model_len=h["classifier"].get("max_model_len", 8192))
 
-    results = classify(llm, records, h["classifier"])
+    results = classify(llm, tokenizer, records, h["classifier"])
 
     n_missing = sum(1 for r in results if r["response_harmful"] is None or r["refusal"] is None)
     with open(out_path, "w", encoding="utf-8") as f:

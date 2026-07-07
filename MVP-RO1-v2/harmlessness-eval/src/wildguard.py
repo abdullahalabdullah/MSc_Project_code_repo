@@ -78,27 +78,66 @@ def parse_verdict(text: str) -> dict:
     }
 
 
-def classify(llm, records: list, classifier_cfg: dict) -> list:
+def _fit_response(tokenizer, user_prompt: str, response: str, budget: int) -> tuple[str, bool]:
+    """Truncate `response` (from the end) so build_prompt(...) tokenizes within `budget`.
+
+    Target-model generations can run away (e.g. an unclosed <think> tag eats the
+    whole max_new_tokens budget), producing a (prompt, response) pair far longer
+    than WildGuard's own context window. vLLM validates the WHOLE batch before
+    generating a single one, so one oversized record crashes every record in the
+    same `llm.generate` call — truncate instead of crashing. `user_prompt` is
+    kept intact (it's the fixed WildJailbreak query and is what's being judged
+    for harm); `response` absorbs the cut. Returns (possibly-truncated response,
+    whether truncation happened).
+    """
+    full_ids = tokenizer(build_prompt(user_prompt, response), add_special_tokens=False).input_ids
+    if len(full_ids) <= budget:
+        return response, False
+    resp_ids = tokenizer(response, add_special_tokens=False).input_ids
+    overflow = len(full_ids) - budget
+    if overflow >= len(resp_ids):
+        # Even an empty response wouldn't fit (the user_prompt alone is the problem).
+        return "", True
+    return tokenizer.decode(resp_ids[:len(resp_ids) - overflow]), True
+
+
+def classify(llm, tokenizer, records: list, classifier_cfg: dict) -> list:
     """Classify a list of {prompt, response, ...} records with WildGuard.
 
     Each record must carry `prompt` and `response` (the text to judge — the
     visible answer for classify_target="answer"). Returns the same records
-    augmented with `wildguard_raw` and the parsed booleans (`prompt_harmful`,
-    `refusal`, `response_harmful`). Issued as a single batched generate call.
+    augmented with `wildguard_raw`, `wildguard_truncated` (input had to be cut
+    to fit WildGuard's context window), and the parsed booleans
+    (`prompt_harmful`, `refusal`, `response_harmful`). Issued as a single
+    batched generate call, so every record must fit `max_model_len` first.
     """
     from vllm import SamplingParams
 
-    sampling = SamplingParams(
-        n=1,
-        temperature=0.0,       # deterministic classification
-        max_tokens=classifier_cfg.get("max_new_tokens", 128),
-    )
-    prompts = [build_prompt(r["prompt"], r["response"]) for r in records]
+    max_model_len = classifier_cfg.get("max_model_len", 8192)
+    max_new_tokens = classifier_cfg.get("max_new_tokens", 128)
+    # Reserve room for the generated output plus a small safety margin (vLLM's
+    # own BOS/special-token accounting can differ slightly from a raw tokenizer count).
+    budget = max_model_len - max_new_tokens - 8
+
+    sampling = SamplingParams(n=1, temperature=0.0, max_tokens=max_new_tokens)
+
+    prompts = []
+    truncated_flags = []
+    for r in records:
+        fitted, truncated = _fit_response(tokenizer, r["prompt"], r["response"], budget)
+        prompts.append(build_prompt(r["prompt"], fitted))
+        truncated_flags.append(truncated)
+    n_truncated = sum(truncated_flags)
+    if n_truncated:
+        print(f"  WARNING: {n_truncated}/{len(records)} responses were truncated to fit "
+              f"WildGuard's max_model_len={max_model_len} (runaway generations) — "
+              f"judged on a partial response.")
+
     outputs = llm.generate(prompts, [sampling] * len(prompts))
 
     results = []
-    for rec, out in zip(records, outputs):
+    for rec, out, truncated in zip(records, outputs, truncated_flags):
         text = out.outputs[0].text
         verdict = parse_verdict(text)
-        results.append({**rec, "wildguard_raw": text, **verdict})
+        results.append({**rec, "wildguard_raw": text, "wildguard_truncated": truncated, **verdict})
     return results

@@ -17,6 +17,29 @@ this module is cheap and safe, matching the rest of src/.
 from pathlib import Path
 
 
+def cleanup_hf_cache(repo_id: str) -> None:
+    """Best-effort delete of `repo_id`'s snapshot from the local HF hub cache.
+
+    Called after a base model has been merged into an adapter and saved to
+    `out_dir` — the cache copy is now redundant (its weights live on disk in
+    the merged output), so freeing it keeps small container disks (e.g.
+    RunPod's default 20-30GB) from filling up. Never raises: a failed cleanup
+    just leaves disk usage higher, it doesn't affect correctness.
+    """
+    try:
+        from huggingface_hub import scan_cache_dir
+        cache_info = scan_cache_dir()
+        for repo in cache_info.repos:
+            if repo.repo_id == repo_id:
+                revisions = {rev.commit_hash for rev in repo.revisions}
+                strategy = cache_info.delete_revisions(*revisions)
+                print(f"Freeing {strategy.expected_freed_size_str} from HF cache "
+                      f"for {repo_id} (merged; no longer needed on disk) ...")
+                strategy.execute()
+    except Exception as e:
+        print(f"WARNING: could not clean HF cache for {repo_id}: {e}")
+
+
 def merge_adapter(base: str, adapter: str, out_dir, force: bool = False,
                   dtype: str = "bfloat16") -> Path:
     """Merge a LoRA adapter into `base` and save the full model to `out_dir`.
@@ -25,8 +48,15 @@ def merge_adapter(base: str, adapter: str, out_dir, force: bool = False,
     adapter: HF repo id (or local dir) of the adapter-only checkpoint.
     out_dir: local directory to write the merged model + tokenizer to.
     force:   re-merge even if `out_dir` already holds a merged model. Default
-             False: an existing merge (detected via config.json) is reused, so
-             repeated --merge runs of the same adapter don't redo the work.
+             False: an existing merge (detected via config.json) is reused if
+             present. In normal operation (via 02_run_inference_qwen.py --merge)
+             `out_dir` won't be there on the next call — the caller deletes it
+             right after vLLM loads it, and this function frees the base
+             model's own HF cache too — trading re-download/re-merge time on
+             the next run for not needing a large container disk. This fast
+             path only fires if that cleanup didn't happen (e.g. a crash
+             between merge and vLLM load, or the merge_and_push.py caller,
+             which needs `out_dir` to persist for the Hub push).
 
     The tokenizer is taken from the adapter repo when it ships one (it carries
     any training-time chat template / added tokens), falling back to the base's.
@@ -66,4 +96,8 @@ def merge_adapter(base: str, adapter: str, out_dir, force: bool = False,
         tokenizer = AutoTokenizer.from_pretrained(base)
     tokenizer.save_pretrained(out_dir)
     print(f"Merged model + tokenizer saved to {out_dir}")
+
+    del base_model, model, merged
+    cleanup_hf_cache(base)
+
     return out_dir

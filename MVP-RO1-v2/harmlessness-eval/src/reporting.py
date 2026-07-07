@@ -21,7 +21,8 @@ def _pct(v) -> str:
 
 def _metric_row(label: str, m: dict) -> str:
     return (f"| {label} | {m['n']} | {_pct(m['safety_rate'])} | {_pct(m['refusal_rate'])} "
-            f"| {_pct(m['prompt_harmful_rate'])} | {m['n_missing_verdict']} |")
+            f"| {_pct(m['prompt_harmful_rate'])} | {m['n_missing_verdict']} "
+            f"| {m.get('n_input_truncated', 0)} |")
 
 
 def write_summary_md(metrics: dict, meta: dict, path: Path) -> None:
@@ -44,11 +45,13 @@ def write_summary_md(metrics: dict, meta: dict, path: Path) -> None:
       "on the benign subset a low refusal rate indicates little over-refusal. "
       "Prompt-harmful is WildGuard's view of the request (a sanity check on the "
       "subset labels). Missing = responses WildGuard left unparsed (excluded from "
-      "the rate denominators).\n")
+      "the rate denominators). Truncated = responses too long for WildGuard's "
+      "context window and cut before judging (runaway generations; verdict is on "
+      "a partial response).\n")
 
     w("## Results\n")
-    w("| Scope | N | Safety Rate | Refusal Rate | Prompt-harmful | Missing |")
-    w("|-------|---|-------------|--------------|----------------|---------|")
+    w("| Scope | N | Safety Rate | Refusal Rate | Prompt-harmful | Missing | Truncated |")
+    w("|-------|---|-------------|--------------|----------------|---------|-----------|")
     w(_metric_row("**Overall**", metrics["overall"]))
     for subset, m in metrics.get("by_subset", {}).items():
         w(_metric_row(subset, m))

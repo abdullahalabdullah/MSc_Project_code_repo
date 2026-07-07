@@ -28,7 +28,11 @@ Options:
                     base from the config `merge:` block (always the same base),
                     save the merged model locally under merge.out_root, and run
                     inference on that. Output dirs stay namespaced by the
-                    ADAPTER id, so downstream steps use the same --model.
+                    ADAPTER id, so downstream steps use the same --model. The
+                    base model's HF cache and the local merged dir are both
+                    freed automatically once vLLM has loaded them (see
+                    src/merge.py) — a deliberate disk-over-time tradeoff for
+                    small container disks (e.g. RunPod's default 20-30GB).
 
 Input:
     data/{dataset}/dataset_index.json
@@ -128,6 +132,15 @@ def main():
 
     # Load model once — reused across all datasets.
     tokenizer, llm = load_qwen_model(model_cfg)
+
+    # vLLM has now loaded the merged weights into GPU memory — the on-disk
+    # merged dir is redundant. Free it so it doesn't sit around filling a
+    # small container disk. A re-run of --merge for this adapter just
+    # re-merges (slower, not broken).
+    if args.merge:
+        import shutil
+        shutil.rmtree(merged_dir, ignore_errors=True)
+        print(f"Freed local merged model dir {merged_dir} (already loaded into vLLM).")
 
     for ds in datasets:
         # Namespace outputs model-first: outputs/{model}/{ds}/{hint}/ — the

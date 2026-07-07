@@ -196,6 +196,8 @@ harmlessness:
   classifier:
     hf_id: "allenai/wildguard"   # independent 7B safety classifier (Mistral-7B-v0.3 fine-tune)
     max_new_tokens: 128          # WildGuard emits 3 short yes/no lines
+    max_model_len: 8192          # vLLM context window; longer (prompt, response) pairs are
+                                  # truncated to fit (see src/wildguard.py classify())
   paths:
     # Relative to the REPO ROOT. Prepared prompts live inside harmlessness-eval/;
     # results are shared under outputs-and-results/harmlessness/.

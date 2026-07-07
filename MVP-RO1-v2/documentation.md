@@ -63,7 +63,12 @@ it), add `--merge` (default: off) to `run_inference.sh`: step 2 then merges the
 adapter into the fixed base from the config `merge:` block (always the same
 base) into a local dir and runs inference on that; output dirs stay namespaced
 by the **adapter** id, so `run_monitor_and_results.sh` takes the same
-`<model_id>` unchanged. Optional env knobs for
+`<model_id>` unchanged. Once vLLM has loaded the merged weights, the base
+model's HF cache and the local merged dir are both **freed automatically**
+(`src/merge.py` / `02_run_inference_qwen.py`) — a deliberate disk-over-time
+tradeoff so `--merge` doesn't need a large container disk; re-running
+`--merge` for the same adapter re-downloads/re-merges rather than reusing a
+cached copy. Optional env knobs for
 `run_inference.sh`: `N_EXAMPLES=50` (examples/dataset), `N_SAMPLES=8`
 (samples/arm; the `--N` flag takes precedence over the env var),
 `FORCE_PREPARE=true` (rebuild indexes). Both scripts are
@@ -341,7 +346,7 @@ and the Phase-3 line in `run_monitor_and_results.sh` — the metric computation
 - `dataset.py` — per-dataset loaders + filtering, uniform (one/two-level) stratified sampling, 3–10-option (A–J) normalisation, hint-*target* assignment, `model_dir_name` (folder-safe model name from an HF ID), `resolve_paths` (namespaces by **model** / dataset / **hint type**), `ensure_hf_auth`.
 - `hints.py` — the hint-type registry (`HINT_TYPES`) plus both prompt builders: `render_hint` (the hinted-arm inference prefix + options block) and `monitor_hint_fields` (the per-type HINT description + acknowledgment guideline used by the monitor) for each type (professor, visual_pattern, metadata, wrong_few_shot, grader_hacking, unethical). Reads per-type wording from the config `hint:` block. The unhinted arm never calls `render_hint`.
 - `inference.py` — shared prompt construction (`build_user_content`, which delegates the hint to `hints.render_hint`) and answer parsing.
-- `merge.py` — `merge_adapter(base, adapter, out_dir)`: merges a LoRA adapter-only checkpoint into a base model (PEFT `merge_and_unload`) and saves a full vLLM-loadable model + tokenizer (adapter's tokenizer preferred, base fallback) to `out_dir`; idempotent (an existing merge is reused unless `force=True`). Backs both `02 --merge` (local merge, base from config `merge.base`) and `scripts/merge_and_push.py` (explicit base, then Hub push).
+- `merge.py` — `merge_adapter(base, adapter, out_dir)`: merges a LoRA adapter-only checkpoint into a base model (PEFT `merge_and_unload`) and saves a full vLLM-loadable model + tokenizer (adapter's tokenizer preferred, base fallback) to `out_dir`; an existing merge at `out_dir` is reused unless `force=True` (fallback path — see below). Also frees the base model's local HF cache via `cleanup_hf_cache(base)` once the merge is saved, since its weights now live in `out_dir`. Backs both `02 --merge` (local merge, base from config `merge.base`) and `scripts/merge_and_push.py` (explicit base, then Hub push). `02 --merge` additionally deletes `out_dir` itself right after vLLM loads it — so in normal operation neither the base cache nor the merged dir persists between runs; the `force=False` reuse path in `merge_adapter` only matters if that cleanup didn't happen (crash between merge and vLLM load) or for callers like `merge_and_push.py` that need `out_dir` to persist. Deliberate disk-over-time tradeoff: re-running `--merge` for the same adapter re-downloads/re-merges rather than reusing a cached copy, so small container disks (e.g. RunPod's default 20-30GB) don't fill up.
 - `inference_qwen.py` — Qwen3 thinking-mode inference (chat template, `<think>` handling, vLLM). Reuses `_SYSTEM_PROMPT` / `build_user_content` / `extract_cot` / `parse_answer` from `inference.py` (shared base); threads `hint_type` into the prompt and into the output dir. **vLLM throughput:** the engine loads with `enable_prefix_caching=True` (shared system-prompt/instance prefixes reuse cached KV), and each checkpoint's full request set — `checkpoint_every × n_samples × 2 arms` — is issued in a **single `llm.generate` call** so continuous batching keeps the GPU saturated (one decode drain-tail per checkpoint, not one per sample×arm). Both are scheduling-only: per-request seeds/params and outputs are unchanged.
 - `monitor.py` — calls the monitor LLM on **every** response in **both** arms
   (`hint_answer = hint_target` even for X=0), seeing only the model's response text
@@ -448,7 +453,12 @@ directly). Step 2 merges it locally into the fixed base from the config
 `merge:` block (`src/merge.py`, duplicated from monitorability-eval's on
 purpose — same independence rule as the rest of `src/`) and runs inference on
 the merged dir; outputs stay namespaced by the adapter id so steps 3-5 are run
-with the same `--model`.
+with the same `--model`. Once vLLM has loaded the merged weights, the base
+model's HF cache and the local merged dir are both **freed automatically**
+(a deliberate disk-over-time tradeoff — re-running `--merge` for the same
+adapter re-downloads/re-merges rather than reusing a cached copy), so this
+step doesn't need a large container disk before WildGuard's own ~14.5GB
+download in phase 3.
 
 If phase 2 (inference) already succeeded but a later phase failed (e.g. disk
 full downloading WildGuard, dropped connection) don't re-run
@@ -500,7 +510,7 @@ python harmlessness-eval/scripts/05_generate_reports.py --model Qwen/Qwen3-4B
 | `limit` | `null` = full eval set; an int caps the prompt count for a quick test. |
 | `generation` | `enable_thinking: true`, `n_samples: 1`. Temperature/top_p/top_k/max_new_tokens are reused from the `qwen_inference` block so both evals generate identically. |
 | `classify_target` | `answer` (visible response after `</think>`, default) or `full` (whole generation). |
-| `classifier` | WildGuard `hf_id` + `max_new_tokens`. |
+| `classifier` | WildGuard `hf_id`, `max_new_tokens`, and `max_model_len` (vLLM context window — records whose (prompt, response) would exceed it are truncated to fit; see `src/wildguard.py`). |
 | `paths` | `data_dir` (`harmlessness-eval/data`) + the three shared result dirs under `outputs-and-results/harmlessness/`. |
 
 ## Source files (`harmlessness-eval/src/`)
@@ -513,10 +523,22 @@ python harmlessness-eval/scripts/05_generate_reports.py --model Qwen/Qwen3-4B
   generation and keeps the visible answer.
 - `merge.py` — `merge_adapter`, copied verbatim from the monitorability eval's
   `src/merge.py`. Merges an adapter-only checkpoint into its base model locally
-  so vLLM can load it; used by `02_run_inference.py --merge`.
+  so vLLM can load it; used by `02_run_inference.py --merge`. Frees the base
+  model's HF cache once merged (`cleanup_hf_cache`); `02_run_inference.py`
+  deletes the merged dir itself right after vLLM loads it — so `--merge` runs
+  don't need a large container disk, at the cost of re-merging from scratch
+  on the next run of the same adapter.
 - `wildguard.py` — `load_wildguard`, the exact WildGuard instruction template,
-  and `parse_verdict` / `classify` (three yes/no lines → booleans).
-- `metrics.py` — Safety Rate + Refusal Rate, overall and per subset.
+  and `parse_verdict` / `classify` (three yes/no lines → booleans). `classify`
+  issues ALL records as one batched `llm.generate` call, so every (prompt,
+  response) pair must fit `classifier.max_model_len` first: `_fit_response`
+  truncates an overlong `response` (from the end, via the WildGuard tokenizer)
+  down to a token budget — guards against a runaway target-model generation
+  (e.g. an unclosed `<think>` tag) crashing the whole classification run.
+  Truncated records are flagged `wildguard_truncated: true` in the output.
+- `metrics.py` — Safety Rate + Refusal Rate, overall and per subset, plus the
+  `n_input_truncated` diagnostic (count of `wildguard_truncated` records —
+  their verdict is on a partial response).
 - `reporting.py` — the only `.md` writer (separable; deletable for a public release).
 
 ## Outputs layout
@@ -525,7 +547,7 @@ python harmlessness-eval/scripts/05_generate_reports.py --model Qwen/Qwen3-4B
 harmlessness-eval/data/wildjailbreak_eval/prompts.jsonl   # prepared prompts (NOT a result)
 outputs-and-results/harmlessness/
 ├── responses/{model}/responses.jsonl          # one record per (prompt, sample): raw_output, thinking, answer, ...
-├── wildguard/{model}/classifications.jsonl     # per response: prompt_harmful / refusal / response_harmful
+├── wildguard/{model}/classifications.jsonl     # per response: prompt_harmful / refusal / response_harmful / wildguard_truncated
 └── analysis/{model}/metrics.json, per_prompt.csv, harmlessness_summary.md
 ```
 

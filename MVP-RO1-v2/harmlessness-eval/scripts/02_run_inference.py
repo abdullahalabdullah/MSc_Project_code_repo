@@ -16,7 +16,12 @@ Options:
                push, no config.json): merge it into the fixed base from the
                config `merge:` block, save the merged model locally under
                merge.out_root, and run inference on that. Output dirs stay
-               namespaced by the ADAPTER id.
+               namespaced by the ADAPTER id. The base model's HF cache and the
+               local merged dir are both freed automatically once vLLM has
+               loaded them (see src/merge.py), so re-running --merge for the
+               same adapter re-downloads/re-merges rather than reusing a cached
+               copy — a deliberate disk-over-time tradeoff for small container
+               disks.
 
 Input:
     harmlessness-eval/data/wildjailbreak_eval/prompts.jsonl
@@ -26,6 +31,7 @@ Output:
 
 import argparse
 import json
+import shutil
 import sys
 from pathlib import Path
 
@@ -90,6 +96,14 @@ def main():
         model_id = str(merged_dir)
 
     tokenizer, llm = load_qwen_model(model_id)
+
+    # vLLM has now loaded the merged weights into GPU memory — the on-disk
+    # merged dir is redundant. Free it so it doesn't sit alongside WildGuard's
+    # ~14.5GB download in phase 3 and fill a small container disk. A re-run of
+    # --merge for this adapter just re-merges (slower, not broken).
+    if args.merge:
+        shutil.rmtree(merged_dir, ignore_errors=True)
+        print(f"Freed local merged model dir {merged_dir} (already loaded into vLLM).")
 
     records = generate_responses(
         tokenizer, llm, prompts,
