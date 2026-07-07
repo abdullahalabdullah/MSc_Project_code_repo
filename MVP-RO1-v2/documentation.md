@@ -450,6 +450,19 @@ purpose — same independence rule as the rest of `src/`) and runs inference on
 the merged dir; outputs stay namespaced by the adapter id so steps 3-5 are run
 with the same `--model`.
 
+If phase 2 (inference) already succeeded but a later phase failed (e.g. disk
+full downloading WildGuard, dropped connection) don't re-run
+`run_harmlessness.sh` — it has no skip-if-exists check and would regenerate all
+responses from scratch. Instead resume from WildGuard onward:
+
+```bash
+bash harmlessness-eval/resume_from_wildguard.sh er-abd/harmless-dpo-qwen3-4B-pilot
+```
+
+It requires `…/harmlessness/responses/{model}/responses.jsonl` to already
+exist, then runs steps 3-5 (WildGuard classification, metrics, report) and
+commits + pushes, same fail-soft/logging conventions as `run_harmlessness.sh`.
+
 ## Pipeline at a glance
 
 | Step | Script | In → Out |
