@@ -8,14 +8,20 @@ Only the transport changes, so `03_run_monitor.py --backend local` writes
 monitor_results.jsonl with exactly the same schema as the API backend and
 steps 04-09 work unchanged.
 
-Qwen3-specific handling (config `monitor.local`, default Qwen/Qwen3-8B):
-  * Qwen3 is a hybrid *reasoning* model with a ChatML template
-    (`<|im_start|>/<|im_end|>`) that differs from the GPT chat API: the
-    thinking/non-thinking switch is a template argument, not a sampling flag.
-    The monitor prompt is rendered with `apply_chat_template(...,
-    enable_thinking=False)` — the template then pre-fills an empty
-    `<think>\n\n</think>` block so the model answers directly (no CoT), which
-    is what we want from a deterministic classifier.
+Which model runs is picked from the config `monitor.local.models` registry
+(via `resolve_local_monitor_cfg`): `monitor.local.default` names the entry used
+when `03 --monitor-model` is omitted. Every entry is rendered with its own
+model's chat template, so adding a monitor = adding a registry entry (e.g.
+`qwen3_8b` = Qwen/Qwen3-8B, `gemma_e4b` = google/gemma-4-E4B-it).
+
+Model-specific handling:
+  * Hybrid *reasoning* models (Qwen3): the thinking/non-thinking switch is a
+    chat-template argument, not a sampling flag. When a registry entry sets
+    `enable_thinking`, it is passed to `apply_chat_template` — with False the
+    Qwen3 template pre-fills an empty `<think>\n\n</think>` block so the model
+    answers directly (no CoT), which is what we want from a deterministic
+    classifier. Entries WITHOUT the key (Gemma, Llama, ...) don't pass the
+    argument at all, since their templates have no such switch.
   * Decoding is greedy: temperature 0 (vLLM's equivalent of
     `do_sample=False`), 1 sample, `max_new_tokens` new tokens, fixed seed.
   * Defensive parsing: if the model still emits a `<think>...</think>` block,
@@ -33,6 +39,29 @@ parse_failure records instead of crashing the whole generate call.
 from src.monitor import build_monitor_prompt, parse_monitor_output_v2
 
 _THINK_CLOSE = "</think>"
+
+
+def resolve_local_monitor_cfg(mon_cfg: dict, key: str | None = None) -> tuple[str, dict]:
+    """Resolve the config `monitor:` block to (monitor_key, model_cfg).
+
+    `key` is the `--monitor-model` selection; None picks `monitor.local.default`.
+    Two `monitor.local` shapes are supported:
+      * registry: `local: {default: <key>, models: {<key>: {...}, ...}}`
+      * flat (legacy): `local: {model: ..., ...}` — one unnamed entry; only
+        selectable as the default.
+    """
+    local = mon_cfg.get("local", {}) or {}
+    models = local.get("models")
+    if not models:
+        if key not in (None, "default"):
+            raise ValueError(
+                f"config monitor.local has no 'models' registry; cannot select '{key}'.")
+        return "default", local
+    key = key or local.get("default")
+    if key not in models:
+        raise ValueError(
+            f"unknown local monitor '{key}'. Available: {', '.join(sorted(models))}")
+    return key, models[key]
 
 
 def load_local_monitor(local_cfg: dict):
@@ -68,13 +97,16 @@ def load_local_monitor(local_cfg: dict):
 
 def format_monitor_prompt_local(tokenizer, model_response: str, hint_answer: str,
                                 hint_type: str = "professor", hint_cfg: dict | None = None,
-                                enable_thinking: bool = False) -> str:
+                                enable_thinking: bool | None = None) -> str:
     """Render the monitor prompt through the local model's own chat template.
 
     The user content is byte-identical to what the API backend sends
-    (src/monitor.build_monitor_prompt); only the chat framing differs
-    (Qwen3 ChatML instead of the OpenAI messages API), plus the
-    `enable_thinking` template switch.
+    (src/monitor.build_monitor_prompt); only the chat framing differs (the
+    monitor model's own template instead of the OpenAI messages API).
+
+    `enable_thinking` is the hybrid-reasoning template switch (Qwen3): pass
+    True/False for models whose template has it; pass None for models without
+    one (Gemma, Llama, ...) and the argument is not forwarded at all.
     """
     user_prompt = build_monitor_prompt(
         model_response=model_response,
@@ -82,11 +114,12 @@ def format_monitor_prompt_local(tokenizer, model_response: str, hint_answer: str
         hint_type=hint_type,
         hint_cfg=hint_cfg,
     )
+    template_kwargs = {} if enable_thinking is None else {"enable_thinking": enable_thinking}
     return tokenizer.apply_chat_template(
         [{"role": "user", "content": user_prompt}],
         tokenize=False,
         add_generation_prompt=True,
-        enable_thinking=enable_thinking,
+        **template_kwargs,
     )
 
 
@@ -109,7 +142,7 @@ def classify_batch(records: list, tokenizer, llm, local_cfg: dict,
     """
     from vllm import SamplingParams
 
-    enable_thinking = bool(local_cfg.get("enable_thinking", False))
+    enable_thinking = local_cfg.get("enable_thinking")  # None = template has no switch
     max_new_tokens = int(local_cfg.get("max_new_tokens", 256))
     prompt_budget = int(local_cfg.get("max_model_len", 20480)) - max_new_tokens
 

@@ -13,9 +13,9 @@
 #              Every token after --dataset (until --hint) is a dataset; tokens may
 #              be space- and/or comma-separated (mmlu_pro lexam == mmlu_pro,lexam).
 #              ALL selects every key.
-#   --hint     REQUIRED. One or more hint types (professor, visual_pattern,
-#              metadata, wrong_few_shot, grader_hacking, unethical); same
-#              space/comma rules. ALL selects every type.
+#   --hint     REQUIRED. One or more hint types (professor, grader_hacking,
+#              unethical — the active set in config hint.types; same space/comma
+#              rules). ALL selects every active type.
 #   (--dataset and --hint may appear in any order.)
 #
 # Examples:

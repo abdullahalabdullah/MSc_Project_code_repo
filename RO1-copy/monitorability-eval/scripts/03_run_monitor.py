@@ -16,10 +16,15 @@ are comparable. Supports resume-on-restart (shared across backends).
 Two interchangeable monitor backends (--backend, default: config monitor.backend):
   api    — OpenAI chat-completions (config monitor.model, e.g. gpt-5-mini),
            threaded with rate-limit back-off. Requires OPENAI_API_KEY in the env.
-  local  — a local vLLM engine (config monitor.local, default Qwen/Qwen3-8B,
-           bfloat16, non-thinking chat template, greedy, 256 new tokens, seed 42;
-           see src/monitor_local.py). Requires a GPU; no API key.
-Both run the identical monitor prompt and write the identical output schema.
+  local  — a local vLLM engine (see src/monitor_local.py). WHICH model runs is
+           picked from the config monitor.local.models registry via
+           --monitor-model (default: monitor.local.default = qwen3_8b; also
+           gemma_e4b). All entries: bfloat16, greedy, 256 new tokens, seed 42.
+           Requires a GPU; no API key. A NON-default --monitor-model writes to
+           monitor_outputs/.../{hint_type}/{monitor_key}/ so different monitors
+           never mix results or resume state.
+Both run the identical monitor prompt and write the identical output schema;
+every line records its `monitor_model`.
 
 Usage:
     OPENAI_API_KEY=<key> python scripts/03_run_monitor.py --model Qwen/Qwen3-4B \
@@ -36,6 +41,8 @@ Usage:
       --hint-type  hint type to monitor (default: config hint.default; must match
                    the inference run). Namespaces I/O paths.
       --backend    monitor backend: api or local (default: config monitor.backend)
+      --monitor-model  local backend only: monitor.local.models registry key
+                   (default: config monitor.local.default)
 
 Input:
     outputs/{model_name}/{dataset}/{hint_type}/hinted.jsonl
@@ -44,6 +51,7 @@ Input:
 Output:
     monitor_outputs/{model_name}/{dataset}/{hint_type}/monitor_results.jsonl
     monitor_outputs/{model_name}/{dataset}/{hint_type}/monitor_progress.json
+    (non-default --monitor-model: same two files under .../{hint_type}/{monitor_key}/)
 """
 
 import argparse
@@ -68,9 +76,13 @@ MIN_WORKERS = 8  # floor for automatic rate-limit back-off
 BACKENDS = ("api", "local")
 
 
-def make_output(record: dict, result: dict) -> dict:
-    """Build one monitor_results.jsonl line (schema shared by both backends)."""
+def make_output(record: dict, result: dict, monitor_model: str) -> dict:
+    """Build one monitor_results.jsonl line (schema shared by both backends).
+
+    `monitor_model` records WHICH monitor produced the line (API model id or
+    local HF id), so results from different monitors are always attributable."""
     return {
+        "monitor_model": monitor_model,
         "instance_id": record["instance_id"],
         "sample_idx": record["sample_idx"],
         "arm": record["arm"],
@@ -159,7 +171,8 @@ def run_api_backend(pending, done_keys, out_path, progress_path,
                         pbar.update(1)
                         continue
 
-                    out_f.write(json.dumps(make_output(record, result), ensure_ascii=False) + "\n")
+                    out_f.write(json.dumps(make_output(record, result, mon_cfg["model"]),
+                                           ensure_ascii=False) + "\n")
                     out_f.flush()
 
                     done_keys.add((record["instance_id"], record["sample_idx"], record["arm"]))
@@ -180,7 +193,7 @@ def run_api_backend(pending, done_keys, out_path, progress_path,
 
 
 def run_local_backend(pending, done_keys, out_path, progress_path,
-                      config, hint_type, desc, engine):
+                      config, local_cfg, hint_type, desc, engine):
     """Monitor via a local vLLM engine (config monitor.local; see src/monitor_local.py).
 
     `engine` is a preloaded (tokenizer, llm) pair from load_local_monitor —
@@ -196,7 +209,6 @@ def run_local_backend(pending, done_keys, out_path, progress_path,
     (512 ≫ it) — it is a checkpointing knob, not a GPU-utilization knob."""
     from src.monitor_local import classify_batch
 
-    local_cfg = config["monitor"].get("local", {})
     hint_cfg = config.get("hint", {})
     batch_size = int(local_cfg.get("batch_size", 512))
 
@@ -213,7 +225,8 @@ def run_local_backend(pending, done_keys, out_path, progress_path,
                                          hint_type=hint_type, hint_cfg=hint_cfg)
 
                 for record, result in zip(batch, results):
-                    out_f.write(json.dumps(make_output(record, result), ensure_ascii=False) + "\n")
+                    out_f.write(json.dumps(make_output(record, result, local_cfg["model"]),
+                                           ensure_ascii=False) + "\n")
                     done_keys.add((record["instance_id"], record["sample_idx"], record["arm"]))
                     total += 1
                     if result.get("parse_failure"):
@@ -249,6 +262,11 @@ def main():
                         help="Monitor backend: 'api' (OpenAI, needs OPENAI_API_KEY) or "
                              "'local' (vLLM on a GPU, config monitor.local). "
                              "Default: config monitor.backend (api).")
+    parser.add_argument("--monitor-model", default=None,
+                        help="Local backend only: which config monitor.local.models "
+                             "entry to run (e.g. qwen3_8b, gemma_e4b). Default: config "
+                             "monitor.local.default. A NON-default choice writes to a "
+                             "'{key}/' subdir of the monitor dir so monitors never mix.")
     args = parser.parse_args()
 
     root = Path(__file__).resolve().parents[2]
@@ -262,6 +280,26 @@ def main():
     if backend not in BACKENDS:
         print(f"ERROR: unknown monitor backend '{backend}' (valid: {', '.join(BACKENDS)}).")
         sys.exit(1)
+    if args.monitor_model and backend != "local":
+        print("ERROR: --monitor-model only applies to --backend local "
+              "(the api backend's model is config monitor.model).")
+        sys.exit(1)
+
+    # Local backend: resolve WHICH local monitor runs (config monitor.local.models
+    # registry). A non-default choice gets its own subdir under the monitor dir so
+    # two monitors on the same run never share results or resume state.
+    local_cfg = None
+    mon_subdir = None
+    if backend == "local":
+        from src.monitor_local import resolve_local_monitor_cfg
+        try:
+            mon_key, local_cfg = resolve_local_monitor_cfg(config["monitor"], args.monitor_model)
+        except ValueError as e:
+            print(f"ERROR: {e}")
+            sys.exit(1)
+        default_key = (config["monitor"].get("local", {}) or {}).get("default", "default")
+        if mon_key != default_key:
+            mon_subdir = mon_key
 
     datasets = [d for tok in args.dataset for d in tok.split(",") if d]
     model_name = model_dir_name(args.model)
@@ -279,19 +317,20 @@ def main():
             sys.exit(1)
         runs.append((dataset, paths, hinted_path, unhinted_path))
 
-    monitor_id = (config["monitor"].get("local", {}).get("model", "Qwen/Qwen3-8B")
-                  if backend == "local" else config["monitor"]["model"])
+    monitor_id = local_cfg["model"] if backend == "local" else config["monitor"]["model"]
 
     # Local backend: load the monitor engine ONCE, reuse across all datasets.
     engine = None
     if backend == "local":
         from src.monitor_local import load_local_monitor
-        engine = load_local_monitor(config["monitor"].get("local", {}))
+        engine = load_local_monitor(local_cfg)
 
     grand_total = 0
     grand_failures = 0
     for dataset, paths, hinted_path, unhinted_path in runs:
         mon_dir = paths["monitor_dir"]
+        if mon_subdir:
+            mon_dir = mon_dir / mon_subdir
         mon_dir.mkdir(parents=True, exist_ok=True)
         out_path = mon_dir / "monitor_results.jsonl"
         progress_path = mon_dir / "monitor_progress.json"
@@ -321,7 +360,8 @@ def main():
         desc = f"{model_name}/{dataset}"
         if backend == "local":
             total, failure_count = run_local_backend(
-                pending, done_keys, out_path, progress_path, config, hint_type, desc, engine)
+                pending, done_keys, out_path, progress_path, config, local_cfg,
+                hint_type, desc, engine)
         else:
             total, failure_count = run_api_backend(
                 pending, done_keys, out_path, progress_path, config, hint_type, desc)

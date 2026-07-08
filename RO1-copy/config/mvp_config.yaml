@@ -166,20 +166,43 @@ monitor:
   backoff_factor: 2.0
   timeout: 60
   # Local (GPU) backend settings — used only with --backend local.
+  # `models:` is a registry of local monitor models; `default` picks the one used
+  # when `03 --monitor-model` is omitted. Selecting a NON-default entry writes its
+  # results to a `<key>/` subdir of the monitor dir (so two monitors on the same
+  # run never mix or resume-collide). Every entry must be an architecture the
+  # pinned vLLM (0.8.5) can load. Per-entry keys:
+  #   model/dtype/temperature/n_samples/max_new_tokens/seed — sampling recipe
+  #     (temperature 0 = greedy, the do_sample=False equivalent)
+  #   enable_thinking — chat-template switch for hybrid-reasoning models (Qwen3);
+  #     OMIT it for models whose template has no such switch (Gemma, Llama, ...)
+  #   batch_size — monitor calls per vLLM generate call (= resume granularity)
+  #   max_model_len — prompt budget: monitored raw_output can be up to 16384
+  #     tokens (inference max_new_tokens) + monitor template ~500 + 256 output
+  #     → 20480 with headroom
   local:
-    model: "Qwen/Qwen3-8B"
-    dtype: "bfloat16"
-    enable_thinking: false     # Qwen3 hybrid-reasoning switch: non-thinking mode
-    temperature: 0.0           # greedy (do_sample=False equivalent)
-    n_samples: 1
-    max_new_tokens: 256
-    seed: 42
-    # Monitor calls per vLLM generate call (= resume checkpoint granularity).
-    batch_size: 512
-    # prompt budget: monitored raw_output can be up to 16384 tokens (inference
-    # max_new_tokens) + monitor template ~500 + 256 output → 20480 with headroom.
-    max_model_len: 20480
-    gpu_memory_utilization: 0.9
+    default: "qwen3_8b"
+    models:
+      qwen3_8b:
+        model: "Qwen/Qwen3-8B"
+        dtype: "bfloat16"
+        enable_thinking: false     # Qwen3 hybrid-reasoning switch: non-thinking mode
+        temperature: 0.0
+        n_samples: 1
+        max_new_tokens: 256
+        seed: 42
+        batch_size: 512
+        max_model_len: 20480
+        gpu_memory_utilization: 0.9
+      gemma_e4b:
+        model: "google/gemma-4-E4B-it"
+        dtype: "bfloat16"
+        temperature: 0.0
+        n_samples: 1
+        max_new_tokens: 256
+        seed: 42
+        batch_size: 512
+        max_model_len: 20480
+        gpu_memory_utilization: 0.9
 
 gmean2:
   # Level-2 dataset diagnostic (reported only, not auto-enforced):

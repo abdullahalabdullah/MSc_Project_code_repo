@@ -167,16 +167,21 @@ def main():
         # The unhinted arm is hint-type-invariant (identical prompt + seeds), so
         # reuse a COMPLETE unhinted.jsonl from any sibling hint's run of this
         # (model, dataset, split) instead of regenerating it — halves the cost
-        # of every hint run after the first.
+        # of every hint run after the first. Also accept a gzipped sibling
+        # (unhinted.jsonl.gz — large runs are stored gzipped in git for the
+        # GitHub 100MB limit, so a fresh clone may only have the .gz).
         n_samp = config["qwen_inference"]["n_samples"]
         shared_unhinted = None
         for other_hint in HINT_TYPES:
             if other_hint == hint_type:
                 continue
-            cand = resolve_paths(root, config, ds, model_cfg["name"], other_hint,
+            base = resolve_paths(root, config, ds, model_cfg["name"], other_hint,
                                  split=args.data)["outputs_dir"] / "unhinted.jsonl"
-            if unhinted_arm_complete(cand, dataset, n_samp):
-                shared_unhinted = cand
+            for cand in (base, base.with_name("unhinted.jsonl.gz")):
+                if unhinted_arm_complete(cand, dataset, n_samp):
+                    shared_unhinted = cand
+                    break
+            if shared_unhinted is not None:
                 break
 
         ds_config = dict(config, paths=dict(config["paths"], outputs_dir=str(paths["outputs_dir"])))

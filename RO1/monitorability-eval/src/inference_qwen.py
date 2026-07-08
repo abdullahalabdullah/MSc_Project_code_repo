@@ -27,6 +27,7 @@ INCLUDING the `<think>...</think>` tags, so the monitor (03_run_monitor.py)
 reads the full reasoning exactly as the model produced it.
 """
 
+import gzip
 import json
 import shutil
 import sys
@@ -181,15 +182,17 @@ def load_qwen_model(model_cfg: dict, max_model_len: int = 24576, gpu_memory_util
 
 
 def unhinted_arm_complete(path: Path, dataset: list, n_samples: int) -> bool:
-    """True iff `path` (an unhinted.jsonl) covers every (instance, sample) pair
-    of `dataset` at this N. Used to decide whether the unhinted arm can be
+    """True iff `path` (an unhinted.jsonl, optionally .jsonl.gz — large runs are
+    gzipped in git for the GitHub 100MB limit) covers every (instance, sample)
+    pair of `dataset` at this N. Used to decide whether the unhinted arm can be
     reused instead of regenerated — valid because the unhinted prompt is
     byte-identical for every hint type (see src/inference.build_user_content)
     and unhinted seeds don't depend on the hint type either."""
     if not path.exists():
         return False
+    opener = gzip.open if path.suffix == ".gz" else open
     seen = set()
-    with open(path, encoding="utf-8") as f:
+    with opener(path, "rt", encoding="utf-8") as f:
         for line in f:
             try:
                 r = json.loads(line)
@@ -259,8 +262,13 @@ def run_inference_qwen(config: dict, model_cfg: dict, dataset: list, base_seed: 
     # so a complete unhinted.jsonl from another hint's run is the same data.
     # Copy it in (only onto a fresh arm — never over partial own generations)
     # and skip unhinted generation entirely while it covers the whole dataset.
+    # A .jsonl.gz source (gzipped in git for the 100MB limit) is decompressed.
     if shared_unhinted is not None and not unhinted_path.exists():
-        shutil.copyfile(shared_unhinted, unhinted_path)
+        if shared_unhinted.suffix == ".gz":
+            with gzip.open(shared_unhinted, "rb") as src, open(unhinted_path, "wb") as dst:
+                shutil.copyfileobj(src, dst)
+        else:
+            shutil.copyfile(shared_unhinted, unhinted_path)
         print(f"Reusing unhinted arm (hint-type-invariant) from: {shared_unhinted}")
     skip_unhinted = unhinted_arm_complete(unhinted_path, dataset, n_samples)
     if skip_unhinted:
