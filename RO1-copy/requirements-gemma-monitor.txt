@@ -11,12 +11,17 @@
 # cannot parse (AttributeError: 'list' object has no attribute 'keys') and
 # vLLM 0.8.5 does not know the architecture.
 #
-# Usage (fresh venv; needs ~10 GB disk for the torch stack + the Gemma
-# weights in the HF cache):
+# Usage (fresh venv). DISK: this stack is BIG — ~20-25 GB installed (newest
+# torch + flashinfer cubins + cutlass) plus ~15 GB Gemma weights in the HF
+# cache. On a pod that already holds the main env (~10 GB) + Qwen3-8B weights
+# (~16.5 GB), free space first (the Qwen weights re-download on demand):
+#
+#   rm -rf ~/.cache/huggingface/hub/models--Qwen--Qwen3-8B
+#   pip cache purge
 #
 #   python -m venv ~/gemma_mon_env
 #   source ~/gemma_mon_env/bin/activate
-#   pip install -r requirements-gemma-monitor.txt
+#   pip install --no-cache-dir -r requirements-gemma-monitor.txt   # no wheel cache = no double disk
 #   bash monitorability-eval/run_local_monitor.sh <model> --dataset ... \
 #        --hint professor --monitor gemma_e4b
 #
