@@ -134,9 +134,13 @@ write `.md`.
 with the default `--backend api`, or a GPU (no API key) with `--backend local`,
 which runs the identical monitor prompt through a local vLLM model instead —
 picked from the config `monitor.local.models` registry via `--monitor-model`
-(default `qwen3_8b` = `Qwen/Qwen3-8B` non-thinking; also `gemma_e4b` =
-`google/gemma-4-E4B-it`; all greedy, 256 new tokens, seed 42). A non-default
-`--monitor-model` writes to a `{key}/` subdir of the monitor dir. Step 3
+(default `qwen3_8b` = `Qwen/Qwen3-8B` in **thinking mode**, temperature 0.6 /
+top_p 0.95 / 4096 new tokens per the Qwen3 model card — non-thinking mode was
+validated at 0/85 recall on GPT-monitor positives; also `gemma_e4b` =
+`google/gemma-4-E4B-it`, greedy, 512 new tokens; both seed 42). Every local
+monitor writes to its own `{key}/` subdir of the monitor dir (symmetric layout:
+`…/{hint}/qwen3_8b/`, `…/{hint}/gemma_e4b/`, …); only the api backend writes to
+the hint dir itself — the location steps 4–9 read. Step 3
 also accepts **multiple** `--dataset` keys (space/comma separated) in one call —
 with `--backend local` the monitor model is loaded once and reused across all
 of them;
@@ -205,7 +209,7 @@ python monitorability-eval/scripts/01_prepare_dataset.py    --dataset gpqa_diamo
 python monitorability-eval/scripts/02_run_inference_qwen.py --model Qwen/Qwen3-4B --dataset gpqa_diamond --hint-type professor
 python monitorability-eval/scripts/03_run_monitor.py        --model Qwen/Qwen3-4B --dataset gpqa_diamond --hint-type professor                       # OpenAI monitor
 python monitorability-eval/scripts/03_run_monitor.py        --model Qwen/Qwen3-4B --dataset gpqa_diamond wmdp --hint-type professor --backend local  # local vLLM monitor (GPU); N datasets, 1 model load
-python monitorability-eval/scripts/03_run_monitor.py        --model Qwen/Qwen3-4B --dataset gpqa_diamond wmdp --hint-type professor --backend local --monitor-model gemma_e4b  # alternate local monitor → {hint}/gemma_e4b/ subdir
+python monitorability-eval/scripts/03_run_monitor.py        --model Qwen/Qwen3-4B --dataset gpqa_diamond wmdp --hint-type professor --backend local --monitor-model gemma_e4b  # pick a local monitor; each writes to {hint}/{key}/
 python monitorability-eval/scripts/04_compute_gmean2.py     --model Qwen/Qwen3-4B --dataset gpqa_diamond --hint-type professor
 python monitorability-eval/scripts/05_analyze_gmean2.py     --model Qwen/Qwen3-4B --dataset gpqa_diamond --hint-type professor
 python monitorability-eval/scripts/09_generate_reports.py   --model Qwen/Qwen3-4B      # all .md reports, every completed run
@@ -278,7 +282,7 @@ it leaves nothing for eval).
 | `hint` | Hint registry: `default` (type used when `--hint-type` is omitted) + `types.<type>` wording. The hint always points at a *wrong* option (`hint_target`) and only appears in the hinted arm. See **Hint types**. |
 | `qwen_inference` | Sampling: `n_samples=8` (N, samples/arm, the main-run design — overridable per run with `02 --n-samples`, no fixed cap), `temperature 0.6`, `top_p 0.95`, `top_k 20`, `max_new_tokens 16384` (Qwen3 thinking-mode recipe; thinking always ON). `checkpoint_every=100` = instances per checkpoint **and** the batch handed to vLLM in one `generate` call (two checkpoints per n=200 dataset; resume granularity; no effect on generations). |
 | `merge` | Adapter merging for `02 --merge`: `base` (the fixed base model every adapter is merged into, currently `Qwen/Qwen3-4B`) and `out_root` (repo-root-relative dir for local merged models, default `merged-models/`, gitignored). |
-| `monitor` | Monitor backends. `backend` = default (`api` or `local`; `03 --backend` overrides). API: `model` (e.g. `gpt-5-mini`) + retry/backoff/timeout. `local:` sub-block = the vLLM backend: a **`models:` registry** of local monitors, `default` naming the entry used when `03 --monitor-model` is omitted. Current entries: `qwen3_8b` (`Qwen/Qwen3-8B`, `enable_thinking false` = non-thinking chat template) and `gemma_e4b` (`google/gemma-4-E4B-it`, no thinking switch). Per entry: `dtype bfloat16`, `temperature 0.0` (greedy), `n_samples 1`, `max_new_tokens 256`, `seed 42`, `batch_size` (calls per `generate` = resume granularity), `max_model_len`, `gpu_memory_utilization`. A **non-default** `--monitor-model` writes to a `{key}/` subdir of the monitor dir so two monitors never mix results/resume state; every result line records its `monitor_model`. |
+| `monitor` | Monitor backends. `backend` = default (`api` or `local`; `03 --backend` overrides). API: `model` (e.g. `gpt-5-mini`) + retry/backoff/timeout. `local:` sub-block = the vLLM backend: a **`models:` registry** of local monitors, `default` naming the entry used when `03 --monitor-model` is omitted. Current entries: `qwen3_8b` (`Qwen/Qwen3-8B`, `enable_thinking true` — thinking mode with the Qwen3 model-card recipe `temperature 0.6` / `top_p 0.95`, `max_new_tokens 4096` since thinking tokens count against it, `max_model_len 24576` so the prompt budget still covers a 16384-token monitored raw_output; non-thinking mode was validated at 0/85 recall on GPT-monitor positives) and `gemma_e4b` (`google/gemma-4-E4B-it`, no thinking switch, `temperature 0.0` greedy, `max_new_tokens 512` — 256 truncated 21/2164 validation responses before the OUTPUT line). Common: `dtype bfloat16`, `n_samples 1`, `seed 42`, `batch_size` (calls per `generate` = resume granularity), `gpu_memory_utilization`. Every local monitor writes to its own `{key}/` subdir of the monitor dir (only the api backend writes to the hint dir itself, the location steps 4–9 read) so two monitors never mix results/resume state; every result line records its `monitor_model`. |
 | `gmean2` | `level2_te_threshold` (reported-only population gate). |
 | `paths` | `data` + the four result dirs under `outputs-and-results/`. |
 
@@ -474,9 +478,15 @@ and the Phase-3 line in `run_monitor_and_results.sh` — the metric computation
   with its own model's chat template; entries that set `enable_thinking` (Qwen3's
   hybrid-reasoning switch — False pre-fills an empty `<think></think>` block =
   non-thinking mode) pass it to the template, entries without it (Gemma, Llama, …)
-  don't. Decoding is greedy (`temperature 0`, 1 sample, 256 new tokens, seed 42)
-  and any stray `<think>…</think>` in the output is stripped before OUTPUT
-  parsing. Batched: each `batch_size` chunk is ONE `llm.generate` call with prefix
+  don't. Decoding comes from the entry (`temperature 0` = greedy; thinking-mode
+  Qwen3 uses `temperature 0.6` / `top_p 0.95` per its model card — greedy loops
+  in thinking mode; 1 sample, `max_new_tokens` incl. thinking tokens, seed 42).
+  A completed `<think>…</think>` block is stripped before OUTPUT parsing; an
+  *unclosed* `<think>` (generation ran out of tokens mid-thinking) makes the
+  record a `parse_failure` — a rehearsed "OUTPUT:" inside truncated thinking is
+  never taken as the verdict. The shared parser tolerates markdown emphasis
+  around the verdict (`**OUTPUT:** False` etc.).
+  Batched: each `batch_size` chunk is ONE `llm.generate` call with prefix
   caching (all prompts share the template prefix); over-long prompts (raw_output
   near the inference 16384-token cap) are skipped as `parse_failure` records
   instead of crashing the batch. Same monitor_results.jsonl schema, so steps

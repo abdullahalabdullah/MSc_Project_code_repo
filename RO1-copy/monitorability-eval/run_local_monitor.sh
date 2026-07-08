@@ -18,8 +18,8 @@
 #   --dataset  REQUIRED. One or more dataset keys (space- and/or comma-separated).
 #   --hint     hint type (default: professor). Must match the inference run.
 #   --monitor  which config monitor.local.models entry to run (e.g. qwen3_8b,
-#              gemma_e4b). Default: config monitor.local.default. A non-default
-#              choice writes to a {key}/ subdir of the monitor dir.
+#              gemma_e4b). Default: config monitor.local.default. Every local
+#              monitor writes to its own {key}/ subdir of the monitor dir.
 #   --data     data split (default: test). Must match the inference run.
 #   --no-push  skip the git commit+push of the monitor outputs at the end.
 #
@@ -150,4 +150,4 @@ if $PUSH; then
 fi
 
 echo ""
-echo "Done: $(date). Results in outputs-and-results/monitor_outputs/${MODEL_NAME}/{ds}${SPLIT_SEG}/${HINT}/"
+echo "Done: $(date). Results in outputs-and-results/monitor_outputs/${MODEL_NAME}/{ds}${SPLIT_SEG}/${HINT}/<monitor-key>/"

@@ -18,11 +18,13 @@ Two interchangeable monitor backends (--backend, default: config monitor.backend
            threaded with rate-limit back-off. Requires OPENAI_API_KEY in the env.
   local  — a local vLLM engine (see src/monitor_local.py). WHICH model runs is
            picked from the config monitor.local.models registry via
-           --monitor-model (default: monitor.local.default = qwen3_8b; also
-           gemma_e4b). All entries: bfloat16, greedy, 256 new tokens, seed 42.
-           Requires a GPU; no API key. A NON-default --monitor-model writes to
-           monitor_outputs/.../{hint_type}/{monitor_key}/ so different monitors
-           never mix results or resume state.
+           --monitor-model (default: monitor.local.default = qwen3_8b, thinking
+           mode, temp 0.6/top_p 0.95, 4096 new tokens; also gemma_e4b, greedy,
+           512 new tokens). All entries: bfloat16, 1 sample, seed 42.
+           Requires a GPU; no API key. EVERY local monitor writes to its own
+           monitor_outputs/.../{hint_type}/{monitor_key}/ subdir, so different
+           monitors never mix results or resume state (only the api backend
+           writes to the hint dir itself — the location steps 04-09 read).
 Both run the identical monitor prompt and write the identical output schema;
 every line records its `monitor_model`.
 
@@ -51,7 +53,7 @@ Input:
 Output:
     monitor_outputs/{model_name}/{dataset}/{hint_type}/monitor_results.jsonl
     monitor_outputs/{model_name}/{dataset}/{hint_type}/monitor_progress.json
-    (non-default --monitor-model: same two files under .../{hint_type}/{monitor_key}/)
+    (--backend local: same two files under .../{hint_type}/{monitor_key}/)
 """
 
 import argparse
@@ -265,7 +267,7 @@ def main():
     parser.add_argument("--monitor-model", default=None,
                         help="Local backend only: which config monitor.local.models "
                              "entry to run (e.g. qwen3_8b, gemma_e4b). Default: config "
-                             "monitor.local.default. A NON-default choice writes to a "
+                             "monitor.local.default. Local results always land in a "
                              "'{key}/' subdir of the monitor dir so monitors never mix.")
     args = parser.parse_args()
 
@@ -286,8 +288,10 @@ def main():
         sys.exit(1)
 
     # Local backend: resolve WHICH local monitor runs (config monitor.local.models
-    # registry). A non-default choice gets its own subdir under the monitor dir so
-    # two monitors on the same run never share results or resume state.
+    # registry). EVERY local monitor gets its own {key}/ subdir under the monitor
+    # dir — a symmetric layout where no monitor's results or resume state can mix
+    # with another's. Only the api backend writes to the hint dir itself (the
+    # canonical location steps 04-09 read).
     local_cfg = None
     mon_subdir = None
     if backend == "local":
@@ -297,9 +301,8 @@ def main():
         except ValueError as e:
             print(f"ERROR: {e}")
             sys.exit(1)
-        default_key = (config["monitor"].get("local", {}) or {}).get("default", "default")
-        if mon_key != default_key:
-            mon_subdir = mon_key
+        # (legacy flat monitor.local config has no key — no subdir there)
+        mon_subdir = mon_key if mon_key != "default" else None
 
     datasets = [d for tok in args.dataset for d in tok.split(",") if d]
     model_name = model_dir_name(args.model)
