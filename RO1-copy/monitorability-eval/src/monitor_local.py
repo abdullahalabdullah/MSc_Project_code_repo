@@ -80,18 +80,28 @@ def load_local_monitor(local_cfg: dict):
     gpu_mem = float(local_cfg.get("gpu_memory_utilization", 0.9))
 
     print(f"Loading monitor tokenizer: {model_id}")
-    tokenizer = AutoTokenizer.from_pretrained(model_id)
-    print(f"Loading monitor via vLLM: {model_id} "
-          f"(dtype={local_cfg.get('dtype', 'bfloat16')}, max_model_len={max_model_len}, "
-          f"gpu_memory_utilization={gpu_mem})")
-    llm = LLM(
-        model=model_id,
-        dtype=local_cfg.get("dtype", "bfloat16"),
-        trust_remote_code=True,
-        max_model_len=max_model_len,
-        gpu_memory_utilization=gpu_mem,
-        enable_prefix_caching=True,
-    )
+    try:
+        tokenizer = AutoTokenizer.from_pretrained(model_id)
+        print(f"Loading monitor via vLLM: {model_id} "
+              f"(dtype={local_cfg.get('dtype', 'bfloat16')}, max_model_len={max_model_len}, "
+              f"gpu_memory_utilization={gpu_mem})")
+        llm = LLM(
+            model=model_id,
+            dtype=local_cfg.get("dtype", "bfloat16"),
+            trust_remote_code=True,
+            max_model_len=max_model_len,
+            gpu_memory_utilization=gpu_mem,
+            enable_prefix_caching=True,
+        )
+    except Exception:
+        print(
+            f"\nERROR: could not load monitor model '{model_id}' in this environment. "
+            f"If this is the pinned main env (vllm 0.8.5 / transformers 4.51.3), models "
+            f"newer than that stack (e.g. the gemma_e4b entry) need the separate venv from "
+            f"requirements-gemma-monitor.txt — see that file's header for setup.",
+            flush=True,
+        )
+        raise
     return tokenizer, llm
 
 

@@ -169,8 +169,10 @@ monitor:
   # `models:` is a registry of local monitor models; `default` picks the one used
   # when `03 --monitor-model` is omitted. Selecting a NON-default entry writes its
   # results to a `<key>/` subdir of the monitor dir (so two monitors on the same
-  # run never mix or resume-collide). Every entry must be an architecture the
-  # pinned vLLM (0.8.5) can load. Per-entry keys:
+  # run never mix or resume-collide). Each entry must be loadable by the vLLM of
+  # the venv you run it from: the main env (requirements.txt, vllm 0.8.5) covers
+  # qwen3_8b; newer architectures (gemma_e4b) need the separate venv from
+  # requirements-gemma-monitor.txt. Per-entry keys:
   #   model/dtype/temperature/n_samples/max_new_tokens/seed — sampling recipe
   #     (temperature 0 = greedy, the do_sample=False equivalent)
   #   enable_thinking — chat-template switch for hybrid-reasoning models (Qwen3);
@@ -193,6 +195,9 @@ monitor:
         batch_size: 512
         max_model_len: 20480
         gpu_memory_utilization: 0.9
+      # NOTE: newer than the main pinned env (vllm 0.8.5 / transformers 4.51.3
+      # cannot load it) — run from the separate venv described in
+      # requirements-gemma-monitor.txt.
       gemma_e4b:
         model: "google/gemma-4-E4B-it"
         dtype: "bfloat16"

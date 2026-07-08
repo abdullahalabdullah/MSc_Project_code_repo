@@ -163,6 +163,18 @@ export OPENAI_API_KEY=sk-...              # only needed for step 3 (monitor) wit
                                           # --backend local (vLLM, GPU) needs no key
 ```
 
+Local monitor models **newer than the pinned stack** (the `gemma_e4b` registry
+entry — transformers 4.51.3 can't parse its tokenizer config, vLLM 0.8.5 doesn't
+know the architecture) run from a **separate venv**:
+
+```bash
+python -m venv ~/gemma_mon_env && source ~/gemma_mon_env/bin/activate
+pip install -r requirements-gemma-monitor.txt   # newest vLLM/transformers — see file header
+```
+
+Only step 3 `--backend local --monitor-model gemma_e4b` uses this env; step 2
+and the `qwen3_8b` monitor stay on the main env.
+
 HuggingFace auth (gated GPQA / Qwen3) is handled in-code: `ensure_hf_auth()` reads
 `HF_TOKEN` from the env, else the `hf_token` field in `config/mvp_config.yaml`.
 
