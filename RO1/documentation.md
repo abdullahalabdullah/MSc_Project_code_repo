@@ -8,6 +8,7 @@ own folder with its own `scripts/`, `src/`, `data/`, and run command:
 - **`harmlessness-eval/`** — safety on the WildJailbreak eval set, judged by
   WildGuard (Safety Rate + Refusal Rate). See [Part 2](#part-2--harmlessness-eval).
 
+
 **Shared at the repo root** (both evals use these, neither imports the other's
 code): `config/mvp_config.yaml`, `outputs-and-results/`, `requirements.txt`, this
 `documentation.md`, and the gitignored `logs/`. Both run commands take a raw HF
