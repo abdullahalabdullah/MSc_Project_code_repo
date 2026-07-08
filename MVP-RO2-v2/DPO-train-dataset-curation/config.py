@@ -54,9 +54,11 @@ TOP_P = 0.95
 TOP_K = 20
 
 # ── vLLM engine tuning (see MVP-RO1-v2/src/inference_qwen.py::load_qwen_model) ──
-# gpu_memory_utilization: fraction of VRAM given to vLLM's KV cache. 0.90 is safe on a
-#   dedicated inference pod and maximizes concurrency on a large-VRAM GPU.
-GPU_MEMORY_UTILIZATION = 0.90
+# gpu_memory_utilization: fraction of VRAM given to vLLM's KV cache. 0.95 on a dedicated
+#   inference pod (nothing else on the GPU) maximizes concurrency on a large-VRAM GPU.
+#   A pure throughput knob — does NOT change outputs (vLLM seeds sampling per request), so
+#   runs at different values stay mergeable. If the engine OOMs at startup, drop to 0.90.
+GPU_MEMORY_UTILIZATION = 0.95
 # max_model_len = MAX_TOKENS + prompt budget. Capping it well below Qwen3's native 40960
 #   context multiplies KV-cache concurrency (more sequences resident at once = higher
 #   throughput). WildJailbreak `adversarial_harmful` prompts are LONG (multi-paragraph
@@ -64,6 +66,15 @@ GPU_MEMORY_UTILIZATION = 0.90
 #   (MAX_MODEL_LEN - MAX_TOKENS) would otherwise error/truncate. Still ~37x concurrency.
 PROMPT_TOKEN_BUDGET = 4096
 MAX_MODEL_LEN = MAX_TOKENS + PROMPT_TOKEN_BUDGET
+# max_num_seqs: cap on sequences vLLM's scheduler runs concurrently (vLLM default: 256).
+# NOT a memory pre-allocation — the scheduler never admits more than the KV cache (sized by
+# GPU_MEMORY_UTILIZATION/MAX_MODEL_LEN) can hold, so raising this is memory-safe by
+# construction; worst case it's simply unused. At 0.95 util on an 80GB card, KV budget is
+# ~68GB / ~144KB per token (Qwen3-4B GQA) ~= 472k tokens -> ~270-290 concurrent sequences at
+# the pilot's mean length (~1268 response + prompt tokens) — above the 256 default, so the
+# scheduler can plausibly be seq-count-limited before it's memory-limited. 384 gives headroom
+# without meaningfully changing engine startup (CUDA-graph capture buckets scale with it).
+MAX_NUM_SEQS = 384
 
 # ── Models ─────────────────────────────────────────────────────────────────
 GEN_MODEL = "Qwen/Qwen3-4B"
@@ -115,8 +126,17 @@ STRATIFY_VALID = os.environ.get("STRATIFY_VALID", "").strip().lower() in ("1", "
 EXPORT_FIELD = os.environ.get("EXPORT_FIELD", "full")   # "full" | "answer"
 
 # ── Classifier / scorer batch sizes ────────────────────────────────────────
-COST_BATCH = 8               # (prompt, answer) pairs per Beaver forward pass
-GUARD_BATCH = 16              # (prompt, answer) pairs per Qwen3Guard generate() call
+COST_BATCH = 16              # (prompt, answer) pairs per Beaver forward pass (forward-only
+                             # scoring at a 2048-token cap — tiny footprint; throughput knob)
+# Stage-03 batching (throughput-only — decoding is greedy, so each item's label does not
+# depend on batch composition). Inputs are length-sorted and packed under a padded-token
+# budget (see 03_classify_guard.py::pack_length_sorted_batches): many short inputs share one
+# big generate() call, the rare near-8k ones get small calls. Worst-case KV memory is bounded
+# by construction: GUARD_TOKEN_BUDGET x ~144KB/token (Qwen3-4B GQA KV) ~= 43GB + 8GB weights
+# — safe on an 80GB H100/A100. GUARD_MAX_BATCH caps batches of tiny inputs (prefill
+# activations + diminishing returns past ~128 sequences).
+GUARD_TOKEN_BUDGET = 300_000  # max padded tokens per call: batch_size x longest (incl. output)
+GUARD_MAX_BATCH = 128         # hard cap on (prompt, answer) pairs per Qwen3Guard generate() call
 GUARD_MAX_NEW_TOKENS = 128    # Qwen3Guard model-card default; fits Safety/Categories/Refusal lines
 WILDGUARD_BATCH = 16         # (prompt, answer) pairs per WildGuard generate() call (sanity_beaver.py)
 WILDGUARD_MAX_NEW_TOKENS = 32  # enough for the 3-line "Harmful request/refusal/response" verdict

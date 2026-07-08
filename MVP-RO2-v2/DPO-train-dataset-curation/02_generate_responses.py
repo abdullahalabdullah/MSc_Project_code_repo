@@ -41,7 +41,9 @@ def main():
     # Engine tuning for throughput on a large-VRAM GPU (mirrors MVP-RO1-v2):
     #   - bfloat16 weights
     #   - max_model_len capped to MAX_TOKENS + prompt budget -> higher KV concurrency
-    #   - gpu_memory_utilization 0.90 -> more VRAM for the KV cache
+    #   - gpu_memory_utilization (config, 0.95) -> more VRAM for the KV cache
+    #   - max_num_seqs raised above vLLM's default (config; see config.py comment) -> the
+    #     scheduler isn't seq-count-limited before the KV cache is memory-limited
     #   - prefix caching: every request shares the identical chat-template prefix, and the
     #     N samples of a prompt share its full prefix, so vLLM reuses that cached KV.
     llm = LLM(
@@ -50,6 +52,7 @@ def main():
         trust_remote_code=True,
         max_model_len=config.MAX_MODEL_LEN,
         gpu_memory_utilization=config.GPU_MEMORY_UTILIZATION,
+        max_num_seqs=config.MAX_NUM_SEQS,
         enable_prefix_caching=True,
     )
     tokenizer = llm.get_tokenizer()

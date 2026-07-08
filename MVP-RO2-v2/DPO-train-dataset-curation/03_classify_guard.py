@@ -61,11 +61,10 @@ def parse_qwen3guard_prompt(text):
     return None if label is None else (label == "Unsafe")
 
 
-def classify_batch(model, tokenizer, conversations, max_new_tokens):
-    """conversations: list of chat-message lists (Qwen3Guard's chat template appends the
-    right assessment cue based on whether the last turn is user-only or user+assistant, so no
-    add_generation_prompt is needed). Returns list of raw Qwen3Guard generations (str)."""
-    rendered = [tokenizer.apply_chat_template(msgs, tokenize=False) for msgs in conversations]
+def classify_batch(model, tokenizer, rendered, max_new_tokens):
+    """rendered: list of already chat-templated strings (Qwen3Guard's chat template appends
+    the right assessment cue based on whether the last turn is user-only or user+assistant,
+    so no add_generation_prompt is needed). Returns list of raw Qwen3Guard generations (str)."""
     enc = tokenizer(
         rendered, return_tensors="pt", padding=True, truncation=True, max_length=8192,
     ).to(model.device)
@@ -76,6 +75,39 @@ def classify_batch(model, tokenizer, conversations, max_new_tokens):
         )
     new_tokens = gen[:, enc["input_ids"].shape[1]:]
     return tokenizer.batch_decode(new_tokens, skip_special_tokens=True)
+
+
+def pack_length_sorted_batches(rendered, max_batch, token_budget, max_new_tokens):
+    """Batch plan for left-padded batched generation: returns index lists into `rendered`,
+    length-sorted and packed so batch_size x (longest padded length in the batch) stays
+    under token_budget.
+
+    Left padding makes every sequence in a batch pay prefill compute + per-step KV reads for
+    the batch's LONGEST input, and generate() only early-stops once the WHOLE batch is done —
+    so mixed-length batches spend most of their work on pad tokens. Sorting by length gives
+    near-homogeneous batches (many short inputs per call, the rare long ones in small calls),
+    and the token budget bounds worst-case KV memory by construction.
+
+    Lengths are estimated conservatively from characters (~3 chars/token, i.e. overestimating
+    typical English tokenization), capped at the 8192-token truncation limit, plus the
+    generation allowance. Throughput-only: decoding is greedy, so an item's output does not
+    depend on which batch it lands in; callers write results back by original index.
+    """
+    def est_tokens(s):
+        return min(len(s) // 3 + 16, 8192) + max_new_tokens
+
+    order = sorted(range(len(rendered)), key=lambda i: est_tokens(rendered[i]))
+    batches, cur = [], []
+    for i in order:
+        # Ascending order -> item i would be the batch's longest; padded cost if added:
+        if cur and (len(cur) == max_batch
+                    or (len(cur) + 1) * est_tokens(rendered[i]) > token_budget):
+            batches.append(cur)
+            cur = []
+        cur.append(i)
+    if cur:
+        batches.append(cur)
+    return batches
 
 
 def main():
@@ -121,24 +153,35 @@ def main():
         config.GUARD_MODEL, torch_dtype="auto", device_map="auto"
     ).eval()
 
-    for b in range(0, len(flat), config.GUARD_BATCH):
-        chunk = flat[b:b + config.GUARD_BATCH]
-        conversations = [
+    rendered = [
+        tokenizer.apply_chat_template(
             [
                 {"role": "user", "content": all_responses[pi][ri]["prompt"]},
                 {"role": "assistant", "content": all_responses[pi][ri]["answer"]},
-            ]
-            for pi, ri in chunk
-        ]
-        raw_outs = classify_batch(model, tokenizer, conversations, config.GUARD_MAX_NEW_TOKENS)
-        for (pi, ri), raw in zip(chunk, raw_outs):
+            ],
+            tokenize=False,
+        )
+        for pi, ri in flat
+    ]
+    batches = pack_length_sorted_batches(
+        rendered, config.GUARD_MAX_BATCH, config.GUARD_TOKEN_BUDGET, config.GUARD_MAX_NEW_TOKENS)
+    print(f"  packed into {len(batches)} length-sorted batches "
+          f"(budget={config.GUARD_TOKEN_BUDGET} padded tokens, max batch={config.GUARD_MAX_BATCH})")
+    n_done = 0
+    for bi, batch_ix in enumerate(batches):
+        raw_outs = classify_batch(
+            model, tokenizer, [rendered[i] for i in batch_ix], config.GUARD_MAX_NEW_TOKENS)
+        for i, raw in zip(batch_ix, raw_outs):
+            pi, ri = flat[i]
             label, refusal = parse_qwen3guard_response(raw)
             rd = all_responses[pi][ri]
             rd["guard_raw"] = raw
             rd["guard_label"] = label            # 'Safe' | 'Unsafe' | None (unparsed); Controversial folded into Unsafe
             rd["refusal"] = refusal              # bool | None  (for the future benign axis)
-        if (b // config.GUARD_BATCH) % 20 == 0:
-            print(f"  {min(b + config.GUARD_BATCH, len(flat))}/{len(flat)}")
+        n_done += len(batch_ix)
+        if bi % 20 == 0:
+            print(f"  {n_done}/{len(flat)}")
+    del rendered
 
     # 2b) Request-only harmfulness ("harmful_request"): a separate prompt-only generation,
     # since Qwen3Guard needs a distinct pass for this (no single-call 3-verdict mode like
@@ -147,12 +190,17 @@ def main():
     unique_prompts = [per_prompt[0]["prompt"] for per_prompt in all_responses]
     print(f"Classifying {len(unique_prompts)} unique prompts for request harmfulness ...")
     prompt_harmful = [None] * n_prompts
-    for b in range(0, len(unique_prompts), config.GUARD_BATCH):
-        chunk_prompts = unique_prompts[b:b + config.GUARD_BATCH]
-        conversations = [[{"role": "user", "content": p}] for p in chunk_prompts]
-        raw_outs = classify_batch(model, tokenizer, conversations, config.GUARD_MAX_NEW_TOKENS)
-        for offset, raw in enumerate(raw_outs):
-            prompt_harmful[b + offset] = parse_qwen3guard_prompt(raw)
+    rendered_prompts = [
+        tokenizer.apply_chat_template([{"role": "user", "content": p}], tokenize=False)
+        for p in unique_prompts
+    ]
+    for batch_ix in pack_length_sorted_batches(
+            rendered_prompts, config.GUARD_MAX_BATCH, config.GUARD_TOKEN_BUDGET,
+            config.GUARD_MAX_NEW_TOKENS):
+        raw_outs = classify_batch(
+            model, tokenizer, [rendered_prompts[i] for i in batch_ix], config.GUARD_MAX_NEW_TOKENS)
+        for i, raw in zip(batch_ix, raw_outs):
+            prompt_harmful[i] = parse_qwen3guard_prompt(raw)
     for pi, per_prompt in enumerate(all_responses):
         for rd in per_prompt:
             rd["harmful_request"] = prompt_harmful[pi]   # bool | None

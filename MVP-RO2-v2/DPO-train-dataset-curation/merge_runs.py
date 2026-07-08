@@ -8,6 +8,13 @@ export there — producing a fresh seeded train/valid split + dpo_dataset over t
 pool. The export respects the same env knobs as a normal run (SEED, VALID_FRACTION,
 STRATIFY_VALID, EXPORT_FIELD).
 
+TARGET_PAIRS (env, optional): cap the merged pool at exactly this many pairs via a seeded
+random downsample (SEED) BEFORE the export. Lets the curation run oversample for safety
+(filter survival is only ~19% and noisy) while the final dataset lands on an exact size:
+    TARGET_PAIRS=5000 python merge_runs.py outputs/pilot outputs/main --out outputs/merged
+Unset/empty = keep every merged pair. A random subsample preserves the vanilla/adversarial
+mix in expectation; the realised mix is reported by the stage-06 export as usual.
+
 NOTE: the merged split is a NEW split over all pairs — it does not preserve the source
 runs' train/valid boundaries. That is fine when the merged dataset trains a model from
 scratch (the standard flow), but do not evaluate a model on the merged valid split if it
@@ -22,6 +29,7 @@ Output: <out>/final_pairs.joblib, <out>/dpo_dataset/, <out>/diagnostics.json ("m
 import argparse
 import importlib.util
 import os
+import random
 from datetime import datetime
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -69,11 +77,25 @@ def main():
         raise SystemExit("No pairs to merge.")
     print(f"Merged: {len(merged)} pairs ({n_dupes} duplicate prompts dropped, first run wins)")
 
+    # Optional exact-size cap (TARGET_PAIRS): seeded random downsample of the merged pool.
+    raw_target = os.environ.get("TARGET_PAIRS", "").strip()
+    target_pairs = int(raw_target) if raw_target else None
+    n_before_cap = len(merged)
+    if target_pairs is not None and len(merged) > target_pairs:
+        merged = random.Random(config.SEED).sample(merged, target_pairs)
+        print(f"TARGET_PAIRS={target_pairs}: downsampled {n_before_cap} -> {len(merged)} "
+              f"(seeded, SEED={config.SEED})")
+    elif target_pairs is not None:
+        print(f"TARGET_PAIRS={target_pairs}: merged pool has only {len(merged)} pairs — "
+              f"keeping all (no downsample)")
+
     config.ensure_output_dir()
     joblib.dump(merged, config.FINAL_PAIRS_PATH, compress=True)
     update_diagnostics(config.DIAGNOSTICS_PATH, "merge", {
         "source_runs": per_run,
         "duplicate_prompts_dropped": n_dupes,
+        "merged_pairs_before_cap": n_before_cap,
+        "target_pairs": target_pairs,
         "merged_pairs": len(merged),
     })
 

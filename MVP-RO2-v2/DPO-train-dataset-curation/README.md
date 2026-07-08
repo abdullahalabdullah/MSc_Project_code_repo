@@ -12,7 +12,7 @@ response as `chosen` and the most harmful as `rejected`, validated by a safety c
 | Stage | Script | What it does |
 |------|--------|--------------|
 | 01 | `01_prepare_prompts.py` | Load WildJailbreak `vanilla_harmful` + `adversarial_harmful` (train config), dedup on prompt, report counts + mix. Default `SAMPLE=ALL` keeps **every** unique prompt; `SAMPLE=<int>` (env var) draws a seeded pilot sample |
-| 02 | `02_generate_responses.py` (GPU) | Qwen3-4B, N=10, temp 0.6 / top_p 0.95 / top_k 20, `max_tokens=8192`; tuned vLLM engine (prefix caching, capped `max_model_len`, 0.90 VRAM); **live truncation reporting** |
+| 02 | `02_generate_responses.py` (GPU) | Qwen3-4B, N=10, temp 0.6 / top_p 0.95 / top_k 20, `max_tokens=8192`; tuned vLLM engine (prefix caching, capped `max_model_len`, 0.95 VRAM); **live truncation reporting** |
 | 03 | `03_classify_guard.py` (GPU) | Split on `</think>`, **Qwen3Guard** label (3-way Safe/Unsafe/Controversial per answer, Controversial folded into Unsafe), **filter-1** (drop prompts whose valid responses share one label) |
 | 04 | `04_score_cost.py` (GPU) | `beaver-7b-unified-cost`; per prompt `chosen=argmin(cost)`, `rejected=argmax(cost)` |
 | 05 | `05_report.py` | **filter-3** (chosen=Safe & rejected=Unsafe), survival rate, cost-spread dist, 10 sample pairs, sign-convention sanity check |
@@ -103,9 +103,13 @@ training-ready dataset (dedup on prompt, fresh seeded train/valid split over the
 
 ```bash
 SAMPLE=4500 RUN_OUTPUT_DIR=outputs/pilot ./run_all.sh          # phase 1: ~1k pairs to smoke-test training
-SAMPLE=22500 EXCLUDE_RUNS=outputs/pilot RUN_OUTPUT_DIR=outputs/main ./run_all.sh   # phase 2: new prompts only
-python merge_runs.py outputs/pilot outputs/main --out outputs/merged               # combine -> merged/dpo_dataset
+SAMPLE=24000 EXCLUDE_RUNS=outputs/pilot RUN_OUTPUT_DIR=outputs/main ./run_all.sh   # phase 2: new prompts only
+TARGET_PAIRS=5000 python merge_runs.py outputs/pilot outputs/main --out outputs/merged  # combine + cap -> merged/dpo_dataset
 ```
+
+`TARGET_PAIRS` (optional) caps the merged pool at an exact size (seeded random downsample
+before the stage-06 export): oversample prompts in phase 2 for safety, trim the surplus at
+merge time, land on exactly the target dataset size. Unset = keep every merged pair.
 
 Note: the merged split is a *new* split over all pairs — it does not preserve the source
 runs' train/valid boundaries (fine when the merged dataset trains from scratch, which is

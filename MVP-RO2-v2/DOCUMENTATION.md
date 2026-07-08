@@ -61,10 +61,15 @@ merged into one dataset):
 ```bash
 cd DPO-train-dataset-curation
 SAMPLE=4500 RUN_OUTPUT_DIR=outputs/pilot bash run_all.sh
-SAMPLE=22500 EXCLUDE_RUNS=outputs/pilot RUN_OUTPUT_DIR=outputs/main bash run_all.sh
-python merge_runs.py outputs/pilot outputs/main --out outputs/merged
+SAMPLE=24000 EXCLUDE_RUNS=outputs/pilot RUN_OUTPUT_DIR=outputs/main bash run_all.sh
+TARGET_PAIRS=5000 python merge_runs.py outputs/pilot outputs/main --out outputs/merged
 cd .. && bash train.sh DPO-train-dataset-curation/outputs/merged/dpo_dataset
 ```
+
+`TARGET_PAIRS` (optional) caps the merged pool at an exact size via a seeded random
+downsample before the export — the run oversamples prompts for safety (filter survival is
+~19% and noisy) and the merge trims the surplus, so the final dataset lands on exactly the
+target. Unset = keep every merged pair.
 
 This works from a fresh clone on a new pod: the two files the workflow reads —
 `01_prompts_meta.joblib` (per-run consumed prompts, for `EXCLUDE_RUNS`) and
