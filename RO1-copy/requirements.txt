@@ -19,10 +19,11 @@
 #   python scripts/02_run_inference_qwen.py --model qwen3_1_7b
 #
 # scripts/02_run_inference_qwen.py loads the target model (needs vLLM/torch);
-# scripts/03_run_monitor.py --backend local loads the local monitor model
-# (Qwen/Qwen3-8B, also via vLLM — same pins, no extra deps). With the default
-# --backend api the monitor only needs `openai`. Steps 04-06 are model-agnostic
-# analysis and run anywhere.
+# scripts/03_run_monitor.py --backend local loads a local monitor model from the
+# config monitor.local.models registry (qwen3_8b / gemma_e4b, also via vLLM —
+# same pins, no extra deps; every registry entry must be an architecture the
+# pinned vLLM 0.8.5 can load). With the default --backend api the monitor only
+# needs `openai`. Steps 04-06 are model-agnostic analysis and run anywhere.
 #
 # -----------------------------------------------------------------------------
 # IMPORTANT — versions are PINNED EXACTLY, not floored. An unbounded floor
