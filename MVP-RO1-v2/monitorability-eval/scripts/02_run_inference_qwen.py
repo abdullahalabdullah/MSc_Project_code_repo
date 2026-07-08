@@ -53,7 +53,7 @@ import yaml
 from src.dataset import (SPLITS, assert_splits_disjoint, ensure_hf_auth,
                          load_dataset_index, model_dir_name, resolve_paths)
 from src.hints import HINT_TYPES
-from src.inference_qwen import load_qwen_model, run_inference_qwen
+from src.inference_qwen import load_qwen_model, run_inference_qwen, unhinted_arm_complete
 
 
 def main():
@@ -163,9 +163,26 @@ def main():
         print(f"\n{'='*60}")
         print(f"Dataset: {ds}  ({len(dataset)} instances from {paths['data_index']})")
         print(f"{'='*60}")
+
+        # The unhinted arm is hint-type-invariant (identical prompt + seeds), so
+        # reuse a COMPLETE unhinted.jsonl from any sibling hint's run of this
+        # (model, dataset, split) instead of regenerating it — halves the cost
+        # of every hint run after the first.
+        n_samp = config["qwen_inference"]["n_samples"]
+        shared_unhinted = None
+        for other_hint in HINT_TYPES:
+            if other_hint == hint_type:
+                continue
+            cand = resolve_paths(root, config, ds, model_cfg["name"], other_hint,
+                                 split=args.data)["outputs_dir"] / "unhinted.jsonl"
+            if unhinted_arm_complete(cand, dataset, n_samp):
+                shared_unhinted = cand
+                break
+
         ds_config = dict(config, paths=dict(config["paths"], outputs_dir=str(paths["outputs_dir"])))
         run_inference_qwen(ds_config, model_cfg, dataset, base_seed=args.seed,
-                           tokenizer=tokenizer, llm=llm, hint_type=hint_type)
+                           tokenizer=tokenizer, llm=llm, hint_type=hint_type,
+                           shared_unhinted=shared_unhinted)
 
 
 if __name__ == "__main__":

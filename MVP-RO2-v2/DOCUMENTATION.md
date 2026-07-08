@@ -66,6 +66,11 @@ python merge_runs.py outputs/pilot outputs/main --out outputs/merged
 cd .. && bash train.sh DPO-train-dataset-curation/outputs/merged/dpo_dataset
 ```
 
+This works from a fresh clone on a new pod: the two files the workflow reads —
+`01_prompts_meta.joblib` (per-run consumed prompts, for `EXCLUDE_RUNS`) and
+`final_pairs.joblib` (per-run final pairs, for `merge_runs.py`) — are git-tracked via
+narrow `.gitignore` re-includes (the other, heavy stage joblibs stay ignored).
+
 Smoke test first (`SAMPLE=8 bash DPO-train-dataset-curation/run_all.sh`) to confirm the
 whole chain produces `dpo_dataset/` before a full run. `SAMPLE` is the only smoke-test
 knob — `N` and `MAX_TOKENS` are fixed across all runs so runs stay mergeable/comparable.

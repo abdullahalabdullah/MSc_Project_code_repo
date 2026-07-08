@@ -180,6 +180,13 @@ cache-*.arrow
 # ignores above so the full run's results get committed/pushed).
 !outputs/**
 !logs/**
+# The two-phase curation workflow (EXCLUDE_RUNS + merge_runs.py) reads two per-run files
+# that must survive a fresh clone on a new pod: 01_prompts_meta.joblib (which prompts the
+# run consumed — stage 01 exclusion) and final_pairs.joblib (its final pairs — merge input).
+# Track them — they are small, unlike the heavy stage joblibs (02_responses etc.), which
+# stay ignored.
+!DPO-train-dataset-curation/outputs/*/01_prompts_meta.joblib
+!DPO-train-dataset-curation/outputs/*/final_pairs.joblib
 # Track the SMALL training-result files under checkpoints/ (metrics, memory, best-ckpt
 # pointer, log history) — but NOT the heavy adapter weights, which live on HF.
 # Re-include the dirs first (a file cannot be un-ignored while its parent dir is ignored),

@@ -111,6 +111,17 @@ Note: the merged split is a *new* split over all pairs — it does not preserve 
 runs' train/valid boundaries (fine when the merged dataset trains from scratch, which is
 the standard flow).
 
+Both files this workflow depends on are **git-tracked** (narrow re-includes in
+`../.gitignore` override the blanket `*.joblib` ignore): `01_prompts_meta.joblib` (the
+prompts a run consumed — what `EXCLUDE_RUNS` reads) and `final_pairs.joblib` (what
+`merge_runs.py` reads). So the phase-2 + merge commands above work from a fresh clone on a
+new pod. The heavy intermediates (`02_responses.joblib` etc.) stay ignored. The pilot's
+copies were recovered after its pod was destroyed: `01_prompts_meta.joblib` regenerated
+deterministically (stage 01 is fully seeded; verified against the pilot's subset mix and
+final prompts), `final_pairs.joblib` reconstructed from the tracked `dpo_dataset` +
+`final_pairs_margins.csv` (pairs carry a `reconstructed: True` flag; full-text fields only,
+so re-exporting it with `EXPORT_FIELD=answer` uses answers re-derived by `</think>` split).
+
 To run stages by hand, set the same folder yourself so they share it (otherwise they default
 to `./outputs` and would overwrite it):
 ```bash

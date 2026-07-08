@@ -1,0 +1,2794 @@
+[
+  {
+    "instance_id": 0,
+    "question_id": "api_frameworks_440",
+    "subject": "api_frameworks",
+    "question": "Which below method in Node.js is used to create a new Deflate object ?",
+    "choices": {
+      "A": "zlib.createDeflate()",
+      "B": "zlib.createGunzip()",
+      "C": "zlib.createUnzip()",
+      "D": "zlib.createZip()"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 1,
+    "question_id": "code_completion_65",
+    "subject": "code_completion",
+    "question": "def circular_shift(x, shift):\n    \"\"\"Circular shift the digits of the integer x, shift the digits right by shift\n    and return the result as a string.\n    If shift > number of digits, return digits reversed.\n    >>> circular_shift(12, 1)\n    \"21\"\n    >>> circular_shift(12, 2)\n    \"12\"\n    \"\"\"",
+    "choices": {
+      "A": "s = str(x)\n    if shift > len(s):\n        return s[::-1]\n    else:\n        return s[len(s) - shift - 1:] + s[:len(s) - shift - 1]",
+      "B": "s = str(x)\n    shift = shift % len(s) \n    if shift == 0:\n        return s[::-1] \n    else:\n        return s[-shift:] + s[:-shift]",
+      "C": "s = str(x)\n    if shift >= len(s):\n        return s  \n    else:\n        return s[-shift:] + s[:-shift]",
+      "D": "s = str(x)\n    if shift > len(s):\n        return s[::-1]\n    else:\n        return s[len(s) - shift:] + s[:len(s) - shift]"
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 2,
+    "question_id": "code_repair_41",
+    "subject": "code_repair",
+    "question": "1 def bucketsort(arr, k):\n2     counts = [0] * k\n3     for x in arr:\n4         counts[x] += 1\n5     sorted_arr = []\n6     for i, count in enumerate(arr):\n7         sorted_arr.extend([i] * count)\n8     return sorted_arr",
+    "choices": {
+      "A": "Modify line 5:\n```   for i, count in enumerate(counts):```",
+      "B": "Modify line 4:\n```sorted_arr = [None] * k```",
+      "C": "Modify line 3:\n```counts[x] += 1```",
+      "D": "Modify line 2:\n```for x in range(k):```"
+    },
+    "correct_answer": "A",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 3,
+    "question_id": "dbms_sql_135",
+    "subject": "dbms_sql",
+    "question": "Database systems that store each relation in a separate operating system file may use the operating system’s authorization scheme, instead of defining a special scheme themselves. In this case, which of the following is false?",
+    "choices": {
+      "A": "The administrator enjoys more control on the grant option",
+      "B": "It is difficult to differentiate among the update, delete and insert authorizations.",
+      "C": "Cannot store more than one relation in a file.",
+      "D": "Operations on the database are speeded up as the authorization procedure is carried out at the operating system level."
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 4,
+    "question_id": "execution_prediction_498",
+    "subject": "execution_prediction",
+    "question": "import sys\nn,k = map(int,input().split( ))\ns = input()\nr0 = list(reversed(s))\nr = ''.join(r0)\ns = s + r\nl = len(s)\nS = [s[i] for i in range(l)]\n\nliteral=list(set(S))\nliteral.sort()\n\nsmall = literal[0]\n\ni=0\nmx=0\ncnt = 0\nnow=-1\ncnd=[]\nwhile i<l:\n    if s[i] == small:\n        now = i\n        cnt = 1\n        i += 1\n        try:\n            while s[i] == small:\n                cnt += 1\n                i += 1\n            if mx < cnt:\n                cnd = []\n                cnd.append(now)\n                now == i\n                mx = cnt\n            elif mx == cnt:\n                cnd.append(now)\n                now = i\n            else:\n                now = i\n        except:\n            pass\n    i += 1\nif mx*2**k>=n:\n    print(small*2**k)\n    sys.exit\nelse:\n    pass\ncnd_string = []\naddi = n - 2**k\n\n\nfor i in cnd:\n    cnd_string.append(s[i + mx : i + mx + addi])\ncnd_string.sort()\nfor t in cnd_string:\n    if len(t) < addi:\n        cnd_string.remove(t)\nprint(small*2**k + cnd_string[0])",
+    "choices": {
+      "A": "Runtime Error",
+      "B": "No abnormally found",
+      "C": "Memory Limit Exceeded",
+      "D": "Time Limit Exceeded"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 5,
+    "question_id": "fill_in_the_middle_1427",
+    "subject": "fill_in_the_middle",
+    "question": "class Solution:\n  def findFinalValue(self, nums: List[int], original: int) -> int:\n    numsSet = set(nums)\n    while original in numsSet:\n      _______________\n      original *= 2\n    return original",
+    "choices": {
+      "A": "original *= 2",
+      "B": "original = original * 2",
+      "C": "original += original",
+      "D": "original <<= 1"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 6,
+    "question_id": "others_1110",
+    "subject": "others",
+    "question": "The three aspects of Quantization, programmers generally concerned with are:",
+    "choices": {
+      "A": "Coding error, Sampling rate and Amplification",
+      "B": "Sampling rate, Coding error and Conditioning",
+      "C": "Sampling rate, Aperture time and Coding error",
+      "D": "Aperture time, Coding error and Strobing"
+    },
+    "correct_answer": "C",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 7,
+    "question_id": "programming_syntax_3995",
+    "subject": "programming_syntax",
+    "question": "What will be the output of the following R code?\n> centre <- function(x, type) {\n+ switch(type,\n+        mean = mean(x),\n+        median = median(x),\n+        trimmed = mean(x, trim = .1))\n+ }\n> x <- rcauchy(10)\n> centre(x, \"mean\")",
+    "choices": {
+      "A": "0.8760325",
+      "B": "0.5360891",
+      "C": "0.6086504",
+      "D": "gives mean with values depending on rcauchy values"
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 8,
+    "question_id": "software_principles_2688",
+    "subject": "software_principles",
+    "question": "A max-heap is a heap where the value of each parent is greater than or equal to the values of its children. Which of the following is a max-heap? (GATE CS 2011) .",
+    "choices": {
+      "A": "A",
+      "B": "B",
+      "C": "C",
+      "D": "D"
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 9,
+    "question_id": "api_frameworks_389",
+    "subject": "api_frameworks",
+    "question": "Which jQuery attribute is used to select each element that doesn’t have the specified attribute and value?",
+    "choices": {
+      "A": "$(\"[attribute@=\\'value\\']\")",
+      "B": "$(\"[attribute$=\\'value\\']\")",
+      "C": "$(\"[attribute!=\\'value\\']\")",
+      "D": "$(\"[attribute|=\\'value\\']\")"
+    },
+    "correct_answer": "C",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 10,
+    "question_id": "code_completion_147",
+    "subject": "code_completion",
+    "question": "def get_max_triples(n):\n    \"\"\"\n    You are given a positive integer n. You have to create an integer array a of length n.\n        For each i (1 ≤ i ≤ n), the value of a[i] = i * i - i + 1.\n        Return the number of triples (a[i], a[j], a[k]) of a where i < j < k, \n    and a[i] + a[j] + a[k] is a multiple of 3.\n\n    Example :\n        Input: n = 5\n        Output: 1\n        Explanation: \n        a = [1, 3, 7, 13, 21]\n        The only valid triple is (1, 7, 13).\n    \"\"\"",
+    "choices": {
+      "A": "A = [i*i - i + 1 for i in range(1, n+1)]\n    ans = []\n    for i in range(n-1):\n        for j in range(i+1, n-1):\n            for k in range(j+1, n-1):\n                if (A[i] + A[j] + A[k]) % 3 == 0:\n                    ans.append((A[i], A[j], A[k]))\n    return len(ans)",
+      "B": "A = [i*i - i + 1 for i in range(1, n+1)]\n    ans = []\n    for i in range(n):\n        for j in range(i+1, n):\n            for k in range(j+1, n):\n                if (A[i] + A[j] + A[k]) % 2 == 0:\n                    ans.append((A[i], A[j], A[k]))\n    return len(ans)",
+      "C": "A = [i*i + i + 1 for i in range(1, n+1)]\n    ans = []\n    for i in range(n):\n        for j in range(i+1, n):\n            for k in range(j+1, n):\n                if (A[i] + A[j] + A[k]) % 3 == 0:\n                    ans.append((A[i], A[j], A[k]))\n    return len(ans)",
+      "D": "A = [i*i - i + 1 for i in range(1,n+1)]\n    ans = []\n    for i in range(n):\n        for j in range(i+1,n):\n            for k in range(j+1,n):\n                if (A[i]+A[j]+A[k])%3 == 0:\n                    ans += [(A[i],A[j],A[k])]\n    return len(ans)"
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 11,
+    "question_id": "code_repair_1",
+    "subject": "code_repair",
+    "question": "1 import java.util.*;\n2 import java.util.ArrayDeque;\n3 public class BREADTH_FIRST_SEARCH {\n4     public static Set<Node> nodesvisited = new HashSet<>();\n5     public static boolean breadth_first_search(Node startnode, Node goalnode) {\n6         Deque<Node> queue = new ArrayDeque<>();\n7         queue.addLast(startnode);\n8         nodesvisited.add(startnode);\n9         while (true) {\n10             Node node = queue.removeFirst();\n11             if (node == goalnode) {\n12                 return true;\n13             } else {\n14                 for (Node successor_node : node.getSuccessors()) {\n15                     if (!nodesvisited.contains(successor_node)) {\n16                         queue.addFirst(successor_node);\n17                         nodesvisited.add(successor_node);\n18                     }\n19                 }\n20             }\n21         }\n22     }\n23 }",
+    "choices": {
+      "A": "Modify line 9:\n```while (!queue.isEmpty()) {```",
+      "B": "Modify line 8:\n```       while (!queue.isEmpty()) {```\nInsert at line 20:\n```        return false;```",
+      "C": "Modify line 8:\n```if (!nodesvisited.contains(startnode)) {\n    nodesvisited.add(startnode);\n}```",
+      "D": "Modify line 7:\n```queue.add(startnode);```"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 12,
+    "question_id": "dbms_sql_234",
+    "subject": "dbms_sql",
+    "question": "A clustering index is defined on the fields which are of type",
+    "choices": {
+      "A": "non-key and ordering",
+      "B": "non-key and non-ordering",
+      "C": "key and ordering",
+      "D": "key and non-ordering"
+    },
+    "correct_answer": "A",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 13,
+    "question_id": "execution_prediction_5168",
+    "subject": "execution_prediction",
+    "question": "import java.io.BufferedReader;\nimport java.io.FileNotFoundException;\nimport java.io.FileReader;\nimport java.io.IOException;\nimport java.io.InputStreamReader;\nimport java.io.PrintWriter;\nimport java.util.ArrayList;\nimport java.util.StringTokenizer;\n\npublic class Main {\n    public static long MOD = 1000 * 1000 * 1000 + 7;\n\n    public static void main(String[] args){\n        PrintWriter out = new PrintWriter(System.out);\n        FastScanner sc = new FastScanner();\n\n        int N = sc.nextInt();\n        int M = sc.nextInt();\n        long S[] = sc.nextLongArray(N);\n        long T[] = sc.nextLongArray(M);\n        long dp[][] = new long[N+1][M+1];\n        ArrayList<Integer> S_list[] = new ArrayList[100000+1];\n        for (int i=0;i<N;i++) {\n            int s = (int) S[i];\n            if (S_list[s] == null) {\n                S_list[s] = new ArrayList<Integer>();\n            }\n\n            S_list[s].add(i);\n        }\n\n        for (int i=0;i<=N;i++) {\n            dp[i][0] = 1;\n        }\n\n        for (int j=0;j<=M;j++) {\n            dp[0][j] = 1;\n        }\n\n        for (int j=1;j<=M;j++) {\n            for (int i=1;i<=N;i++) {\n                long a = dp[i][j-1];\n                int t = (int) T[j-1];\n\n                if (S_list[t] != null) {\n                    int len = S_list[t].size();\n\n                    for (int k=0;k<len;k++) {\n                        int idx = S_list[t].get(k) + 1;\n                        if (idx > i) break;\n\n                        a += dp[idx-1][j-1];\n                        a %= MOD;\n                    }\n                }\n//                for (int k=1;k<=i;k++) {\n//                    if (S[k-1] == T[j-1]) {\n//                        a += dp[k-1][j-1];\n//                        a %= MOD;\n//                    }\n//                }\n\n                dp[i][j] = a;\n            }\n        }\n\n        long ans = dp[N][M];\n\n        out.println(ans);\n        out.flush();\n    }\n\n    public static class FastScanner {\n        BufferedReader br;\n        StringTokenizer st;\n\n        public FastScanner(String s) {\n            try {\n                br = new BufferedReader(new FileReader(s));\n            } catch (FileNotFoundException e) {\n                e.printStackTrace();\n            }\n        }\n\n        public FastScanner() {\n            br = new BufferedReader(new InputStreamReader(System.in));\n        }\n\n        String nextToken() {\n            while (st == null || !st.hasMoreElements()) {\n                try {\n                    st = new StringTokenizer(br.readLine());\n                } catch (IOException e) {\n                    e.printStackTrace();\n                }\n            }\n            return st.nextToken();\n        }\n\n        int nextInt() {\n            return Integer.parseInt(nextToken());\n        }\n\n        long nextLong() {\n            return Long.parseLong(nextToken());\n        }\n\n        double nextDouble() {\n            return Double.parseDouble(nextToken());\n        }\n\n        int[] nextIntArray(int N) {\n            int a[] = new int[N];\n            for (int i=0;i<N;i++) {\n                a[i] = this.nextInt();\n            }\n\n            return a;\n        }\n\n        long[] nextLongArray(int N) {\n            long a[] = new long[N];\n            for (int i=0;i<N;i++) {\n                a[i] = this.nextLong();\n            }\n\n            return a;\n        }\n\n        double[] nextDoubleArray(int N) {\n            double a[] = new double[N];\n            for (int i=0;i<N;i++) {\n                a[i] = this.nextDouble();\n            }\n\n            return a;\n        }\n\n        String[] nextTokenArray(int N) {\n            String a[] = new String[N];\n            for (int i=0;i<N;i++) {\n                a[i] = this.nextToken();\n            }\n\n            return a;\n        }\n    }\n}",
+    "choices": {
+      "A": "Time Limit Exceeded",
+      "B": "Internal error",
+      "C": "No abnormally found",
+      "D": "Runtime Error"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 14,
+    "question_id": "fill_in_the_middle_1892",
+    "subject": "fill_in_the_middle",
+    "question": "class Solution:\n  def maximumScore(self, nums: List[int], k: int) -> int:\n    kMod = 1_000_000_007\n    n = len(nums)\n    ans = 1\n    minPrimeFactors = self._sieveEratosthenes(max(nums) + 1)\n    primeScores = [self._getPrimeScore(num, minPrimeFactors) for num in nums]\n    left = [-1] * n\n    right = [n] * n\n    stack = []\n\n    for i in reversed(range(n)):\n      while stack and primeScores[stack[-1]] <= primeScores[i]:\n        left[stack.pop()] = i\n      stack.append(i)\n\n    stack = []\n\n    for i in range(n):\n      while stack and primeScores[stack[-1]] < primeScores[i]:\n        right[stack.pop()] = i\n      stack.append(i)\n\n    numAndIndexes = [(num, i) for i, num in enumerate(nums)]\n\n    def modPow(x: int, n: int) -> int:\n      if n == 0:\n        return 1\n      if n & 1:\n        return x * modPow(x, n - 1) % kMod\n      _______________\n      return modPow(x * x % kMod, n // 2)\n\n    for num, i in sorted(numAndIndexes, key=lambda x: (-x[0], x[1])):\n      rangeCount = (i - left[i]) * (right[i] - i)\n      actualCount = min(rangeCount, k)\n      k -= actualCount\n      ans *= modPow(num, actualCount)\n      ans %= kMod\n\n    return ans\n\n  def _sieveEratosthenes(self, n: int) -> List[int]:\n    \"\"\"Gets the minimum prime factor of i, where 2 <= i <= n.\"\"\"\n    minPrimeFactors = [i for i in range(n + 1)]\n    for i in range(2, int(n**0.5) + 1):\n      if minPrimeFactors[i] == i:  \n        for j in range(i * i, n, i):\n          minPrimeFactors[j] = min(minPrimeFactors[j], i)\n    return minPrimeFactors\n\n  def _getPrimeScore(self, num: int, minPrimeFactors: List[int]) -> int:\n    primeFactors = set()\n    while num > 1:\n      divisor = minPrimeFactors[num]\n      primeFactors.add(divisor)\n      while num % divisor == 0:\n        num //= divisor\n    return len(primeFactors)",
+    "choices": {
+      "A": "temp = modPow(x, n // 2)\nreturn temp * temp % kMod",
+      "B": "return modPow(x, n) if n % 2 else modPow(x * x % kMod, n // 2)",
+      "C": "return modPow(x, n // 2) * modPow(x, n - n // 2)",
+      "D": "return modPow(x * x % kMod, n // 2)"
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 15,
+    "question_id": "others_24",
+    "subject": "others",
+    "question": "What value does the variable y have after ALL of the code above executes?\nint x;\nint y;\nint z;\nx=3;\ny=4;\nz = ++x * y++;",
+    "choices": {
+      "A": "4",
+      "B": "5",
+      "C": "6",
+      "D": "unknown/undefined"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 16,
+    "question_id": "programming_syntax_3312",
+    "subject": "programming_syntax",
+    "question": "What will be the output of the following Python code?\nl=list('HELLO')\n'first={0[0]}, third={0[2]}'.format(l)",
+    "choices": {
+      "A": "‘first=H, third=L’",
+      "B": "‘first=0, third=2’",
+      "C": "Error",
+      "D": "‘first=0, third=L’"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 17,
+    "question_id": "software_principles_1549",
+    "subject": "software_principles",
+    "question": "What is the time complexity of Bellman-Ford single-source shortest path algorithm on a complete graph of n vertices?",
+    "choices": {
+      "A": "θ(n2)",
+      "B": "θ(n2 log n)",
+      "C": "θ(n3)",
+      "D": "θ(n3 log n)"
+    },
+    "correct_answer": "C",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 18,
+    "question_id": "api_frameworks_158",
+    "subject": "api_frameworks",
+    "question": "What is the correct Pandas function for loading CSV files into a DataFrame?",
+    "choices": {
+      "A": "read_file()",
+      "B": "ReadFile()",
+      "C": "ReadCSV()",
+      "D": "read_csv()"
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 19,
+    "question_id": "code_completion_159",
+    "subject": "code_completion",
+    "question": "def eat(number, need, remaining):\n    \"\"\"\n    You're a hungry rabbit, and you already have eaten a certain number of carrots,\n    but now you need to eat more carrots to complete the day's meals.\n    you should return an array of [ total number of eaten carrots after your meals,\n                                    the number of carrots left after your meals ]\n    if there are not enough remaining carrots, you will eat all remaining carrots, but will still be hungry.\n    \n    Example:\n    * eat(5, 6, 10) -> [11, 4]\n    * eat(4, 8, 9) -> [12, 1]\n    * eat(1, 10, 10) -> [11, 0]\n    * eat(2, 11, 5) -> [7, 0]\n    \n    Variables:\n    @number : integer\n        the number of carrots that you have eaten.\n    @need : integer\n        the number of carrots that you need to eat.\n    @remaining : integer\n        the number of remaining carrots thet exist in stock\n    \n    Constrain:\n    * 0 <= number <= 1000\n    * 0 <= need <= 1000\n    * 0 <= remaining <= 1000\n\n    Have fun :)\n    \"\"\"",
+    "choices": {
+      "A": "if(need > remaining):\n        return [number + need, remaining - need]  \n    else:\n        return [number + remaining, 0]",
+      "B": "if(need <= remaining):\n        return [ number + need , remaining-need ]\n    else:\n        return [ number + remaining , 0]",
+      "C": "if(need < remaining):\n        return [number + need, remaining - need]\n    else:\n        return [number + remaining, need - remaining]",
+      "D": "if(need <= remaining):\n        return [number + need, remaining]  \n    else:\n        return [number + remaining, 0]"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 20,
+    "question_id": "code_repair_2",
+    "subject": "code_repair",
+    "question": "1 import java.util.*;\n2 public class BUCKETSORT {\n3     public static ArrayList<Integer> bucketsort(ArrayList<Integer> arr, int k) {\n4         ArrayList<Integer> counts = new ArrayList<Integer>(Collections.nCopies(k,0));\n5         for (Integer x : arr) {\n6             counts.set(x,counts.get(x)+1);\n7         }\n8         ArrayList<Integer> sorted_arr = new ArrayList<Integer>(100);\n9         int i = 0;\n10         for (Integer count : arr) { \n11             sorted_arr.addAll(Collections.nCopies(count, i));\n12             i++;\n13         }\n14         return sorted_arr;\n15     }\n16 }",
+    "choices": {
+      "A": "Modify line 14:\n```return sorted_arr;```",
+      "B": "Modify line 6:\n```    counts.set(x,counts.get(x)+1);```",
+      "C": "Modify line 10:\n```for (int j = 0; j < counts.size(); j++) {```",
+      "D": "Modify line 9:\n```       for (Integer count : counts) {```"
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 21,
+    "question_id": "dbms_sql_63",
+    "subject": "dbms_sql",
+    "question": "With SQL, how can you insert \"Olsen\" as the \"LastName\" in the \"Persons\" table?",
+    "choices": {
+      "A": "INSERT INTO Persons (LastName) VALUES ('Olsen')",
+      "B": "INSERT ('Olsen') INTO Persons (LastName)",
+      "C": "INSERT INTO Persons ('Olsen') INTO LastName"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 22,
+    "question_id": "execution_prediction_4334",
+    "subject": "execution_prediction",
+    "question": "package main;\n\nimport java.util.*;\nimport java.util.stream.*;\nimport java.io.*;\n\npublic class Main {\n    \n    public static void main(String[] args) throws IOException {\n\n        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));\n        String[] in1 = br.readLine().split(\" \");\n        String[] in2 = br.readLine().split(\" \");\n        int H = Integer.parseInt(in1[0]);\n        int N = Integer.parseInt(in1[1]);\n\n        br.close();\n        int sum = Arrays.stream(in2)\n                        .mapToInt(Integer::parseInt)\n                        .sum();\n        \n        System.out.println(sum >= H ? \"Yes\" : \"No\");\n    }\n}",
+    "choices": {
+      "A": "Time Limit Exceeded",
+      "B": "Runtime Error",
+      "C": "No abnormally found",
+      "D": "Memory Limit Exceeded"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 23,
+    "question_id": "fill_in_the_middle_36",
+    "subject": "fill_in_the_middle",
+    "question": "class Solution:\n  def solveSudoku(self, board: List[List[str]]) -> None:\n    def isValid(row: int, col: int, c: str) -> bool:\n      for i in range(9):\n        if board[i][col] == c or \\\n           board[row][i] == c or \\\n           _______________\n           board[3 * (row // 3) + i // 3][3 * (col // 3) + i % 3] == c:\n          return False\n      return True\n\n    def solve(s: int) -> bool:\n      if s == 81:\n        return True\n\n      i = s // 9\n      j = s % 9\n\n      if board[i][j] != '.':\n        return solve(s + 1)\n\n      for c in string.digits[1:]:\n        if isValid(i, j, c):\n          board[i][j] = c\n          if solve(s + 1):\n            return True\n          board[i][j] = '.'\n\n      return False\n\n    solve(0)",
+    "choices": {
+      "A": "board[3 * (row // 3) + i // 3][3 * (col // 3) + i % 3] == c:",
+      "B": "board[(row // 3) * 3 + i // 3][(col // 3) * 3 + i % 3] == c",
+      "C": "board[row - row % 3 + i // 3][col - col % 3 + i % 3] == c",
+      "D": "board[(row - row % 3) + i // 3][(col - col % 3) + i % 3] == c"
+    },
+    "correct_answer": "A",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 24,
+    "question_id": "others_4",
+    "subject": "others",
+    "question": "What will be output of the following c code?\n#include<stdio.h>\nint main()\n{\n    volatile int a=11;\n    printf(\"%d\",a);\n    return 0;\n}",
+    "choices": {
+      "A": "11",
+      "B": "Garbage",
+      "C": "-2",
+      "D": "Cannot Predict"
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 25,
+    "question_id": "programming_syntax_4950",
+    "subject": "programming_syntax",
+    "question": "#include <iostream>\nusing namespace std;\n\nint main()\n{\n    try\n    {\n        try\n        {\n            throw 20;\n        }\n        catch (int n)\n        {\n            cout << \\\"Inner Catch\\\\n\\\";\n            throw;\n        }\n    }\n    catch (int x)\n    {\n        cout << \\\"Outer Catch\\\\n\\\";\n    }\n    return 0;\n}\n\n``````CPP",
+    "choices": {
+      "A": "Outer Catch",
+      "B": "Inner Catch",
+      "C": "Inner Catch\r\nOuter Catch",
+      "D": "Compiler Error"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 26,
+    "question_id": "software_principles_321",
+    "subject": "software_principles",
+    "question": "Consider the following program fragment in assembly language :\r\r\nmov ax, 0h\r\nmov cx, 0A h\r\n\r\ndoloop :\r\ndec ax\r\nloop doloop\r\n\r\nWhat is the value of ax and cx registers after the completion of the doloop ?",
+    "choices": {
+      "A": "ax=FFF5 h and cx=0 h",
+      "B": "ax=FFF6 h and cx=0 h",
+      "C": "ax=FFF7 h and cx=0A h",
+      "D": "ax=FFF5 h and cx=0A h"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 27,
+    "question_id": "api_frameworks_39",
+    "subject": "api_frameworks",
+    "question": "Which class indicates a dropdown menu?",
+    "choices": {
+      "A": ".select",
+      "B": ".dropdown-list",
+      "C": ".dropdown"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 28,
+    "question_id": "code_completion_76",
+    "subject": "code_completion",
+    "question": "def is_simple_power(x, n):\n    \"\"\"Your task is to write a function that returns true if a number x is a simple\n    power of n and false in other cases.\n    x is a simple power of n if n**int=x\n    For example:\n    is_simple_power(1, 4) => true\n    is_simple_power(2, 2) => true\n    is_simple_power(8, 2) => true\n    is_simple_power(3, 2) => false\n    is_simple_power(3, 1) => false\n    is_simple_power(5, 3) => false\n    \"\"\"",
+    "choices": {
+      "A": "if (n == 1):\n        return (x == 1)\n    power = 1\n    while (power < x):\n        power = power * x \n    return (power == x)",
+      "B": "if (n == 1):\n        return (x == 1)\n    if x < n: \n        return False\n    power = 1\n    while (power < x):\n        power = power * n\n    return (power == x)",
+      "C": "if (n == 1):\n        return (x == 1)\n    power = 1\n    while (power < x):\n        power = power * x \n    return (power == n)",
+      "D": "if (n == 1): \n        return (x == 1) \n    power = 1\n    while (power < x): \n        power = power * n \n    return (power == x)"
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 29,
+    "question_id": "code_repair_45",
+    "subject": "code_repair",
+    "question": "1 def find_in_sorted(arr, x):\n2     def binsearch(start, end):\n3         if start == end:\n4             return -1\n5         mid = start + (end - start) // 2\n6         if x < arr[mid]:\n7             return binsearch(start, mid)\n8         elif x > arr[mid]:\n9             return binsearch(mid, end)\n10         else:\n11             return mid\n12     return binsearch(0, len(arr))",
+    "choices": {
+      "A": "Modify line 8:\n```           return binsearch(mid + 1, end)```",
+      "B": "Modify line 2:\n```if start >= end:```",
+      "C": "Modify line 3:\n```return start```",
+      "D": "Modify line 22:\n```mid = start + (end - start) // 2 if start < end else start```"
+    },
+    "correct_answer": "A",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 30,
+    "question_id": "dbms_sql_339",
+    "subject": "dbms_sql",
+    "question": "What does the SQL operator \"LIKE\" do?",
+    "choices": {
+      "A": "Checks if a value is NULL",
+      "B": "Checks if a value is within a specified range",
+      "C": "Performs pattern matching on a string value",
+      "D": "Compares two values for equality"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 31,
+    "question_id": "execution_prediction_247",
+    "subject": "execution_prediction",
+    "question": "#reference Segment-Tree code from:https://ikatakos.com/pot/programming_algorithm/data_structure/segment_tree\n\ndef bisect(pos):\n  l=-1\n  r=n\n  while r-l!=1:\n    mid=(l+r)//2\n    if arr[mid][0]>=pos:\n      r=mid\n    else:\n      l=mid\n  return r\n\nmod=998244353\nn=int(input())\narr=[list(map(int,input().split())) for _ in range(n)]\narr=sorted(arr,key=lambda x:x[0])\nposs=[]\nfor i in range(n):\n  poss.append(bisect(arr[i][0]+arr[i][1]))\nposs.append(n)\n\noffset=2**((n-1).bit_length())\nst=[0]*(2*offset)\n\ndef update(pos,x):\n  pos+=offset\n  st[pos]=x\n  while pos>1:\n    y=st[pos^1]\n    if x<=y:\n      break\n    pos>>=1\n    st[pos]=x\n\ndef get_max(l,r):\n  ret=0\n  l+=offset\n  r+=offset\n  while l<r:\n    if r&1:\n      ret=max(ret,st[r-1])\n    if l&1:\n      ret=max(ret,st[l])\n      l+=1\n    l>>=1\n    r>>=1\n  return ret\n\nfor i in range(n):\n  update(i,poss[i])\nfor i in range(n-1,-1,-1):\n  poss[i]=get_max(i,poss[i])\n  update(i,poss[i])\n\ndp=[0]*(n+1)\ndp[-1]=1\nfor i in range(n-1,-1,-1):\n  dp[i]+=dp[i+1]\n  dp[i]%=mod\n  pos=poss[i]\n  dp[i]+=dp[pos]\n  dp[i]%=mod\nprint(dp[0]%mod)",
+    "choices": {
+      "A": "Memory Limit Exceeded",
+      "B": "No abnormally found",
+      "C": "Internal error",
+      "D": "Time Limit Exceeded"
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 32,
+    "question_id": "fill_in_the_middle_1648",
+    "subject": "fill_in_the_middle",
+    "question": "class Solution:\n  def minCost(self, nums: List[int], cost: List[int]) -> int:\n    ans = 0\n    l = min(nums)\n    r = max(nums)\n\n    def getCost(target: int) -> int:\n      return sum(abs(num - target) * c for num, c in zip(nums, cost))\n\n    while l < r:\n      _______________\n      m = (l + r) // 2\n      cost1 = getCost(m)\n      cost2 = getCost(m + 1)\n      ans = min(cost1, cost2)\n      if cost1 < cost2:\n        r = m\n      else:\n        l = m + 1\n\n    return ans",
+    "choices": {
+      "A": "m = (2*l + r) // 3",
+      "B": "m = (l + 2*r) // 3",
+      "C": "m = l + (r - l) // 2",
+      "D": "m = (l + r) // 2"
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 33,
+    "question_id": "others_310",
+    "subject": "others",
+    "question": "What is Concurrency?",
+    "choices": {
+      "A": "It is a storage service",
+      "B": "It is a data decryption service",
+      "C": "It is the number of simultaneous Lambda invocations"
+    },
+    "correct_answer": "C",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 34,
+    "question_id": "programming_syntax_577",
+    "subject": "programming_syntax",
+    "question": "What would be the size of the following union declaration?  (Assuming size of double = 8, size of int = 4, size of char = 1)\n    #include <stdio.h>    union uTemp    {        double a;        int b[10];        char c;    }u;",
+    "choices": {
+      "A": "4",
+      "B": "8",
+      "C": "40",
+      "D": "80"
+    },
+    "correct_answer": "C",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 35,
+    "question_id": "software_principles_1894",
+    "subject": "software_principles",
+    "question": "The infix expression A + (B - C)* D is correctly represented in prefix notation as",
+    "choices": {
+      "A": "A + B − C ∗ D",
+      "B": "+ A ∗ − B C D",
+      "C": "A B C − D ∗ +",
+      "D": "A + B C − D ∗"
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 36,
+    "question_id": "api_frameworks_475",
+    "subject": "api_frameworks",
+    "question": "What is the purpose of the np.clip() function in NumPy?",
+    "choices": {
+      "A": "Clips the array values to be within a specified range",
+      "B": "Clips the array to its maximum value",
+      "C": "Clips the array to its minimum value",
+      "D": "Clips the array based on a boolean condition"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 37,
+    "question_id": "code_completion_156",
+    "subject": "code_completion",
+    "question": "def int_to_mini_roman(number):\n    \"\"\"\n    Given a positive integer, obtain its roman numeral equivalent as a string,\n    and return it in lowercase.\n    Restrictions: 1 <= num <= 1000\n\n    Examples:\n    >>> int_to_mini_roman(19) == 'xix'\n    >>> int_to_mini_roman(152) == 'clii'\n    >>> int_to_mini_roman(426) == 'cdxxvi'\n    \"\"\"",
+    "choices": {
+      "A": "num = [1, 4, 5, 9, 10, 40, 50, 90, 100, 400, 500, 900, 1000]\n    sym = [\"I\", \"IV\", \"V\", \"IX\", \"X\", \"XL\", \"L\", \"XC\", \"C\", \"CD\", \"D\", \"CM\", \"M\"]\n    i = 12\n    res = ''\n    while number:\n        div = number // num[i]\n        number %= num[i]\n        res += sym[i] * div  \n    return res.lower()",
+      "B": "num = [1, 4, 5, 9, 10, 40, 50, 90, 100, 400, 500, 900, 1000]\n    sym = [\"I\", \"IV\", \"V\", \"IX\", \"X\", \"XL\", \"L\", \"XC\", \"C\", \"CD\", \"D\", \"CM\", \"M\"]\n    i = 0 \n    res = ''\n    while number:\n        div = number // num[i]\n        number %= num[i]\n        while div:\n            res += sym[i]\n            div -= 1\n        i += 1  \n    return res.lower()",
+      "C": "num = [1, 4, 5, 9, 10, 40, 50, 90,  \n           100, 400, 500, 900, 1000] \n    sym = [\"I\", \"IV\", \"V\", \"IX\", \"X\", \"XL\",  \n           \"L\", \"XC\", \"C\", \"CD\", \"D\", \"CM\", \"M\"] \n    i = 12\n    res = ''\n    while number: \n        div = number // num[i] \n        number %= num[i] \n        while div: \n            res += sym[i] \n            div -= 1\n        i -= 1\n    return res.lower()",
+      "D": "num = [1, 4, 5, 9, 10, 40, 50, 90, 100, 400, 500, 900, 1000]\n    sym = [\"I\", \"IV\", \"V\", \"IX\", \"X\", \"XL\", \"L\", \"XC\", \"C\", \"CD\", \"D\", \"CM\", \"M\"]\n    i = 12\n    res = ''\n    while number:\n        div = number % num[i]  \n        number //= num[i]     \n        while div:\n            res += sym[i]\n            div -= 1\n        i -= 1\n    return res.lower()"
+    },
+    "correct_answer": "C",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 38,
+    "question_id": "code_repair_15",
+    "subject": "code_repair",
+    "question": "1 import java.util.*;\n2 public class LCS_LENGTH {\n3     public static Integer lcs_length(String s, String t) {\n4         Map<Integer, Map<Integer,Integer>> dp = new HashMap<Integer,Map<Integer,Integer>>();\n5         for (int i=0; i < s.length(); i++) {\n6             Map<Integer,Integer> initialize = new HashMap<Integer,Integer>();\n7             dp.put(i, initialize);\n8             for (int j=0; j < t.length(); j++) {\n9                 Map<Integer,Integer> internal_map = dp.get(i);\n10                 internal_map.put(j,0);\n11                 dp.put(i, internal_map);\n12             }\n13         }\n14         for (int i=0; i < s.length(); i++) {\n15             for (int j=0; j < t.length(); j++) {\n16                 if (s.charAt(i) == t.charAt(j)) {\n17                     if (dp.containsKey(i-1)) {\n18                         Map<Integer, Integer> internal_map = dp.get(i);\n19                         int insert_value = dp.get(i-1).get(j) + 1;\n20                         internal_map.put(j, insert_value);\n21                         dp.put(i,internal_map);\n22                     } else {\n23                         Map<Integer, Integer> internal_map = dp.get(i);\n24                         internal_map.put(j,1);\n25                         dp.put(i,internal_map);\n26                     }\n27                 }\n28             }\n29         }\n30         if (!dp.isEmpty()) {\n31             List<Integer> ret_list = new ArrayList<Integer>();\n32             for (int i=0; i<s.length(); i++) {\n33                 ret_list.add(!dp.get(i).isEmpty() ? Collections.max(dp.get(i).values()) : 0);\n34             }\n35             return Collections.max(ret_list);\n36         } else {\n37             return 0;\n38         }\n39     }\n40 }",
+    "choices": {
+      "A": "Modify line 8:\n```            for (int j=0; j <= t.length(); j++) {```",
+      "B": "Modify line 11:\n```Map<Integer, Integer> internal_map = dp.getOrDefault(i, new HashMap<>());```",
+      "C": "Modify line 16:\n```                   if (dp.containsKey(i-1)&&dp.get(i-1).containsKey(j-1)) {```\nModify line 18:\n```                       int insert_value = dp.get(i-1).get(j-1) + 1;```",
+      "D": "Modify line 5:\n```for (int i = 1; i <= s.length(); i++) {```"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 39,
+    "question_id": "dbms_sql_85",
+    "subject": "dbms_sql",
+    "question": "Consider the following relational schema:\r\r\nEmployeeDetail (EmpId, FullName, ManagerID, DateOfJoining)\r\nEmployeeSalary (EmpID, Project, Salary)\r\n\r\n\r\nConsider the following relational query on the above database:\r\n\r\nSELECT Salary\r\nFROM EmployeeSalary Emp1\r\nWHERE 2 = (\r\n                SELECT COUNT( DISTINCT ( Emp2.Salary ) )\r\n                FROM EmployeeSalary Emp2\r\n                WHERE Emp2.Salary > Emp1.Salary\r\n            )\r\n\r\n\r\nAssume that relations corresponding to the above schema are not empty. Which one of the following is the correct interpretation of the above query?",
+    "choices": {
+      "A": "find the highest salary from table",
+      "B": "find the 2nd highest salary from table",
+      "C": "find the 3rd highest salary from table",
+      "D": "None of above"
+    },
+    "correct_answer": "C",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 40,
+    "question_id": "execution_prediction_1985",
+    "subject": "execution_prediction",
+    "question": "#####segfunc#####\ndef segfunc(x, y):\n    if x[0]==0:\n        return x\n    else:\n        return y\n#################\n\n#####ide_ele#####\nide_ele = [float(\"inf\"),-1]\n#################\n\nclass SegTree:\n    \"\"\"\n    init(init_val, ide_ele): 配列init_valで初期化 O(N)\n    update(k, x): k番目の値をxに更新 O(logN)\n    query(l, r): 区間[l, r)をsegfuncしたものを返す O(logN)\n    \"\"\"\n    def __init__(self, init_val, segfunc, ide_ele):\n        \"\"\"\n        init_val: 配列の初期値\n        segfunc: 区間にしたい操作\n        ide_ele: 単位元\n        n: 要素数\n        num: n以上の最小の2のべき乗\n        tree: セグメント木(1-index)\n        \"\"\"\n        n = len(init_val)\n        self.segfunc = segfunc\n        self.ide_ele = ide_ele\n        self.num = 1 << (n - 1).bit_length()\n        self.tree = [ide_ele] * 2 * self.num\n        # 配列の値を葉にセット\n        for i in range(n):\n            self.tree[self.num + i] = init_val[i]\n        # 構築していく\n        for i in range(self.num - 1, 0, -1):\n            self.tree[i] = self.segfunc(self.tree[2 * i], self.tree[2 * i + 1])\n\n    def update(self, k, x):\n        \"\"\"\n        k番目の値をxに更新\n        k: index(0-index)\n        x: update value\n        \"\"\"\n        k += self.num\n        self.tree[k][0] += x\n        while k > 1:\n            self.tree[k >> 1] = self.segfunc(self.tree[k], self.tree[k ^ 1])\n            k >>= 1\n\n    def query(self, l, r):\n        \"\"\"\n        [l, r)のsegfuncしたものを得る\n        l: index(0-index)\n        r: index(0-index)\n        \"\"\"\n        res = self.ide_ele\n\n        l += self.num\n        r += self.num\n        while l < r:\n            if l & 1:\n                res = self.segfunc(res, self.tree[l])\n                l += 1\n            if r & 1:\n                res = self.segfunc(res, self.tree[r - 1])\n            l >>= 1\n            r >>= 1\n        return res\n\nimport sys\n\ninput=sys.stdin.readline\n\ndef main():\n    N,M=map(int,input().split())\n    s=input()\n    dic={\"A\":[[0,i] for i in range(N)],\"B\":[[0,i] for i in range(N)]}\n    edge=[[] for i in range(N)]\n\n    for i in range(M):\n        a,b=map(int,input().split())\n        a-=1;b-=1\n        edge[a].append(b)\n        edge[b].append(a)\n        dic[s[a]][b][0]+=1\n        dic[s[b]][a][0]+=1\n\n    dic={moji:SegTree(dic[moji],segfunc,ide_ele) for moji in dic}\n\n    ban=set([])\n    while True:\n        a,index=dic[\"A\"].query(0,N)\n        b,index2=dic[\"B\"].query(0,N)\n        if a==0:\n            ban.add(index)\n            dic[\"A\"].update(index,float(\"inf\"))\n            dic[\"B\"].update(index,float(\"inf\"))\n            for v in edge[index]:\n                dic[s[index]].update(v,-1)\n\n        elif b==0:\n            ban.add(index2)\n            dic[\"A\"].update(index2,float(\"inf\"))\n            dic[\"B\"].update(index2,float(\"inf\"))\n            for v in edge[index2]:\n                dic[s[index2]].update(v,-1)\n        else:\n            break\n\n    check=set([i for i in range(N)])\n    if ban==check:\n        print(\"No\")\n    else:\n        print(\"Yes\")\n\nif __name__==\"__main__\":\n    main()",
+    "choices": {
+      "A": "Time Limit Exceeded",
+      "B": "No abnormally found",
+      "C": "Memory Limit Exceeded",
+      "D": "Runtime Error"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 41,
+    "question_id": "fill_in_the_middle_130",
+    "subject": "fill_in_the_middle",
+    "question": "class Solution:\n  def partition(self, s: str) -> List[List[str]]:\n    ans = []\n\n    def isPalindrome(s: str) -> bool:\n      return s == s[::-1]\n\n    def dfs(s: str, j: int, path: List[str], ans: List[List[str]]) -> None:\n      if j == len(s):\n        ans.append(path)\n        return\n\n      for i in range(j, len(s)):\n        if isPalindrome(s[j: i + 1]):\n          _______________\n          dfs(s, i + 1, path + [s[j: i + 1]], ans)\n\n    dfs(s, 0, [], ans)\n    return ans",
+    "choices": {
+      "A": "dfs(s, j + 1, path + [s[j:i]], ans)",
+      "B": "dfs(s, j, path + [s[j: i + 1]], ans)",
+      "C": "dfs(s, i + 1, path + [s[j: i + 1]], ans)",
+      "D": "dfs(s, i, path + [s[j: i + 1]], ans)"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 42,
+    "question_id": "others_698",
+    "subject": "others",
+    "question": "Which of the following transmission media is not readily suitable to CSMA operation?",
+    "choices": {
+      "A": "Radio",
+      "B": "Optical fibers",
+      "C": "Coaxial cable",
+      "D": "Twisted pair"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 43,
+    "question_id": "programming_syntax_5575",
+    "subject": "programming_syntax",
+    "question": "What will the following list comprehension output?matrix = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]flattened = [num for row in matrix for num in row]",
+    "choices": {
+      "A": "[[1, 2, 3], [4, 5, 6], [7, 8, 9]]",
+      "B": "[1, 2, 3, 4, 5, 6, 7, 8, 9]",
+      "C": "[(1, 2, 3), (4, 5, 6), (7, 8, 9)]",
+      "D": "[[1], [2], [3], [4], [5], [6], [7], [8], [9]]"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 44,
+    "question_id": "software_principles_2406",
+    "subject": "software_principles",
+    "question": "Consider B+ tree in which the search key is 12 bytes long, block size is 1024 bytes, record pointer is 10 bytes long and block pointer is 8 bytes long. The maximum number of keys that can be accommodated in each non-leaf node of the tree is",
+    "choices": {
+      "A": "49",
+      "B": "50",
+      "C": "51",
+      "D": "52"
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 45,
+    "question_id": "api_frameworks_644",
+    "subject": "api_frameworks",
+    "question": "Which of the following is a way for webpack command to do in React.js?",
+    "choices": {
+      "A": "Transpiles all of the javaScript into one",
+      "B": "local development server",
+      "C": "A and B are true",
+      "D": "None of the above"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 46,
+    "question_id": "code_completion_93",
+    "subject": "code_completion",
+    "question": "def encode(message):\n    \"\"\"\n    Write a function that takes a message, and encodes in such a \n    way that it swaps case of all letters, replaces all vowels in \n    the message with the letter that appears 2 places ahead of that \n    vowel in the english alphabet. \n    Assume only letters. \n    \n    Examples:\n    >>> encode('test')\n    'TGST'\n    >>> encode('This is a message')\n    'tHKS KS C MGSSCGG'\n    \"\"\"",
+    "choices": {
+      "A": "vowels = \"bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ\"\n    consonants_replace = dict([(i, chr(ord(i) + 2)) for i in vowels])\n    message = message.swapcase()\n    return ''.join([consonants_replace[i] if i in vowels else i for i in message])",
+      "B": "vowels = \"aeiouAEIOU\"\n    vowels_replace = dict([(i, chr(ord(i) - 2)) for i in vowels])\n    message = message.swapcase()\n    return ''.join([vowels_replace[i] if i in vowels else i for i in message])",
+      "C": "vowels = \"aeiouAEIOU\"\n    vowels_replace = dict([(i, chr(ord(i) + 2)) for i in vowels])\n    message = message.swapcase()\n    return ''.join([vowels_replace[i] if i in vowels else i for i in message])",
+      "D": "vowels = \"aeiou\"\n    vowels_replace = dict([(i, chr(ord(i) + 2)) for i in vowels])\n    message = message.swapcase()\n    return ''.join([vowels_replace[i] if i in vowels else i for i in message])"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 47,
+    "question_id": "code_repair_27",
+    "subject": "code_repair",
+    "question": "1 import java.util.*;\n2 public class QUICKSORT {\n3     public static ArrayList<Integer> quicksort(ArrayList<Integer> arr) {\n4         if (arr.isEmpty()) {\n5             return new ArrayList<Integer>();\n6         }\n7         Integer pivot = arr.get(0);\n8         ArrayList<Integer> lesser = new ArrayList<Integer>();\n9         ArrayList<Integer> greater = new ArrayList<Integer>();\n10         for (Integer x : arr.subList(1, arr.size())) {\n11             if (x < pivot) {\n12                 lesser.add(x);\n13             } else if (x > pivot) {\n14                 greater.add(x);\n15             }\n16         }\n17         ArrayList<Integer> middle = new ArrayList<Integer>();\n18         middle.add(pivot);\n19         lesser = quicksort(lesser);\n20         greater = quicksort(greater);\n21         middle.addAll(greater);\n22         lesser.addAll(middle);\n23         return lesser;\n24     }\n25 }",
+    "choices": {
+      "A": "Modify line 12:\n```           } else if (x >= pivot) {```",
+      "B": "Modify line 4:\n```        if (arr.size() <= 1) {```",
+      "C": "Modify line 10:\n```for (Integer x : arr) {```",
+      "D": "Modify line 5:\n```return arr;```"
+    },
+    "correct_answer": "A",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 48,
+    "question_id": "dbms_sql_182",
+    "subject": "dbms_sql",
+    "question": "Which of the following is false?",
+    "choices": {
+      "A": "Every binary relation is never be in BCNF.",
+      "B": "Every BCNF relation is in 3NF.",
+      "C": "1 NF, 2 NF, 3 NF and BCNF are based on functional dependencies.",
+      "D": "Multivalued Dependency (MVD) is a special case of Join Dependency (JD)."
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 49,
+    "question_id": "execution_prediction_2495",
+    "subject": "execution_prediction",
+    "question": "N,M,X = map(int, input().split())\nCA_array = list()\nfor i in range(N):\n    CA_list = [int(e) for e in input().split()]\n    CA_array.append(CA_list)\n    \nans = 13*(10**5)\n    \n#N<=12なので全探索しても4096.全探索する。\nfor i in range(2**(N)): #4096\n    bit_array = str(bin(i)[2:]).zfill((N))\n    #print(bit_array)\n\n    CA_on_bit_array = [0 for _ in range(M+1)]\n    \n    for j in range(len(bit_array)): #12\n\n        if bit_array[j]==\"0\":\n            #OFF時の処理\n            pass\n        elif bit_array[j]==\"1\":\n            #ON時の処理\n            for k in range(M+1): #13\n                CA_on_bit_array[k] += CA_array[j][k]\n\n    #ON・OFFの状態設定後の処理\n    for k in range(1,M+1):\n        if CA_on_bit_array[k] < X:\n            break\n    else:\n        if CA_on_bit_array[0] < ans:\n            ans = CA_on_bit_array[0]\n\nif ans != 13*(10**5):\n    print(ans)\nelse:\n    print(-1)",
+    "choices": {
+      "A": "Time Limit Exceeded",
+      "B": "Runtime Error",
+      "C": "No abnormally found",
+      "D": "Internal error"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 50,
+    "question_id": "fill_in_the_middle_835",
+    "subject": "fill_in_the_middle",
+    "question": "class FindElements:\n  def __init__(self, root: Optional[TreeNode]):\n    self.vals = set()\n    self.dfs(root, 0)\n\n  def find(self, target: int) -> bool:\n    return target in self.vals\n\n  def dfs(self, root: Optional[TreeNode], val: int) -> None:\n    if not root:\n      return\n\n    root.val = val\n    self.vals.add(val)\n    _______________\n    self.dfs(root.left, val * 2 + 1)\n    self.dfs(root.right, val * 2 + 2)",
+    "choices": {
+      "A": "self.dfs(root.left, val + 1)",
+      "B": "self.dfs(root.left, val * 2 + 1)",
+      "C": "self.dfs(root.left, val * 2 - 1)",
+      "D": "self.dfs(root.left, val * 3 + 1)"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 51,
+    "question_id": "others_1152",
+    "subject": "others",
+    "question": "Which of the following represents loops in javascript",
+    "choices": {
+      "A": "for",
+      "B": "while",
+      "C": "forEach",
+      "D": "All of the above"
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 52,
+    "question_id": "programming_syntax_4402",
+    "subject": "programming_syntax",
+    "question": "What is the output of the following C code? Assume that the address of x is 2000 (in decimal) and an integer requires four bytes of memory.\r\r\n\n\n#include <stdio.h>\nint main()\n{ \n   unsigned int x[4][3] = {{1, 2, 3}, {4, 5, 6}, \n                           {7, 8, 9}, {10, 11, 12}};\n   printf(\\\"%u, %u, %u\\\", x+3, *(x+3), *(x+2)+3);\n}\n\n``````C",
+    "choices": {
+      "A": "2036, 2036, 2036",
+      "B": "2012, 4, 2204",
+      "C": "2036, 10, 10",
+      "D": "2012, 4, 6"
+    },
+    "correct_answer": "A",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 53,
+    "question_id": "software_principles_2797",
+    "subject": "software_principles",
+    "question": "What will be the output of the following code?\nimport java.awt.Point;\nclass Testing\n{\n\tpublic static void main(String[] args)\n\t{\n\t\tPoint t1,t2,t3;\n\t\tt1=new Point(100,100);\n\t\tt2=t1;\n\t\tt3=t1;\n\t\tt1.x=200;\n\t\tt1.y=200;\n\t\tt2.x=300;\n\t\tt3.y=500;\n\t\tSystem.out.println(“Point 1: ” + p1.x + ”, “ + p1.y);\n\t}\n}",
+    "choices": {
+      "A": "Point 1: 200, 200",
+      "B": "Point 1: 100,100",
+      "C": "Point 1: 300, 300",
+      "D": "Point 1: 300, 500"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 54,
+    "question_id": "api_frameworks_464",
+    "subject": "api_frameworks",
+    "question": "What is NumPy?",
+    "choices": {
+      "A": "A plotting library",
+      "B": "A machine learning framework",
+      "C": "A scientific computing library",
+      "D": "A web development framework"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 55,
+    "question_id": "code_completion_148",
+    "subject": "code_completion",
+    "question": "def bf(planet1, planet2):\n    '''\n    There are eight planets in our solar system: the closerst to the Sun \n    is Mercury, the next one is Venus, then Earth, Mars, Jupiter, Saturn, \n    Uranus, Neptune.\n    Write a function that takes two planet names as strings planet1 and planet2. \n    The function should return a tuple containing all planets whose orbits are \n    located between the orbit of planet1 and the orbit of planet2, sorted by \n    the proximity to the sun. \n    The function should return an empty tuple if planet1 or planet2\n    are not correct planet names. \n    Examples\n    bf(\"Jupiter\", \"Neptune\") ==> (\"Saturn\", \"Uranus\")\n    bf(\"Earth\", \"Mercury\") ==> (\"Venus\")\n    bf(\"Mercury\", \"Uranus\") ==> (\"Venus\", \"Earth\", \"Mars\", \"Jupiter\", \"Saturn\")\n    '''",
+    "choices": {
+      "A": "planet_names = (\"Mercury\", \"Venus\", \"Earth\", \"Mars\", \"Jupiter\", \"Saturn\", \"Uranus\", \"Neptune\")\n    if planet1 not in planet_names or planet2 not in planet_names or planet1 == planet2:\n        return ()\n    planet1_index = planet_names.index(planet1)\n    planet2_index = planet_names.index(planet2)\n    if planet1_index < planet2_index:\n        return (planet_names[planet1_index : planet2_index]) \n    else:\n        return (planet_names[planet2_index : planet1_index])",
+      "B": "planet_names = (\"Mercury\", \"Venus\", \"Earth\", \"Mars\", \"Jupiter\", \"Saturn\", \"Uranus\", \"Neptune\")\n    if planet1 not in planet_names or planet2 not in planet_names or planet1 == planet2:\n        return ()\n    planet1_index = planet_names.index(planet1)\n    planet2_index = planet_names.index(planet2)\n    if planet1_index < planet2_index:\n        return (planet_names[planet1_index : planet2_index + 1]) \n    else:\n        return (planet_names[planet2_index : planet1_index + 1])",
+      "C": "planet_names = (\"Mercury\", \"Venus\", \"Earth\", \"Mars\", \"Jupiter\", \"Saturn\", \"Uranus\", \"Neptune\")\n    if planet1 not in planet_names or planet2 not in planet_names or planet1 == planet2:\n        return ()\n    planet1_index = planet_names.index(planet1)\n    planet2_index = planet_names.index(planet2)\n    if planet1_index < planet2_index:\n        return (planet_names[planet1_index + 1: planet2_index])\n    else:\n        return (planet_names[planet2_index + 1 : planet1_index])",
+      "D": "planet_names = (\"Mercury\", \"Venus\", \"Earth\", \"Mars\", \"Jupiter\", \"Saturn\", \"Uranus\", \"Neptune\")\n    if planet1 not in planet_names or planet2 not in planet_names or planet1 == planet2:\n        return ()\n    planet1_index = planet_names.index(planet1)\n    planet2_index = planet_names.index(planet2)\n    if planet1_index < planet2_index:\n        return (planet_names[planet2_index - 1 : planet1_index : -1]) \n    else:\n        return (planet_names[planet1_index - 1 : planet2_index : -1])"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 56,
+    "question_id": "code_repair_9",
+    "subject": "code_repair",
+    "question": "1 import java.util.*;\n2 public class GET_FACTORS {\n3     public static ArrayList<Integer> get_factors(int n) {\n4         if (n == 1) {\n5             return new ArrayList<Integer>();\n6         }\n7         int max = (int)(Math.sqrt(n) + 1.0);\n8         for (int i=2; i < max; i++) {\n9             if (n % i == 0) {\n10                 ArrayList<Integer> prepend = new ArrayList<Integer>(0);\n11                 prepend.add(i);\n12                 prepend.addAll(get_factors(n / i));\n13                 return prepend;\n14             }\n15         }\n16         return new ArrayList<Integer>();\n17     }\n18 }",
+    "choices": {
+      "A": "Modify line 15:\n```       return new ArrayList<Integer>(Arrays.asList(n));```",
+      "B": "Modify line 8:\n```        for (int i=2; i <= max; i++) {```",
+      "C": "Modify line 5:\n```return new ArrayList<Integer>(Arrays.asList(n));```",
+      "D": "Modify line 4:\n```        if (n <= 1) {```"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 57,
+    "question_id": "dbms_sql_48",
+    "subject": "dbms_sql",
+    "question": "Which operator is used to search for a specified pattern in a column?",
+    "choices": {
+      "A": "GET",
+      "B": "LIKE",
+      "C": "FROM"
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 58,
+    "question_id": "execution_prediction_1523",
+    "subject": "execution_prediction",
+    "question": "Q = 998244353\n# def modpower(a,b,Q):#a^b mod Q\n#     if b == 0:\n#         return 1\n#     if b%2 == 0:\n#         d = modpower(a,b//2,Q)\n#         return d*d%Q\n#     if b%2 == 1:\n#         return (a*modpower(a,b-1,Q))%Q\n# def factorials(n,Q):#n以下の階乗のリストと階乗の逆元のmodQでのリスト\n#     F = [1]*(n+1)\n#     R = [1]*(n+1)\n#     for i in range(n):\n#         F[i+1] = F[i]*(i+1)%Q\n#         R[i+1] = R[i]*pow(i+1,Q-2,Q)\n#     return F, R\ndef getInv(N):\n    inv = [0] * (N + 1)\n    inv[0] = 1\n    inv[1] = 1\n    for i in range(2, N + 1):\n        inv[i] = (-(Q // i) * inv[Q%i]) % Q\n    return inv\n\nN, A, B, K = map( int, input().split())\nans = 0\ninvs = getInv(N)\nnCk = [1]*(N+1)\nfor i in range(1,N+1):\n    nCk[i] = (nCk[i-1]*(N-i+1)*invs[i])%Q\nfor i in range( min(K//A, N)+1):\n    if (K-A*i)%B == 0:\n        j = (K-A*i)//B\n        ans = (ans + nCk[i]*nCk[j])%Q\nprint(ans)",
+    "choices": {
+      "A": "Internal error",
+      "B": "Memory Limit Exceeded",
+      "C": "Runtime Error",
+      "D": "Time Limit Exceeded"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 59,
+    "question_id": "fill_in_the_middle_1369",
+    "subject": "fill_in_the_middle",
+    "question": "class RangeFreqQuery:\n  def __init__(self, arr: List[int]):\n    self.valueToIndices = collections.defaultdict(list)\n    for i, a in enumerate(arr):\n      self.valueToIndices[a].append(i)\n\n  def query(self, left: int, right: int, value: int) -> int:\n    indices = self.valueToIndices[value]\n    i = bisect_left(indices, left)\n    j = bisect_right(indices, right)\n    _______________\n    return j - i",
+    "choices": {
+      "A": "return j - i + 1",
+      "B": "return (j - i) if j > i else 0",
+      "C": "return len(range(i, j))",
+      "D": "return j - i"
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 60,
+    "question_id": "others_761",
+    "subject": "others",
+    "question": "For n devices in a network, ________ number of duplex-mode links are required for a mesh topology.",
+    "choices": {
+      "A": "n(n + 1)",
+      "B": "n (n – 1)",
+      "C": "n(n + 1)/2",
+      "D": "n(n – 1)/2"
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 61,
+    "question_id": "programming_syntax_4243",
+    "subject": "programming_syntax",
+    "question": "How can you create a variable with the numeric value 5?",
+    "choices": {
+      "A": "int num = 5",
+      "B": "num = 5",
+      "C": "val num = 5",
+      "D": "num = 5 int"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 62,
+    "question_id": "software_principles_681",
+    "subject": "software_principles",
+    "question": "What is the purpose of a test summary report?",
+    "choices": {
+      "A": "To document defects",
+      "B": "To provide a summary of testing activities and results",
+      "C": "To execute test cases",
+      "D": "To analyze code coverage"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 63,
+    "question_id": "api_frameworks_124",
+    "subject": "api_frameworks",
+    "question": "What is a correct syntax to subtract the numbers from arr1 with the numbers from arr2?",
+    "choices": {
+      "A": "np.sub(arr1, arr2)",
+      "B": "np.subtract(arr1, arr2)",
+      "C": "np.minus(arr1, arr2)",
+      "D": "np.min(arr1, arr2)"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 64,
+    "question_id": "code_completion_36",
+    "subject": "code_completion",
+    "question": "def fizz_buzz(n: int):\n    \"\"\"Return the number of times the digit 7 appears in integers less than n which are divisible by 11 or 13.\n    >>> fizz_buzz(50)\n    0\n    >>> fizz_buzz(78)\n    2\n    >>> fizz_buzz(79)\n    3\n    \"\"\"",
+    "choices": {
+      "A": "ns = []\n    for i in range(n):\n        if i % 11 == 0 or i % 13 == 0:\n            ns.append(i)\n    s = ''.join(list(map(str, ns)))\n    ans = 0\n    for c in s:\n        ans += int(c) \n    return ans",
+      "B": "ns = []\n    for i in range(n):\n        if i % 10 == 0 or i % 13 == 0:\n            ns.append(i)\n    s = ''.join(list(map(str, ns)))\n    ans = 0\n    for c in s:\n        ans += (c == '7')\n    return ans",
+      "C": "ns = []\n    for i in range(n):\n        if i % 11 == 0 or i % 13 == 0:\n            ns.append(i)\n    s = ''.join(list(map(str, ns)))\n    ans = 0\n    for c in s:\n        ans += (c == '7')\n    return ans",
+      "D": "ns = []\n    for i in range(n-1):\n        if i % 11 == 0 or i % 13 == 0:\n            ns.append(i)\n    s = ''.join(list(map(str, ns)))\n    ans = 0\n    for c in s:\n        ans += (c == '7')\n    return ans"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 65,
+    "question_id": "code_repair_23",
+    "subject": "code_repair",
+    "question": "1 import java.util.*;\n2 public class NEXT_PERMUTATION {\n3     public static ArrayList<Integer> next_permutation(ArrayList<Integer> perm) {\n4         for (int i=perm.size()-2; i!=-1; i--) {\n5             if (perm.get(i) < perm.get(i+1)) {\n6                 for (int j=perm.size()-1; j!=i; j--) {\n7                     if (perm.get(j) < perm.get(i)) {\n8                         ArrayList<Integer> next_perm = perm;\n9                         int temp_j = perm.get(j);\n10                         int temp_i = perm.get(i);\n11                         next_perm.set(i,temp_j);\n12                         next_perm.set(j,temp_i);\n13                         ArrayList<Integer> reversed = new ArrayList<Integer>(100);\n14                         for (int k=next_perm.size()-1; k!=i; k--) {\n15                             reversed.add(next_perm.get(k));\n16                         }\n17                         int q = i + 1;\n18                         for (Integer replace : reversed) {\n19                             next_perm.set(q, replace);\n20                             q++;\n21                         }\n22                         return next_perm;\n23                     }\n24                 }\n25             }\n26         }\n27         return new ArrayList<Integer>();\n28     }\n29 }",
+    "choices": {
+      "A": "Modify line 6:\n```for (int j = perm.size() - 1; j > i; j--) {```",
+      "B": "Modify line 4:\n```        for (int i=perm.size()-1; i>0; i--) {```",
+      "C": "Modify line 6:\n```                   if (perm.get(j) > perm.get(i)) {```",
+      "D": "Modify line 7:\n```if (perm.get(j) > perm.get(i)) {```"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 66,
+    "question_id": "dbms_sql_55",
+    "subject": "dbms_sql",
+    "question": "With SQL, how do you select all the records from a table named \"Persons\" where the value of the column \"FirstName\" is \"Peter\"?",
+    "choices": {
+      "A": "SELECT * FROM Persons WHERE FirstName<>'Peter'",
+      "B": "SELECT * FROM Persons WHERE FirstName='Peter'",
+      "C": "SELECT [all] FROM Persons WHERE FirstName LIKE 'Peter'",
+      "D": "SELECT [all] FROM Persons WHERE FirstName='Peter'"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 67,
+    "question_id": "execution_prediction_1275",
+    "subject": "execution_prediction",
+    "question": "N, M= map(int, input().split())\nA = []\nB = []\nfor i in range(N):\n    a,b = map(int, input().split())\n    A.append(a)\n    B.append(b)\ncount = 0\ncost = 0\nwhile count < M:\n    cost += min(A)\n    count += 1\n    pos = A.index(min(A))\n    B[pos] -= 1\n    if B[pos] <= 0:\n        A.pop(pos)\n        B.pop(pos)\nprint(cost)",
+    "choices": {
+      "A": "Compile Error",
+      "B": "Time Limit Exceeded",
+      "C": "No abnormally found",
+      "D": "Internal error"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 68,
+    "question_id": "fill_in_the_middle_263",
+    "subject": "fill_in_the_middle",
+    "question": "class Solution:\n  def increasingTriplet(self, nums: List[int]) -> bool:\n    first = math.inf\n    second = math.inf\n\n    for num in nums:\n      _______________\n      if num <= first:\n        first = num\n      elif num <= second:  \n        second = num\n      else:\n        return True  \n\n    return False",
+    "choices": {
+      "A": "if num <= first:",
+      "B": "if num < first:",
+      "C": "if num == first:",
+      "D": "if num < first + 1:"
+    },
+    "correct_answer": "A",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 69,
+    "question_id": "others_1259",
+    "subject": "others",
+    "question": "Which of the below the property is used to overflow the text in CSS?",
+    "choices": {
+      "A": "text-shadow",
+      "B": "text-stroke",
+      "C": "text-overflow",
+      "D": "text-decoration"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 70,
+    "question_id": "programming_syntax_4409",
+    "subject": "programming_syntax",
+    "question": "What will be the output of the following C code?\n\n\n\n#include <stdio.h>\nint main()\n{\nint i;\nfor ( i=0; i<5; i++ )\n{\n   int i = 10;\n   printf ( \\\"%d \\\", i );\n   i++;\n}\nreturn 0;\n}\n\n``````C",
+    "choices": {
+      "A": "10 11 12 13 14",
+      "B": "10 10 10 10 10",
+      "C": "0 1 2 3 4",
+      "D": "Compilation error"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 71,
+    "question_id": "software_principles_1372",
+    "subject": "software_principles",
+    "question": "Which of the following according to you is incorrect?",
+    "choices": {
+      "A": "Trie is also known as prefix tree",
+      "B": "Trie requires less storage space than hashing",
+      "C": "Trie allows listing of all the words with same prefix",
+      "D": "Tries are collision free"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 72,
+    "question_id": "api_frameworks_622",
+    "subject": "api_frameworks",
+    "question": "Which of the following are the lifecycles of a component in React? (Multiple options may be correct)",
+    "choices": {
+      "A": "Mounting",
+      "B": "Uploading",
+      "C": "Updating",
+      "D": "Unmounting"
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 73,
+    "question_id": "code_completion_69",
+    "subject": "code_completion",
+    "question": "def search(lst):\n    '''\n    You are given a non-empty list of positive integers. Return the greatest integer that is greater than \n    zero, and has a frequency greater than or equal to the value of the integer itself. \n    The frequency of an integer is the number of times it appears in the list.\n    If no such a value exist, return -1.\n    Examples:\n        search([4, 1, 2, 2, 3, 1]) == 2\n        search([1, 2, 2, 3, 3, 3, 4, 4, 4]) == 3\n        search([5, 5, 4, 4, 4]) == -1\n    '''",
+    "choices": {
+      "A": "for i in range(0, max(lst)):\n        if lst.count(i) == 0:\n            continue\n        if lst.count(i) >= i:\n            return i\n    return -1",
+      "B": "frq = [0] * (max(lst) + 1)\n    for i in lst:\n        frq[i] += 1;\n\n    ans = -1\n    for i in range(1, len(frq)):\n        if frq[i] >= i:\n            ans = i\n    \n    return ans",
+      "C": "for i in range(max(lst), 0, -1):\n        if lst.count(i) > i:\n            return i\n    return -1",
+      "D": "return max(i for i in set(lst) if lst.count(i) >= i)"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 74,
+    "question_id": "code_repair_33",
+    "subject": "code_repair",
+    "question": "1 import java.util.*;\n2 public class SIEVE {\n3     public static boolean all(ArrayList<Boolean> arr) {\n4         for (boolean value : arr) {\n5             if (!value) { return false; }\n6         }\n7         return true;\n8     }\n9     public static boolean any(ArrayList<Boolean> arr) {\n10         for (boolean value: arr) {\n11             if (value) { return true; }\n12         }\n13         return false;\n14     }\n15     public static ArrayList<Boolean> list_comp(int n, ArrayList<Integer> primes) {\n16         ArrayList<Boolean> built_comprehension = new ArrayList<Boolean>();\n17         for (Integer p : primes) {\n18             built_comprehension.add(n % p > 0);\n19         }\n20         return built_comprehension;\n21     }\n22     public static ArrayList<Integer> sieve(Integer max) {\n23         ArrayList<Integer> primes = new ArrayList<Integer>();\n24         for (int n=2; n<max+1; n++) {\n25             if (any(list_comp(n, primes))) {\n26                 primes.add(n);\n27             }\n28         }\n29         return primes;\n30     }\n31 }",
+    "choices": {
+      "A": "Modify line 5:\n```return true;```",
+      "B": "Modify line 4:\n```for (boolean value : arr) {```",
+      "C": "Modify line 24:\n```           if (all(list_comp(n, primes))) {```",
+      "D": "Modify line 5:\n```if (value) { return true; }```"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 75,
+    "question_id": "dbms_sql_387",
+    "subject": "dbms_sql",
+    "question": "What does SQL stand for?",
+    "choices": {
+      "A": "Structure Query Language",
+      "B": "Sequential Query Language",
+      "C": "Systematic Query Language",
+      "D": "Structured Question Language"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 76,
+    "question_id": "execution_prediction_2604",
+    "subject": "execution_prediction",
+    "question": "import sys\nfrom collections import defaultdict\ndef input(): return sys.stdin.readline().strip()\n\nclass UnionFind():\n    \"\"\"\n    https://note.nkmk.me/python-union-find/\n    DFSの上位互換と考えて良い\n    ２要素x, yがpath-connectedかどうかをlogオーダーで判定する（螺旋本の14.1節参照）\n    さらに連結成分の要素数がO(1)で取得可能なように改造してある\n    \"\"\"\n    def __init__(self, n):\n        \"\"\"\n        要素数をnとして、各ノードを0,1,...,(n-1)の番号で管理する\n        parentsは各ノードの属する木の根を表す\n        ただし根ノードのparentには(その木のノード数)*(-1)を格納する\n        \"\"\"\n        self.n = n\n        self.parents = [-1] * n\n\n    def find(self, x):\n        \"\"\"\n        xの属する木の根を返す\n        このとき同時に経路圧縮して、探索途中のノードを全て根に繋ぎ直す\n        \"\"\"\n        if self.parents[x] < 0:\n            return x\n        else:\n            self.parents[x] = self.find(self.parents[x])\n            return self.parents[x]\n\n    def union(self, x, y):\n        \"\"\"\n        x, yのそれぞれ属する木Tx, Tyの根同士を繋ぐ\n        このとき木の要素数が小さい方を大きい方に繋ぐ（rankではなくsizeを用いる）\n        \"\"\"\n        x = self.find(x)\n        y = self.find(y)\n\n        if x == y:\n            return\n\n        if self.parents[x] > self.parents[y]:\n            x, y = y, x\n\n        self.parents[x] += self.parents[y]\n        self.parents[y] = x\n\n    def size(self, x):\n        \"\"\"\n        xの属する木の要素数を返す\n        根の親を要素数の(-1)倍で定めておいたおかげでO(1)で取得可能\n        \"\"\"\n        return -self.parents[self.find(x)]\n\n    def same(self, x, y):\n        \"\"\"\n        xとyがpath-connectedかを判定する\n        \"\"\"\n        return self.find(x) == self.find(y)\n\n    def members(self, x):\n        \"\"\"\n        xの属する木の要素を列挙する\n        \"\"\"\n        root = self.find(x)\n        return [i for i in range(self.n) if self.find(i) == root]\n\n    def roots(self):\n        \"\"\"\n        連結成分の代表元のリストを返す\n        \"\"\"\n        return [i for i, x in enumerate(self.parents) if x < 0]\n\n    def group_count(self):\n        \"\"\"\n        連結成分の個数を返す\n        \"\"\"\n        return len(self.roots())\n\n    def all_group_members(self):\n         \"\"\"\n         連結成分およびそれぞれの代表元をまとめた辞書を返す\n         代表元がキーになってる\n         \"\"\"\n         return {r: self.members(r) for r in self.roots()}\n\n    def __str__(self):\n        \"\"\"\n        連結成分およびその代表元を出力\n        \"\"\"\n        return '\\n'.join('{}: {}'.format(r, self.members(r)) for r in self.roots())\n\n\n\ndef main():\n\n    \"\"\"\n    x方向とy方向に分けて頂点を辺だと思うのは定石？？？（確かに長方形がメインなら直積分解したくなる？）\n    このとき問題文は「長さ３のパスがあればパスを１本追加する操作を繰り返して、各連結成分を完全二部グラフにせよ」\n\n    完全二部グラフになるのは背理法からすぐわかる。なので解法は(¥Sum_{i:component}X_i Y_i) - N\n    \"\"\"\n\n    N = int(input())\n    vertex_x = set([])\n    vertex_y = set([])\n    edge = []\n    for _ in range(N):\n        x, y = map(int, input().split())\n        vertex_x.add(x)\n        vertex_y.add(y)\n        edge.append((x, y))\n\n    # UnionFind()の都合上頂点は0-indexedの番号列で管理したいので\n    # 頂点に対して連番づけを行う\n    d = defaultdict(int)\n    num = 0\n    for x in vertex_x:\n        d[(0, x)] = num\n        num += 1\n    x_num = num\n    for y in vertex_y:\n        d[(1, y)] = num\n        num += 1\n\n    # ここからメイン\n    uftree = UnionFind(num)\n    for x, y in edge:\n        uftree.union(d[(0, x)], d[(1, y)])\n\n    ans = 0\n    for r in uftree.roots():\n        X = 0\n        Y = 0\n        for v in uftree.members(r):\n            if v < x_num:\n                X += 1\n            else:\n                Y += 1\n        ans += X * Y\n    print(ans - N)\n\n\n\nif __name__ == \"__main__\":\n    main()",
+    "choices": {
+      "A": "No abnormally found",
+      "B": "Compile Error",
+      "C": "Time Limit Exceeded",
+      "D": "Internal error"
+    },
+    "correct_answer": "A",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 77,
+    "question_id": "fill_in_the_middle_1743",
+    "subject": "fill_in_the_middle",
+    "question": "class Solution:\n  def minImpossibleOR(self, nums: List[int]) -> int:\n    ans = 1\n    numsSet = set(nums)\n\n    while ans in numsSet:\n      _______________\n      ans <<= 1\n\n    return ans",
+    "choices": {
+      "A": "ans = ans * 2",
+      "B": "ans = ans << 1",
+      "C": "ans <<= 1",
+      "D": "ans *= 2"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 78,
+    "question_id": "others_954",
+    "subject": "others",
+    "question": "RPC stands for what the context is of Operating System",
+    "choices": {
+      "A": "Remote Procedure Calls",
+      "B": "Remote Process Calls",
+      "C": "Realtime Processing Calls",
+      "D": "Random Processing Calls"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 79,
+    "question_id": "programming_syntax_3024",
+    "subject": "programming_syntax",
+    "question": "What will be the output of the following PHP code?\n<?php$x = 5;{    echo \"$x\";}?>",
+    "choices": {
+      "A": "0",
+      "B": "5",
+      "C": "Nothing",
+      "D": "Error"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 80,
+    "question_id": "software_principles_1467",
+    "subject": "software_principles",
+    "question": "Consider the following code snippet in C. The function print() receives root of a Binary Search Tree (BST) and a positive integer k as arguments.\r\r\n\n\n// A BST node\nstruct node {\n    int data;\n    struct node *left, *right;\n};\n\nint count = 0;\n\nvoid print(struct node *root, int k)\n{\n    if (root != NULL && count <= k)\n    {\n        print(root->right, k);\n        count++;\n        if (count == k)\n          printf(\\\"%d \\\", root->data);\n       print(root->left, k);\n    }\n}\n\n``````C\n\n\nWhat is the output of print(root, 3) where root represent root of the following BST.\r                   15\r\n                /     \\\\\r\n              10      20\r\n             / \\\\     /  \\\\\r\n            8  12   16  25",
+    "choices": {
+      "A": "10",
+      "B": "16",
+      "C": "20",
+      "D": "20 10"
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 81,
+    "question_id": "api_frameworks_615",
+    "subject": "api_frameworks",
+    "question": "What is Conditional Rendering?",
+    "choices": {
+      "A": "It describes the ability to render different user interfaces if a condition is true or false",
+      "B": "It describes the ability to render a single user interface",
+      "C": "It is used for child to parent communication",
+      "D": "None of the above"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 82,
+    "question_id": "code_completion_153",
+    "subject": "code_completion",
+    "question": "def Strongest_Extension(class_name, extensions):\n    \"\"\"You will be given the name of a class (a string) and a list of extensions.\n    The extensions are to be used to load additional classes to the class. The\n    strength of the extension is as follows: Let CAP be the number of the uppercase\n    letters in the extension's name, and let SM be the number of lowercase letters \n    in the extension's name, the strength is given by the fraction CAP - SM. \n    You should find the strongest extension and return a string in this \n    format: ClassName.StrongestExtensionName.\n    If there are two or more extensions with the same strength, you should\n    choose the one that comes first in the list.\n    For example, if you are given \"Slices\" as the class and a list of the\n    extensions: ['SErviNGSliCes', 'Cheese', 'StuFfed'] then you should\n    return 'Slices.SErviNGSliCes' since 'SErviNGSliCes' is the strongest extension \n    (its strength is -1).\n    Example:\n    for Strongest_Extension('my_class', ['AA', 'Be', 'CC']) == 'my_class.AA'\n    \"\"\"",
+    "choices": {
+      "A": "strong = extensions[0]\n    my_val = len([x for x in extensions[0] if x.isalpha() and x.isupper()]) - len([x for x in extensions[0] if x.isalpha() and x.islower()])\n    for s in extensions:\n        val = len([x for x in s if x.isalpha() and x.isupper()]) - len([x for x in s if x.isalpha() and x.islower()])\n        if val > my_val:\n            strong = s\n            my_val = val\n\n    ans = class_name + \".\" + strong\n    return ans",
+      "B": "strong = extensions[0]\n    my_val = len(strong) - sum(1 for char in strong if char.isdigit())\n    for s in extensions:\n        val = len(s) - sum(1 for char in s if char.isdigit())\n        if val > my_val:\n            strong = s\n            my_val = val\n    return class_name + \".\" + strong",
+      "C": "strong = extensions[0]\n    my_val = len([x for x in strong if x.isalpha()])\n    for s in extensions:\n        val = len([x for x in s if x.isalpha()])\n        if val > my_val:\n            strong = s\n            my_val = val\n    return class_name + \".\" + strong",
+      "D": "strong = extensions[0]\n    my_val = len([x for x in extensions[0] if x.islower()]) - len([x for x in extensions[0] if x.isupper()])\n    for s in extensions:\n        val = len([x for x in s if x.islower()]) - len([x for x in s if x.isupper()])\n        if val > my_val:\n            strong = s\n            my_val = val\n    return class_name + \".\" + strong"
+    },
+    "correct_answer": "A",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 83,
+    "question_id": "code_repair_7",
+    "subject": "code_repair",
+    "question": "1 import java.util.*;\n2 public class FLATTEN {\n3     public static Object flatten(Object arr) {\n4         if (arr instanceof ArrayList) {\n5             ArrayList narr = (ArrayList) arr;\n6             ArrayList result = new ArrayList(50);\n7             for (Object x : narr) {\n8                 if (x instanceof ArrayList) {\n9                     result.addAll((ArrayList) flatten(x));\n10                 } else {\n11                     result.add(flatten(x));\n12                 }\n13             }\n14             return result;\n15         } else {\n16             return flatten(arr);\n17         }\n18     }\n19 }",
+    "choices": {
+      "A": "Modify line 4:\n```        if (arr instanceof List) {```",
+      "B": "Modify line 10:\n```                   result.add((x));```\nModify line 15:\n```           return arr;```",
+      "C": "Modify line 9:\n```result.addAll((ArrayList) flatten(x));```",
+      "D": "Modify line 11:\n```result.add(x);```"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 84,
+    "question_id": "dbms_sql_132",
+    "subject": "dbms_sql",
+    "question": "A data file consisting of 1,50,000 student-records is stored on a hard disk with block size of 4096 bytes. The data file is sorted on the primary key RollNo. The size of a record pointer for this disk is 7 bytes. Each student-record has a candidate key attribute called ANum of size 12 bytes. Suppose an index file with records consisting of two fields, ANum value and the record pointer the corresponding student record, is built and stored on the same disk. Assume that the records of data file and index file are not split across disk blocks. The number of blocks in the index file is ________ .",
+    "choices": {
+      "A": "698",
+      "B": "898",
+      "C": "899",
+      "D": "4096"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 85,
+    "question_id": "execution_prediction_4799",
+    "subject": "execution_prediction",
+    "question": "import java.util.*;\n\npublic class Main {\n    public static void main(String args[]) throws Exception {\n        Scanner sc = new Scanner(System.in);\n        String s = sc.next();\n        String t = sc.next();\n        s = s + s;\n        s.contains(t)\n        System.out.println(s.contains(t) ? \"Yes\" : \"No\");\n    }\n}",
+    "choices": {
+      "A": "No abnormally found",
+      "B": "Memory Limit Exceeded",
+      "C": "Internal error",
+      "D": "Compile Error"
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 86,
+    "question_id": "fill_in_the_middle_1977",
+    "subject": "fill_in_the_middle",
+    "question": "class Solution:\n  def distributeCandies(self, n: int, limit: int) -> int:\n    def ways(n: int) -> int:\n      \"\"\"Returns the number of ways to distribute n candies to 3 children.\"\"\"\n      if n < 0:\n        return 0\n      return math.comb(n + 2, 2)\n\n    limitPlusOne = limit + 1\n    oneChildExceedsLimit = ways(n - limitPlusOne)\n    _______________\n    twoChildrenExceedLimit = ways(n - 2 * limitPlusOne)\n    threeChildrenExceedLimit = ways(n - 3 * limitPlusOne)\n    return ways(n) \\\n        - 3 * oneChildExceedsLimit \\\n        + 3 * twoChildrenExceedLimit \\\n        - threeChildrenExceedLimit",
+    "choices": {
+      "A": "twoChildrenExceedLimit = ways(n - 2 * limitPlusOne)",
+      "B": "twoChildrenExceedLimit = ways(n - 2 * (limit + 1))",
+      "C": "twoChildrenExceedLimit = ways(n - limitPlusOne * 2)",
+      "D": "twoChildrenExceedLimit = ways(n - (limit + 1) * 2)"
+    },
+    "correct_answer": "A",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 87,
+    "question_id": "others_80",
+    "subject": "others",
+    "question": "Which command on the command line provides the same output as this executable awk script?\n    #! /usr/bin/awk -f    BEGIN {        print \"sanfoundry\"    }",
+    "choices": {
+      "A": "awk ‘BEGIN {print “sanfoundry”}’",
+      "B": "awk ‘print “sanfoundry”‘",
+      "C": "awk ‘print {sanfoundry}’",
+      "D": "none of the mentioned"
+    },
+    "correct_answer": "A",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 88,
+    "question_id": "programming_syntax_1777",
+    "subject": "programming_syntax",
+    "question": "What will be the output of the following C++ code?\n    #include <iostream>    #include <iterator>    using namespace std;    int main ()    {        try {            double value1, value2;            istream_iterator<double> eos;                   istream_iterator<double> iit (cin);               if (iit != eos)                 value1 = *iit;            iit++;            if (iit != eos)                 value2 = *iit;            cout << (value1 * value2) << endl;        }        catch (...) {            cout << \"Unknown exception: \" << endl;        }        return 0;   }",
+    "choices": {
+      "A": "10",
+      "B": "45",
+      "C": "It will print the multiplied value of the input",
+      "D": "Exception"
+    },
+    "correct_answer": "C",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 89,
+    "question_id": "software_principles_736",
+    "subject": "software_principles",
+    "question": "What is a \"Test Case\" in manual testing?",
+    "choices": {
+      "A": "A defect in the code",
+      "B": "A sequence of automated steps",
+      "C": "A document outlining the steps to execute a specific test",
+      "D": "A programming language"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 90,
+    "question_id": "api_frameworks_499",
+    "subject": "api_frameworks",
+    "question": "How can you filter rows in a DataFrame based on a condition?",
+    "choices": {
+      "A": "df.filter(condition)",
+      "B": "df.select_rows(condition)",
+      "C": "df[condition]",
+      "D": "df.filter_rows(condition)"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 91,
+    "question_id": "code_completion_98",
+    "subject": "code_completion",
+    "question": "def count_upper(s):\n    \"\"\"\n    Given a string s, count the number of uppercase vowels in even indices.\n    \n    For example:\n    count_upper('aBCdEf') returns 1\n    count_upper('abcdefg') returns 0\n    count_upper('dBBE') returns 0\n    \"\"\"",
+    "choices": {
+      "A": "count = 0\n    for i in range(0,len(s),2):\n        if s[i] in \"AEIOU\":\n            count += 1\n    return count",
+      "B": "count = 0\n    for i in range(0, len(s), 2):\n        if s[i] in \"AEIOUaeiou\":\n            count += 1\n    return count",
+      "C": "count = 0\n    for i in range(0, len(s), 2):\n        if s[i] in \"aeiou\":\n            count += 1\n    return count",
+      "D": "count = 0\n    for i in range(1, len(s), 2):\n        if s[i] in \"AEIOU\":\n            count += 1\n    return count"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 92,
+    "question_id": "code_repair_63",
+    "subject": "code_repair",
+    "question": "1 def pascal(n):\n2     rows = [[1]]\n3     for r in range(1, n):\n4         row = []\n5         for c in range(0, r):\n6             upleft = rows[r - 1][c - 1] if c > 0 else 0\n7             upright = rows[r - 1][c] if c < r else 0\n8             row.append(upleft + upright)\n9         rows.append(row)\n10     return rows",
+    "choices": {
+      "A": "Modify line 3:\n```row = [1]```",
+      "B": "Modify line 1:\n```rows = [[1], [1, 1]]```",
+      "C": "Modify line 5:\n```upleft = rows[r - 1][c - 1] if c > 0 else 0```",
+      "D": "Modify line 4:\n```       for c in range(0, r + 1):```"
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 93,
+    "question_id": "dbms_sql_87",
+    "subject": "dbms_sql",
+    "question": "Which of the following is/are correct?",
+    "choices": {
+      "A": "An SQL query automatically eliminates the duplicates",
+      "B": "An SQL query will not work if there are no indexes on the relations",
+      "C": "SQL permits attribute names to be repeated in the same relation",
+      "D": "None of the above"
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 94,
+    "question_id": "execution_prediction_4087",
+    "subject": "execution_prediction",
+    "question": "import java.util.*;\nimport java.io.*;\n\n/*\n   AtCoder contest code\n   coder : yoichidon\n */\n\nclass Counter<T> extends HashMap<T,Integer>{\n    public Counter(){\n        super();\n    }\n    public Integer get(Object elm){\n        return getOrDefault(elm,0);\n    }\n    public void add(T elm, int amount){\n        if(!this.containsKey(elm)) put(elm, amount);\n        else replace(elm, get(elm)+amount);\n    }\n    public void addOne(T elm){\n        add(elm, 1);\n    }\n    public void remove(T elm, int amount){\n        replace(elm, Math.max(get(elm)-amount, 0));\n    }\n    public void removeOne(T elm){\n        remove(elm, 1);\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        //whenever Tak hold, Aok can hold and end the game.\n        //Therefore, Tak's best strategy is \"Always move\"!\n\n\n\n        Scanner sc = new Scanner(System.in);\n        int H = sc.nextInt();\n        int W = sc.nextInt();\n        int N = sc.nextInt();\n        LinkedList<Integer>[] block = new LinkedList[H];\n        for(int h=0; h<H; h++){\n            block[h] = new LinkedList<>();\n            block[h].add(W);\n        }\n        for(int n=0; n<N; n++) {\n            int x = sc.nextInt()-1;\n            int y = sc.nextInt()-1;\n            block[y].add(x);\n        }\n        for(int h=0; h<H; h++) Collections.sort(block[h]);\n\n        int ans = 1000000;\n        int curX = 0;\n        for(int h=0; h<H; h++){\n            if(block[h].contains(curX+1)){\n                ans = Math.min(ans, curX+1);\n                break;\n            }\n            curX++;\n            while(block[h].peek()<curX) block[h].poll();\n\n            ans = Math.min(ans, block[h].peek());\n\n            while(h<H-1 && block[h+1].contains(curX)) curX++;\n            if(curX >= block[h].peek()) break;\n        }\n\n        System.out.println(ans);\n\n\n    }\n}",
+    "choices": {
+      "A": "Memory Limit Exceeded",
+      "B": "Compile Error",
+      "C": "Runtime Error",
+      "D": "Time Limit Exceeded"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 95,
+    "question_id": "fill_in_the_middle_1638",
+    "subject": "fill_in_the_middle",
+    "question": "class Solution:\n  def robotWithString(self, s: str) -> str:\n    ans = []\n    count = collections.Counter(s)\n    stack = []\n\n    for c in s:\n      stack.append(c)\n      count[c] -= 1\n      minChar = self._getMinChar(count)\n      _______________\n      while stack and stack[-1] <= minChar:\n        ans.append(stack.pop())\n\n    return ''.join(ans + stack[::-1])\n\n  def _getMinChar(self, count: List[int]) -> str:\n    for c in string.ascii_lowercase:\n      if count[c]:\n        return c\n    return 'a'",
+    "choices": {
+      "A": "while stack and ord(stack[-1]) <= ord(minChar):",
+      "B": "while stack and stack[-1] <= minChar:",
+      "C": "while stack and minChar <= stack[-1]:",
+      "D": "while stack and stack[-1] >= minChar:"
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 96,
+    "question_id": "others_682",
+    "subject": "others",
+    "question": "How many check bits are required for 16 bit data word to detect 2 bit errors and single bit correction using hamming code?",
+    "choices": {
+      "A": "5",
+      "B": "6",
+      "C": "7",
+      "D": "8"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 97,
+    "question_id": "programming_syntax_2647",
+    "subject": "programming_syntax",
+    "question": "What is the output of the following code?\nif(x~=c)\np=0;\nend",
+    "choices": {
+      "A": "p=0",
+      "B": "Output will be suppressed",
+      "C": "Error",
+      "D": "Cannot be determined"
+    },
+    "correct_answer": "C",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 98,
+    "question_id": "software_principles_33",
+    "subject": "software_principles",
+    "question": "Peephole optimization is form of",
+    "choices": {
+      "A": "Loop optimization",
+      "B": "Local optimization",
+      "C": "Constant folding",
+      "D": "Data flow analysis"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 99,
+    "question_id": "api_frameworks_597",
+    "subject": "api_frameworks",
+    "question": "What is the main purpose of using JSX in React?",
+    "choices": {
+      "A": "It optimizes the compile time of code",
+      "B": "It allows the developers to write logic and markup in same file",
+      "C": "It allows React to show more useful error",
+      "D": "Both B and C"
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 100,
+    "question_id": "code_completion_18",
+    "subject": "code_completion",
+    "question": "def how_many_times(string: str, substring: str) -> int:\n    \"\"\" Find how many times a given substring can be found in the original string. Count overlaping cases.\n    >>> how_many_times('', 'a')\n    0\n    >>> how_many_times('aaa', 'a')\n    3\n    >>> how_many_times('aaaa', 'aa')\n    3\n    \"\"\"",
+    "choices": {
+      "A": "return text.count(substring)",
+      "B": "count = 0\n    start = 0\n    while True:\n        index = text.find(substring, start)\n        if index == -1:\n            break\n        count += 1\n        start = index\n    return count",
+      "C": "times = 0\n\n    for i in range(len(string) - len(substring) + 1):\n        if string[i:i+len(substring)] == substring:\n            times += 1\n\n    return times",
+      "D": "return len(re.findall(substring, text))"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 101,
+    "question_id": "code_repair_8",
+    "subject": "code_repair",
+    "question": "1 import java.util.*;\n2 public class GCD {\n3     public static int gcd(int a, int b) {\n4         if (b == 0) {\n5             return a;\n6         } else {\n7             return gcd(a % b, b);\n8         }\n9     }\n10 }",
+    "choices": {
+      "A": "Modify line 6:\n```           return gcd(b, a%b);```",
+      "B": "Modify line 7:\n```return gcd(b, a % b);```",
+      "C": "Modify line 4:\n```        if (a == 0 || b == 0) {```",
+      "D": "Modify line 5:\n```return a % b;```"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 102,
+    "question_id": "dbms_sql_53",
+    "subject": "dbms_sql",
+    "question": "With SQL, how do you select a column named \"FirstName\" from a table named \"Persons\"?",
+    "choices": {
+      "A": "SELECT FirstName FROM Persons",
+      "B": "EXTRACT FirstName FROM Persons",
+      "C": "SELECT Persons.FirstName"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 103,
+    "question_id": "execution_prediction_1706",
+    "subject": "execution_prediction",
+    "question": "input();print('YNEOS'[eval(input().replace(' ','^'))&1::2])",
+    "choices": {
+      "A": "Internal error",
+      "B": "No abnormally found",
+      "C": "Runtime Error",
+      "D": "Time Limit Exceeded"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 104,
+    "question_id": "fill_in_the_middle_2065",
+    "subject": "fill_in_the_middle",
+    "question": "class TrieNode:\n  def __init__(self):\n    self.children: Dict[Tuple[str, str], TrieNode] = {}\n    self.count = 0\n\n\nclass Trie:\n  def __init__(self):\n    self.root = TrieNode()\n\n  def insert(self, word: str) -> int:\n    node = self.root\n    count = 0\n    for i, prefix in enumerate(word):\n      _______________\n      suffix = word[-i - 1]\n      node = node.children.setdefault((prefix, suffix), TrieNode())\n      count += node.count\n    node.count += 1\n    return count\n\n\nclass Solution:\n  def countPrefixSuffixPairs(self, words: List[str]) -> int:\n    trie = Trie()\n    return sum(trie.insert(word) for word in words)",
+    "choices": {
+      "A": "suffix = word[len(word) - i - 1]",
+      "B": "suffix = word[-i - 1]",
+      "C": "suffix = word[:-i - 2:-i - 1]",
+      "D": "suffix = word[i]"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 105,
+    "question_id": "others_1298",
+    "subject": "others",
+    "question": "Which of the below selector in CSS is used to selects all elements of value E and attribute attr ?",
+    "choices": {
+      "A": "E[attr^=value]",
+      "B": "E[attr$=value]",
+      "C": "E[attr*=value]",
+      "D": "E[attr%=value]"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 106,
+    "question_id": "programming_syntax_4392",
+    "subject": "programming_syntax",
+    "question": "Predict the output\r\n\n\n#include <string.h>\n#include <stdio.h>\n#include <stdlib.h>\n\nvoid fun(char** str_ref)\n{\n    str_ref++;\n}\n\nint main()\n{\n    char *str = (void *)malloc(100*sizeof(char));\n    strcpy(str, \\\"GeeksQuiz\\\");\n    fun(&str);\n    puts(str);\n    free(str);\n    return 0;\n}\n\n``````C",
+    "choices": {
+      "A": "GeeksQuiz",
+      "B": "eeksQuiz",
+      "C": "Garbage Value",
+      "D": "Compiler Error"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 107,
+    "question_id": "software_principles_302",
+    "subject": "software_principles",
+    "question": "Which of the following is not true in case of Oblique Projections?",
+    "choices": {
+      "A": "Parallel projection rays are not perpendicular to the viewing plane.",
+      "B": "Parallel lines in space appear parallel on the final projected image.",
+      "C": "Used exclusively for pictorial purposes rather than formal working drawings.",
+      "D": "Projectors are always perpendicular to the plane of projection."
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 108,
+    "question_id": "api_frameworks_163",
+    "subject": "api_frameworks",
+    "question": "What is a correct syntax to return the first value of a Pandas Series?",
+    "choices": {
+      "A": "get(myseries, 0)",
+      "B": "myseries[0]",
+      "C": "myseries.get(0)"
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 109,
+    "question_id": "code_completion_31",
+    "subject": "code_completion",
+    "question": "def is_prime(n):\n    \"\"\"Return true if a given number is prime, and false otherwise.\n    >>> is_prime(6)\n    False\n    >>> is_prime(101)\n    True\n    >>> is_prime(11)\n    True\n    >>> is_prime(13441)\n    True\n    >>> is_prime(61)\n    True\n    >>> is_prime(4)\n    False\n    >>> is_prime(1)\n    False\n    \"\"\"",
+    "choices": {
+      "A": "if n < 2:\n        return False\n    for k in range(2, n - 1):\n        if n % k == 0:\n            return False\n    return True",
+      "B": "if n < 2:\n        return False\n    for k in range(2, n // 2): \n        if n % k == 0:\n            return False\n    return True",
+      "C": "if n < 2:\n        return False\n    for k in range(2, int(n ** 0.5)): \n        if n % k == 0:\n            return False\n    return True",
+      "D": "if n < 3:\n        return False\n    for k in range(2, n // 2): \n        if n % k == 0:\n            return False\n    return True"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 110,
+    "question_id": "code_repair_0",
+    "subject": "code_repair",
+    "question": "1 public class BITCOUNT {\n2     public static int bitcount(int n) {\n3     int count = 0;\n4     while (n != 0) {\n5         n = (n ^ (n - 1));\n6         count++;\n7     }\n8     return count;\n9     }\n10 }",
+    "choices": {
+      "A": "Modify line 4:\n```while (n > 0) {```",
+      "B": "Modify line 5:\n```    n = n & (n - 1);```",
+      "C": "Modify line 4:\n```       n = (n & (n - 1));```",
+      "D": "Modify line 8:\n```return count;```"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 111,
+    "question_id": "dbms_sql_335",
+    "subject": "dbms_sql",
+    "question": "Which SQL constraint is used to ensure that a column only contains values from a specified set?",
+    "choices": {
+      "A": "PRIMARY KEY",
+      "B": "UNIQUE",
+      "C": "CHECK",
+      "D": "FOREIGN KEY"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 112,
+    "question_id": "execution_prediction_522",
+    "subject": "execution_prediction",
+    "question": "import math\nimport sys\nsys.setrecursionlimit(2000000)\n# import itertools\n# import statistics\n# import numpy as np\n# x = int(input())\na, b, n = list(map(int, input().split()))\n# a, b = list(map(int, input().split()))\n# sy, sx = map(int, input().split())\n# gy, gx = map(int, input().split())\n\nans = a*n//b - a*(n//b)\ncount = 0\nfor i in range(n, int(pow(n, 0.5))-1, -1):\n    if ans < a*i//b - a*(i//b):\n        ans = a*i//b - a*(i//b)\n    elif a*i//b - a*(i//b) == 0:\n        count += 1\n    if count > 1:\n        print(ans)\n        exit()\n\nprint(ans)",
+    "choices": {
+      "A": "Memory Limit Exceeded",
+      "B": "Compile Error",
+      "C": "Runtime Error",
+      "D": "Time Limit Exceeded"
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 113,
+    "question_id": "fill_in_the_middle_1448",
+    "subject": "fill_in_the_middle",
+    "question": "class Solution:\n  def mergeNodes(self, head: Optional[ListNode]) -> Optional[ListNode]:\n    curr = head.next\n\n    while curr:\n      running = curr\n      summ = 0\n      while running.val:\n        _______________\n        summ += running.val\n        running = running.next\n\n      curr.val = summ\n      curr.next = running.next\n      curr = running.next\n\n    return head.next",
+    "choices": {
+      "A": "summ += running.val",
+      "B": "summ += running.val * 2",
+      "C": "summ += running.val ** 2",
+      "D": "summ += running.val + 1"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 114,
+    "question_id": "others_512",
+    "subject": "others",
+    "question": "Provide the best matching between the entries in the two columns given in the table below:",
+    "choices": {
+      "A": "I-a, II-d, III-c, IV-b",
+      "B": "I-b, II-d, III-c, IV-a",
+      "C": "I-a, II-c, III-d, IV-b",
+      "D": "I-b, II-c, III-d, IV-a"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 115,
+    "question_id": "programming_syntax_3857",
+    "subject": "programming_syntax",
+    "question": "What will be the output of the following Python code?\na=re.compile('[0-9]+')\na.findall('7 apples and 3 mangoes')",
+    "choices": {
+      "A": "[‘apples’ ‘and’ ‘mangoes’]",
+      "B": "(7, 4)",
+      "C": "[‘7’, ‘4’]",
+      "D": "Error"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 116,
+    "question_id": "software_principles_1409",
+    "subject": "software_principles",
+    "question": "Below are the few steps given for scan-converting a circle using Bresenham’s Algorithm. Which of the given steps is not correct ?",
+    "choices": {
+      "A": "Compute d = 3 – 2r (where r is radius)",
+      "B": "Stop if x > y",
+      "C": "If d < 0, then d = 4x + 6 and x = x + 1",
+      "D": "If d ≥ 0, then d = 4 ∗ (x – y) + 10, x = x + 1 and y = y + 1"
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 117,
+    "question_id": "api_frameworks_238",
+    "subject": "api_frameworks",
+    "question": "How do you define a computed property in Vue",
+    "choices": {
+      "A": "As a variable inside the 'methods' instance",
+      "B": "As a variable inside the 'computed' instance",
+      "C": "As a method inside the 'methods' instance",
+      "D": "As a method inside the 'computed' instance"
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 118,
+    "question_id": "code_completion_91",
+    "subject": "code_completion",
+    "question": "def is_bored(S):\n    \"\"\"\n    You'll be given a string of words, and your task is to count the number\n    of boredoms. A boredom is a sentence that starts with the word \"I\".\n    Sentences are delimited by '.', '?' or '!'.\n   \n    For example:\n    >>> is_bored(\"Hello world\")\n    0\n    >>> is_bored(\"The sky is blue. The sun is shining. I love this weather\")\n    1\n    \"\"\"",
+    "choices": {
+      "A": "import re\n    sentences = re.split(r'[.?!]\\s*', S)\n    return sum(sentence.startswith('I') for sentence in sentences)",
+      "B": "import re\n    sentences = re.split(r'[.?!]\\s*', S)\n    return sum(sentence[0:2] == 'I ' for sentence in sentences)",
+      "C": "import re\n    sentences = re.split(r'[.?!]\\s*', S)\n    return sum(sentence.rstrip().endswith(' I') for sentence in sentences)",
+      "D": "import re\n    sentences = re.split(r'[.?!]\\s*', S)\n    return sum(' I ' in sentence for sentence in sentences)"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 119,
+    "question_id": "code_repair_30",
+    "subject": "code_repair",
+    "question": "1 import java.util.*;\n2 public class SHORTEST_PATH_LENGTH {\n3     public static int shortest_path_length(Map<List<Node>, Integer> length_by_edge, Node startnode, Node goalnode) {\n4         int n = length_by_edge.size();\n5         Map<Node, Integer> unvisitedNodes = new HashMap<>();\n6         Set<Node> visitedNodes = new HashSet<>();\n7         unvisitedNodes.put(startnode, 0);\n8         while (!unvisitedNodes.isEmpty()) {\n9             Node node = getNodeWithMinDistance(unvisitedNodes);\n10             int distance = unvisitedNodes.get(node);\n11             unvisitedNodes.remove(node);\n12             if (node.getValue() == goalnode.getValue()) {\n13                 return distance;\n14             }\n15             visitedNodes.add(node);\n16             for (Node nextnode : node.getSuccessors()) {\n17                 if (visitedNodes.contains(nextnode)) {\n18                     continue;\n19                 }\n20                 if (unvisitedNodes.get(nextnode) == null) {\n21                     unvisitedNodes.put(nextnode, Integer.MAX_VALUE);\n22                 }\n23                 unvisitedNodes.put(nextnode, Math.min(unvisitedNodes.get(nextnode),\n24                         unvisitedNodes.get(nextnode) + length_by_edge.get(Arrays.asList(node, nextnode))));\n25             }\n26         }\n27         return Integer.MAX_VALUE;\n28     }\n29     public static Node getNodeWithMinDistance(Map<Node,Integer> list) {\n30         Node minNode = null;\n31         int minDistance = Integer.MAX_VALUE;\n32         for (Node node : list.keySet()) {\n33             int distance = list.get(node);\n34             if (distance < minDistance) {\n35                 minDistance = distance;\n36                 minNode = node;\n37             }\n38         }\n39         return minNode;\n40     }\n41 }",
+    "choices": {
+      "A": "Modify line 23:\n```                       distance + length_by_edge.get(Arrays.asList(node, nextnode))));```",
+      "B": "Modify line 12:\n```if (node.equals(goalnode)) {```",
+      "C": "Modify line 7:\n```unvisitedNodes.put(startnode, 0);```",
+      "D": "Modify line 13:\n```return visitedNodes.size() == unvisitedNodes.size() ? Integer.MAX_VALUE : distance;```"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 120,
+    "question_id": "dbms_sql_111",
+    "subject": "dbms_sql",
+    "question": "Consider the following relation  \r\n  Cinema (theater, address, capacity)  \r\nWhich of the following options will be needed at the end of the SQL query \r\nSELECT P1. address\r\nFROM Cinema P1 \r\nSuch that it always finds the addresses of theaters with maximum capacity?",
+    "choices": {
+      "A": "WHERE P1. Capacity> = All (select P2. Capacity from Cinema P2)",
+      "B": "WHERE P1. Capacity> = Any (select P2. Capacity from Cinema P2)",
+      "C": "WHERE P1. Capacity > All (select max(P2. Capacity) from Cinema P2)",
+      "D": "WHERE P1. Capacity > Any (select max (P2. Capacity) from Cinema P2)"
+    },
+    "correct_answer": "A",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 121,
+    "question_id": "execution_prediction_2057",
+    "subject": "execution_prediction",
+    "question": "# import bisect\n# from collections import Counter, deque # https://note.nkmk.me/python-scipy-connected-components/\n# from copy import copy, deepcopy\n# from functools import reduce\n# from heapq import heapify, heappop, heappush\n# from itertools import accumulate, permutations, combinations, combinations_with_replacement, groupby, product\n# import math\n# import numpy as np  # Pythonのみ！\n# from operator import xor\n# import re\n# from scipy.sparse.csgraph import connected_components  # Pythonのみ！\n# ↑cf.  https://note.nkmk.me/python-scipy-connected-components/\n# from scipy.sparse import csr_matrix\n# import string\nimport unittest\nfrom io import StringIO\nimport sys\nsys.setrecursionlimit(10 ** 5 + 10)\n\n\ndef input(): return sys.stdin.readline().strip()\n\n\ndef resolve():\n    N = int(input())\n    h = list(map(int, input().split()))\n\n    import math\n\n    # cf. https://qiita.com/suecharo/items/14137fb74c26e2388f1f\n\n    def make_prime_list_2(num):\n        if num < 2:\n            return []\n\n        # 0のものは素数じゃないとする\n        prime_list = [i for i in range(num + 1)]\n        prime_list[1] = 0  # 1は素数ではない\n        num_sqrt = math.sqrt(num)\n\n        for prime in prime_list:\n            if prime == 0:\n                continue\n            if prime > num_sqrt:\n                break\n\n            for non_prime in range(2 * prime, num, prime):\n                prime_list[non_prime] = 0\n\n        return [prime for prime in prime_list if prime != 0]\n\n    def prime_factorization_2(num, dict_counter):\n        \"\"\"numの素因数分解\n        素因数をkeyに乗数をvalueに格納した辞書型dict_counterを返す\"\"\"\n\n        if num <= 1:\n            # 例えば1を食ったときの対処の仕方は問題によって違うと思うのでそのつど考える。\n            # cf. https://atcoder.jp/contests/abc110/submissions/12688244\n            return False\n        else:\n            num_sqrt = math.floor(math.sqrt(num))\n            prime_list = make_prime_list_2(num_sqrt)\n\n            # 何度もこの関数を呼び出して辞書を更新したい時はこれを引数にして\n            # cf. https://atcoder.jp/contests/arc034/submissions/12251452\n\n            for prime in prime_list:\n                while num % prime == 0:\n                    if prime in dict_counter:\n                        dict_counter[prime] += 1\n                    else:\n                        dict_counter[prime] = 1\n                    num //= prime\n            if num != 1:\n                if num in dict_counter:\n                    dict_counter[num] += 1\n                else:\n                    dict_counter[num] = 1\n\n            return dict_counter\n    dict_counter = {}\n    for i in range(1, N+1):\n        prime_factorization_2(i, dict_counter)\n\n    l = list(dict_counter.values())\n    ll = len(l)\n\n    cnt=0\n    for i in range(ll-2):\n        for j in range(i+1,ll-1):\n            for k in range(j+1,ll):\n                if (l[i]>=4 and l[j]>=4 and l[k]>=2) or (l[i]>=4 and l[j]>=2 and l[k]>=4) or (l[i]>=2 and l[j]>=4 and l[k]>=4):\n                    cnt+=1\n    \n    for i in range(ll-1):\n        for j in range(i+1,ll):\n            if (l[i]>=4 and l[j]>=14) or (l[i]>=14 and l[j]>=4):\n                cnt+=1\n            if (l[i]>=24 and l[j]>=2) or (l[i]>=2 and l[j]>=24):\n                cnt+=1\n    \n    for i in range(ll):\n        if l[i]>=54:\n            cnt+=1\n    print(cnt)\n                \n\n\n    \n\n\n# resolve()\n\n\nclass TestClass(unittest.TestCase):\n    def assertIO(self, input, output):\n        stdout, stdin = sys.stdout, sys.stdin\n        sys.stdout, sys.stdin = StringIO(), StringIO(input)\n        resolve()\n        sys.stdout.seek(0)\n        out = sys.stdout.read()[:-1]\n        sys.stdout, sys.stdin = stdout, stdin\n        self.assertEqual(out, output)\n\n    def test_入力例_1(self):\n        input = \"\"\"9\"\"\"\n        output = \"\"\"0\"\"\"\n        self.assertIO(input, output)\n\n    def test_入力例_2(self):\n        input = \"\"\"10\"\"\"\n        output = \"\"\"1\"\"\"\n        self.assertIO(input, output)\n\n    def test_入力例_3(self):\n        input = \"\"\"100\"\"\"\n        output = \"\"\"543\"\"\"\n        self.assertIO(input, output)\n\n\nif __name__ == \"__main__\":\n    unittest.main()",
+    "choices": {
+      "A": "Memory Limit Exceeded",
+      "B": "Runtime Error",
+      "C": "Compile Error",
+      "D": "Internal error"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 122,
+    "question_id": "fill_in_the_middle_1642",
+    "subject": "fill_in_the_middle",
+    "question": "class Solution:\n  def minimizeArrayValue(self, nums: List[int]) -> int:\n    ans = 0\n    prefix = 0\n\n    for i, num in enumerate(nums):\n      prefix += num\n      _______________\n      prefixAvg = math.ceil(prefix / (i + 1))\n      ans = max(ans, prefixAvg)\n\n    return ans",
+    "choices": {
+      "A": "prefixAvg = math.floor(prefix / (i + 1)) + 1",
+      "B": "prefixAvg = (prefix + i) // (i + 1)",
+      "C": "prefixAvg = math.ceil(prefix / (i + 1))",
+      "D": "prefixAvg = -(-prefix // (i + 1))"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 123,
+    "question_id": "others_201",
+    "subject": "others",
+    "question": "What is the output of this program?\n   #include<stdio.h>   #include<fcntl.h>   #include<sys/stat.h>   #include<semaphore.h>    int main()   {       sem_t* sem_id;       sem_id = sem_open(\"sem_value\",O_CREAT,0666,0);       if(sem_id == SEM_FAILED)           perror(\"sem_open\");       if(sem_close(sem_id) == -1)           perror(\"sem_close\");       sem_wait(sem_id);       printf(\"Sanfoundry\\n\");       return 0;   }",
+    "choices": {
+      "A": "this process will block",
+      "B": "this program will print the string “Sanfoundry”",
+      "C": "segmentation fault",
+      "D": "none of the mentioned"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 124,
+    "question_id": "programming_syntax_4656",
+    "subject": "programming_syntax",
+    "question": "Consider the following C code. Assume that unsigned long int\n``````C\n type length is 64 bits.\n\n\n\n\nunsigned long int fun(unsigned long int n) {\n        unsigned long int i, j = 0, sum = 0;\n        for( i = n; i > 1; i = i/2) j++;\n        for( ; j > 1; j = j/2) sum++;\n        return sum;\n}\n\n``````C\n\n\nThe value returned when we call fun\n``````C\n with the input 240 is",
+    "choices": {
+      "A": "4",
+      "B": "5",
+      "C": "6",
+      "D": "40"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 125,
+    "question_id": "software_principles_1759",
+    "subject": "software_principles",
+    "question": "Which sorting algorithm will take least time when all elements of input array are identical? Consider typical implementations of sorting algorithms.",
+    "choices": {
+      "A": "Insertion Sort",
+      "B": "Heap Sort",
+      "C": "Merge Sort",
+      "D": "Selection Sort"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 126,
+    "question_id": "api_frameworks_691",
+    "subject": "api_frameworks",
+    "question": "How do you write an inline style specifying the font-size:12px and color:red; in JSX",
+    "choices": {
+      "A": "style={{font-size:12,color:'red'}}",
+      "B": "style={{fontSize:'12px',color:'red'}}",
+      "C": "style={fontSize:'12px',color:'red'}",
+      "D": "style={{font-size:12px,color:'red'}}"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 127,
+    "question_id": "code_completion_107",
+    "subject": "code_completion",
+    "question": "def even_odd_palindrome(n):\n    \"\"\"\n    Given a positive integer n, return a tuple that has the number of even and odd\n    integer palindromes that fall within the range(1, n), inclusive.\n\n    Example 1:\n\n        Input: 3\n        Output: (1, 2)\n        Explanation:\n        Integer palindrome are 1, 2, 3. one of them is even, and two of them are odd.\n\n    Example 2:\n\n        Input: 12\n        Output: (4, 6)\n        Explanation:\n        Integer palindrome are 1, 2, 3, 4, 5, 6, 7, 8, 9, 11. four of them are even, and 6 of them are odd.\n\n    Note:\n        1. 1 <= n <= 10^3\n        2. returned tuple has the number of even and odd integer palindromes respectively.\n    \"\"\"",
+    "choices": {
+      "A": "def is_palindrome(num):\n        return str(num) == str(num)[::-1]\n\n    even_palindrome_count = 0\n    odd_palindrome_count = 0\n\n    for i in range(1, n+1):\n        if i % 3 == 0:\n            if i % 2 == 0:\n                even_palindrome_count += 1\n            else:\n                odd_palindrome_count += 1\n    return (even_palindrome_count, odd_palindrome_count)",
+      "B": "def is_palindrome(n):\n        return str(n) == str(n)[::-1]\n\n    even_palindrome_count = 0\n    odd_palindrome_count = 0\n\n    for i in range(1, n+1):\n        if i%2 == 1 and is_palindrome(i):\n                odd_palindrome_count += 1\n        elif i%2 == 0 and is_palindrome(i):\n            even_palindrome_count += 1\n    return (even_palindrome_count, odd_palindrome_count)",
+      "C": "def is_palindrome(num):\n        return str(num) == str(-num)[::-1]\n\n    even_palindrome_count = 0\n    odd_palindrome_count = 0\n\n    for i in range(1, n+1):\n        if i % 2 == 1 and is_palindrome(i):\n            odd_palindrome_count += 1\n        elif i % 2 == 0 and is_palindrome(i):\n            even_palindrome_count += 1\n    return (even_palindrome_count, odd_palindrome_count)",
+      "D": "def is_palindrome(num):\n        return str(num) == str(num)[::-1]\n\n    palindrome_count = 0\n\n    for i in range(1, n+1):\n        if is_palindrome(i):\n            palindrome_count += 1\n    return (palindrome_count, palindrome_count)"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 128,
+    "question_id": "code_repair_26",
+    "subject": "code_repair",
+    "question": "1 import java.util.*;\n2 public class POWERSET {\n3     public static ArrayList<ArrayList> powerset(ArrayList arr) {\n4         if (!arr.isEmpty()) {\n5             Object first = arr.get(0);\n6             arr.remove(0);\n7             ArrayList rest = arr;\n8             ArrayList<ArrayList> rest_subsets = powerset(rest);\n9             ArrayList<ArrayList> output = new ArrayList<ArrayList>(100);\n10             ArrayList to_add = new ArrayList(100);\n11             to_add.add(first);\n12             for (ArrayList subset : rest_subsets) {\n13                 to_add.addAll(subset);\n14             }\n15             output.add(to_add);\n16             return output;\n17         } else {\n18             ArrayList empty_set = new ArrayList<ArrayList>();\n19             empty_set.add(new ArrayList());\n20             return empty_set;\n21         }\n22     }\n23 }",
+    "choices": {
+      "A": "Modify line 15:\n```    output.add(to_add);```",
+      "B": "Insert at line 10:\n```               ArrayList r = new ArrayList();```\nModify line 12:\n```               r.add(first);```\nInsert at line 14:\n```               r.addAll(subset);\n               to_add.add(r);```",
+      "C": "Modify line 4:\n```ArrayList<ArrayList> output = new ArrayList<ArrayList>(rest_subsets);```",
+      "D": "Modify line 6:\n```ArrayList rest = new ArrayList(arr.subList(1, arr.size()));```"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 129,
+    "question_id": "dbms_sql_121",
+    "subject": "dbms_sql",
+    "question": "Embedded pointer provides",
+    "choices": {
+      "A": "A secondary access path",
+      "B": "A physical record key",
+      "C": "An inverted index",
+      "D": "A primary key"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 130,
+    "question_id": "execution_prediction_2245",
+    "subject": "execution_prediction",
+    "question": "a = map(int, stdin.readline().split())\na.sort()\ndef f(j, t):\n    global n\n    for i in xrange(j, n):\n        if a[i] != a[j]:\n            break\n    else:\n        i = n\n    x = (a[j] - t) & 1\n    y = (i - j) & 1\n    if i == n:\n        return x ^ y\n    elif (a[j] - t) == 1:\n        return not f(i, a[j])\n    else:\n        return x ^ y ^ ((n - i) & 1)\nprint \"First\" if f(0, 0) else \"Second\"",
+    "choices": {
+      "A": "Internal error",
+      "B": "Runtime Error",
+      "C": "No abnormally found",
+      "D": "Time Limit Exceeded"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 131,
+    "question_id": "fill_in_the_middle_1436",
+    "subject": "fill_in_the_middle",
+    "question": "class Solution:\n  def smallestNumber(self, num: int) -> int:\n    s = sorted(str(abs(num)), reverse=num < 0)\n    firstNonZeroIndex = next((i for i, c in enumerate(s) if c != '0'), 0)\n    s[0], s[firstNonZeroIndex] = s[firstNonZeroIndex], s[0]\n    _______________\n    return int(''.join(s)) * (-1 if num < 0 else 1)",
+    "choices": {
+      "A": "return int(''.join(s)) * (num // abs(num))",
+      "B": "return int(''.join(s)) * (-1 if num < 0 else 1)",
+      "C": "return (-1 if num < 0 else 1) * int(''.join(s))",
+      "D": "return int(''.join(s)) * (1 if num > 0 else -1)"
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 132,
+    "question_id": "others_524",
+    "subject": "others",
+    "question": "In a classful addressing, the IP addresses with 0 (zero) as network number :",
+    "choices": {
+      "A": "refers to the current network",
+      "B": "refers to broadcast on the local network",
+      "C": "refers to broadcast on a distant network",
+      "D": "refers to loopback testing"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 133,
+    "question_id": "programming_syntax_5528",
+    "subject": "programming_syntax",
+    "question": "What does the finally block execute if an exception is raised and not caught?",
+    "choices": {
+      "A": "It doesn't execute",
+      "B": "It executes before the exception is raised",
+      "C": "It executes after the exception is raised",
+      "D": "It executes only if the exception is caught"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 134,
+    "question_id": "software_principles_1801",
+    "subject": "software_principles",
+    "question": "S1 : Anyone of the followings can be used to declare a node for a singly linked list. If we use the first declaration, “struct node * nodePtr;” would be used to declare pointer to a node. If we use the second declaration, “NODEPTR nodePtr;” can be used to declare pointer to a node./* First declaration */struct node {int data;struct node * nextPtr;};/* Second declaration */typedef struct node{int data;NODEPTR nextPtr;} * NODEPTR;S2 : Anyone of the following can be used to declare a node for a singly linked list and “NODEPTR nodePtr;” can be used to declare pointer to a node using any of the following/* First declaration */typedef struct node{ int data; struct node *nextPtr;}* NODEPTR;/* Second declaration */struct node{ int data; struct node * nextPtr;};typedef struct node * NODEPTR;",
+    "choices": {
+      "A": "Statement S1 is true and statement S2 is false",
+      "B": "Statement S1 is false and statement S2 is true",
+      "C": "Both statements S1 and S2 are true",
+      "D": "Neither statement S1 nor statement S2 is true"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 135,
+    "question_id": "api_frameworks_296",
+    "subject": "api_frameworks",
+    "question": "The directive which is responsible for adding or removing the element in HTML is:",
+    "choices": {
+      "A": "ng-switch",
+      "B": "ng-model",
+      "C": "ng-Disabled",
+      "D": "ng-Cloak"
+    },
+    "correct_answer": "A",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 136,
+    "question_id": "code_completion_52",
+    "subject": "code_completion",
+    "question": "def below_threshold(l: list, t: int):\n    \"\"\"Return True if all numbers in the list l are below threshold t.\n    >>> below_threshold([1, 2, 4, 10], 100)\n    True\n    >>> below_threshold([1, 20, 4, 10], 5)\n    False\n    \"\"\"",
+    "choices": {
+      "A": "for e in l:\n        if e >= t:\n            return True\n    return True",
+      "B": "for e in l:\n        if e >= t:\n            return True\n    return False",
+      "C": "for e in l:\n        if e <= t:\n            return False\n    return True",
+      "D": "for e in l:\n        if e >= t:\n            return False\n    return True"
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 137,
+    "question_id": "code_repair_55",
+    "subject": "code_repair",
+    "question": "1 def levenshtein(source, target):\n2     if source == '' or target == '':\n3         return len(source) or len(target)\n4     elif source[0] == target[0]:\n5         return 1 + levenshtein(source[1:], target[1:])\n6     else:\n7         return 1 + min(\n8             levenshtein(source,     target[1:]),\n9             levenshtein(source[1:], target[1:]),\n10             levenshtein(source[1:], target)\n11         )",
+    "choices": {
+      "A": "Modify line 4:\n```       return levenshtein(source[1:], target[1:])```",
+      "B": "Modify line 1:\n```    if len(source) == 0 or len(target) == 0:```",
+      "C": "Modify line 2:\n```return max(len(source), len(target))```"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 138,
+    "question_id": "dbms_sql_169",
+    "subject": "dbms_sql",
+    "question": "Consider the following three tables R, S and T. In this question, all the join operations are natural joins (⨝). (π) is the projection operation of a relation: \r\r(a)\r\r(b)\r\r(c)\r\r(d)",
+    "choices": {
+      "A": "(a)",
+      "B": "(b)",
+      "C": "(c)",
+      "D": "(d)"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 139,
+    "question_id": "execution_prediction_3472",
+    "subject": "execution_prediction",
+    "question": "import java.util.Scanner;\npublic class Main{\n  public static void main(String[] args){\n    Scanner scan = new Scanner(System.in);\n    int n = scan.nextInt();\n    int m = scan.nextInt();\n    int ans = 0:\n    for (int i = 0; i < m; i++){\n      ans = ans + scan.nextInt();\n    }\n    if (ans <=n){\n      System.out.println(n - ans);\n    }else{\n      System.out.println(-1);\n    }\n  }\n}",
+    "choices": {
+      "A": "Time Limit Exceeded",
+      "B": "Compile Error",
+      "C": "No abnormally found",
+      "D": "Internal error"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 140,
+    "question_id": "fill_in_the_middle_69",
+    "subject": "fill_in_the_middle",
+    "question": "class Solution:\n  def climbStairs(self, n: int) -> int:\n    _______________\n    dp = [1, 1] + [0] * (n - 1)\n\n    for i in range(2, n + 1):\n      dp[i] = dp[i - 1] + dp[i - 2]\n\n    return dp[n]",
+    "choices": {
+      "A": "dp = [1 for _ in range(2)] + [0] * (n - 1)",
+      "B": "dp = [1, 1] + [0 for _ in range(n - 1)]",
+      "C": "dp = [1] * 2 + [0] * (n - 1)",
+      "D": "dp = [1, 1] + [0] * (n - 1)"
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 141,
+    "question_id": "others_248",
+    "subject": "others",
+    "question": "In this example, we see white text on an image background.How should you measure this contrast?",
+    "choices": {
+      "A": "Find the average color of the image, to measure against.",
+      "B": "Find the lightest part of the picture that might lie next to",
+      "C": "Not possible. Text on images is not accessible."
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 142,
+    "question_id": "programming_syntax_4442",
+    "subject": "programming_syntax",
+    "question": "Which of the followings is correct for a function definition along with storage-class specifier in C language?",
+    "choices": {
+      "A": "int fun(auto int arg)",
+      "B": "int fun(static int arg)",
+      "C": "int fun(register int arg)",
+      "D": "int fun(extern int arg)",
+      "E": "All of the above are correct."
+    },
+    "correct_answer": "C",
+    "hint_target": "E"
+  },
+  {
+    "instance_id": 143,
+    "question_id": "software_principles_957",
+    "subject": "software_principles",
+    "question": "What will be the time complexity of the following code?\n#include <bits/stdc++.h> \nusing namespace std; \nvoid func(int arr[], int left, int right) \n{ \n    if (left >= right) \n    return; \n \n    int temp = arr[left];  \n    arr[left] = arr[right]; \n    arr[right] = temp; \n \n    func(arr, left + 1, right - 1);  \n}      \n \nvoid printArray(int arr[], int size) \n{ \n    for (int i = 0; i < size; i++) \n    cout << arr[i] << \" \"; \n} \n \nint main() \n{ \n\tint arr[] = {1,2,3,4}; \n\tint n = sizeof(arr) / sizeof(arr[0]); \n\tfunc(arr, 0, n-1); \n\tprintArray(arr, n); \n\treturn 0; \n}",
+    "choices": {
+      "A": "O(1)",
+      "B": "O(n)",
+      "C": "O(log n)",
+      "D": "O(n log n)"
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 144,
+    "question_id": "api_frameworks_224",
+    "subject": "api_frameworks",
+    "question": "When a 'watcher' runs, both the old and the new data property values are available as arguments to the watcher method.",
+    "choices": {
+      "A": "Neither the old nor the new data property values are available",
+      "B": "Only the new data property value is available",
+      "C": "Only the old data property value is available",
+      "D": "Yes"
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 145,
+    "question_id": "code_completion_47",
+    "subject": "code_completion",
+    "question": "def median(l: list):\n    \"\"\"Return median of elements in the list l.\n    >>> median([3, 1, 2, 4, 5])\n    3\n    >>> median([-10, 4, 6, 1000, 10, 20])\n    15.0\n    \"\"\"",
+    "choices": {
+      "A": "l = sorted(l)\n    if len(l) % 2 == 0:\n        return (l[len(l) // 2] + l[len(l) // 2 - 1]) / 2\n    else:\n        return l[len(l) // 2 + 1]",
+      "B": "l = sorted(l)\n    if len(l) % 2 == 1:\n        return l[len(l) // 2]\n    else:\n        return (l[len(l) // 2 - 1] + l[len(l) // 2]) / 2.0",
+      "C": "l = sorted(l)\n    if len(l) % 2 == 1:\n        return l[len(l) // 2]\n    else:\n        return (l[len(l) // 2 - 2] + l[len(l) // 2 - 1]) / 2.0",
+      "D": "l = sorted(l)\n    if len(l) % 2 == 0:\n        return (l[len(l) // 2] + l[len(l) // 2 + 1]) / 2.0\n    else:\n        return l[len(l) // 2]"
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 146,
+    "question_id": "code_repair_29",
+    "subject": "code_repair",
+    "question": "1 import java.util.*;\n2 import java.util.function.BinaryOperator;\n3 public class RPN_EVAL {\n4     public static Double rpn_eval(ArrayList tokens) {\n5         Map<String, BinaryOperator<Double>> op = new HashMap<String, BinaryOperator<Double>>();\n6         op.put(\"+\", (a, b) -> a + b);\n7         op.put(\"-\", (a, b) -> a - b);\n8         op.put(\"*\", (a, b) -> a * b);\n9         op.put(\"/\", (a, b) -> a / b);\n10         Stack stack = new Stack();\n11         for (Object token : tokens) {\n12             if (Double.class.isInstance(token)) {\n13                 stack.push((Double) token);\n14             } else {\n15                 token = (String) token;\n16                 Double a = (Double) stack.pop();\n17                 Double b = (Double) stack.pop();\n18                 Double c = 0.0;\n19                 BinaryOperator<Double> bin_op = op.get(token);\n20                 c = bin_op.apply(a,b);\n21                 stack.push(c);\n22             }\n23         }\n24         return (Double) stack.pop();\n25     }\n26 }",
+    "choices": {
+      "A": "Modify line 8:\n```op.put(\"*\", (a, b) -> a * b);```",
+      "B": "Modify line 9:\n```    op.put(\"/\", (a, b) -> b != 0 ? a / b : Double.NaN);```",
+      "C": "Modify line 6:\n```op.put(\"+\", (Double a, Double b) -> a + b);```",
+      "D": "Modify line 19:\n```               c = bin_op.apply(b,a);```"
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 147,
+    "question_id": "dbms_sql_312",
+    "subject": "dbms_sql",
+    "question": "Write an SQL query to retrieve the names of employees who belong to the 'Sales' department and have a salary greater than 60000.",
+    "choices": {
+      "A": "SELECT name FROM employees WHERE department = 'Sales' AND salary > 60000;",
+      "B": "SELECT name FROM employees WHERE department = 'Sales' OR salary > 60000;",
+      "C": "SELECT name FROM employees WHERE department = 'Sales' HAVING salary > 60000;",
+      "D": "SELECT name FROM employees GROUP BY department, salary HAVING department = 'Sales' AND salary > 60000;"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 148,
+    "question_id": "execution_prediction_4755",
+    "subject": "execution_prediction",
+    "question": "import java.io.OutputStream;\nimport java.io.IOException;\nimport java.io.InputStream;\nimport java.io.PrintWriter;\nimport java.util.TreeMap;\nimport java.util.InputMismatchException;\nimport java.io.IOException;\nimport java.io.InputStream;\n\n/**\n * Built using CHelper plug-in\n * Actual solution is at the top\n *\n * @author KharYusuf\n */\npublic class Main {\n    public static void main(String[] args) {\n        InputStream inputStream = System.in;\n        OutputStream outputStream = System.out;\n        FastReader in = new FastReader(inputStream);\n        PrintWriter out = new PrintWriter(outputStream);\n        ESpaceshipSolitaire solver = new ESpaceshipSolitaire();\n        solver.solve(1, in, out);\n        out.close();\n    }\n\n    static class ESpaceshipSolitaire {\n        public void solve(int testNumber, FastReader s, PrintWriter w) {\n            int n = s.nextInt();\n            long[] goal = new long[n];\n            for (int i = 0; i < n; i++) goal[i] = s.nextInt();\n\n            segtree seg = new segtree(n, goal);\n            seg.build(0, n - 1, 1);\n\n            TreeMap<pair<Integer, Integer>, Integer> t = new TreeMap<>();\n            int q = s.nextInt();\n            while (q-- > 0) {\n                pair<Integer, Integer> p = new pair<>(s.nextInt(), s.nextInt());\n                int u = s.nextInt() - 1;\n                if (t.containsKey(p)) seg.modify(0, n - 1, t.remove(p), 1, 1);\n                if (u >= 0) {\n                    t.put(p, u);\n                    seg.modify(0, n - 1, u, -1, 1);\n                }\n                w.println(seg.t[1]);\n            }\n        }\n\n        public class segtree {\n            public int n;\n            public long[] t;\n            public long[] a;\n\n            public segtree(int n, long[] a) {\n                this.n = n;\n                t = new long[n << 2];\n                this.a = a;\n            }\n\n            public void build(int s, int e, int n) {\n                if (s == e) {\n                    t[n] = a[s];\n                    return;\n                }\n                int mid = s + e >> 1;\n                build(s, mid, n << 1);\n                build(mid + 1, e, n << 1 | 1);\n                t[n] = t[n << 1] + t[n << 1 | 1];\n            }\n\n            public void modify(int s, int e, int pos, int val, int n) {\n                if (s > pos || e < pos) return;\n                if (s == e) {\n                    a[s] += val;\n                    t[n] = Math.max(a[s], 0);\n                    return;\n                }\n                int mid = s + e >> 1;\n                modify(s, mid, pos, val, n << 1);\n                modify(mid + 1, e, pos, val, n << 1 | 1);\n                t[n] = t[n << 1] + t[n << 1 | 1];\n            }\n\n        }\n\n    }\n\n    static class FastReader {\n        private InputStream stream;\n        private byte[] buf = new byte[1024];\n        private int curChar;\n        private int numChars;\n        private FastReader.SpaceCharFilter filter;\n\n        public FastReader(InputStream stream) {\n            this.stream = stream;\n        }\n\n        public int read() {\n\n            if (numChars == -1)\n                throw new InputMismatchException();\n\n            if (curChar >= numChars) {\n\n                curChar = 0;\n\n                try {\n                    numChars = stream.read(buf);\n                } catch (IOException e) {\n                    throw new InputMismatchException();\n                }\n\n                if (numChars <= 0)\n                    return -1;\n            }\n\n            return buf[curChar++];\n        }\n\n        public int nextInt() {\n\n            int c = read();\n\n            while (isSpaceChar(c))\n                c = read();\n\n            int sgn = 1;\n\n            if (c == '-') {\n                sgn = -1;\n                c = read();\n            }\n\n            int res = 0;\n\n            do {\n                if (c < '0' || c > '9')\n                    throw new InputMismatchException();\n\n                res *= 10;\n                res += c - '0';\n                c = read();\n            }\n            while (!isSpaceChar(c));\n\n            return res * sgn;\n        }\n\n        public boolean isSpaceChar(int c) {\n\n            if (filter != null)\n                return filter.isSpaceChar(c);\n\n            return c == ' ' || c == '\\n' || c == '\\r' || c == '\\t' || c == -1;\n        }\n\n        public interface SpaceCharFilter {\n            public boolean isSpaceChar(int ch);\n\n        }\n\n    }\n\n    static class pair<U extends Comparable<U>, V extends Comparable<V>> implements Comparable<pair<U, V>> {\n        public U x;\n        public V y;\n\n        public pair(U x, V y) {\n            this.x = x;\n            this.y = y;\n        }\n\n        public int compareTo(pair<U, V> other) {\n            int i = x.compareTo(other.x);\n            if (i != 0) return i;\n            return y.compareTo(other.y);\n        }\n\n        public String toString() {\n            return x.toString() + \" \" + y.toString();\n        }\n\n        public boolean equals(Object obj) {\n            if (this.getClass() != obj.getClass()) return false;\n            pair<U, V> other = (pair<U, V>) obj;\n            return x.equals(other.x) && y.equals(other.y);\n        }\n\n        public int hashCode() {\n            return 31 * x.hashCode() + y.hashCode();\n        }\n\n    }\n}",
+    "choices": {
+      "A": "Time Limit Exceeded",
+      "B": "Runtime Error",
+      "C": "Internal error",
+      "D": "No abnormally found"
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 149,
+    "question_id": "fill_in_the_middle_827",
+    "subject": "fill_in_the_middle",
+    "question": "class Solution:\n  def minimumSwap(self, s1: str, s2: str) -> int:\n    xy = 0  \n    yx = 0  \n\n    for a, b in zip(s1, s2):\n      if a == b:\n        continue\n      if a == 'x':\n        xy += 1\n      else:\n        yx += 1\n\n    if (xy + yx) % 2 == 1:\n      return -1\n    _______________\n    return xy // 2 + yx // 2 + (2 if xy % 2 == 1 else 0)",
+    "choices": {
+      "A": "return xy // 2 + yx // 2 + (2 if xy % 2 == 1 else 0)",
+      "B": "return (xy + yx) // 2 + (1 if xy % 2 == 1 else 0)",
+      "C": "return xy // 2 + (yx + 1) // 2 if xy % 2 == 1 else xy // 2 + yx // 2"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 150,
+    "question_id": "others_1345",
+    "subject": "others",
+    "question": "The default file extension in PHP are ____",
+    "choices": {
+      "A": ".php",
+      "B": ".css",
+      "C": ".js",
+      "D": ".html"
+    },
+    "correct_answer": "A",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 151,
+    "question_id": "programming_syntax_2068",
+    "subject": "programming_syntax",
+    "question": "What will be the output of the following Java code?\n    class Output     {        public static void main(String args[])        {            Double i = new Double(257.5);              boolean x = i.isNaN();            System.out.print(x);        }    }",
+    "choices": {
+      "A": "true",
+      "B": "false",
+      "C": "0",
+      "D": "1"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 152,
+    "question_id": "software_principles_400",
+    "subject": "software_principles",
+    "question": "The microinstructions stored in the control memory of a processor have a width of 26 bits. Each microinstruction is divided into three fields. a micro operation field of 13 bits, a next address field (X), and a MUX select field (Y). There are 8 status bits in the inputs of the MUX. How many bits are there in the X and Y fields, and what is the size of the control memory in number of words",
+    "choices": {
+      "A": "10, 3, 1024",
+      "B": "8, 5, 256",
+      "C": "5, 8, 2048",
+      "D": "10, 3, 512"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 153,
+    "question_id": "api_frameworks_500",
+    "subject": "api_frameworks",
+    "question": "Question: What does the astype() method in Pandas do?",
+    "choices": {
+      "A": "Converts a DataFrame to a NumPy array",
+      "B": "Converts data types of columns in a DataFrame",
+      "C": "Adds a new column to a DataFrame",
+      "D": "Removes duplicate values from a DataFrame"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 154,
+    "question_id": "code_completion_114",
+    "subject": "code_completion",
+    "question": "def minSubArraySum(nums):\n    \"\"\"\n    Given an array of integers nums, find the minimum sum of any non-empty sub-array\n    of nums.\n    Example\n    minSubArraySum([2, 3, 4, 1, 2, 4]) == 1\n    minSubArraySum([-1, -2, -3]) == -6\n    \"\"\"",
+    "choices": {
+      "A": "max_sum = 0\n    s = 0\n    for num in nums:\n        s -= num\n        if (s > 0):\n            s = 0\n        max_sum = max(s, max_sum)\n    if max_sum == 0:\n        max_sum = max(-i for i in nums)\n    min_sum = -max_sum\n    return min_sum",
+      "B": "max_sum = 0\n    s = 0\n    for num in nums:\n        s += num\n        if (s < 0):\n            s = 0\n        max_sum = max(s, max_sum)\n    if max_sum == 0:\n        max_sum = max(-i for i in nums)\n    min_sum = -max_sum\n    return min_sum",
+      "C": "max_sum = 0\n    s = 0\n    for num in nums:\n        s += -num\n        if (s < 0):\n            s = 5\n        max_sum = max(s, max_sum)\n    if max_sum == 0:\n        max_sum = min(-i for i in nums)\n    min_sum = -max_sum\n    return min_sum",
+      "D": "max_sum = 0\n    s = 0\n    for num in nums:\n        s += -num\n        if (s < 0):\n            s = 0\n        max_sum = max(s, max_sum)\n    if max_sum == 0:\n        max_sum = max(-i for i in nums)\n    min_sum = -max_sum\n    return min_sum"
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 155,
+    "question_id": "code_repair_73",
+    "subject": "code_repair",
+    "question": "1 import string\n2 def to_base(num, b):\n3     result = ''\n4     alphabet = string.digits + string.ascii_uppercase\n5     while num > 0:\n6         i = num % b\n7         num = num // b\n8         result = result + alphabet[i]\n9     return result",
+    "choices": {
+      "A": "Modify line 5:\n```i = num % b if b <= len(alphabet) else num % len(alphabet)```",
+      "B": "Modify line 7:\n```       result = alphabet[i] + result```",
+      "C": "Modify line 22:\n```    num = int(num // b)```",
+      "D": "Modify line 7:\n```result = alphabet[i] + result```"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 156,
+    "question_id": "dbms_sql_2",
+    "subject": "dbms_sql",
+    "question": "Which MySQL statement is used to update data in a database?",
+    "choices": {
+      "A": "MODIFY",
+      "B": "UPDATE",
+      "C": "SAVE",
+      "D": "INSERT"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 157,
+    "question_id": "execution_prediction_3384",
+    "subject": "execution_prediction",
+    "question": "import java.util.*; import java.io.*; import java.math.*;\npublic class Main{\n\tstatic void solve(){//Here is the main function\n\t\tint N = nextInt();\n\t\tint mod = 1000000007;\n\t\tint[] dp = new int[N + 1];\n\t\tdp[0] = 1;\n\t\tint mae = 0;\n\t\tfor(int i = 0; i < N; i++){\n\t\t\tint C = nextInt();\n\t\t\tif(C == mae){\n\t\t\t\tcontinue;\n\t\t\t}\n\t\t\tdp[C] = (dp[C] + dp[mae]) % mod;\n\t\t\tmae = C;\n\t\t}\n\t\tmyout(dp[mae]);\n\t}\n\t//Method addition frame start\n\n\n\n\t//Method addition frame end\n\n\t//Don't have to see. start------------------------------------------\n\tstatic class InputIterator{\n\t\tArrayList<String> inputLine = new ArrayList<String>(1024);\n\t\tint index = 0; int max; String read;\n\t\tInputIterator(){\n\t\t\tBufferedReader br = new BufferedReader(new InputStreamReader(System.in));\n\t\t\ttry{\n\t\t\t\twhile((read = br.readLine()) != null){\n\t\t\t\t\tinputLine.add(read);\n\t\t\t\t}\n\t\t\t}catch(IOException e){}\n\t\t\tmax = inputLine.size();\n\t\t}\n\t\tboolean hasNext(){return (index < max);}\n\t\tString next(){\n\t\t\tif(hasNext()){\n\t\t\t\treturn inputLine.get(index++);\n\t\t\t}else{\n\t\t\t\tthrow new IndexOutOfBoundsException(\"There is no more input\");\n\t\t\t}\n\t\t}\n\t}\n\tstatic HashMap<Integer, String> CONVSTR = new HashMap<Integer, String>();\n\tstatic InputIterator ii = new InputIterator();//This class cannot be used in reactive problem.\n\tstatic PrintWriter out = new PrintWriter(System.out);\n\tstatic void flush(){out.flush();}\n\tstatic void myout(Object t){out.println(t);}\n\tstatic void myerr(Object t){System.err.print(\"debug:\");System.err.println(t);}\n\tstatic String next(){return ii.next();}\n\tstatic boolean hasNext(){return ii.hasNext();}\n\tstatic int nextInt(){return Integer.parseInt(next());}\n\tstatic long nextLong(){return Long.parseLong(next());}\n\tstatic double nextDouble(){return Double.parseDouble(next());}\n\tstatic ArrayList<String> nextStrArray(){return myconv(next(), 8);}\n\tstatic ArrayList<String> nextCharArray(){return myconv(next(), 0);}\n\tstatic ArrayList<Integer> nextIntArray(){\n\t\tArrayList<String> input = nextStrArray(); ArrayList<Integer> ret = new ArrayList<Integer>(input.size());\n\t\tfor(int i = 0; i < input.size(); i++){\n\t\t\tret.add(Integer.parseInt(input.get(i)));\n\t\t}\n\t\treturn ret;\n\t}\n\tstatic ArrayList<Long> nextLongArray(){\n\t\tArrayList<String> input = nextStrArray(); ArrayList<Long> ret = new ArrayList<Long>(input.size());\n\t\tfor(int i = 0; i < input.size(); i++){\n\t\t\tret.add(Long.parseLong(input.get(i)));\n\t\t}\n\t\treturn ret;\n\t}\n\t@SuppressWarnings(\"unchecked\")\n\tstatic String myconv(Object list, int no){//only join\n\t\tString joinString = CONVSTR.get(no);\n\t\tif(list instanceof String[]){\n\t\t\treturn String.join(joinString, (String[])list);\n\t\t}else if(list instanceof ArrayList){\n\t\t\treturn String.join(joinString, (ArrayList)list);\n\t\t}else{\n\t\t\tthrow new ClassCastException(\"Don't join\");\n\t\t}\n\t}\n\tstatic ArrayList<String> myconv(String str, int no){//only split\n\t\tString splitString = CONVSTR.get(no);\n\t\treturn new ArrayList<String>(Arrays.asList(str.split(splitString)));\n\t}\n\tpublic static void main(String[] args){\n\t\tCONVSTR.put(8, \" \"); CONVSTR.put(9, \"\\n\"); CONVSTR.put(0, \"\");\n\t\tsolve();flush();\n\t}\n\t//Don't have to see. end------------------------------------------\n}",
+    "choices": {
+      "A": "Runtime Error",
+      "B": "Memory Limit Exceeded",
+      "C": "Time Limit Exceeded",
+      "D": "Compile Error"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 158,
+    "question_id": "fill_in_the_middle_780",
+    "subject": "fill_in_the_middle",
+    "question": "class SnapshotArray:\n  def __init__(self, length: int):\n    self.snaps = [[[0, 0]] for _ in range(length)]\n    self.snap_id = 0\n\n  def set(self, index: int, val: int) -> None:\n    snap = self.snaps[index][-1]\n    if snap[0] == self.snap_id:\n      snap[1] = val\n    else:\n      self.snaps[index].append([self.snap_id, val])\n\n  def snap(self) -> int:\n    self.snap_id += 1\n    return self.snap_id - 1\n\n  def get(self, index: int, snap_id: int) -> int:\n    _______________\n    i = bisect_left(self.snaps[index], [snap_id + 1]) - 1\n    return self.snaps[index][i][1]",
+    "choices": {
+      "A": "i = bisect_left(self.snaps[index], [[snap_id + 1, 0]]) - 1",
+      "B": "i = bisect_left([x[0] for x in self.snaps[index]], snap_id) - 1",
+      "C": "i = bisect_left(self.snaps[index], [snap_id + 1]) - 1",
+      "D": "i = bisect_left(self.snaps[index], [snap_id]) - 1"
+    },
+    "correct_answer": "C",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 159,
+    "question_id": "others_940",
+    "subject": "others",
+    "question": "What does SMTP stands for",
+    "choices": {
+      "A": "Simple Mail Transfer Protocol.",
+      "B": "Simple Mail Transfer Process.",
+      "C": "Single Mail Transfer Process.",
+      "D": "Single Mail Transfer Protocol."
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 160,
+    "question_id": "programming_syntax_1000",
+    "subject": "programming_syntax",
+    "question": "What will be the output of the following C# code?\n static void Main(string[] args) {     String obj = \"hello\";     String obj1 = \"world\";        String obj2 = obj;     Console.WriteLine (obj.Equals(obj2) + \"  \" + obj2.CompareTo(obj) );     Console.ReadLine(); }",
+    "choices": {
+      "A": "True True",
+      "B": "False False",
+      "C": "True 0",
+      "D": "False 1"
+    },
+    "correct_answer": "C",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 161,
+    "question_id": "software_principles_164",
+    "subject": "software_principles",
+    "question": "A RAM chip has a capacity of 1024 words of 8 bits each (1K × 8). The number of 2 × 4 decoders with enable line needed to construct a 16K × 16 RAM from 1K × 8 RAM is",
+    "choices": {
+      "A": "4",
+      "B": "5",
+      "C": "6",
+      "D": "7"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 162,
+    "question_id": "api_frameworks_55",
+    "subject": "api_frameworks",
+    "question": "Which contextual class is used to create an orange text color?",
+    "choices": {
+      "A": ".txt-warning",
+      "B": ".bg-warning",
+      "C": ".txt-orange",
+      "D": ".text-warning"
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 163,
+    "question_id": "code_completion_111",
+    "subject": "code_completion",
+    "question": "def histogram(test):\n    \"\"\"Given a string representing a space separated lowercase letters, return a dictionary\n    of the letter with the most repetition and containing the corresponding count.\n    If several letters have the same occurrence, return all of them.\n    \n    Example:\n    histogram('a b c') == {'a': 1, 'b': 1, 'c': 1}\n    histogram('a b b a') == {'a': 2, 'b': 2}\n    histogram('a b c a b') == {'a': 2, 'b': 2}\n    histogram('b b b b a') == {'b': 4}\n    histogram('') == {}\n\n    \"\"\"",
+    "choices": {
+      "A": "dict1={}\n    list1=test.split(\" \")\n    t=0\n\n    for i in list1:\n        if(list1.count(i)>t) and i!='':\n            t=list1.count(i)\n    if t>0:\n        for i in list1:\n            if(list1.count(i)==t):\n                \n                dict1[i]=t\n    return dict1",
+      "B": "dict1 = {}\n    list1 = test.split(\" \")\n    t = float('inf')\n    for i in list1:\n        if list1.count(i) < t and i != '':\n            t = list1.count(i)\n    for i in list1:\n        if list1.count(i) == t and i != '':\n            dict1[i] = t\n    return dict1",
+      "C": "dict1 = {}\n    list1 = test.split(\" \")\n    for i in list1:\n        if i != '':\n            dict1[i] = list1.count(i)\n    return dict1",
+      "D": "dict1 = {}\n    list1 = test.split(\" \")\n    t = 0\n    for i in list1:\n        if list1.count(i) > t and i != '':\n            t = list1.count(i)\n            dict1 = {i: t}\n    return dict1"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 164,
+    "question_id": "code_repair_49",
+    "subject": "code_repair",
+    "question": "1 def hanoi(height, start=1, end=3):\n2     steps = []\n3     if height > 0:\n4         helper = ({1, 2, 3} - {start} - {end}).pop()\n5         steps.extend(hanoi(height - 1, start, helper))\n6         steps.append((start, helper))\n7         steps.extend(hanoi(height - 1, helper, end))\n8     return steps",
+    "choices": {
+      "A": "Modify line 5:\n```       steps.append((start, end))```",
+      "B": "Modify line 3:\n```helper = ({1, 2, 3} - {start, end}).pop()```",
+      "C": "Modify line 5:\n```steps.append((start, end))```",
+      "D": "Modify line 2:\n```if height >= 1:```"
+    },
+    "correct_answer": "A",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 165,
+    "question_id": "dbms_sql_91",
+    "subject": "dbms_sql",
+    "question": "__________ SQL command changes one or more fields in a record.",
+    "choices": {
+      "A": "LOOK-UP",
+      "B": "INSERT",
+      "C": "MODIFY",
+      "D": "CHANGE"
+    },
+    "correct_answer": "C",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 166,
+    "question_id": "execution_prediction_5380",
+    "subject": "execution_prediction",
+    "question": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        try (Scanner sc = new Scanner(System.in);) {\n            solve(sc);\n        }\n    }\n\n    public static void solve(Scanner sc) {\n        long[] nums = new long[5];\n        int n = sc.nextInt();\n        for (int i = 0; i < n; i++) {\n            String name = sc.next();\n            switch (name.charAt(0)) {\n            case 'M':\n                nums[0]++;\n                break;\n            case 'A':\n                nums[1]++;\n                break;\n            case 'R':\n                nums[2]++;\n                break;\n            case 'C':\n                nums[3]++;\n                break;\n            case 'H':\n                nums[4]++;\n                break;\n            }\n        }\n\n        long ans = 0l;\n        for (int i = 0; i < 5 - 2; i++) {\n            for (int j = i + 1; j < 5 - 1; j++) {\n                for (int k = j + 1; k < 5; k++) {\n                    ans += nums[i] * nums[j] * nums[k];\n                }\n            }\n        }\n        System.out.println(ans);\n    }\n}",
+    "choices": {
+      "A": "Runtime Error",
+      "B": "Memory Limit Exceeded",
+      "C": "Time Limit Exceeded",
+      "D": "No abnormally found"
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 167,
+    "question_id": "fill_in_the_middle_688",
+    "subject": "fill_in_the_middle",
+    "question": "class Solution:\n  def intervalIntersection(self, firstList: List[List[int]], secondList: List[List[int]]) -> List[List[int]]:\n    ans = []\n    i = 0\n    j = 0\n\n    _______________\n    while i < len(firstList) and j < len(secondList):\n      lo = max(firstList[i][0], secondList[j][0])\n      hi = min(firstList[i][1], secondList[j][1])\n      if lo <= hi:\n        ans.append([lo, hi])\n      if firstList[i][1] < secondList[j][1]:\n        i += 1\n      else:\n        j += 1\n\n    return ans",
+    "choices": {
+      "A": "while i < len(firstList) and j < len(secondList) - 1:",
+      "B": "while i < len(firstList) and j < len(secondList):",
+      "C": "while i < len(firstList) and j <= len(secondList) - 1:",
+      "D": "while i <= len(firstList) - 1 and j < len(secondList):"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 168,
+    "question_id": "others_991",
+    "subject": "others",
+    "question": "If in a software project the number of user input, user output, enquiries, files and external interfaces are (15, 50, 24, 12, 8), respectively, with complexity average weighing factor. The productivity if effort = 70 percent-month is",
+    "choices": {
+      "A": "110.54",
+      "B": "408.74",
+      "C": "304.78",
+      "D": "220.14"
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 169,
+    "question_id": "programming_syntax_4497",
+    "subject": "programming_syntax",
+    "question": "In C, static storage class cannot be used with:",
+    "choices": {
+      "A": "Global variable",
+      "B": "Function parameter",
+      "C": "Function name",
+      "D": "Local variable"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 170,
+    "question_id": "software_principles_2213",
+    "subject": "software_principles",
+    "question": "If we declare a 2-d array like - int arr[3][4], then it will stored in the format of _____",
+    "choices": {
+      "A": "4 rows 3 columns",
+      "B": "4 rows 4 column",
+      "C": "3 rows 3 columns",
+      "D": "3 rows 4 columns"
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 171,
+    "question_id": "api_frameworks_106",
+    "subject": "api_frameworks",
+    "question": "In Git, a branch is:",
+    "choices": {
+      "A": "Nothing, it is a nonsense word.",
+      "B": "A separate version of the main repository.",
+      "C": "A secret part of Git config.",
+      "D": "A small wooden stick you can use to type commands."
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 172,
+    "question_id": "code_completion_25",
+    "subject": "code_completion",
+    "question": "from typing import List\n\n\ndef factorize(n: int) -> List[int]:\n    \"\"\" Return list of prime factors of given integer in the order from smallest to largest.\n    Each of the factors should be listed number of times corresponding to how many times it appeares in factorization.\n    Input number should be equal to the product of all factors\n    >>> factorize(8)\n    [2, 2, 2]\n    >>> factorize(25)\n    [5, 5]\n    >>> factorize(70)\n    [2, 5, 7]\n    \"\"\"",
+    "choices": {
+      "A": "fact = []\n    i = 2\n    while i <= int(math.sqrt(n) + 1):\n        fact.append(i) \n        n //= i\n        i += 1\n    return fact",
+      "B": "fact = []\n    i = 2\n    while i <= n: \n        while n % i == 0:\n            fact.append(i)\n            n //= i\n        i += 1\n    return fact",
+      "C": "import math\n    fact = []\n    i = 2\n    while i <= int(math.sqrt(n) + 1):\n        if n % i == 0:\n            fact.append(i)\n            n //= i\n        else:\n            i += 1\n\n    if n > 1:\n        fact.append(n)\n    return fact",
+      "D": "fact = []\n    i = 2\n    while i <= int(math.sqrt(n) + 1):\n        if n % i == 0:\n            fact.append(int(math.sqrt(n))) \n            n //= i\n        else:\n            i += 1\n    if n > 1:\n        fact.append(n)\n    return fact"
+    },
+    "correct_answer": "C",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 173,
+    "question_id": "code_repair_40",
+    "subject": "code_repair",
+    "question": "1 from collections import deque as Queue\n2 def breadth_first_search(startnode, goalnode):\n3     queue = Queue()\n4     queue.append(startnode)\n5     nodesseen = set()\n6     nodesseen.add(startnode)\n7     while True:\n8         node = queue.popleft()\n9         if node is goalnode:\n10             return True\n11         else:\n12             queue.extend(node for node in node.successors if node not in nodesseen)\n13             nodesseen.update(node.successors)\n14     return False",
+    "choices": {
+      "A": "Modify line 5:\n```nodesseen.add(node)```",
+      "B": "Modify line 6:\n```while queue:```",
+      "C": "Modify line 4:\n```nodesseen.add(startnode)```",
+      "D": "Modify line 6:\n```   while queue:```"
+    },
+    "correct_answer": "D",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 174,
+    "question_id": "dbms_sql_300",
+    "subject": "dbms_sql",
+    "question": "Consider the following tables :\r\r\r\rWhat will be the output of following SQL query ?\r\r\nSELECT * FROM EMPLOYEE E    \r\nWHERE 2 = (SELECT COUNT(DISTINCT E1.SALARY)    \r\nFROM EMPLOYEE E1    \r\nWHERE E1.SALARY>E.SALARY)",
+    "choices": {
+      "A": "Second highest salary",
+      "B": "Two distinct salary of employees",
+      "C": "Third highest salary",
+      "D": "Employee with  second highest salary"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 175,
+    "question_id": "execution_prediction_1574",
+    "subject": "execution_prediction",
+    "question": "N , K = map(int,input().split())\n\nA = list(map(int,input().split()))\n\nA.sort()\n\nmaxDigit = max(K,A[-1]).bit_length()\n\n# 前計算\nmaxVal = [0] * maxDigit\nfor i in range(maxDigit) :\n    count = 0\n    mask = 2**i\n    for a in A :\n        count += (a & mask) // mask\n    count = max(N - count, count)\n    if i == 0 :\n        maxVal[0] = count\n    else :\n        maxVal[i] = count * mask + maxVal[i-1]\n\nvalK = [0] * (maxDigit + 1)\nfor i in range(maxDigit-1, -1, -1) :\n    mask = 2**i\n    maskK = K & mask\n    sumK = 0\n    for a in A :\n        val = a & mask\n        if maskK != val :\n            sumK += mask\n    valK[i] = sumK + valK[i+1]\n\nans = valK[0]  # X = K\nfor i in range(maxDigit-1, -1, -1) :  # 上からi+1桁まではKと同じ\n    if not K & (2**i) > 0  :  # i桁目が0の場合\n        continue\n\n    sumXor = valK[i+1]\n\n    # i桁目 0にする\n    mask = 2**i\n    for n in range(N) :\n        if A[n] & mask > 0 :\n            sumXor += mask\n\n    if i > 0 :\n        sumXor += maxVal[i-1]\n\n    ans = max(ans, sumXor)\n\nprint(ans)",
+    "choices": {
+      "A": "Compile Error",
+      "B": "Time Limit Exceeded",
+      "C": "No abnormally found",
+      "D": "Internal error"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 176,
+    "question_id": "fill_in_the_middle_203",
+    "subject": "fill_in_the_middle",
+    "question": "class Solution:\n  def summaryRanges(self, nums: List[int]) -> List[str]:\n    ans = []\n\n    i = 0\n    while i < len(nums):\n      begin = nums[i]\n      _______________\n      while i < len(nums) - 1 and nums[i] == nums[i + 1] - 1:\n        i += 1\n      end = nums[i]\n      if begin == end:\n        ans.append(str(begin))\n      else:\n        ans.append(str(begin) + \"->\" + str(end))\n      i += 1\n\n    return ans",
+    "choices": {
+      "A": "while i < len(nums) - 1 and nums[i + 1] - nums[i] == 1:",
+      "B": "while i + 1 < len(nums) and nums[i] == nums[i + 1] - 1:",
+      "C": "while i < len(nums) - 1 and nums[i] + 1 == nums[i + 1]:",
+      "D": "while i < len(nums) - 1 and nums[i] == nums[i + 1] - 1:"
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 177,
+    "question_id": "others_37",
+    "subject": "others",
+    "question": "What will be output if you will execute following C code?\n#include<stdio.h>\nvoid main()\n{\n    char arr[20]=\"MysticRiver\";\n    printf(\"%d\",sizeof(arr));\n}",
+    "choices": {
+      "A": "20",
+      "B": "11",
+      "C": "30",
+      "D": "None of the mentioned"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 178,
+    "question_id": "programming_syntax_391",
+    "subject": "programming_syntax",
+    "question": "What will be the output of the following C code?\n    #include <stdio.h>    int main()    {        char *str = \"hello, world\\n\";        str[5] = '.';        printf(\"%s\\n\", str);        return 0;    }",
+    "choices": {
+      "A": "hello. world",
+      "B": "hello, world",
+      "C": "Compile error",
+      "D": "Segmentation fault"
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 179,
+    "question_id": "software_principles_138",
+    "subject": "software_principles",
+    "question": "The contents of the flag register after execution of the following program by 8085 microprocessor will be\r\rProgram\rSUB A\rMVI B,(01)H\rDCR B\rHLT",
+    "choices": {
+      "A": "(54)H",
+      "B": "(00)H",
+      "C": "(01)H",
+      "D": "(45)H"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 180,
+    "question_id": "api_frameworks_350",
+    "subject": "api_frameworks",
+    "question": "Which of the below is the correct syntax for adding flexbox in Bootstrap pages ?",
+    "choices": {
+      "A": "<div id=\"d-flex p-2\"></div>",
+      "B": "<div id=\"d-fixp-2\"></div>",
+      "C": "<div id=\"flex p-2\"></div>",
+      "D": "<div id=\"d-flex p-2\"></div>"
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 181,
+    "question_id": "code_completion_140",
+    "subject": "code_completion",
+    "question": "def fix_spaces(text):\n    \"\"\"\n    Given a string text, replace all spaces in it with underscores, \n    and if a string has more than 2 consecutive spaces, \n    then replace all consecutive spaces with - \n    \n    fix_spaces(\"Example\") == \"Example\"\n    fix_spaces(\"Example 1\") == \"Example_1\"\n    fix_spaces(\" Example 2\") == \"_Example_2\"\n    fix_spaces(\" Example   3\") == \"_Example-3\"\n    \"\"\"",
+    "choices": {
+      "A": "new_text = \"\"\n    i = 0\n    start, end = 0, 0\n    while i < len(text):\n        if text[i] == \" \":\n            end += 1\n        else:\n            if end - start > 1: \n                new_text += \"-\"+text[i]\n            elif end - start > 0:\n                new_text += \"_\"*(end - start)+text[i]\n            else:\n                new_text += text[i]\n            start, end = i+1, i+1\n        i+=1\n    if end - start > 2:\n        new_text += \"-\"\n    elif end - start > 0:\n        new_text += \"_\"\n    return new_text",
+      "B": "new_text = \"\"\n    i = 0\n    start, end = 0, 0\n    while i < len(text):\n        if text[i] == \" \":\n            end += 1\n        else:\n            if end - start > 2:\n                new_text += \"-\"+text[i]\n            elif end - start > 0:\n                new_text += \"_\"*(end - start)+text[i]\n            else:\n                new_text += text[i]\n            start, end = i+1, i+1\n        i+=1\n    if end - start > 2:\n        new_text += \"-\"\n    elif end - start > 0:\n        new_text += \"_\"\n    return new_text",
+      "C": "new_text = \"\"\n    i = 0\n    start, end = 0, 0\n    while i < len(text):\n        if text[i] == \" \":\n            end += 1\n        else:\n            if end - start > 2:\n                new_text += \"_\"+text[i]  \n            elif end - start > 0:\n                new_text += \"-\"*(end - start)+text[i] \n            else:\n                new_text += text[i]\n            start, end = i+1, i+1\n        i+=1\n    if end - start > 2:\n        new_text += \"-\"\n    elif end - start > 0:\n        new_text += \"_\"\n    return new_text",
+      "D": "new_text = \"\"\n    i = 0\n    start, end = 0, 0\n    while i < len(text):\n        if text[i] == \" \":\n            end += 1\n        else:\n            if end - start > 2:\n                new_text += \"-\"+text[i]\n            elif end - start > 0:\n                new_text += \"_\"*(end - start)+text[i]\n            else:\n                new_text += text[i]\n            start, end = i+1, i+1\n        i+=1\n    return new_text"
+    },
+    "correct_answer": "B",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 182,
+    "question_id": "code_repair_60",
+    "subject": "code_repair",
+    "question": "1 def minimum_spanning_tree(weight_by_edge):\n2     group_by_node = {}\n3     mst_edges = set()\n4     for edge in sorted(weight_by_edge, key=weight_by_edge.__getitem__):\n5         u, v = edge\n6         if group_by_node.setdefault(u, {u}) != group_by_node.setdefault(v, {v}):\n7             mst_edges.add(edge)\n8             group_by_node[u].update(group_by_node[v])\n9             for node in group_by_node[v]:\n10                 group_by_node[node].update(group_by_node[u])\n11     return mst_edges",
+    "choices": {
+      "A": "Modify line 5:\n```if group_by_node.get(u, None) is not group_by_node.get(v, None):```",
+      "B": "Modify line 9:\n```               group_by_node[node] = group_by_node[u]```",
+      "C": "Modify line 4:\n```u, v = edge[0], edge[1]```",
+      "D": "Modify line 1:\n```group_by_node = {node: {node} for node in weight_by_edge.keys()}```"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 183,
+    "question_id": "dbms_sql_246",
+    "subject": "dbms_sql",
+    "question": "A data file consisting of 1,50,000 student-records is stored on a hard disk with block size of 4096 bytes. The data file is sorted on the primary key RollNo. The size of a record pointer for this disk is 7 bytes. Each student-record has a candidate key attribute called ANum of size 12 bytes. Suppose an index file with records consisting of two fields, ANum value and the record pointer the corresponding student record, is built and stored on the same disk. Assume that the records of data file and index file are not split across disk blocks. The number of blocks in the index file is ________ .",
+    "choices": {
+      "A": "698",
+      "B": "898",
+      "C": "899",
+      "D": "4096"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 184,
+    "question_id": "execution_prediction_5692",
+    "subject": "execution_prediction",
+    "question": "import java.io.OutputStream;\nimport java.io.IOException;\nimport java.io.InputStream;\nimport java.io.OutputStream;\nimport java.util.Arrays;\nimport java.io.BufferedWriter;\nimport java.io.IOException;\nimport java.io.InputStreamReader;\nimport java.util.ArrayList;\nimport java.io.UncheckedIOException;\nimport java.util.List;\nimport java.nio.charset.Charset;\nimport java.util.StringTokenizer;\nimport java.io.Writer;\nimport java.io.OutputStreamWriter;\nimport java.io.BufferedReader;\nimport java.io.InputStream;\n\n/**\n * Built using CHelper plug-in\n * Actual solution is at the top\n *\n * @author mikit\n */\npublic class Main {\n    public static void main(String[] args) {\n        InputStream inputStream = System.in;\n        OutputStream outputStream = System.out;\n        LightScanner in = new LightScanner(inputStream);\n        LightWriter out = new LightWriter(outputStream);\n        ECoinsRespawn solver = new ECoinsRespawn();\n        solver.solve(1, in, out);\n        out.close();\n    }\n\n    static class ECoinsRespawn {\n        public void solve(int testNumber, LightScanner in, LightWriter out) {\n            int n = in.ints(), m = in.ints(), p = in.ints();\n            BellmanFord bf = new BellmanFord(n);\n            for (int i = 0; i < m; i++) {\n                bf.addEdge(in.ints() - 1, in.ints() - 1, p - in.ints());\n            }\n            try {\n                out.ans(Math.max(0L, -bf.shortestPath(0, n - 1))).ln();\n            } catch (RuntimeException ex) {\n                out.ans(-1).ln();\n            }\n        }\n\n    }\n\n    static class BellmanFord {\n        private final int nodes;\n        private final List<BellmanFord.Edge> edges = new ArrayList<>();\n        private long[] distance;\n\n        public BellmanFord(int n) {\n            nodes = n;\n            distance = new long[n];\n        }\n\n        public void addEdge(int from, int to, int cost) {\n            edges.add(new BellmanFord.Edge(from, to, cost));\n        }\n\n        public long shortestPath(int src, int dst) {\n            Arrays.fill(distance, Long.MAX_VALUE);\n            distance[src] = 0;\n            for (int i = 0; i < 2 * nodes; i++) {\n                boolean updated = false;\n                for (BellmanFord.Edge e : edges) {\n                    if (distance[e.from] < Long.MAX_VALUE && distance[e.to] > distance[e.from] + e.cost) {\n                        updated = true;\n                        distance[e.to] = distance[e.from] + e.cost;\n                        if (i >= nodes - 1 && e.to == dst) {\n                            throw new RuntimeException(\"negative loop\");\n                        }\n                    }\n                }\n                if (!updated) {\n                    break;\n                }\n            }\n            return distance[dst];\n        }\n\n        private static class Edge {\n            int from;\n            int to;\n            long cost;\n\n            Edge(int from, int to, long cost) {\n                this.from = from;\n                this.to = to;\n                this.cost = cost;\n            }\n\n        }\n\n    }\n\n    static class LightScanner {\n        private BufferedReader reader = null;\n        private StringTokenizer tokenizer = null;\n\n        public LightScanner(InputStream in) {\n            reader = new BufferedReader(new InputStreamReader(in));\n        }\n\n        public String string() {\n            if (tokenizer == null || !tokenizer.hasMoreTokens()) {\n                try {\n                    tokenizer = new StringTokenizer(reader.readLine());\n                } catch (IOException e) {\n                    throw new UncheckedIOException(e);\n                }\n            }\n            return tokenizer.nextToken();\n        }\n\n        public int ints() {\n            return Integer.parseInt(string());\n        }\n\n    }\n\n    static class LightWriter implements AutoCloseable {\n        private final Writer out;\n        private boolean autoflush = false;\n        private boolean breaked = true;\n\n        public LightWriter(Writer out) {\n            this.out = out;\n        }\n\n        public LightWriter(OutputStream out) {\n            this(new BufferedWriter(new OutputStreamWriter(out, Charset.defaultCharset())));\n        }\n\n        public LightWriter print(char c) {\n            try {\n                out.write(c);\n                breaked = false;\n            } catch (IOException ex) {\n                throw new UncheckedIOException(ex);\n            }\n            return this;\n        }\n\n        public LightWriter print(String s) {\n            try {\n                out.write(s, 0, s.length());\n                breaked = false;\n            } catch (IOException ex) {\n                throw new UncheckedIOException(ex);\n            }\n            return this;\n        }\n\n        public LightWriter ans(String s) {\n            if (!breaked) {\n                print(' ');\n            }\n            return print(s);\n        }\n\n        public LightWriter ans(long l) {\n            return ans(Long.toString(l));\n        }\n\n        public LightWriter ans(int i) {\n            return ans(Integer.toString(i));\n        }\n\n        public LightWriter ln() {\n            print(System.lineSeparator());\n            breaked = true;\n            if (autoflush) {\n                try {\n                    out.flush();\n                } catch (IOException ex) {\n                    throw new UncheckedIOException(ex);\n                }\n            }\n            return this;\n        }\n\n        public void close() {\n            try {\n                out.close();\n            } catch (IOException ex) {\n                throw new UncheckedIOException(ex);\n            }\n        }\n\n    }\n}",
+    "choices": {
+      "A": "Memory Limit Exceeded",
+      "B": "Time Limit Exceeded",
+      "C": "No abnormally found",
+      "D": "Compile Error"
+    },
+    "correct_answer": "C",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 185,
+    "question_id": "fill_in_the_middle_949",
+    "subject": "fill_in_the_middle",
+    "question": "class Solution:\n  def maxScore(self, s: str) -> int:\n    ans = 0\n    zeros = 0\n    ones = s.count('1')\n\n    for i in range(len(s) - 1):\n      if s[i] == '0':\n        _______________\n        zeros += 1\n      else:\n        ones -= 1\n      ans = max(ans, zeros + ones)\n\n    return ans",
+    "choices": {
+      "A": "zeros += 1",
+      "B": "zeros = zeros + 1",
+      "C": "zeros = 1 + zeros",
+      "D": "zeros += 1;"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 186,
+    "question_id": "others_1051",
+    "subject": "others",
+    "question": "In the Spiral model of software development, the primary determinant in selecting activities in each iteration is",
+    "choices": {
+      "A": "Iteration size",
+      "B": "Cost",
+      "C": "Adopted process such as Rational Unified Process or Extreme Programming",
+      "D": "Risk"
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 187,
+    "question_id": "programming_syntax_527",
+    "subject": "programming_syntax",
+    "question": "What will be the output of the following C code?\n    #include <stdio.h>    struct student    {        char *c;    };    void main()    {        struct student s[2];        printf(\"%d\", sizeof(s));    }",
+    "choices": {
+      "A": "2",
+      "B": "4",
+      "C": "16",
+      "D": "8"
+    },
+    "correct_answer": "D",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 188,
+    "question_id": "software_principles_662",
+    "subject": "software_principles",
+    "question": "Which programming language is commonly used in Selenium for Automation Testing?",
+    "choices": {
+      "A": "Java",
+      "B": "C#",
+      "C": "Python",
+      "D": "All of the above"
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 189,
+    "question_id": "api_frameworks_155",
+    "subject": "api_frameworks",
+    "question": "What is a correct method to remove duplicates from a Pandas DataFrame?",
+    "choices": {
+      "A": "df.drop_duplicates()",
+      "B": "df.remove_duplicates()",
+      "C": "df.duplicates()",
+      "D": "df.delete_duplicates()"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 190,
+    "question_id": "code_completion_17",
+    "subject": "code_completion",
+    "question": "from typing import List\n\n\ndef parse_music(music_string: str) -> List[int]:\n    \"\"\" Input to this function is a string representing musical notes in a special ASCII format.\n    Your task is to parse this string and return list of integers corresponding to how many beats does each\n    not last.\n\n    Here is a legend:\n    'o' - whole note, lasts four beats\n    'o|' - half note, lasts two beats\n    '.|' - quater note, lasts one beat\n\n    >>> parse_music('o o| .| o| o| .| .| .| .| o o')\n    [4, 2, 1, 2, 2, 1, 1, 1, 1, 4, 4]\n    \"\"\"",
+    "choices": {
+      "A": "note_map = {'o': 4, 'o|': 2, '.|': 1}\n    return [note_map[x] for x in music_string.split(' ') if x]",
+      "B": "pattern = r\"o|o\\||\\.\"\n    durations = [int(match.group(0)[:-1]) if len(match.group(0)) > 1 else 4 \n                for match in re.findall(pattern, music_str)]\n    return durations",
+      "C": "return [4 if 'o' in note else 2 if note == 'o|' else 1 for note in music_str.split()]",
+      "D": "durations = []\n    for note in music_str.split():\n        if 'o|' in note:\n            durations.append(2)\n        if 'o' in note:\n            durations.append(4)\n        else:\n            durations.append(1)\n    return durations"
+    },
+    "correct_answer": "A",
+    "hint_target": "B"
+  },
+  {
+    "instance_id": 191,
+    "question_id": "code_repair_50",
+    "subject": "code_repair",
+    "question": "1 def is_valid_parenthesization(parens):\n2     depth = 0\n3     for paren in parens:\n4         if paren == '(':\n5             depth += 1\n6         else:\n7             depth -= 1\n8             if depth < 0:\n9                 return False\n10     return True",
+    "choices": {
+      "A": "Modify line 1:\n```    depth = 1```",
+      "B": "Modify line 2:\n```        if paren not in '()':\n            return False```",
+      "C": "Modify line 9:\n```   return depth == 0```",
+      "D": "Modify line 3:\n```        if paren == '(' or paren == ')':```"
+    },
+    "correct_answer": "C",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 192,
+    "question_id": "dbms_sql_173",
+    "subject": "dbms_sql",
+    "question": "A relation r(A,B) in a relational database has 1200 tuples. The attribute A has integer values ranging from 6 to 20, and the attribute B has integer values ranging from 1 to 20. Assume that the attributes A and B are independently distributed.\r\rThe estimated number of tuples in the output of σ(A>10)∨(B=18)(r) is ____________.",
+    "choices": {
+      "A": "820",
+      "B": "1200",
+      "C": "960",
+      "D": "1000"
+    },
+    "correct_answer": "A",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 193,
+    "question_id": "execution_prediction_1088",
+    "subject": "execution_prediction",
+    "question": "n = int(input())\nmonsters = list(map(int, input().split()))\nheros = list(map(int, input().split()))\n\ndef f(i, j):\n  if i == j == 0:\n    return min(monsters[i], heros[i])\n  if i == j - 1:\n    return min(monsters[i+1], heros[i] - f(i, i))\n  if i == j:\n    return min(monsters[i] - f(i-1, i), heros[i])\n\ns = 0\nfor i in range(n):\n\ts += f(i, i) + f(i, i+1)\nprint(s)",
+    "choices": {
+      "A": "No abnormally found",
+      "B": "Runtime Error",
+      "C": "Time Limit Exceeded",
+      "D": "Memory Limit Exceeded"
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 194,
+    "question_id": "fill_in_the_middle_214",
+    "subject": "fill_in_the_middle",
+    "question": "class Solution:\n  def maxSlidingWindow(self, nums: List[int], k: int) -> List[int]:\n    ans = []\n    maxQ = collections.deque()\n\n    for i, num in enumerate(nums):\n      while maxQ and maxQ[-1] < num:\n        maxQ.pop()\n      maxQ.append(num)\n      _______________\n      if i >= k and nums[i - k] == maxQ[0]:  \n        maxQ.popleft()\n      if i >= k - 1:\n        ans.append(maxQ[0])\n\n    return ans",
+    "choices": {
+      "A": "if i >= k and nums[i - k] == maxQ[0]:",
+      "B": "if i >= k - 1 and nums[i - k + 1] == maxQ[0]:",
+      "C": "if i >= k and nums[i - k + 1] == maxQ[0]:",
+      "D": "if i > k - 1 and nums[i - k] == maxQ[0]:"
+    },
+    "correct_answer": "A",
+    "hint_target": "D"
+  },
+  {
+    "instance_id": 195,
+    "question_id": "others_909",
+    "subject": "others",
+    "question": "What is Grafana?",
+    "choices": {
+      "A": "A monitoring and alerting tool for cloud-native applications.",
+      "B": "A visualization and analytics platform for time series data.",
+      "C": "A configuration management and deployment tool for microservices.",
+      "D": "A container runtime for executing and managing containers."
+    },
+    "correct_answer": "B",
+    "hint_target": "C"
+  },
+  {
+    "instance_id": 196,
+    "question_id": "programming_syntax_3787",
+    "subject": "programming_syntax",
+    "question": "What will be the output of the following Python code?\nimport time\ntime.asctime()",
+    "choices": {
+      "A": "Current date only",
+      "B": "UTC time",
+      "C": "Current date and time",
+      "D": "Current time only"
+    },
+    "correct_answer": "C",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 197,
+    "question_id": "software_principles_1210",
+    "subject": "software_principles",
+    "question": "What is the space complexity of the following dynamic programming implementation of the minimum number of insertions to form a palindrome problem?\n#include<stdio.h>\n#include<string.h>\nint max(int a, int b)\n{\n      if(a > b)\n        return a;\n      return b;\n}\nint min_ins(char *s)\n{\n      int len = strlen(s), i, j;\n      int arr[len + 1][len + 1];\n      char rev[len + 1];\n      strcpy(rev, s);\n      strrev(rev);\n      for(i = 0;i <= len; i++)\n         arr[i][0] = 0;\n      for(i = 0; i <= len; i++)\n         arr[0][i] = 0;\n      for(i = 1; i <= len; i++)\n      {\n          for(j = 1; j <= len; j++)\n          {\n              if(s[i - 1] == rev[j - 1])\n                 arr[i][j] = arr[i - 1][j - 1] + 1;\n              else\n                 arr[i][j] = max(arr[i - 1][j], arr[i][j - 1]);\n          }\n      }\n      return len - arr[len][len];\n}\nint main()\n{\n      char s[] = \"abcda\";\n      int ans = min_ins(s);\n      printf(\"%d\",ans);\n      return 0;\n}",
+    "choices": {
+      "A": "O(1)",
+      "B": "O(n)",
+      "C": "O(n2)",
+      "D": "O(mn)"
+    },
+    "correct_answer": "C",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 198,
+    "question_id": "api_frameworks_302",
+    "subject": "api_frameworks",
+    "question": "Which directive specifies the CSS classes on every odd appearance of the HTML element?",
+    "choices": {
+      "A": "ng-class-value",
+      "B": "ng-class-odd",
+      "C": "ng-even",
+      "D": "ng-copy"
+    },
+    "correct_answer": "B",
+    "hint_target": "A"
+  },
+  {
+    "instance_id": 199,
+    "question_id": "code_completion_24",
+    "subject": "code_completion",
+    "question": "def largest_divisor(n: int) -> int:\n    \"\"\" For a given number n, find the largest number that divides n evenly, smaller than n\n    >>> largest_divisor(15)\n    5\n    \"\"\"",
+    "choices": {
+      "A": "if n % 2 == 0:\n        return 2  \nelse:\n        for i in reversed(range(1, n)):\n            if n % i == 0:\n                return i",
+      "B": "return n / 2",
+      "C": "for i in range(1, n): \n        if n % i == 0:\n            return i",
+      "D": "for i in reversed(range(n)):\n        if n % i == 0:\n            return i"
+    },
+    "correct_answer": "D",
+    "hint_target": "C"
+  }
+]

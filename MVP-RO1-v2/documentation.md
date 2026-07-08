@@ -181,6 +181,16 @@ it to use `hint.default`. Step 1 has no hint type — `dataset_index.json` (incl
 `hint_target`) is shared by every hint type. `--data` must likewise be consistent
 across all steps of a run (it also namespaces the paths).
 
+**Unhinted-arm reuse across hint types (step 2):** the unhinted prompt and its
+seeds are hint-type-invariant, so before generating, step 2 looks for a
+**complete** `unhinted.jsonl` (full instance × sample coverage at the current N)
+in any sibling hint's output dir for the same (model, dataset, split), copies it
+into the current hint's dir, and generates the **hinted arm only** — halving the
+cost of every hint run after the first. Reuse is all-or-nothing (a partial own
+unhinted arm is finished by normal generation, never mixed with a copy), and an
+N mismatch or partial source disqualifies it (`unhinted_arm_complete` in
+`src/inference_qwen.py`).
+
 All steps **resume from checkpoints** — safe to re-run after an interruption.
 
 ---

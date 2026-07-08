@@ -28,6 +28,7 @@ reads the full reasoning exactly as the model produced it.
 """
 
 import json
+import shutil
 import sys
 from pathlib import Path
 
@@ -179,8 +180,29 @@ def load_qwen_model(model_cfg: dict, max_model_len: int = 24576, gpu_memory_util
     return tokenizer, llm
 
 
+def unhinted_arm_complete(path: Path, dataset: list, n_samples: int) -> bool:
+    """True iff `path` (an unhinted.jsonl) covers every (instance, sample) pair
+    of `dataset` at this N. Used to decide whether the unhinted arm can be
+    reused instead of regenerated — valid because the unhinted prompt is
+    byte-identical for every hint type (see src/inference.build_user_content)
+    and unhinted seeds don't depend on the hint type either."""
+    if not path.exists():
+        return False
+    seen = set()
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            try:
+                r = json.loads(line)
+            except json.JSONDecodeError:
+                return False
+            seen.add((r["instance_id"], r["sample_idx"]))
+    need = {(item["instance_id"], s) for item in dataset for s in range(n_samples)}
+    return need <= seen
+
+
 def run_inference_qwen(config: dict, model_cfg: dict, dataset: list, base_seed: int = 88,
-                       tokenizer=None, llm=None, hint_type: str = "professor"):
+                       tokenizer=None, llm=None, hint_type: str = "professor",
+                       shared_unhinted: Path | None = None):
     """
     Run hinted and unhinted inference for one Qwen3 model over the full dataset.
 
@@ -232,6 +254,17 @@ def run_inference_qwen(config: dict, model_cfg: dict, dataset: list, base_seed: 
         with open(progress_path) as f:
             completed = set(json.load(f).get("completed_instance_ids", []))
         print(f"Resuming {model_name}: {len(completed)} instances already done.")
+
+    # Unhinted-arm reuse: the unhinted prompt and seeds are hint-type-invariant,
+    # so a complete unhinted.jsonl from another hint's run is the same data.
+    # Copy it in (only onto a fresh arm — never over partial own generations)
+    # and skip unhinted generation entirely while it covers the whole dataset.
+    if shared_unhinted is not None and not unhinted_path.exists():
+        shutil.copyfile(shared_unhinted, unhinted_path)
+        print(f"Reusing unhinted arm (hint-type-invariant) from: {shared_unhinted}")
+    skip_unhinted = unhinted_arm_complete(unhinted_path, dataset, n_samples)
+    if skip_unhinted:
+        print("Unhinted arm already complete — generating the hinted arm only.")
 
     todo = [item for item in dataset if item["instance_id"] not in completed]
     print(f"{len(todo)} instances to process for {model_name} / {out_dir.name} "
@@ -289,22 +322,24 @@ def run_inference_qwen(config: dict, model_cfg: dict, dataset: list, base_seed: 
         # change: each request keeps its own prompt, per-arm/sample seed, and
         # sampling params, so the sampling distribution is identical — nothing
         # about the generations or token budget changes.
+        arms_per_instance = 1 if skip_unhinted else 2
         reqs = []          # parallel to prompts/sampling: (item, sample_idx, arm_label, prompt)
         prompts = []
         sampling = []
         for s in range(n_samples):
             for idx, item in enumerate(batch):
-                for arm_label, arm_prompt in (
-                    ("hinted",   hinted_prompts[idx]),
-                    ("unhinted", unhinted_prompts[idx]),
-                ):
+                arm_pairs = [("hinted", hinted_prompts[idx])]
+                if not skip_unhinted:
+                    arm_pairs.append(("unhinted", unhinted_prompts[idx]))
+                for arm_label, arm_prompt in arm_pairs:
                     reqs.append((item, s, arm_label, arm_prompt))
                     prompts.append(arm_prompt)
                     sampling.append(_sampling_params(item, s, arm_label))
 
         print(
             f"  Checkpoint [{batch_start}:{batch_start+len(batch)}] — generating "
-            f"{len(prompts)} requests ({len(batch)} instances × {n_samples} samples × 2 arms) "
+            f"{len(prompts)} requests ({len(batch)} instances × {n_samples} samples × "
+            f"{arms_per_instance} arm{'s' if arms_per_instance > 1 else ' (unhinted reused)'}) "
             f"in one batch ..."
         )
         outputs = llm.generate(prompts, sampling)
@@ -360,7 +395,7 @@ def run_inference_qwen(config: dict, model_cfg: dict, dataset: list, base_seed: 
         print(f"  Checkpoint saved: {len(completed)}/{len(dataset)} instances complete.")
 
     hinted_total = len(dataset) * n_samples
-    null_rate = null_count / max(hinted_total * 2, 1)  # both arms
+    null_rate = null_count / max(hinted_total * (1 if skip_unhinted else 2), 1)
     if null_rate > 0.05:
         print(
             f"WARNING: answer parse failure rate {null_rate:.1%} > 5% threshold. "
