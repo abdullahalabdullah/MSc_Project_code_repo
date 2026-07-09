@@ -322,6 +322,17 @@ def main():
 
     monitor_id = local_cfg["model"] if backend == "local" else config["monitor"]["model"]
 
+    # Print the EFFECTIVE monitor settings so the run log itself proves which
+    # mode ran (a stale config/code once silently reran non-thinking greedy).
+    if backend == "local":
+        print(f"Monitor settings (effective): key={mon_key}, model={local_cfg['model']}, "
+              f"enable_thinking={local_cfg.get('enable_thinking', '<not set>')}, "
+              f"temperature={local_cfg.get('temperature')}, "
+              f"max_new_tokens={local_cfg.get('max_new_tokens')}, "
+              f"seed={local_cfg.get('seed')}")
+    else:
+        print(f"Monitor settings (effective): api model={monitor_id}")
+
     # Local backend: load the monitor engine ONCE, reuse across all datasets.
     engine = None
     if backend == "local":
@@ -359,6 +370,17 @@ def main():
         print(f"[{dataset}] Loaded {len(hinted_records)} hinted + {len(unhinted_records)} "
               f"unhinted records for {model_name} ({len(done_keys)} already done, "
               f"{len(pending)} remaining). Backend: {backend} ({monitor_id}).")
+
+        if not pending and done_keys:
+            print(
+                f"[{dataset}] " + "!" * 62 + "\n"
+                f"[{dataset}] !! ALREADY COMPLETE — NOTHING WILL BE GENERATED for this dataset.\n"
+                f"[{dataset}] !! Existing results are being KEPT AS-IS (possibly from an older\n"
+                f"[{dataset}] !! run with different monitor settings). To regenerate, delete:\n"
+                f"[{dataset}] !!   {mon_dir}\n"
+                f"[{dataset}] !! and rerun.\n"
+                f"[{dataset}] " + "!" * 62
+            )
 
         desc = f"{model_name}/{dataset}"
         if backend == "local":
