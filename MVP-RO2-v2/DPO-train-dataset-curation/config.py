@@ -126,8 +126,11 @@ STRATIFY_VALID = os.environ.get("STRATIFY_VALID", "").strip().lower() in ("1", "
 EXPORT_FIELD = os.environ.get("EXPORT_FIELD", "full")   # "full" | "answer"
 
 # ── Classifier / scorer batch sizes ────────────────────────────────────────
-COST_BATCH = 16              # (prompt, answer) pairs per Beaver forward pass (forward-only
-                             # scoring at a 2048-token cap — tiny footprint; throughput knob)
+COST_BATCH = 64              # (prompt, answer) pairs per Beaver forward pass (forward-only
+                             # scoring at a 2048-token cap; no KV cache, so memory is just weights
+                             # + B x ctx activations — safe to batch large on an 80GB H100). Stage
+                             # 04 length-sorts pairs so each batch pads to a near-uniform length,
+                             # and checkpoints every batch (04_cost.ckpt.jsonl) for resumability.
 # Stage-03 runs Qwen3Guard on **vLLM** (like stage 02), not transformers: continuous batching
 # + paged KV keep the H100 saturated, and each sequence stops at its own EOS (unlike a padded
 # transformers batch that waits for the slowest). Throughput knobs below are engine settings;

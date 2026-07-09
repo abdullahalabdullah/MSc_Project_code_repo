@@ -23,9 +23,12 @@
 #   bash monitorability-eval/run_monitor_and_results.sh Qwen/Qwen3-4B --dataset mmlu_pro lexam --hint professor
 #   bash monitorability-eval/run_monitor_and_results.sh Qwen/Qwen3-4B --dataset mmlu_pro,lexam --hint ALL
 #
-# Per (hint type x dataset): monitor (03), g-mean^2 metrics (04), plots (05),
-# Excel export (06); then one cross-dataset summary table (07) per hint type.
-# Fail-soft; commits + pushes the results at the end; logs to logs/ (gitignored).
+# Per dataset: monitor (03) then g-mean^2 metrics (04), plots (05), Excel
+# export (06) for every requested hint type, THEN commit + push — so each
+# dataset's results land on the remote as soon as that dataset finishes,
+# instead of everything riding on one commit at the very end. Markdown
+# reports (09) run once at the end across all datasets, with a final commit.
+# Fail-soft; logs to logs/ (gitignored).
 
 set -uo pipefail
 
@@ -145,8 +148,12 @@ for hint in "${HINT_TYPES[@]}"; do
     for ds in "${DATASETS[@]}"; do
         for arm in hinted unhinted; do
             f="outputs-and-results/inference-outputs/${MODEL_NAME}/${ds}${SPLIT_SEG}/${hint}/${arm}.jsonl"
+            # Large runs may be committed gzipped for GitHub's 100MB limit
+            # (see src/gmean2_metrics.py resolve_jsonl); accept either.
             if [[ -f "$f" ]]; then
                 echo "  OK  $f"
+            elif [[ -f "${f}.gz" ]]; then
+                echo "  OK  ${f}.gz (gzipped)"
             else
                 echo "  MISSING  $f"
                 missing=$((missing + 1))
@@ -209,24 +216,26 @@ echo "########## PHASE 0: git identity ##########"
 run git config --global user.email "abd@gmail.com"
 run git config --global user.name "Abd"
 
-# --- Phase 1: monitor ----------------------------------------------------------
-for hint in "${HINT_TYPES[@]}"; do
+_SPLIT_TAG=""
+[[ "$DATA_SPLIT" == "eval" ]] && _SPLIT_TAG=", eval-split"
+
+# --- Phases 1+2: monitor, then results, per dataset — commit + push after each --
+for ds in "${DATASETS[@]}"; do
     echo ""
-    echo "########## PHASE 1: monitor ($hint) ##########"
-    for ds in "${DATASETS[@]}"; do
+    echo "########## PHASE 1: monitor ($ds) ##########"
+    for hint in "${HINT_TYPES[@]}"; do
         run python monitorability-eval/scripts/03_run_monitor.py --model "$MODEL_ID" --dataset "$ds" --hint-type "$hint" --data "$DATA_SPLIT"
     done
-done
 
-# --- Phase 2: results (g-mean^2 + plots + excel) --------------------------------
-for hint in "${HINT_TYPES[@]}"; do
     echo ""
-    echo "########## PHASE 2: results calculation ($hint) ##########"
-    for ds in "${DATASETS[@]}"; do
+    echo "########## PHASE 2: results calculation ($ds) ##########"
+    for hint in "${HINT_TYPES[@]}"; do
         run python monitorability-eval/scripts/04_compute_gmean2.py --model "$MODEL_ID" --dataset "$ds" --hint-type "$hint" --data "$DATA_SPLIT"
         run python monitorability-eval/scripts/05_analyze_gmean2.py --model "$MODEL_ID" --dataset "$ds" --hint-type "$hint" --data "$DATA_SPLIT"
         run python monitorability-eval/scripts/06_export_excel.py   --model "$MODEL_ID" --dataset "$ds" --hint-type "$hint" --data "$DATA_SPLIT"
     done
+
+    commit_push "monitor + results (${HINT_TYPES[*]}$_SPLIT_TAG) — $MODEL_NAME — $ds"
 done
 
 # --- Phase 3: Markdown reports ----------------------------------------------------
@@ -236,9 +245,7 @@ echo ""
 echo "########## PHASE 3: markdown reports ##########"
 run python monitorability-eval/scripts/09_generate_reports.py --model "$MODEL_ID" --data "$DATA_SPLIT"
 
-_SPLIT_TAG=""
-[[ "$DATA_SPLIT" == "eval" ]] && _SPLIT_TAG=", eval-split"
-commit_push "monitor + results (${HINT_TYPES[*]}$_SPLIT_TAG) — $MODEL_NAME"
+commit_push "monitor + results reports (${HINT_TYPES[*]}$_SPLIT_TAG) — $MODEL_NAME"
 
 # --- Summary -----------------------------------------------------------------
 echo ""

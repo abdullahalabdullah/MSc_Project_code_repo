@@ -14,7 +14,7 @@ response as `chosen` and the most harmful as `rejected`, validated by a safety c
 | 01 | `01_prepare_prompts.py` | Load WildJailbreak `vanilla_harmful` + `adversarial_harmful` (train config), dedup on prompt, report counts + mix. Default `SAMPLE=ALL` keeps **every** unique prompt; `SAMPLE=<int>` (env var) draws a seeded pilot sample |
 | 02 | `02_generate_responses.py` (GPU) | Qwen3-4B, N=10, temp 0.6 / top_p 0.95 / top_k 20, `max_tokens=8192`; tuned vLLM engine (prefix caching, capped `max_model_len`, 0.95 VRAM); **live truncation reporting** |
 | 03 | `03_classify_guard.py` (GPU) | Split on `</think>`, **Qwen3Guard** label (3-way Safe/Unsafe/Controversial per answer, Controversial folded into Unsafe), **filter-1** (drop prompts whose valid responses share one label). Runs on **vLLM** (greedy); **resumable** — checkpoints every `GUARD_CHECKPOINT_EVERY` pairs to `03_guard_*.ckpt.jsonl`, so an interrupted run continues instead of restarting |
-| 04 | `04_score_cost.py` (GPU) | `beaver-7b-unified-cost`; per prompt `chosen=argmin(cost)`, `rejected=argmax(cost)` |
+| 04 | `04_score_cost.py` (GPU) | `beaver-7b-unified-cost` (forward-only, **length-sorted** batches); per prompt `chosen=argmin(cost)`, `rejected=argmax(cost)`. **Resumable** — checkpoints every batch to `04_cost.ckpt.jsonl` |
 | 05 | `05_report.py` | **filter-3** (chosen=Safe & rejected=Unsafe), survival rate, cost-spread dist, 10 sample pairs, sign-convention sanity check |
 | 06 | `06_export_dpo_dataset.py` | **Handoff**: convert `final_pairs.joblib` → a HF `DatasetDict({train,valid})` with `prompt`/`chosen`/`rejected`, saved via `save_to_disk` |
 
@@ -133,6 +133,12 @@ export RUN_OUTPUT_DIR=outputs/run_$(date +%Y%m%d_%H%M%S)
 python 01_prepare_prompts.py && python 02_generate_responses.py \
   && python 03_classify_guard.py && python 04_score_cost.py \
   && python 05_report.py && python 06_export_dpo_dataset.py
+```
+
+To **resume from stage 03** when 01/02 are already done (reuses an existing run's
+`02_responses.joblib`; stages 03/04 pick up their own checkpoints after an interrupt):
+```bash
+RUN_OUTPUT_DIR=outputs/main ./run_from_03.sh
 ```
 
 ## Beaver ranker sanity check (`sanity_beaver.py`)

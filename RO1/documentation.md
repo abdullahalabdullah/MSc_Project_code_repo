@@ -77,7 +77,10 @@ cached copy. Optional env knobs for
 (samples/arm; the `--N` flag takes precedence over the env var),
 `FORCE_PREPARE=true` (rebuild indexes). Both scripts are
 fail-soft, resume from checkpoints, commit+push progress, and log to `logs/`
-(gitignored).
+(gitignored). `run_monitor_and_results.sh` commits+pushes **after each
+dataset** finishes its monitor + results phases (not just once at the end),
+so results land on the remote incrementally instead of riding on one commit;
+a final commit follows the Phase-3 Markdown reports step.
 
 ---
 
