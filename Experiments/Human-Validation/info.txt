@@ -1,0 +1,9 @@
+in this folder I have the sample generation of gpt-5-mini monitor to check its doing teh right job
+4 dataste 
+1 hint type
+
+model taht generates reposnes: qwen3-4B
+
+30 hinted (15 of them followed the hint, 15 resisted) + 15 unhinted,
+
+these were sampled randomly from a larger run

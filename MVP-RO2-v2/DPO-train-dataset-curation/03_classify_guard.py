@@ -19,13 +19,22 @@ For each response: strip everything up to and including </think>; the remainder 
 filter-1: drop a prompt if all its VALID responses share one label (or if <2 valid) — such
 prompts cannot yield a chosen/rejected pair.
 
+Inference runs on **vLLM** (like stage 02): greedy decoding, continuous batching, per-sequence
+EOS stop. Inputs are chat-templated to token ids and left-truncated to GUARD_MAX_INPUT_TOKENS
+(keeping the answer + assessment cue). Both classification passes are **checkpointed** every
+GUARD_CHECKPOINT_EVERY pairs to <OUTPUT_DIR>/03_guard_*.ckpt.jsonl, so an interrupted run
+resumes from where it stopped instead of re-classifying from scratch. A fingerprint of the
+inputs invalidates a stale checkpoint if 02_responses.joblib changed.
+
 Runs on GPU. Output: config.LABELED_PATH (survivors) + config.ALL_LABELED_PATH (all, debug).
 """
+import hashlib
+import json
+import os
 import re
 
 import joblib
-import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from vllm import LLM, SamplingParams
 
 import config
 import env_setup
@@ -35,6 +44,10 @@ from utils import (
 
 SAFETY_RE = re.compile(r"Safety:\s*(Safe|Unsafe|Controversial)", re.IGNORECASE)
 REFUSAL_RE = re.compile(r"Refusal:\s*(yes|no)", re.IGNORECASE)
+
+RESP_CKPT_PATH = os.path.join(config.OUTPUT_DIR, "03_guard_responses.ckpt.jsonl")
+PROMPT_CKPT_PATH = os.path.join(config.OUTPUT_DIR, "03_guard_prompts.ckpt.jsonl")
+CKPT_META_PATH = os.path.join(config.OUTPUT_DIR, "03_guard.ckpt.meta.json")
 
 
 def _yn(m):
@@ -61,53 +74,99 @@ def parse_qwen3guard_prompt(text):
     return None if label is None else (label == "Unsafe")
 
 
-def classify_batch(model, tokenizer, rendered, max_new_tokens):
-    """rendered: list of already chat-templated strings (Qwen3Guard's chat template appends
-    the right assessment cue based on whether the last turn is user-only or user+assistant,
-    so no add_generation_prompt is needed). Returns list of raw Qwen3Guard generations (str)."""
-    enc = tokenizer(
-        rendered, return_tensors="pt", padding=True, truncation=True, max_length=8192,
-    ).to(model.device)
-    with torch.no_grad():
-        gen = model.generate(
-            **enc, max_new_tokens=max_new_tokens, do_sample=False,
-            pad_token_id=tokenizer.pad_token_id,
-        )
-    new_tokens = gen[:, enc["input_ids"].shape[1]:]
-    return tokenizer.batch_decode(new_tokens, skip_special_tokens=True)
+def render_ids(tokenizer, messages):
+    """Chat-template `messages` to token ids and left-truncate to GUARD_MAX_INPUT_TOKENS.
 
-
-def pack_length_sorted_batches(rendered, max_batch, token_budget, max_new_tokens):
-    """Batch plan for left-padded batched generation: returns index lists into `rendered`,
-    length-sorted and packed so batch_size x (longest padded length in the batch) stays
-    under token_budget.
-
-    Left padding makes every sequence in a batch pay prefill compute + per-step KV reads for
-    the batch's LONGEST input, and generate() only early-stops once the WHOLE batch is done —
-    so mixed-length batches spend most of their work on pad tokens. Sorting by length gives
-    near-homogeneous batches (many short inputs per call, the rare long ones in small calls),
-    and the token budget bounds worst-case KV memory by construction.
-
-    Lengths are estimated conservatively from characters (~3 chars/token, i.e. overestimating
-    typical English tokenization), capped at the 8192-token truncation limit, plus the
-    generation allowance. Throughput-only: decoding is greedy, so an item's output does not
-    depend on which batch it lands in; callers write results back by original index.
+    Qwen3Guard's chat template appends the right assessment cue based on whether the last turn
+    is user-only or user+assistant, so no add_generation_prompt is needed. Left truncation
+    (keep the tail) preserves the answer + assessment scaffold if the input is over-long.
     """
-    def est_tokens(s):
-        return min(len(s) // 3 + 16, 8192) + max_new_tokens
+    ids = tokenizer.apply_chat_template(messages, tokenize=True)
+    if len(ids) > config.GUARD_MAX_INPUT_TOKENS:
+        ids = ids[-config.GUARD_MAX_INPUT_TOKENS:]
+    return ids
 
-    order = sorted(range(len(rendered)), key=lambda i: est_tokens(rendered[i]))
-    batches, cur = [], []
-    for i in order:
-        # Ascending order -> item i would be the batch's longest; padded cost if added:
-        if cur and (len(cur) == max_batch
-                    or (len(cur) + 1) * est_tokens(rendered[i]) > token_budget):
-            batches.append(cur)
-            cur = []
-        cur.append(i)
-    if cur:
-        batches.append(cur)
-    return batches
+
+# ── Checkpointing ──────────────────────────────────────────────────────────────
+# Each pass writes one JSONL line per completed item (append-only, fsync'd per shard); a
+# half-written trailing line on a crash is simply ignored on reload. A sidecar meta file
+# fingerprints the inputs so a checkpoint left over from a *different* 02_responses.joblib is
+# discarded rather than silently reused.
+
+def _fingerprint(flat, all_responses):
+    n = len(flat)
+    probe = []
+    for i in (0, n // 2, n - 1):
+        if 0 <= i < n:
+            pi, ri = flat[i]
+            rd = all_responses[pi][ri]
+            probe.append(rd["prompt"])
+            probe.append(rd["answer"])
+    h = hashlib.sha256(("\x00".join(probe)).encode("utf-8")).hexdigest()
+    return {"n_prompts": len(all_responses), "n_flat": n, "sig": h}
+
+
+def _reset_checkpoints_if_stale(fp):
+    """Keep checkpoints only if they match the current inputs; otherwise archive + start fresh."""
+    if os.path.exists(CKPT_META_PATH):
+        with open(CKPT_META_PATH) as f:
+            prev = json.load(f)
+        if prev == fp:
+            return  # valid resume
+        print("  WARNING: existing 03 checkpoint does not match current 02_responses.joblib "
+              "(inputs changed) — archiving stale checkpoints and starting fresh.")
+        for p in (RESP_CKPT_PATH, PROMPT_CKPT_PATH, CKPT_META_PATH):
+            if os.path.exists(p):
+                os.replace(p, p + ".stale")
+    with open(CKPT_META_PATH, "w") as f:
+        json.dump(fp, f)
+
+
+def _load_ckpt(path):
+    """Return {index: record} for all complete JSONL lines (ignoring a torn trailing line)."""
+    done = {}
+    if not os.path.exists(path):
+        return done
+    with open(path) as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                rec = json.loads(line)
+            except json.JSONDecodeError:
+                break  # torn last line from a mid-write crash
+            done[rec["i"]] = rec
+    return done
+
+
+def _run_pass(llm, sampling_params, indices, make_ids, ckpt_path, on_result, total, label):
+    """Generate for the not-yet-done `indices` in checkpointed shards.
+
+    make_ids(i) -> token ids for item i; on_result(i, raw_text) applies the parsed result.
+    Already-checkpointed items are replayed through on_result (no recompute) and skipped.
+    """
+    done = _load_ckpt(ckpt_path)
+    for i, rec in done.items():
+        on_result(i, rec["raw"])
+    remaining = [i for i in indices if i not in done]
+    n_done = len(done)
+    print(f"  {label}: {n_done}/{total} already checkpointed, {len(remaining)} to classify")
+
+    step = config.GUARD_CHECKPOINT_EVERY
+    for s in range(0, len(remaining), step):
+        shard = remaining[s:s + step]
+        prompts = [{"prompt_token_ids": make_ids(i)} for i in shard]
+        outs = llm.generate(prompts, sampling_params, use_tqdm=False)
+        with open(ckpt_path, "a") as f:
+            for i, out in zip(shard, outs):
+                raw = out.outputs[0].text
+                on_result(i, raw)
+                f.write(json.dumps({"i": i, "raw": raw}) + "\n")
+            f.flush()
+            os.fsync(f.fileno())
+        n_done += len(shard)
+        print(f"  {label}: {n_done}/{total}")
 
 
 def main():
@@ -139,68 +198,64 @@ def main():
     print(f"Invalid (no visible answer): {n_invalid} / {n_total} "
           f"({100.0 * n_invalid / n_total:.1f}%)")
 
-    # 2) Flatten all valid (prompt, answer) pairs and classify with Qwen3Guard.
+    # 2) Flatten all valid (prompt, answer) pairs and classify with Qwen3Guard on vLLM.
     flat = [(pi, ri) for pi, pp in enumerate(all_responses)
             for ri, rd in enumerate(pp) if not rd["invalid"]]
-    print(f"Classifying {len(flat)} valid (prompt, answer) pairs with {config.GUARD_MODEL} ...")
+    print(f"Classifying {len(flat)} valid (prompt, answer) pairs with {config.GUARD_MODEL} (vLLM) ...")
 
-    tokenizer = AutoTokenizer.from_pretrained(config.GUARD_MODEL)
-    tokenizer.padding_side = "left"      # batched generation
-    tokenizer.truncation_side = "left"   # if over-long, keep the answer + assessment scaffold
-    if tokenizer.pad_token_id is None:
-        tokenizer.pad_token = tokenizer.eos_token
-    model = AutoModelForCausalLM.from_pretrained(
-        config.GUARD_MODEL, torch_dtype="auto", device_map="auto"
-    ).eval()
+    _reset_checkpoints_if_stale(_fingerprint(flat, all_responses))
 
-    rendered = [
-        tokenizer.apply_chat_template(
-            [
-                {"role": "user", "content": all_responses[pi][ri]["prompt"]},
-                {"role": "assistant", "content": all_responses[pi][ri]["answer"]},
-            ],
-            tokenize=False,
-        )
-        for pi, ri in flat
-    ]
-    batches = pack_length_sorted_batches(
-        rendered, config.GUARD_MAX_BATCH, config.GUARD_TOKEN_BUDGET, config.GUARD_MAX_NEW_TOKENS)
-    print(f"  packed into {len(batches)} length-sorted batches "
-          f"(budget={config.GUARD_TOKEN_BUDGET} padded tokens, max batch={config.GUARD_MAX_BATCH})")
-    n_done = 0
-    for bi, batch_ix in enumerate(batches):
-        raw_outs = classify_batch(
-            model, tokenizer, [rendered[i] for i in batch_ix], config.GUARD_MAX_NEW_TOKENS)
-        for i, raw in zip(batch_ix, raw_outs):
-            pi, ri = flat[i]
-            label, refusal = parse_qwen3guard_response(raw)
-            rd = all_responses[pi][ri]
-            rd["guard_raw"] = raw
-            rd["guard_label"] = label            # 'Safe' | 'Unsafe' | None (unparsed); Controversial folded into Unsafe
-            rd["refusal"] = refusal              # bool | None  (for the future benign axis)
-        n_done += len(batch_ix)
-        if bi % 20 == 0:
-            print(f"  {n_done}/{len(flat)}")
-    del rendered
+    sampling_params = SamplingParams(
+        temperature=0.0,                              # greedy: labels are deterministic
+        max_tokens=config.GUARD_MAX_NEW_TOKENS,
+    )
+    llm = LLM(
+        model=config.GUARD_MODEL,
+        dtype="bfloat16",
+        trust_remote_code=True,
+        max_model_len=config.GUARD_MAX_INPUT_TOKENS + config.GUARD_MAX_NEW_TOKENS,
+        gpu_memory_utilization=config.GPU_MEMORY_UTILIZATION,
+        max_num_seqs=config.GUARD_MAX_NUM_SEQS,
+        enable_prefix_caching=True,                   # the N samples of a prompt share its user-turn prefix
+    )
+    tokenizer = llm.get_tokenizer()
+
+    def resp_ids(i):
+        pi, ri = flat[i]
+        rd = all_responses[pi][ri]
+        return render_ids(tokenizer, [
+            {"role": "user", "content": rd["prompt"]},
+            {"role": "assistant", "content": rd["answer"]},
+        ])
+
+    def apply_resp(i, raw):
+        pi, ri = flat[i]
+        label, refusal = parse_qwen3guard_response(raw)
+        rd = all_responses[pi][ri]
+        rd["guard_raw"] = raw
+        rd["guard_label"] = label   # 'Safe' | 'Unsafe' | None (unparsed); Controversial folded into Unsafe
+        rd["refusal"] = refusal      # bool | None  (for the future benign axis)
+
+    _run_pass(llm, sampling_params, range(len(flat)), resp_ids, RESP_CKPT_PATH,
+              apply_resp, len(flat), "responses")
 
     # 2b) Request-only harmfulness ("harmful_request"): a separate prompt-only generation,
     # since Qwen3Guard needs a distinct pass for this (no single-call 3-verdict mode like
     # WildGuard had). Run once per UNIQUE prompt — all N responses to a prompt share the same
     # request, so this is n_prompts calls, not n_prompts * N.
     unique_prompts = [per_prompt[0]["prompt"] for per_prompt in all_responses]
-    print(f"Classifying {len(unique_prompts)} unique prompts for request harmfulness ...")
+    print(f"Classifying {len(unique_prompts)} unique prompts for request harmfulness (vLLM) ...")
     prompt_harmful = [None] * n_prompts
-    rendered_prompts = [
-        tokenizer.apply_chat_template([{"role": "user", "content": p}], tokenize=False)
-        for p in unique_prompts
-    ]
-    for batch_ix in pack_length_sorted_batches(
-            rendered_prompts, config.GUARD_MAX_BATCH, config.GUARD_TOKEN_BUDGET,
-            config.GUARD_MAX_NEW_TOKENS):
-        raw_outs = classify_batch(
-            model, tokenizer, [rendered_prompts[i] for i in batch_ix], config.GUARD_MAX_NEW_TOKENS)
-        for i, raw in zip(batch_ix, raw_outs):
-            prompt_harmful[i] = parse_qwen3guard_prompt(raw)
+
+    def prompt_ids(i):
+        return render_ids(tokenizer, [{"role": "user", "content": unique_prompts[i]}])
+
+    def apply_prompt(i, raw):
+        prompt_harmful[i] = parse_qwen3guard_prompt(raw)
+
+    _run_pass(llm, sampling_params, range(n_prompts), prompt_ids, PROMPT_CKPT_PATH,
+              apply_prompt, n_prompts, "prompts")
+
     for pi, per_prompt in enumerate(all_responses):
         for rd in per_prompt:
             rd["harmful_request"] = prompt_harmful[pi]   # bool | None
@@ -248,6 +303,11 @@ def main():
         "filter1_survivors": len(survivors),
     })
     print(f"Diagnostics -> {config.DIAGNOSTICS_PATH} [classification]")
+
+    # Both passes finished and outputs are dumped — drop the resume checkpoints.
+    for p in (RESP_CKPT_PATH, PROMPT_CKPT_PATH, CKPT_META_PATH):
+        if os.path.exists(p):
+            os.remove(p)
 
 
 if __name__ == "__main__":
