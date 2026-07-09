@@ -54,7 +54,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import pandas as pd
 import yaml
 
-from src.gmean2_metrics import load_jsonl, compute_gmean2
+from src.gmean2_metrics import load_jsonl, resolve_jsonl, compute_gmean2
 from src.dataset import SPLITS, model_dir_name, resolve_paths
 from src.hints import HINT_TYPES
 
@@ -201,8 +201,8 @@ def run_dataset(root, config, dataset_key, models, output_override, hint_type, s
         out_dir = mpaths["outputs_dir"]
         mon_dir = mpaths["monitor_dir"]
 
-        hinted_path = out_dir / "hinted.jsonl"
-        unhinted_path = out_dir / "unhinted.jsonl"
+        hinted_path = resolve_jsonl(out_dir / "hinted.jsonl")
+        unhinted_path = resolve_jsonl(out_dir / "unhinted.jsonl")
         monitor_path = mon_dir / "monitor_results.jsonl"
 
         if not hinted_path.exists() or not unhinted_path.exists():

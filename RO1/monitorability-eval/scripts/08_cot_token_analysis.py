@@ -39,7 +39,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import yaml
-from src.gmean2_metrics import load_jsonl, compute_gmean2
+from src.gmean2_metrics import load_jsonl, resolve_jsonl, compute_gmean2
 from src.dataset import SPLITS, model_dir_name, resolve_paths
 from src.hints import HINT_TYPES
 from src.cot_tokens import bucket_counts, raw_token_stats, truncation_stats
@@ -72,8 +72,8 @@ def main():
     for ds in dataset_keys:
         paths = resolve_paths(root, config, ds, model_name, hint_type, split=args.data)
         out_dir = paths["outputs_dir"]
-        hinted_path = out_dir / "hinted.jsonl"
-        unhinted_path = out_dir / "unhinted.jsonl"
+        hinted_path = resolve_jsonl(out_dir / "hinted.jsonl")
+        unhinted_path = resolve_jsonl(out_dir / "unhinted.jsonl")
         if not hinted_path.exists() or not unhinted_path.exists():
             print(f"  Skipping {ds}: no inference outputs in {out_dir}")
             continue

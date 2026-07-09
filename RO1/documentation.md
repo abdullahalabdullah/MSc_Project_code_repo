@@ -196,6 +196,14 @@ hint's dir. Reuse is all-or-nothing (a partial own unhinted arm is finished by
 normal generation, never mixed with a copy), and an N mismatch or partial
 source disqualifies it (`unhinted_arm_complete` in `src/inference_qwen.py`).
 
+**Reading gzipped inference outputs (steps 3, 4, 6, 8):** any `hinted.jsonl` or
+`unhinted.jsonl` over GitHub's 100MB limit must be committed as `<name>.jsonl.gz`
+instead (`gzip` a large file in place before committing — datasets with long CoTs,
+e.g. `lsat_ar`, routinely need this). `src/gmean2_metrics.resolve_jsonl` checks for
+the plain file first, falls back to the `.gz` sibling, and `load_jsonl` reads
+either transparently — steps 3/4/6/8 all call `resolve_jsonl` before `load_jsonl`,
+so a gzipped commit needs no manual decompression to be read downstream.
+
 All steps **resume from checkpoints** — safe to re-run after an interruption.
 
 ---

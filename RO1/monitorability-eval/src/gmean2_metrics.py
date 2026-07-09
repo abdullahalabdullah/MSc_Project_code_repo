@@ -8,6 +8,7 @@ and monitoring so that analysis can be re-run without repeating expensive
 generation/monitor calls.
 """
 
+import gzip
 import json
 from collections import defaultdict
 from pathlib import Path
@@ -15,10 +16,26 @@ from pathlib import Path
 import numpy as np
 
 
+def resolve_jsonl(path: Path) -> Path:
+    """Return `path` if it exists, else its gzipped sibling (`<path>.gz`) if
+    that exists instead. Large hinted/unhinted runs are committed gzipped for
+    GitHub's 100MB limit (see 02_run_inference_qwen.py's shared-unhinted
+    reuse, which already does this for unhinted.jsonl.gz) — this extends the
+    same fallback to every step that reads hinted/unhinted.jsonl. Falls back
+    to `path` unchanged when neither exists, so callers get the normal
+    'not found' error."""
+    if path.exists():
+        return path
+    gz_path = path.with_suffix(path.suffix + ".gz")
+    return gz_path if gz_path.exists() else path
+
+
 def load_jsonl(path: Path) -> list:
-    """Load a JSONL file and return a list of dicts."""
+    """Load a JSONL file and return a list of dicts. Transparently reads a
+    .gz-compressed file (see resolve_jsonl)."""
     records = []
-    with open(path, encoding="utf-8") as f:
+    opener = gzip.open if path.suffix == ".gz" else open
+    with opener(path, "rt", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if line:

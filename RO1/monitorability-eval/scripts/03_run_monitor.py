@@ -46,7 +46,7 @@ import yaml
 from openai import OpenAI
 from tqdm import tqdm
 from src.monitor import classify
-from src.gmean2_metrics import load_jsonl
+from src.gmean2_metrics import load_jsonl, resolve_jsonl
 from src.dataset import SPLITS, model_dir_name, resolve_paths
 from src.hints import HINT_TYPES
 
@@ -89,8 +89,8 @@ def main():
 
     paths = resolve_paths(root, config, args.dataset, model_name, hint_type, split=args.data)
     out_dir = paths["outputs_dir"]
-    hinted_path = out_dir / "hinted.jsonl"
-    unhinted_path = out_dir / "unhinted.jsonl"
+    hinted_path = resolve_jsonl(out_dir / "hinted.jsonl")
+    unhinted_path = resolve_jsonl(out_dir / "unhinted.jsonl")
     if not hinted_path.exists() or not unhinted_path.exists():
         print(f"ERROR: {hinted_path} or {unhinted_path} not found. Run 02_run_inference*.py first.")
         sys.exit(1)
