@@ -14,6 +14,9 @@ cd "$(dirname "$0")"
 
 PY="${PY:-python}"
 export PYTHONUNBUFFERED=1          # unbuffered stdout so progress lines aren't hidden by the tee pipe
+# Reduce CUDA caching-allocator fragmentation from the variable-length (length-sorted) batches
+# in stage 04 — lets it reuse freed blocks across differently-shaped batches.
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 # filter-4 minimum margin — leave empty for harmlessness (matches run_all.sh default).
 MIN_MARGIN=""
@@ -40,11 +43,21 @@ else
     echo "== filter-4 minimum margin: not applied =="
 fi
 
-echo "== Stage 03: classify (Qwen3Guard, vLLM) + filter-1 (GPU) — resumable =="
-$PY 03_classify_guard.py
+# Stages 03/04 are the expensive GPU steps; skip one whose final output already exists so a
+# re-run resumes the pipeline instead of redoing finished work (set FORCE=1 to recompute).
+if [ -f "$RUN_OUTPUT_DIR/03_labeled.joblib" ] && [ -z "${FORCE:-}" ]; then
+    echo "== Stage 03: SKIP — $RUN_OUTPUT_DIR/03_labeled.joblib already exists (FORCE=1 to redo) =="
+else
+    echo "== Stage 03: classify (Qwen3Guard, vLLM) + filter-1 (GPU) — resumable =="
+    $PY 03_classify_guard.py
+fi
 
-echo "== Stage 04: Beaver cost scoring (GPU) — resumable =="
-$PY 04_score_cost.py
+if [ -f "$RUN_OUTPUT_DIR/04_scored.joblib" ] && [ -z "${FORCE:-}" ]; then
+    echo "== Stage 04: SKIP — $RUN_OUTPUT_DIR/04_scored.joblib already exists (FORCE=1 to redo) =="
+else
+    echo "== Stage 04: Beaver cost scoring (GPU) — resumable =="
+    $PY 04_score_cost.py
+fi
 
 echo "== Stage 05: filter-3 + reports =="
 $PY 05_report.py
