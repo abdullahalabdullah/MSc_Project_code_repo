@@ -54,6 +54,37 @@ NUM_WORKERS = 32
 MIN_WORKERS = 16  # floor for automatic rate-limit back-off
 
 
+def find_shared_unhinted_monitor(root, config, dataset_key, model_name, hint_type,
+                                  split, needed_keys):
+    """Look for a sibling hint type's monitor_results.jsonl that already
+    covers every (instance_id, sample_idx) in `needed_keys` for the unhinted
+    arm, and return those rows verbatim if found, else None.
+
+    The unhinted arm is hint-type-invariant at inference time — the same
+    unhinted.jsonl is reused (not regenerated) across hint types, see
+    02_run_inference_qwen.py's shared_unhinted logic — so its monitor
+    verdicts are equally reusable, saving a full re-run of the API calls for
+    every hint type after the first. hint_target is assigned once at prep
+    time and shared across hint types (see src/dataset.py resolve_paths), so
+    the copied rows need no adjustment.
+    """
+    for other_hint in HINT_TYPES:
+        if other_hint == hint_type:
+            continue
+        other_path = resolve_paths(root, config, dataset_key, model_name, other_hint,
+                                    split=split)["monitor_dir"] / "monitor_results.jsonl"
+        if not other_path.exists():
+            continue
+        rows = {}
+        for line in open(other_path, encoding="utf-8"):
+            r = json.loads(line)
+            if r["arm"] == "unhinted":
+                rows[(r["instance_id"], r["sample_idx"])] = r
+        if needed_keys.issubset(rows.keys()):
+            return [rows[k] for k in needed_keys]
+    return None
+
+
 def main():
     parser = argparse.ArgumentParser(description="Run monitor (both arms) for one model.")
     parser.add_argument("--model", required=True,
@@ -112,6 +143,33 @@ def main():
     unhinted_records = load_jsonl(unhinted_path)
     all_records = hinted_records + unhinted_records
 
+    # Reuse a sibling hint type's unhinted monitor verdicts instead of
+    # re-calling the API on the (identical) unhinted transcripts. Only
+    # considers unhinted records not already done in THIS hint type's own
+    # progress file, so resume behavior is unaffected.
+    reused = 0
+    still_needed_unhinted = [
+        r for r in unhinted_records
+        if (r["instance_id"], r["sample_idx"], "unhinted") not in done_keys
+        and not r.get("truncated", False)
+        and r.get("parsed_answer") is not None
+    ]
+    if still_needed_unhinted:
+        needed_keys = {(r["instance_id"], r["sample_idx"]) for r in still_needed_unhinted}
+        shared_rows = find_shared_unhinted_monitor(
+            root, config, args.dataset, model_name, hint_type, args.data, needed_keys
+        )
+        if shared_rows is not None:
+            with open(out_path, "a", encoding="utf-8") as out_f:
+                for row in shared_rows:
+                    out_f.write(json.dumps(row, ensure_ascii=False) + "\n")
+                    done_keys.add((row["instance_id"], row["sample_idx"], "unhinted"))
+            with open(progress_path, "w") as pf:
+                json.dump({"done_keys": [list(k) for k in done_keys]}, pf)
+            reused = len(shared_rows)
+            print(f"Reused {reused} unhinted monitor verdicts from a sibling hint type "
+                  f"(unhinted arm is hint-type-invariant — see 02_run_inference_qwen.py).")
+
     pending = [
         r for r in all_records
         if (r["instance_id"], r["sample_idx"], r["arm"]) not in done_keys
@@ -119,7 +177,7 @@ def main():
         and r.get("parsed_answer") is not None
     ]
     print(f"Loaded {len(hinted_records)} hinted + {len(unhinted_records)} unhinted records "
-          f"for {model_name} ({len(done_keys)} already done, {len(pending)} remaining).")
+          f"for {model_name} ({len(done_keys)} already done [{reused} reused], {len(pending)} remaining).")
 
     failure_count = 0
     total = 0

@@ -199,6 +199,18 @@ hint's dir. Reuse is all-or-nothing (a partial own unhinted arm is finished by
 normal generation, never mixed with a copy), and an N mismatch or partial
 source disqualifies it (`unhinted_arm_complete` in `src/inference_qwen.py`).
 
+**Unhinted-arm monitor reuse across hint types (step 3):** since the unhinted
+transcripts themselves are hint-type-invariant (reused verbatim by step 2, above),
+their monitor verdicts are reused too — `03_run_monitor.py` looks for a sibling
+hint type's `monitor_results.jsonl` with **complete** unhinted-arm coverage for
+the same (model, dataset, split) and copies those rows in verbatim instead of
+re-calling the API, before falling back to normal monitoring for whatever's
+left. Reuse is per-record and all-or-nothing per sibling checked (a sibling is
+only used if it covers every unhinted record this run still needs); the first
+hint type run for a dataset always monitors unhinted for real, and every hint
+type after that reuses it. `find_shared_unhinted_monitor` in
+`03_run_monitor.py`.
+
 **Reading gzipped inference outputs (steps 3, 4, 6, 8):** any `hinted.jsonl` or
 `unhinted.jsonl` over GitHub's 100MB limit must be committed as `<name>.jsonl.gz`
 instead (`gzip` a large file in place before committing — datasets with long CoTs,
