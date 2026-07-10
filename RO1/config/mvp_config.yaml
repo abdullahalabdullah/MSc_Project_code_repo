@@ -144,11 +144,12 @@ qwen_inference:
   max_new_tokens: 16384
   # Instances per checkpoint. The whole checkpoint (checkpoint_every × n_samples ×
   # 2 arms requests) is sent to vLLM in ONE generate call, so this also sets the
-  # batch handed to the scheduler. At n=200/N=8, 100 = two checkpoints per
-  # dataset (100 × 8 × 2 = 1600 requests per generate call — still a saturated
-  # batch), so a mid-dataset crash/spot reclaim loses at most half a dataset.
-  # Lower it for finer resume points; it does not affect generations.
-  checkpoint_every: 100
+  # batch handed to the scheduler. At n=200/N=8, 200 = one checkpoint per dataset
+  # (200 × 8 × 2 = 3200 requests per generate call), so the whole dataset drains
+  # in a single batch — one decode drain-tail per dataset instead of two. Tradeoff:
+  # a mid-dataset crash/spot reclaim loses the whole dataset (no half-dataset
+  # resume point). Lower it for finer resume points; it does not affect generations.
+  checkpoint_every: 200
 
 # Adapter merging (02_run_inference_qwen.py --merge). RO2 checkpoints are pushed
 # as adapter-only repos, which vLLM cannot load; with --merge the --model arg is

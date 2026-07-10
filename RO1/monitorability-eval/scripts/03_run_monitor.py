@@ -50,7 +50,7 @@ from src.gmean2_metrics import load_jsonl, resolve_jsonl
 from src.dataset import SPLITS, model_dir_name, resolve_paths
 from src.hints import HINT_TYPES
 
-NUM_WORKERS = 32
+NUM_WORKERS = 64
 MIN_WORKERS = 16  # floor for automatic rate-limit back-off
 
 
@@ -201,7 +201,7 @@ def main():
 
     # Gate semaphore controls how many threads call the API concurrently.
     # On a 429, we permanently consume one slot (don't release) to reduce concurrency,
-    # down to a floor of MIN_WORKERS. Steps: 32 → 28 → 24 → 20 → 16.
+    # down to a floor of MIN_WORKERS, 4 at a time (e.g. 64 → 60 → ... → 16).
     gate = threading.Semaphore(NUM_WORKERS)
     current_workers = [NUM_WORKERS]
     lock = threading.Lock()
