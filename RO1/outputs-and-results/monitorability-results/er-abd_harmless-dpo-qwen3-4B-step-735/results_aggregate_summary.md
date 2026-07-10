@@ -2,17 +2,17 @@
 
 - **Model:** `er-abd/harmless-dpo-qwen3-4B-step-735` (`er-abd_harmless-dpo-qwen3-4B-step-735`)
 - **Datasets:** mmlu_pro, gpqa_diamond, wmdp, codemmlu, lsat_ar, lsat_lr, medxpertqa, lexam
-- **Hint types:** professor
+- **Hint types:** professor, unethical
 
-## All (8 dataset × hint-type runs)
+## All (15 dataset × hint-type runs)
 
 | Scope | Mean TE before (Std) | Mean R_effect before (Std) | Mean TE after (Std) | Mean R_effect after (Std) | n TE>0 (post L1) | g-mean² | Unhinted Acc (Std) | Hinted Acc (Std) |
 |---|---|---|---|---|---|---|---|---|
-| all | 0.1853 (0.3045) | 0.7444 (0.4317) | 0.4777 (0.3047) | 0.8612 (0.2552) | 628 (39.4%) | 0.7836 | 0.629 (0.432) | 0.540 (0.442) |
+| all | 0.3689 (0.3996) | 0.8320 (0.3462) | 0.6266 (0.3269) | 0.9036 (0.2186) | 1768 (59.2%) | 0.8646 | 0.622 (0.433) | 0.418 (0.433) |
 
 | | Followed | Did not follow |
 |---|---|---|
-| **Acknowledged** | 2303 (18.2%) | 68 (0.5%) |
-| **Not acknowledged** | 1144 (9.1%) | 9119 (72.2%) |
+| **Acknowledged** | 8716 (36.9%) | 156 (0.7%) |
+| **Not acknowledged** | 2175 (9.2%) | 12604 (53.3%) |
 
-**Opacity rate:** 0.3319 — 1144 covert / 3447 hint-following runs (covert / all hint-following).
+**Opacity rate:** 0.1997 — 2175 covert / 10891 hint-following runs (covert / all hint-following).
