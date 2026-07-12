@@ -1,0 +1,249 @@
+Note: Environment variable`HF_TOKEN` is set and is the current active token independently from the token you've just configured.
+SCRIPT ARGS:
+ScriptArguments(dataset_path='harmlessness-DPO-train-dataset-curation/outputs/main/sft_dataset_smoke', eval_fraction=0.2)
+TRAINING ARGS:
+SFTConfig(
+_n_gpu=1,
+accelerator_config={'split_batches': False, 'dispatch_batches': None, 'even_batches': True, 'use_seedable_sampler': True, 'non_blocking': False, 'gradient_accumulation_kwargs': None, 'use_configured_state': False},
+activation_offloading=False,
+adafactor=False,
+adam_beta1=0.9,
+adam_beta2=0.999,
+adam_epsilon=1e-08,
+assistant_only_loss=False,
+auto_find_batch_size=False,
+average_tokens_across_devices=True,
+batch_eval_metrics=False,
+bf16=True,
+bf16_full_eval=False,
+chat_template_path=None,
+completion_only_loss=True,
+data_seed=None,
+dataloader_drop_last=False,
+dataloader_num_workers=0,
+dataloader_persistent_workers=False,
+dataloader_pin_memory=True,
+dataloader_prefetch_factor=None,
+dataset_kwargs=None,
+dataset_num_proc=None,
+dataset_text_field=text,
+ddp_backend=None,
+ddp_broadcast_buffers=None,
+ddp_bucket_cap_mb=None,
+ddp_find_unused_parameters=None,
+ddp_timeout=1800,
+debug=[],
+deepspeed=None,
+disable_tqdm=False,
+do_eval=False,
+do_predict=False,
+do_train=False,
+eos_token=<EOS_TOKEN>,
+eval_accumulation_steps=None,
+eval_delay=0,
+eval_do_concat_batches=True,
+eval_on_start=False,
+eval_packing=None,
+eval_steps=None,
+eval_strategy=IntervalStrategy.NO,
+eval_use_gather_object=False,
+fp16=False,
+fp16_backend=auto,
+fp16_full_eval=False,
+fp16_opt_level=O1,
+fsdp=[],
+fsdp_config={'min_num_params': 0, 'xla': False, 'xla_fsdp_v2': False, 'xla_fsdp_grad_ckpt': False},
+fsdp_min_num_params=0,
+fsdp_transformer_layer_cls_to_wrap=None,
+full_determinism=False,
+gradient_accumulation_steps=16,
+gradient_checkpointing=True,
+gradient_checkpointing_kwargs=None,
+greater_is_better=None,
+group_by_length=False,
+half_precision_backend=auto,
+hub_always_push=False,
+hub_model_id=er-abd/smoke-sft-qwen3-4B,
+hub_private_repo=None,
+hub_revision=None,
+hub_strategy=HubStrategy.EVERY_SAVE,
+hub_token=<HUB_TOKEN>,
+ignore_data_skip=False,
+include_for_metrics=[],
+include_inputs_for_metrics=False,
+include_num_input_tokens_seen=no,
+include_tokens_per_second=False,
+jit_mode_eval=False,
+label_names=None,
+label_smoothing_factor=0.0,
+learning_rate=0.0001,
+length_column_name=length,
+liger_kernel_config=None,
+load_best_model_at_end=False,
+local_rank=0,
+log_level=passive,
+log_level_replica=warning,
+log_on_each_node=True,
+logging_dir=checkpoints/qwen3-4B/smoke_sft/runs/Jul12_18-58-47_8118ca3c2753,
+logging_first_step=False,
+logging_nan_inf_filter=True,
+logging_steps=10,
+logging_strategy=IntervalStrategy.STEPS,
+lr_scheduler_kwargs=None,
+lr_scheduler_type=SchedulerType.COSINE,
+max_grad_norm=1.0,
+max_length=12288,
+max_steps=-1,
+metric_for_best_model=None,
+model_init_kwargs=None,
+mp_parameters=,
+neftune_noise_alpha=None,
+no_cuda=False,
+num_train_epochs=1.0,
+optim=OptimizerNames.ADAMW_TORCH,
+optim_args=None,
+optim_target_modules=None,
+output_dir=checkpoints/qwen3-4B/smoke_sft,
+overwrite_output_dir=False,
+packing=False,
+packing_strategy=bfd,
+pad_to_multiple_of=None,
+pad_token=<PAD_TOKEN>,
+padding_free=False,
+parallelism_config=None,
+past_index=-1,
+per_device_eval_batch_size=1,
+per_device_train_batch_size=1,
+prediction_loss_only=False,
+project=huggingface,
+push_to_hub=True,
+push_to_hub_model_id=None,
+push_to_hub_organization=None,
+push_to_hub_token=<PUSH_TO_HUB_TOKEN>,
+ray_scope=last,
+remove_unused_columns=False,
+report_to=[],
+restore_callback_states_from_checkpoint=False,
+resume_from_checkpoint=None,
+run_name=harmless_sft_smoke_sft_seed-0,
+save_on_each_node=False,
+save_only_model=True,
+save_safetensors=True,
+save_steps=500,
+save_strategy=SaveStrategy.STEPS,
+save_total_limit=None,
+seed=0,
+skip_memory_metrics=True,
+tf32=True,
+torch_compile=False,
+torch_compile_backend=None,
+torch_compile_mode=None,
+torch_empty_cache_steps=None,
+torchdynamo=None,
+tpu_metrics_debug=False,
+tpu_num_cores=None,
+trackio_space_id=trackio,
+use_cpu=False,
+use_legacy_prediction_loop=False,
+use_liger_kernel=False,
+use_mps_device=False,
+warmup_ratio=0.1,
+warmup_steps=0,
+weight_decay=0.01,
+)
+MODEL CONFIG:
+ModelConfig(model_name_or_path='Qwen/Qwen3-4B', model_revision='main', torch_dtype=None, trust_remote_code=False, attn_implementation=None, use_peft=True, lora_r=16, lora_alpha=32, lora_dropout=0.05, lora_target_modules=['q_proj', 'k_proj', 'v_proj', 'o_proj', 'gate_proj', 'up_proj', 'down_proj'], lora_target_parameters=None, lora_modules_to_save=None, lora_task_type='CAUSAL_LM', use_rslora=False, use_dora=False, load_in_8bit=False, load_in_4bit=False, bnb_4bit_quant_type='nf4', use_bnb_nested_quant=False)
+Setting seed to 0
+Loading dataset from:  harmlessness-DPO-train-dataset-curation/outputs/main/sft_dataset_smoke
+WARNING: training on a NON-canonical (--limit smoke) sft_dataset.
+Dataset provenance -> checkpoints/qwen3-4B/smoke_sft/dataset_provenance.json
+`torch_dtype` is deprecated! Use `dtype` instead!
+Fetching 3 files:   0%|          | 0/3 [00:00<?, ?it/s]Fetching 3 files:  33%|███▎      | 1/3 [00:05<00:10,  5.18s/it]Fetching 3 files:  67%|██████▋   | 2/3 [00:05<00:02,  2.20s/it]Fetching 3 files: 100%|██████████| 3/3 [00:05<00:00,  1.76s/it]
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 1/3 [00:00<00:01,  1.78it/s]Loading checkpoint shards:  67%|██████▋   | 2/3 [00:01<00:00,  1.77it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:01<00:00,  2.62it/s]
+Map:   0%|          | 0/32 [00:00<?, ? examples/s]Map: 100%|██████████| 32/32 [00:00<00:00, 1327.78 examples/s]
+Map:   0%|          | 0/32 [00:00<?, ? examples/s]Map: 100%|██████████| 32/32 [00:00<00:00, 4534.54 examples/s]
+Adding EOS to train dataset:   0%|          | 0/32 [00:00<?, ? examples/s]Adding EOS to train dataset: 100%|██████████| 32/32 [00:00<00:00, 4522.77 examples/s]
+Tokenizing train dataset:   0%|          | 0/32 [00:00<?, ? examples/s]Tokenizing train dataset: 100%|██████████| 32/32 [00:00<00:00, 314.92 examples/s]Tokenizing train dataset: 100%|██████████| 32/32 [00:00<00:00, 311.10 examples/s]
+Truncating train dataset:   0%|          | 0/32 [00:00<?, ? examples/s]Truncating train dataset: 100%|██████████| 32/32 [00:00<00:00, 9579.45 examples/s]
+Adding EOS to eval dataset:   0%|          | 0/32 [00:00<?, ? examples/s]Adding EOS to eval dataset: 100%|██████████| 32/32 [00:00<00:00, 9837.85 examples/s]
+Tokenizing eval dataset:   0%|          | 0/32 [00:00<?, ? examples/s]Tokenizing eval dataset: 100%|██████████| 32/32 [00:00<00:00, 333.86 examples/s]
+Truncating eval dataset:   0%|          | 0/32 [00:00<?, ? examples/s]Truncating eval dataset: 100%|██████████| 32/32 [00:00<00:00, 12012.68 examples/s]
+The model is already on multiple devices. Skipping the move to device specified in `args`.
+The tokenizer has new PAD/BOS/EOS tokens that differ from the model config and generation config. The model config and generation config were aligned accordingly, being updated with the tokenizer's values. Updated tokens: {'bos_token_id': None, 'pad_token_id': 151643}.
+[eval schedule] 2 total training steps -> eval/checkpoint every 1 steps (~20% of training), plus step 0 and the final step
+  0%|          | 0/32 [00:00<?, ?it/s]  6%|▋         | 2/32 [00:00<00:02, 12.58it/s] 12%|█▎        | 4/32 [00:00<00:03,  8.27it/s] 16%|█▌        | 5/32 [00:00<00:03,  8.71it/s] 22%|██▏       | 7/32 [00:00<00:03,  7.59it/s] 25%|██▌       | 8/32 [00:00<00:03,  7.83it/s] 28%|██▊       | 9/32 [00:01<00:03,  6.41it/s] 31%|███▏      | 10/32 [00:01<00:03,  5.90it/s] 34%|███▍      | 11/32 [00:01<00:03,  5.65it/s] 38%|███▊      | 12/32 [00:01<00:03,  6.36it/s] 41%|████      | 13/32 [00:01<00:02,  6.92it/s] 44%|████▍     | 14/32 [00:02<00:02,  6.46it/s] 50%|█████     | 16/32 [00:02<00:02,  7.74it/s] 56%|█████▋    | 18/32 [00:02<00:01,  8.60it/s] 59%|█████▉    | 19/32 [00:02<00:01,  8.86it/s] 66%|██████▌   | 21/32 [00:02<00:01,  9.16it/s] 69%|██████▉   | 22/32 [00:02<00:01,  9.26it/s] 75%|███████▌  | 24/32 [00:03<00:00,  9.63it/s] 81%|████████▏ | 26/32 [00:03<00:00,  9.04it/s] 88%|████████▊ | 28/32 [00:03<00:00,  9.45it/s] 94%|█████████▍| 30/32 [00:03<00:00,  9.05it/s] 97%|█████████▋| 31/32 [00:03<00:00,  8.18it/s]100%|██████████| 32/32 [00:03<00:00,  8.08it/s]
+***** eval metrics *****
+  epoch                    =          0
+  eval_entropy             =     0.5937
+  eval_loss                =     0.3423
+  eval_mean_token_accuracy =     0.9048
+  eval_num_tokens          =        0.0
+  eval_runtime             = 0:00:04.39
+  eval_samples_per_second  =      7.281
+  eval_steps_per_second    =      7.281
+[push] Uploading step-0 checkpoint to er-abd/smoke-sft-qwen3-4B-step-0 ...
+[push] Done: https://huggingface.co/er-abd/smoke-sft-qwen3-4B-step-0
+  0%|          | 0/2 [00:00<?, ?it/s] 50%|█████     | 1/2 [00:07<00:07,  7.83s/it]
+  0%|          | 0/32 [00:00<?, ?it/s][A
+  6%|▋         | 2/32 [00:00<00:02, 13.66it/s][A
+ 12%|█▎        | 4/32 [00:00<00:03,  8.52it/s][A
+ 16%|█▌        | 5/32 [00:00<00:03,  8.90it/s][A
+ 22%|██▏       | 7/32 [00:00<00:03,  7.66it/s][A
+ 25%|██▌       | 8/32 [00:00<00:03,  7.90it/s][A
+ 28%|██▊       | 9/32 [00:01<00:03,  6.45it/s][A
+ 31%|███▏      | 10/32 [00:01<00:03,  5.93it/s][A
+ 34%|███▍      | 11/32 [00:01<00:03,  5.67it/s][A
+ 41%|████      | 13/32 [00:01<00:02,  6.92it/s][A
+ 44%|████▍     | 14/32 [00:01<00:02,  6.54it/s][A
+ 50%|█████     | 16/32 [00:02<00:02,  7.70it/s][A
+ 56%|█████▋    | 18/32 [00:02<00:01,  8.47it/s][A
+ 62%|██████▎   | 20/32 [00:02<00:01,  9.03it/s][A
+ 66%|██████▌   | 21/32 [00:02<00:01,  9.04it/s][A
+ 72%|███████▏  | 23/32 [00:02<00:00,  9.45it/s][A
+ 78%|███████▊  | 25/32 [00:03<00:00,  9.71it/s][A
+ 81%|████████▏ | 26/32 [00:03<00:00,  8.90it/s][A
+ 88%|████████▊ | 28/32 [00:03<00:00,  9.35it/s][A
+ 94%|█████████▍| 30/32 [00:03<00:00,  8.97it/s][A
+ 97%|█████████▋| 31/32 [00:03<00:00,  8.09it/s][A                                             
+                                               [A{'eval_loss': 0.34228724241256714, 'eval_runtime': 4.0349, 'eval_samples_per_second': 7.931, 'eval_steps_per_second': 7.931, 'eval_entropy': 0.5937356324866414, 'eval_num_tokens': 17418.0, 'eval_mean_token_accuracy': 0.9048357792198658, 'epoch': 0.5}
+ 50%|█████     | 1/2 [00:11<00:07,  7.83s/it]
+100%|██████████| 32/32 [00:03<00:00,  8.09it/s][A
+                                               [A[push] Uploading step-1 checkpoint to er-abd/smoke-sft-qwen3-4B-step-1 ...
+[push] Done: https://huggingface.co/er-abd/smoke-sft-qwen3-4B-step-1
+100%|██████████| 2/2 [00:22<00:00, 11.60s/it]
+  0%|          | 0/32 [00:00<?, ?it/s][A
+  6%|▋         | 2/32 [00:00<00:02, 13.66it/s][A
+ 12%|█▎        | 4/32 [00:00<00:03,  8.52it/s][A
+ 16%|█▌        | 5/32 [00:00<00:03,  8.90it/s][A
+ 22%|██▏       | 7/32 [00:00<00:03,  7.67it/s][A
+ 25%|██▌       | 8/32 [00:00<00:03,  7.90it/s][A
+ 28%|██▊       | 9/32 [00:01<00:03,  6.46it/s][A
+ 31%|███▏      | 10/32 [00:01<00:03,  5.93it/s][A
+ 34%|███▍      | 11/32 [00:01<00:03,  5.67it/s][A
+ 41%|████      | 13/32 [00:01<00:02,  6.93it/s][A
+ 44%|████▍     | 14/32 [00:01<00:02,  6.55it/s][A
+ 50%|█████     | 16/32 [00:02<00:02,  7.73it/s][A
+ 56%|█████▋    | 18/32 [00:02<00:01,  8.53it/s][A
+ 62%|██████▎   | 20/32 [00:02<00:01,  9.10it/s][A
+ 66%|██████▌   | 21/32 [00:02<00:01,  9.10it/s][A
+ 72%|███████▏  | 23/32 [00:02<00:00,  9.50it/s][A
+ 78%|███████▊  | 25/32 [00:03<00:00,  9.76it/s][A
+ 81%|████████▏ | 26/32 [00:03<00:00,  8.93it/s][A
+ 88%|████████▊ | 28/32 [00:03<00:00,  9.38it/s][A
+ 94%|█████████▍| 30/32 [00:03<00:00,  8.99it/s][A
+ 97%|█████████▋| 31/32 [00:03<00:00,  8.11it/s][A                                             
+                                               [A{'eval_loss': 0.32259875535964966, 'eval_runtime': 4.025, 'eval_samples_per_second': 7.95, 'eval_steps_per_second': 7.95, 'eval_entropy': 0.5611839443445206, 'eval_num_tokens': 33691.0, 'eval_mean_token_accuracy': 0.9049054682254791, 'epoch': 1.0}
+100%|██████████| 2/2 [00:26<00:00, 11.60s/it]
+100%|██████████| 32/32 [00:03<00:00,  8.11it/s][A
+                                               [A[push] Uploading step-2 checkpoint to er-abd/smoke-sft-qwen3-4B-step-2 ...
+[push] Done: https://huggingface.co/er-abd/smoke-sft-qwen3-4B-step-2
+                                             {'train_runtime': 44.8344, 'train_samples_per_second': 0.714, 'train_steps_per_second': 0.045, 'train_loss': 0.3275827169418335, 'epoch': 1.0}
+100%|██████████| 2/2 [00:32<00:00, 11.60s/it]100%|██████████| 2/2 [00:32<00:00, 16.37s/it]
+Full training log history -> checkpoints/qwen3-4B/smoke_sft/train_log_history.json
+GPU memory: peak reserved 34.45 GB / 85.1 GB total -> 50.6 GB headroom (details: checkpoints/qwen3-4B/smoke_sft/gpu_memory.json)
+Best checkpoint at step 2 with metrics: {'loss': 0.32259875535964966, 'mean_token_accuracy': 0.9049054682254791}
+Removed checkpoint: checkpoints/qwen3-4B/smoke_sft/checkpoint-0
+Removed checkpoint: checkpoints/qwen3-4B/smoke_sft/checkpoint-1
+Removed checkpoint: checkpoints/qwen3-4B/smoke_sft/checkpoint-2
+Successfully renamed checkpoint-2 to checkpoint-best
+Best-checkpoint info -> checkpoints/qwen3-4B/smoke_sft/best_checkpoint.txt (HF: er-abd/smoke-sft-qwen3-4B-step-2)

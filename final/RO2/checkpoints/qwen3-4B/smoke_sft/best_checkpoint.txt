@@ -1,0 +1,7 @@
+Best checkpoint (selected by eval_loss — lower is better; SFT has no reward metrics)
+step: 2
+eval_loss: 0.32259875535964966
+eval_mean_token_accuracy: 0.9049054682254791
+local: checkpoints/qwen3-4B/smoke_sft/checkpoint-best
+hf_repo: er-abd/smoke-sft-qwen3-4B-step-2
+hf_url: https://huggingface.co/er-abd/smoke-sft-qwen3-4B-step-2
