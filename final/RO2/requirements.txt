@@ -2,7 +2,8 @@
 #
 # Single unified environment for the whole repo — the ONLY requirements file (the
 # curation modules have no separate copies). Covers end-to-end dataset curation
-# (harmlessness + anti-sycophancy) and the LoRA DPO trainer (train_dpo.py / train.sh).
+# (harmlessness + anti-sycophancy) and the LoRA trainers (train_dpo.py / train_sft.py /
+# train.sh, incl. the SFT converter + tokenization verifier).
 #
 # System packages (NOT pip) — install on a fresh pod before long runs:
 #   apt-get update && apt-get install -y tmux
