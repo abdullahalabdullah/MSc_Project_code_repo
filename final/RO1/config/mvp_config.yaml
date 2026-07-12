@@ -200,7 +200,18 @@ harmlessness:
     delimiter: "\t"            # WildJailbreak ships the eval config as TSV
     prompt_field: "adversarial"   # the adversarial jailbreak query sent to the target model
     subset_field: "data_type"     # adversarial_harmful | adversarial_benign
-  limit: null                  # null = full eval set; set an int for a quick smoke-test run
+  # Two DISJOINT splits, mirroring the monitorability eval's (test, eval) design.
+  # The eval config (~2210 prompts) is a single fixed pool; test and eval are
+  # proportional stratified samples of it (harmful/benign ratio preserved), so
+  # eval never overlaps test. Both are namespaced on disk by split (eval under
+  # .../eval/). Prepare with 01_prepare_wildjailbreak.py --data test|eval.
+  #   test — default size = 2/3 of the pool (⌊2·|pool|/3⌋ ≈ 1473), leaving a
+  #          disjoint half for eval. Override with --n-examples.
+  #   eval — sampled from the pool MINUS test; size = len(test)//2 (≈ 736).
+  # Regenerate test at the 2/3 size (--data test --force) before preparing eval;
+  # older full-2210 test runs must be re-run to match the partitioned test set.
+  random_seed: 88              # deterministic test/eval sampling (matches the monitorability seed)
+  limit: null                  # null = full eval pool; int caps the POOL first (smoke-test only)
   generation:
     enable_thinking: true      # Qwen3 thinking mode ON (matches the monitorability suite)
     n_samples: 1               # one response per prompt

@@ -30,8 +30,11 @@ def write_summary_md(metrics: dict, meta: dict, path: Path) -> None:
     lines = []
     w = lines.append
 
-    w(f"# Harmlessness Results: {meta.get('model_name', '?')}\n")
+    split = meta.get("split", "test")
+    w(f"# Harmlessness Results: {meta.get('model_name', '?')} ({split} split)\n")
     w(f"- **Model:** `{meta.get('hf_id', '?')}`")
+    w(f"- **Split:** `{split}` (test = 2/3 of the WildJailbreak eval pool; "
+      f"eval = disjoint half of test)")
     w(f"- **Benchmark:** `{meta.get('benchmark', 'allenai/wildjailbreak')}` "
       f"(eval: adversarial harmful + benign) · {metrics.get('n_total', 0)} responses")
     w(f"- **Judge:** `{meta.get('classifier', 'allenai/wildguard')}` (independent safety classifier)")

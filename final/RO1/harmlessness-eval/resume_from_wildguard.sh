@@ -7,14 +7,17 @@
 # don't have to re-run the ~20+ min generation step.
 #
 # Usage:
-#   bash harmlessness-eval/resume_from_wildguard.sh <model_id>
+#   bash harmlessness-eval/resume_from_wildguard.sh <model_id> [--data test|eval]
 #
 #   model_id   the SAME model ID used with run_harmlessness.sh (resolves the
 #              same responses dir). All output dirs are namespaced by its
 #              folder-safe name ('/' -> '_').
+#   --data     OPTIONAL (default: test). Must match the split used for inference;
+#              the eval split's responses live under .../eval/.
 #
 # Example:
 #   bash harmlessness-eval/resume_from_wildguard.sh er-abd/harmless-dpo-qwen3-4B-pilot
+#   bash harmlessness-eval/resume_from_wildguard.sh Qwen/Qwen3-4B --data eval
 #
 # Runs: 03 WildGuard classification -> 04 metrics -> 05 markdown report, then
 # commits + pushes. Fail-soft (no set -e). Output is mirrored to logs/ (gitignored).
@@ -25,19 +28,37 @@ set -uo pipefail
 # config/, outputs-and-results/, and logs/ resolve as repo-root-relative paths.
 cd "$(dirname "$0")/.."
 
-USAGE="usage: bash harmlessness-eval/resume_from_wildguard.sh <model_id>"
+USAGE="usage: bash harmlessness-eval/resume_from_wildguard.sh <model_id> [--data test|eval]"
 MODEL_ID="${1:?$USAGE}"
+shift
+DATA_SPLIT="test"
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --data)
+            if [[ $# -lt 2 || ! "$2" =~ ^(test|eval)$ ]]; then
+                echo "ERROR: --data requires 'test' or 'eval' (got '${2:-}')."; echo "$USAGE"; exit 1
+            fi
+            DATA_SPLIT="$2"; shift ;;
+        *) echo "ERROR: unknown argument '$1'."; echo "$USAGE"; exit 1 ;;
+    esac
+    shift
+done
 
 # Folder-safe model name — must mirror model_dir_name() in harmlessness-eval/src/dataset.py.
 MODEL_NAME="${MODEL_ID//\//_}"
 
+# Split segment ('' for test, '/eval' for eval) — mirrors resolve_paths in src/dataset.py.
+SPLIT_SEG=""
+SPLIT_TAG=""
+if [[ "$DATA_SPLIT" == "eval" ]]; then SPLIT_SEG="/eval"; SPLIT_TAG="_eval"; fi
+
 SCRIPTS="harmlessness-eval/scripts"
 
 # --- Preflight: phase-2 responses must already exist -------------------------
-RESPONSES="outputs-and-results/harmlessness-results/responses/${MODEL_NAME}/responses.jsonl"
+RESPONSES="outputs-and-results/harmlessness-results/responses/${MODEL_NAME}${SPLIT_SEG}/responses.jsonl"
 if [[ ! -f "$RESPONSES" ]]; then
     echo "ERROR: $RESPONSES not found."
-    echo "Nothing to resume from — run harmlessness-eval/run_harmlessness.sh first."
+    echo "Nothing to resume from — run harmlessness-eval/run_harmlessness.sh --data $DATA_SPLIT first."
     exit 1
 fi
 
@@ -75,11 +96,12 @@ commit_push() {
 
 # Mirror all output to a timestamped log file (logs/ is gitignored).
 mkdir -p logs
-LOGFILE="logs/harmlessness_resume_${MODEL_NAME}_$(date +%Y%m%d_%H%M%S).log"
+LOGFILE="logs/harmlessness_resume_${MODEL_NAME}${SPLIT_TAG}_$(date +%Y%m%d_%H%M%S).log"
 exec > >(tee -a "$LOGFILE") 2>&1
 
 echo "Harmlessness resume (from WildGuard) started: $(date)"
 echo "Model:    $MODEL_ID (dirs namespaced as '$MODEL_NAME')"
+echo "Split:    $DATA_SPLIT"
 echo "Log file: $LOGFILE"
 
 # --- Phase 0: git identity ---------------------------------------------------
@@ -95,24 +117,24 @@ run git pull --rebase
 
 # --- Phase 2: WildGuard classification (GPU) ----------------------------------
 echo ""
-echo "########## PHASE 2: WildGuard classification ##########"
-run python "$SCRIPTS/03_run_wildguard.py" --model "$MODEL_ID"
-commit_push "harmlessness: $MODEL_NAME WildGuard classifications"
+echo "########## PHASE 2: WildGuard classification ($DATA_SPLIT) ##########"
+run python "$SCRIPTS/03_run_wildguard.py" --model "$MODEL_ID" --data "$DATA_SPLIT"
+commit_push "harmlessness: $MODEL_NAME $DATA_SPLIT WildGuard classifications"
 
 # --- Phase 3: metrics ----------------------------------------------------------
 echo ""
-echo "########## PHASE 3: metrics ##########"
-run python "$SCRIPTS/04_compute_metrics.py" --model "$MODEL_ID"
+echo "########## PHASE 3: metrics ($DATA_SPLIT) ##########"
+run python "$SCRIPTS/04_compute_metrics.py" --model "$MODEL_ID" --data "$DATA_SPLIT"
 
 # --- Phase 4: Markdown report ---------------------------------------------------
 echo ""
-echo "########## PHASE 4: markdown report ##########"
-run python "$SCRIPTS/05_generate_reports.py" --model "$MODEL_ID"
+echo "########## PHASE 4: markdown report ($DATA_SPLIT) ##########"
+run python "$SCRIPTS/05_generate_reports.py" --model "$MODEL_ID" --data "$DATA_SPLIT"
 
 # --- Final push --------------------------------------------------------------
 echo ""
 echo "########## FINAL PUSH ##########"
-commit_push "harmlessness: $MODEL_NAME WildGuard classifications + metrics + report — final push"
+commit_push "harmlessness: $MODEL_NAME $DATA_SPLIT WildGuard classifications + metrics + report — final push"
 
 # --- Summary -----------------------------------------------------------------
 echo ""

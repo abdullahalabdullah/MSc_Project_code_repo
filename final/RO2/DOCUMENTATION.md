@@ -7,8 +7,8 @@ harmlessness-DPO-train-dataset-curation/   # harmlessness curation (WildJailbrea
 anti-syc-DPO-train-dataset-curation/       # anti-sycophancy curation (TriviaQA → preference pairs
                                            #   + sham control + the RO1 eval's frozen files)
 train_dpo.py                  # LoRA DPO trainer (self-contained; consumes either module's export)
-train_simpo.py                # LoRA SimPO trainer (length-normalized, reference-free; Meng et al. 2024)
-train.sh                      # one-command training wrapper (harmlessness defaults; METHOD=dpo|simpo)
+train_dpo_norm.py             # LoRA length-normalized DPO trainer (open-instruct dpo_norm; avg log-probs)
+train.sh                      # one-command training wrapper (harmlessness defaults; METHOD=dpo|dpo_norm)
 train_antisyc.sh              # anti-sycophancy wrapper (pins output dir / HF repo / W&B names)
 train_antisyc_sham.sh         # sham-control wrapper
 requirements.txt              # unified environment
@@ -124,42 +124,46 @@ box and the API box (heavy JSONLs are gitignored).
 
 ```bash
 bash train.sh                                            # harmlessness, standard DPO
-METHOD=simpo bash train.sh <path/to/dpo_dataset>         # harmlessness, length-normalized SimPO
+METHOD=dpo_norm bash train.sh <path/to/dpo_dataset>      # harmlessness, length-normalized DPO
 bash train_antisyc.sh      <path/to/dpo_dataset>         # anti-sycophancy
 bash train_antisyc_sham.sh <path/to/dpo_dataset_sham>    # sham control
 ```
 
-### Objective: DPO vs SimPO (`METHOD`)
+### Objective: DPO vs length-normalized DPO (`METHOD`)
 
 `train.sh` runs two interchangeable preference objectives on the **same** exported dataset,
 selected by `METHOD`:
 
 - **`METHOD=dpo`** (default) — standard DPO (`train_dpo.py`). Unchanged.
-- **`METHOD=simpo`** — length-normalized, reference-free SimPO (`train_simpo.py`), Meng et al.
-  2024 ([arXiv:2405.14734](https://arxiv.org/abs/2405.14734)), implemented via TRL's
-  `CPOTrainer` with `loss_type="simpo"`. DPO scores a completion by the **sum** of its token
-  log-probs, which mechanically rewards longer generations and drives the post-training
-  response-length inflation documented in
-  `RO1/notes/harmless_dpo_response_length_inflation.md`. SimPO scores by the **length-normalized
-  average** instead (reward `r(x,y) = (β/|y|)·Σ log p`), is reference-free, and adds a target
-  reward margin γ: loss `-log σ(β·(r_w − r_l) − γ)`. It reuses all of `train_dpo.py`'s
-  machinery (LoRA, eval/checkpoint schedule, per-step Hub push, best-checkpoint selection,
-  metric logging, dataset formatting) so the two are directly comparable — `train_dpo.py` is
-  not modified.
+- **`METHOD=dpo_norm`** — length-normalized DPO (`train_dpo_norm.py`). Standard DPO scores a
+  completion by the **sum** of its per-token log-probs, which mechanically rewards longer
+  generations and drives the post-training response-length inflation documented in
+  `RO1/notes/harmless_dpo_response_length_inflation.md`. Length-normalized DPO scores by the
+  **average** instead (sum ÷ #completion-tokens), removing that length bias while keeping DPO's
+  reference-based sigmoid loss. Length normalization for DPO was noted in the original DPO work
+  (Rafailov et al.) and established as a strong, well-tuned variant by Meng et al. 2024 (SimPO,
+  which reports it as a baseline). The averaging follows AllenAI **open-instruct**'s `dpo_norm`
+  ([`open_instruct/dpo_utils.py`](https://github.com/allenai/open-instruct/blob/main/open_instruct/dpo_utils.py),
+  `_get_batch_logps(average_log_prob=True)`), applied here to TRL's sigmoid DPO via a thin
+  `DPOTrainer` subclass (`LengthNormalizedDPOTrainer`) that divides the summed completion
+  log-probs by completion length on both the policy and reference passes. It reuses all of
+  `train_dpo.py`'s machinery (LoRA, eval/checkpoint schedule, per-step Hub push, best-checkpoint
+  selection, metric logging, dataset formatting) so the two are directly comparable —
+  `train_dpo.py` is not modified.
 
-`METHOD=simpo` changes the default `OUTPUT_DIR` (`checkpoints/qwen3-4B/harmless_simpo`),
-`HUB_MODEL_ID` (`er-abd/harmless-simpo-qwen3-4B`), and W&B project so DPO and SimPO artifacts
-never collide. Loss knobs (env, SimPO only): `SIMPO_BETA` (default 5), `SIMPO_GAMMA` (default
-1.5 — target margin γ; tunable, roughly 0.3–0.5·β), `CPO_ALPHA` (default 0 = pure SimPO; >0
-adds an SFT/NLL term → CPO-SimPO hybrid). DPO knob: `DPO_BETA` (default 0.1). Shared:
+`METHOD=dpo_norm` changes the default `OUTPUT_DIR` (`checkpoints/qwen3-4B/harmless_dpo_norm`),
+`HUB_MODEL_ID` (`er-abd/harmless-dpo-norm-qwen3-4B`), and W&B project so the two methods'
+artifacts never collide. Loss knob (env): `DPO_NORM_BETA` (default 5 — larger than standard
+DPO's `DPO_BETA`=0.1 because averaged per-token log-probs are ~1/|y| smaller). Shared:
 `LEARNING_RATE` (default 5.0e-6). Example:
 
 ```bash
-METHOD=simpo SIMPO_BETA=5 SIMPO_GAMMA=1.5 bash train.sh path/to/dpo_dataset
+METHOD=dpo_norm DPO_NORM_BETA=5 bash train.sh path/to/dpo_dataset
 ```
 
-SimPO is reference-free, so it never runs a reference forward pass — it uses **less** GPU
-memory than DPO (relevant on the near-full 80GB H100).
+Note `dpo_norm` stays **reference-based** (`loss_type="sigmoid"`), so — like standard DPO with
+PEFT — the reference is the base model with the LoRA adapter disabled (no separate model copy),
+and the length normalization is applied identically to the reference log-probs.
 
 ### Shared behaviour
 
@@ -182,12 +186,12 @@ max_new_tokens), but trivia CoT is much shorter in practice; check the curation
 `qa_report.md` length stats and raise `MAX_LENGTH` (default 12288) only if the >12k share
 is non-negligible.
 
-Output: LoRA adapters under `checkpoints/qwen3-4B/harmless_dpo/` (or `..._simpo/` for
-`METHOD=simpo`). The best checkpoint by eval reward-accuracy is kept as `checkpoint-best`;
+Output: LoRA adapters under `checkpoints/qwen3-4B/harmless_dpo/` (or `..._dpo_norm/` for
+`METHOD=dpo_norm`). The best checkpoint by eval reward-accuracy is kept as `checkpoint-best`;
 others are pruned. Its identity — the winning step and the exact `<HUB_MODEL_ID>-step-<N>` HF
 repo it was pushed to — is written to `OUTPUT_DIR/best_checkpoint.txt` (and mirrored into the
 W&B run summary). A full log is written to `logs/train_<method>.log` (`logs/train_dpo.log` /
-`logs/train_simpo.log`).
+`logs/train_dpo_norm.log`).
 
 **Eval/checkpoint schedule**: fixed step intervals are epoch-count-proof and derived from the
 trainer's own total-step count (dataset size × epochs × batch/grad-accum settings), not a fixed
@@ -197,12 +201,12 @@ number of steps. Eval + checkpoint fire at:
 - the final training step, always — even if it doesn't land on a 20%-boundary
 
 `--eval_strategy` / `--save_strategy` are forced to `"no"` inside `train_dpo.py` /
-`train_simpo.py` regardless of CLI flags, so this schedule is the only thing that triggers
+`train_dpo_norm.py` regardless of CLI flags, so this schedule is the only thing that triggers
 eval/save — nothing here sets `num_train_epochs` early-stop behavior; the run always trains
 through every epoch.
 
 **Eval metrics** — at every eval point the trainer writes one line to `OUTPUT_DIR/eval_metrics.jsonl`
-with `step`, `epoch`, and all DPO/SimPO eval metrics (`eval_loss`, `eval_rewards/accuracies`,
+with `step`, `epoch`, and all DPO eval metrics (`eval_loss`, `eval_rewards/accuracies`,
 `eval_rewards/margins`, `eval_logps/*`, …). Plain JSONL for easy plotting of the training curves:
 `pandas.read_json("eval_metrics.jsonl", lines=True)`.
 
@@ -275,26 +279,30 @@ or serve it directly with vLLM (`--enable-lora` / `LoRARequest`).
 | Curate harmlessness dataset | `bash harmlessness-DPO-train-dataset-curation/run_all.sh` |
 | Curate anti-syc dataset | `anti-syc-DPO-train-dataset-curation/run_all.sh` (smoke) or `run_phase{1..4}_{gpu,api}.sh` |
 | Train harmlessness (DPO) | `bash train.sh` |
-| Train harmlessness (SimPO) | `METHOD=simpo bash train.sh <dpo_dataset>` |
+| Train harmlessness (length-normalized DPO) | `METHOD=dpo_norm bash train.sh <dpo_dataset>` |
 | Train anti-syc (+ sham) | `bash train_antisyc.sh <dpo_dataset>` / `bash train_antisyc_sham.sh <dpo_dataset_sham>` |
 
 ## Notes
 
-- **TRL version**: `train_dpo.py` uses the TRL `DPOTrainer` / `DPOConfig` / `TrlParser` API and
-  `train_simpo.py` uses `CPOTrainer` / `CPOConfig` with `loss_type="simpo"` (`processing_class`,
-  `get_peft_config`). `requirements.txt` pins `trl==0.22.2` **exactly** (not a floor) — all of
-  `train.sh`'s CLI flags for **both** methods were verified against this version (incl. that
-  `CPOConfig` accepts `--loss_type simpo --beta --simpo_gamma --cpo_alpha` and that its
-  `loss_type="simpo"` path length-normalizes the log-probs and is reference-free), and TRL's
-  config APIs have changed across versions before. If you deliberately upgrade TRL, run
-  `python train_dpo.py --help` and `python train_simpo.py --help` first to confirm every flag
-  still parses, then re-pin.
-- **SimPO knobs** (`METHOD=simpo`): `SIMPO_BETA` (default 5), `SIMPO_GAMMA` (default 1.5, target
-  reward margin γ — tunable, ~0.3–0.5·β), `CPO_ALPHA` (default 0 = pure SimPO; >0 = CPO-SimPO
-  hybrid). γ has no universally-correct value; treat 1.5 as a starting point and tune. SimPO is
-  the length-normalized fix for DPO's response-length inflation — background and evidence in
-  `RO1/notes/harmless_dpo_response_length_inflation.md`.
+- **TRL version**: `train_dpo.py` and `train_dpo_norm.py` both use the TRL `DPOTrainer` /
+  `DPOConfig` / `TrlParser` API (`processing_class`, `get_peft_config`); `train_dpo_norm.py`
+  subclasses `DPOTrainer` (`LengthNormalizedDPOTrainer`) to length-average the completion
+  log-probs. `requirements.txt` pins `trl==0.22.2` **exactly** (not a floor) — `train.sh`'s CLI
+  flags for both methods were verified against this version, and the length-normalization hook
+  relies on TRL internals (`concatenated_forward` returning summed `chosen_logps`/`rejected_logps`
+  and `concatenated_inputs(...)["completion_attention_mask"]`), which have changed across TRL
+  versions before. If you deliberately upgrade TRL, run `python train_dpo.py --help` and
+  `python train_dpo_norm.py --help`, re-verify the subclass hook against the new
+  `concatenated_forward`, then re-pin.
+- **dpo_norm knob** (`METHOD=dpo_norm`): `DPO_NORM_BETA` (default 5 — larger than standard DPO's
+  0.1 because averaged per-token log-probs are ~1/|y| smaller; treat 5 as a starting point and
+  tune). The length-averaging follows open-instruct's `dpo_norm` and is the fix for DPO's
+  response-length inflation — background and evidence in
+  `RO1/notes/harmless_dpo_response_length_inflation.md`. The subclass assumes completions are
+  **not** truncated by `max_length` (train.sh's 12288 default is well above the ~1.5k-token
+  completions); if you lower `max_length` below the completion length, the normalization
+  denominator would differ from the tokens actually scored — revisit the subclass then.
 - **Dataset schema contract**: training expects exactly `prompt` / `chosen` / `rejected` string
   columns with `train` / `valid` splits — which is what stage 06 emits. `chosen`/`rejected` retain
   the `<think>…</think>` reasoning (thinking-mode preference training); both `train_dpo.py` and
-  `train_simpo.py` wrap them as assistant turns without stripping the CoT.
+  `train_dpo_norm.py` wrap them as assistant turns without stripping the CoT.

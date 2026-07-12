@@ -24,9 +24,9 @@ Options:
                disks.
 
 Input:
-    harmlessness-eval/data/wildjailbreak_eval/prompts.jsonl
+    harmlessness-eval/data/wildjailbreak_eval/[eval/]prompts.jsonl
 Output:
-    outputs-and-results/harmlessness-results/responses/{model}/responses.jsonl
+    outputs-and-results/harmlessness-results/responses/{model}/[eval/]responses.jsonl
 """
 
 import argparse
@@ -38,7 +38,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import yaml
-from src.dataset import ensure_hf_auth, model_dir_name, load_prompts
+from src.dataset import SPLITS, ensure_hf_auth, model_dir_name, load_prompts, resolve_paths
 from src.inference import load_qwen_model, generate_responses
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -49,6 +49,8 @@ def main():
     parser.add_argument("--model", required=True,
                         help="HF model ID (e.g. Qwen/Qwen3-4B) or local model dir.")
     parser.add_argument("--config", default="config/mvp_config.yaml")
+    parser.add_argument("--data", default="test", choices=SPLITS,
+                        help="Data split: test (default) or eval (namespaced under .../eval/).")
     parser.add_argument("--merge", action="store_true", default=False,
                         help="Treat --model as a LoRA adapter repo and merge it into the "
                              "fixed base from the config 'merge:' block before inference. "
@@ -63,17 +65,18 @@ def main():
 
     h = config["harmlessness"]
     model_name = model_dir_name(args.model)
+    paths = resolve_paths(REPO_ROOT, config, model_name=model_name, split=args.data)
 
-    index_path = REPO_ROOT / h["paths"]["data_dir"] / "wildjailbreak_eval" / "prompts.jsonl"
+    index_path = paths["data_index"]
     if not index_path.exists():
-        print(f"ERROR: prompts index not found at {index_path}. Run 01_prepare_wildjailbreak.py first.")
+        print(f"ERROR: '{args.data}' prompts index not found at {index_path}. "
+              f"Run 01_prepare_wildjailbreak.py --data {args.data} first.")
         sys.exit(1)
     prompts = load_prompts(index_path)
-    print(f"Loaded {len(prompts)} prompts from {index_path}")
+    print(f"Loaded {len(prompts)} '{args.data}' prompts from {index_path}")
 
-    out_dir = REPO_ROOT / h["paths"]["responses_dir"] / model_name
-    out_dir.mkdir(parents=True, exist_ok=True)
-    out_path = out_dir / "responses.jsonl"
+    out_path = paths["responses"]
+    out_path.parent.mkdir(parents=True, exist_ok=True)
 
     ensure_hf_auth()
 

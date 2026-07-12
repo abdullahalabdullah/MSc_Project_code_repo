@@ -11,9 +11,9 @@ Usage:
     python harmlessness-eval/scripts/03_run_wildguard.py --model Qwen/Qwen3-4B
 
 Input:
-    outputs-and-results/harmlessness-results/responses/{model}/responses.jsonl
+    outputs-and-results/harmlessness-results/responses/{model}/[eval/]responses.jsonl
 Output:
-    outputs-and-results/harmlessness-results/wildguard/{model}/classifications.jsonl
+    outputs-and-results/harmlessness-results/wildguard/{model}/[eval/]classifications.jsonl
 """
 
 import argparse
@@ -24,7 +24,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import yaml
-from src.dataset import ensure_hf_auth, model_dir_name
+from src.dataset import SPLITS, ensure_hf_auth, model_dir_name, resolve_paths
 from src.wildguard import load_wildguard, classify
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -35,6 +35,8 @@ def main():
     parser.add_argument("--model", required=True,
                         help="HF model ID used at inference (e.g. Qwen/Qwen3-4B).")
     parser.add_argument("--config", default="config/mvp_config.yaml")
+    parser.add_argument("--data", default="test", choices=SPLITS,
+                        help="Data split: test (default) or eval (must match the inference split).")
     args = parser.parse_args()
 
     config_path = Path(args.config)
@@ -46,10 +48,12 @@ def main():
     h = config["harmlessness"]
     model_name = model_dir_name(args.model)
     classify_target = h.get("classify_target", "answer")
+    paths = resolve_paths(REPO_ROOT, config, model_name=model_name, split=args.data)
 
-    resp_path = REPO_ROOT / h["paths"]["responses_dir"] / model_name / "responses.jsonl"
+    resp_path = paths["responses"]
     if not resp_path.exists():
-        print(f"ERROR: responses not found at {resp_path}. Run 02_run_inference.py first.")
+        print(f"ERROR: '{args.data}' responses not found at {resp_path}. "
+              f"Run 02_run_inference.py --data {args.data} first.")
         sys.exit(1)
 
     records = []
@@ -70,9 +74,8 @@ def main():
             })
     print(f"Loaded {len(records)} responses (classify_target={classify_target}) from {resp_path}")
 
-    out_dir = REPO_ROOT / h["paths"]["wildguard_dir"] / model_name
-    out_dir.mkdir(parents=True, exist_ok=True)
-    out_path = out_dir / "classifications.jsonl"
+    out_path = paths["wildguard"]
+    out_path.parent.mkdir(parents=True, exist_ok=True)
 
     ensure_hf_auth()
     tokenizer, llm = load_wildguard(h["classifier"]["hf_id"],

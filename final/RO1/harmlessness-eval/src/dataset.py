@@ -10,7 +10,14 @@ and writes a flat prompts index the rest of the pipeline consumes.
 
 import json
 import os
+import random
+from collections import Counter, defaultdict
 from pathlib import Path
+
+# The WildJailbreak eval config is a single fixed pool; test and eval are two
+# DISJOINT proportional-stratified samples of it (see prepare_split). Mirrors the
+# monitorability eval's (test, eval) split names and `eval/` path namespacing.
+SPLITS = ("test", "eval")
 
 
 # ---------------------------------------------------------------------------
@@ -62,6 +69,40 @@ def model_dir_name(model_id: str) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Path namespacing (test / eval split)
+# ---------------------------------------------------------------------------
+
+def resolve_paths(root, config: dict, model_name: str | None = None,
+                  split: str = "test") -> dict:
+    """Resolve harmlessness on-disk paths for a (model, split) pair.
+
+    `split` = "test" (default) keeps the existing flat layout; "eval" inserts an
+    `eval/` segment after the dataset dir / model dir everywhere, so the two
+    splits never overwrite each other (mirrors monitorability-eval.resolve_paths):
+
+        data/wildjailbreak_eval/[eval/]prompts.jsonl
+        responses/{model}/[eval/]responses.jsonl
+        wildguard/{model}/[eval/]classifications.jsonl
+        analysis/{model}/[eval/]
+
+    `model_name` is required for every path except the prompts index (which is
+    model-independent — both splits are sampled once, shared by all models)."""
+    if split not in SPLITS:
+        raise ValueError(f"split must be one of {SPLITS}, got '{split}'")
+    root = Path(root)
+    p = config["harmlessness"]["paths"]
+    seg = () if split == "test" else ("eval",)
+    paths = {
+        "data_index": root.joinpath(p["data_dir"], "wildjailbreak_eval", *seg, "prompts.jsonl"),
+    }
+    if model_name:
+        paths["responses"] = root.joinpath(p["responses_dir"], model_name, *seg, "responses.jsonl")
+        paths["wildguard"] = root.joinpath(p["wildguard_dir"], model_name, *seg, "classifications.jsonl")
+        paths["analysis_dir"] = root.joinpath(p["analysis_dir"], model_name, *seg)
+    return paths
+
+
+# ---------------------------------------------------------------------------
 # WildJailbreak eval loading
 # ---------------------------------------------------------------------------
 
@@ -104,12 +145,104 @@ def load_wildjailbreak_eval(bench_cfg: dict, limit: int | None = None) -> list:
     return records
 
 
-def prepare_prompts(config: dict, output_path: Path, limit: int | None = None) -> list:
-    """Load WildJailbreak eval, write the prompts index to output_path, return it."""
+def _stratified_partition(records: list, n: int, rng: random.Random,
+                          key: str = "subset") -> tuple[list, list]:
+    """Proportional stratified sample of `n` records by `key` (default the
+    adversarial_harmful / adversarial_benign subset), preserving each stratum's
+    share of the pool so the harmful/benign ratio is kept. Returns
+    (sample, remainder). Deterministic in `rng`; the fractional leftover is
+    allocated by largest remainder (ties broken by stratum name). If
+    n >= len(records) the whole pool is the sample (remainder empty)."""
+    if n >= len(records):
+        out = list(records)
+        rng.shuffle(out)
+        return out, []
+
+    groups: dict[str, list] = defaultdict(list)
+    for r in records:
+        groups[r.get(key, "unknown")].append(r)
+    for items in groups.values():
+        rng.shuffle(items)
+
+    total = len(records)
+    alloc: dict[str, int] = {}
+    frac: dict[str, float] = {}
+    for g, items in groups.items():
+        exact = n * len(items) / total
+        alloc[g] = int(exact)
+        frac[g] = exact - int(exact)
+    assigned = sum(alloc.values())
+    # Distribute the remaining slots to the largest fractional remainders.
+    for g in sorted(frac, key=lambda k: (frac[k], k), reverse=True):
+        if assigned >= n:
+            break
+        if alloc[g] < len(groups[g]):
+            alloc[g] += 1
+            assigned += 1
+
+    sample: list = []
+    remainder: list = []
+    for g, items in groups.items():
+        k = alloc[g]
+        sample.extend(items[:k])
+        remainder.extend(items[k:])
+    rng.shuffle(sample)
+    rng.shuffle(remainder)
+    return sample, remainder
+
+
+def prepare_split(config: dict, output_path: Path, split: str = "test",
+                  test_records: list | None = None, n_examples: int | None = None,
+                  limit: int | None = None) -> list:
+    """Prepare a WildJailbreak prompts index for `split` and write it (JSONL).
+
+    Partition semantics (mirrors the monitorability eval): the WildJailbreak eval
+    config is a single fixed pool; test and eval are DISJOINT proportional
+    stratified samples of it (harmful/benign ratio preserved), so eval never
+    overlaps test.
+
+      test  — default size = 2/3 of the pool (⌊2·|pool|/3⌋), which leaves a
+              disjoint half for eval; override with `n_examples`.
+      eval  — sampled from the pool MINUS the test split; default size =
+              len(test)//2 (half the test set). Requires the FINAL test index,
+              passed as `test_records`.
+
+    `limit` caps the loaded pool first (smoke-test only). Deterministic in the
+    config `harmlessness.random_seed` (default 88)."""
+    if split not in SPLITS:
+        raise ValueError(f"split must be one of {SPLITS}, got '{split}'")
     h = config["harmlessness"]
-    records = load_wildjailbreak_eval(h["benchmark"], limit=limit)
-    if not records:
+    rng = random.Random(h.get("random_seed", 88))
+    pool = load_wildjailbreak_eval(h["benchmark"], limit=limit)
+    if not pool:
         raise ValueError("WildJailbreak eval produced no prompts — check the config/benchmark.")
+
+    if split == "test":
+        n = n_examples if n_examples is not None else (2 * len(pool)) // 3
+        records, _ = _stratified_partition(pool, n, rng)
+    else:  # eval
+        if not test_records:
+            raise ValueError("eval split requires the FINAL test index (test_records).")
+        used_ids = {r["prompt_id"] for r in test_records}
+        used_prompts = {r["prompt"] for r in test_records}
+        avail = [r for r in pool
+                 if r["prompt_id"] not in used_ids and r["prompt"] not in used_prompts]
+        if not avail:
+            raise ValueError(
+                f"no prompts left after excluding the {len(test_records)}-prompt "
+                f"test split — the test index likely still covers the whole "
+                f"{len(pool)}-prompt pool (a pre-split full run). Regenerate the "
+                f"test split at the 2/3 partition size first: "
+                f"01_prepare_wildjailbreak.py --data test --force")
+        n = n_examples if n_examples is not None else len(test_records) // 2
+        if n > len(avail):
+            print(f"  NOTE: only {len(avail)} prompts left after excluding the "
+                  f"{len(test_records)}-prompt test split; using all (below n={n}). "
+                  f"Regenerate the test split at the 2/3 partition size "
+                  f"(01_prepare_wildjailbreak.py --data test --force) if you expected more.")
+            n = len(avail)
+        records, _ = _stratified_partition(avail, n, rng)
+        assert_splits_disjoint(test_records, records)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f:
@@ -117,12 +250,29 @@ def prepare_prompts(config: dict, output_path: Path, limit: int | None = None) -
             f.write(json.dumps(r, ensure_ascii=False) + "\n")
 
     # Report the subset balance so the run log shows the harmful/benign split.
-    from collections import Counter
     counts = Counter(r["subset"] for r in records)
-    print(f"  Wrote {len(records)} prompts to {output_path}")
-    for subset, n in sorted(counts.items()):
-        print(f"    {subset}: {n}")
+    print(f"  Wrote {len(records)} '{split}' prompts to {output_path}")
+    for subset, n_sub in sorted(counts.items()):
+        print(f"    {subset}: {n_sub}")
     return records
+
+
+def assert_splits_disjoint(test_records: list, eval_records: list) -> None:
+    """Hard-fail if the test and eval splits share any prompt (by prompt_id or
+    prompt text). Guards against the eval index being sampled against a stale
+    test index (e.g. test regenerated at a different size afterwards)."""
+    test_ids = {r["prompt_id"] for r in test_records}
+    test_prompts = {r["prompt"] for r in test_records}
+    overlap = [r["prompt_id"] for r in eval_records
+               if r["prompt_id"] in test_ids or r["prompt"] in test_prompts]
+    if overlap:
+        raise ValueError(
+            f"eval split overlaps the test split on {len(overlap)} prompt(s) "
+            f"(prompt_ids {overlap[:10]}...). The test index was probably "
+            f"regenerated after the eval index was sampled. Regenerate the eval "
+            f"index (01_prepare_wildjailbreak.py --data eval --force) from the "
+            f"FINAL test index."
+        )
 
 
 def load_prompts(index_path: Path) -> list:

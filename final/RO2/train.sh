@@ -3,11 +3,12 @@
 # One-command LoRA preference training on the harmlessness pairs.
 #
 # METHOD selects the objective (both consume the SAME exported dataset):
-#   METHOD=dpo    (default) standard DPO            -> train_dpo.py
-#   METHOD=simpo  length-normalized, reference-free -> train_simpo.py
-#                 SimPO (Meng et al. 2024, arXiv:2405.14734). Fixes DPO's response-length
-#                 inflation by normalizing the reward by completion length. See
-#                 RO1/notes/harmless_dpo_response_length_inflation.md.
+#   METHOD=dpo       (default) standard DPO (summed log-probs)   -> train_dpo.py
+#   METHOD=dpo_norm  length-normalized DPO (averaged log-probs)  -> train_dpo_norm.py
+#                    Reference-based sigmoid DPO on length-AVERAGED log-probs (open-instruct
+#                    "dpo_norm"; length normalization noted in Rafailov et al. and tuned as a
+#                    strong variant by Meng et al. 2024). Fixes DPO's response-length inflation.
+#                    See RO1/notes/harmless_dpo_response_length_inflation.md.
 #
 # It trains on the dataset exported by the curation module (stage 06). By default it
 # auto-discovers the MOST RECENT export under
@@ -17,9 +18,9 @@
 # HF hub repo, and W&B names, then call this script).
 #
 # Usage:
-#   bash train.sh                                  # newest exported dataset, standard DPO
-#   bash train.sh path/to/dpo_dataset              # a specific dataset
-#   METHOD=simpo bash train.sh path/to/dpo_dataset # length-normalized SimPO instead of DPO
+#   bash train.sh                                     # newest exported dataset, standard DPO
+#   bash train.sh path/to/dpo_dataset                 # a specific dataset
+#   METHOD=dpo_norm bash train.sh path/to/dpo_dataset # length-normalized DPO instead of DPO
 #   EPOCHS=5 MODEL=Qwen/Qwen3-4B bash train.sh     # override via env vars
 #   HUB_MODEL_ID=<namespace>/harmless-dpo-qwen3-4B bash train.sh
 #                                                   # override the HF repo prefix. Pushing is
@@ -30,10 +31,10 @@
 #   REPORT_TO=none bash train.sh                        # disable W&B
 #
 # Loss knobs (env):
-#   DPO   : DPO_BETA (default 0.1)
-#   SimPO : SIMPO_BETA (default 5), SIMPO_GAMMA (default 1.5, target margin), CPO_ALPHA
-#           (default 0 = pure SimPO; >0 adds an SFT/NLL term -> CPO-SimPO hybrid)
-#   Both  : LEARNING_RATE (default 5.0e-6)
+#   DPO      : DPO_BETA (default 0.1)
+#   dpo_norm : DPO_NORM_BETA (default 5 — larger than DPO's because averaged log-probs
+#              are ~1/|y| smaller)
+#   Both     : LEARNING_RATE (default 5.0e-6)
 #
 # Run inside tmux for long jobs:  tmux new -s train ;  bash train.sh
 set -euo pipefail
@@ -56,22 +57,21 @@ case "${METHOD}" in
     DPO_BETA="${DPO_BETA:-0.1}"
     LOSS_ARGS=(--beta "${DPO_BETA}")
     ;;
-  simpo)
-    TRAIN_SCRIPT="train_simpo.py"
-    DEFAULT_OUTPUT="checkpoints/qwen3-4B/harmless_simpo"
-    DEFAULT_HUB="er-abd/harmless-simpo-qwen3-4B"
-    DEFAULT_WANDB="harmless-simpo-qwen3-4B"
-    # SimPO (Meng et al. 2024): length-normalized, reference-free reward with target margin.
-    #   SIMPO_BETA  reward scale (user-tuned; paper uses ~2-2.5, higher = sharper separation)
-    #   SIMPO_GAMMA target reward margin gamma (tunable; ~0.3-0.5 * beta is a common range)
-    #   CPO_ALPHA   0 = pure SimPO (no SFT term); >0 = CPO-SimPO hybrid
-    SIMPO_BETA="${SIMPO_BETA:-5}"
-    SIMPO_GAMMA="${SIMPO_GAMMA:-1.5}"
-    CPO_ALPHA="${CPO_ALPHA:-0}"
-    LOSS_ARGS=(--loss_type simpo --beta "${SIMPO_BETA}" --simpo_gamma "${SIMPO_GAMMA}" --cpo_alpha "${CPO_ALPHA}")
+  dpo_norm)
+    TRAIN_SCRIPT="train_dpo_norm.py"
+    DEFAULT_OUTPUT="checkpoints/qwen3-4B/harmless_dpo_norm"
+    DEFAULT_HUB="er-abd/harmless-dpo-norm-qwen3-4B"
+    DEFAULT_WANDB="harmless-dpo-norm-qwen3-4B"
+    # Length-normalized DPO (open-instruct "dpo_norm"): reference-based sigmoid DPO on
+    # length-AVERAGED log-probs (loss_type stays "sigmoid"; the averaging is applied by
+    # train_dpo_norm.py's DPOTrainer subclass). Fixes DPO's response-length inflation.
+    #   DPO_NORM_BETA  reward scale — larger than standard DPO's 0.1 because averaged
+    #                  (per-token) log-probs are ~1/|y| smaller. Default 5 (user-tuned).
+    DPO_NORM_BETA="${DPO_NORM_BETA:-5}"
+    LOSS_ARGS=(--beta "${DPO_NORM_BETA}")
     ;;
   *)
-    echo "ERROR: unknown METHOD='${METHOD}' (expected 'dpo' or 'simpo')"; exit 1 ;;
+    echo "ERROR: unknown METHOD='${METHOD}' (expected 'dpo' or 'dpo_norm')"; exit 1 ;;
 esac
 
 MODEL="${MODEL:-Qwen/Qwen3-4B}"

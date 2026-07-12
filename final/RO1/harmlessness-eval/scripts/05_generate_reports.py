@@ -10,7 +10,7 @@ Usage:
     python harmlessness-eval/scripts/05_generate_reports.py --model Qwen/Qwen3-4B
 
 Output:
-    outputs-and-results/harmlessness-results/analysis/{model}/harmlessness_summary.md
+    outputs-and-results/harmlessness-results/analysis/{model}/[eval/]harmlessness_summary.md
 """
 
 import argparse
@@ -20,7 +20,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import yaml
-from src.dataset import model_dir_name
+from src.dataset import SPLITS, model_dir_name, resolve_paths
 from src.reporting import load_metrics, write_summary_md
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -31,6 +31,8 @@ def main():
     parser.add_argument("--model", required=True,
                         help="HF model ID used at inference (e.g. Qwen/Qwen3-4B).")
     parser.add_argument("--config", default="config/mvp_config.yaml")
+    parser.add_argument("--data", default="test", choices=SPLITS,
+                        help="Data split: test (default) or eval (must match the metrics split).")
     args = parser.parse_args()
 
     config_path = Path(args.config)
@@ -39,18 +41,20 @@ def main():
     with open(config_path) as f:
         config = yaml.safe_load(f)
 
-    h = config["harmlessness"]
     model_name = model_dir_name(args.model)
-    analysis_dir = REPO_ROOT / h["paths"]["analysis_dir"] / model_name
+    analysis_dir = resolve_paths(REPO_ROOT, config, model_name=model_name,
+                                 split=args.data)["analysis_dir"]
     metrics_path = analysis_dir / "metrics.json"
     if not metrics_path.exists():
-        print(f"ERROR: metrics not found at {metrics_path}. Run 04_compute_metrics.py first.")
+        print(f"ERROR: '{args.data}' metrics not found at {metrics_path}. "
+              f"Run 04_compute_metrics.py --data {args.data} first.")
         sys.exit(1)
 
     summary = load_metrics(metrics_path)
     meta = {
         "model_name": summary.get("model_name"),
         "hf_id": summary.get("hf_id"),
+        "split": summary.get("split", args.data),
         "benchmark": summary.get("benchmark"),
         "classifier": summary.get("classifier"),
         **summary.get("config_snapshot", {}),

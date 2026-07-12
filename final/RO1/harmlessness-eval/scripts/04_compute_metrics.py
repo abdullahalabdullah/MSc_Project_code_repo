@@ -11,8 +11,8 @@ Usage:
     python harmlessness-eval/scripts/04_compute_metrics.py --model Qwen/Qwen3-4B
 
 Input:
-    outputs-and-results/harmlessness-results/wildguard/{model}/classifications.jsonl
-Output (under outputs-and-results/harmlessness-results/analysis/{model}/):
+    outputs-and-results/harmlessness-results/wildguard/{model}/[eval/]classifications.jsonl
+Output (under outputs-and-results/harmlessness-results/analysis/{model}/[eval/]):
     metrics.json        — overall + per-subset safety/refusal rates + config snapshot
     per_prompt.csv      — one row per classified response
 """
@@ -26,7 +26,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import yaml
-from src.dataset import model_dir_name
+from src.dataset import SPLITS, model_dir_name, resolve_paths
 from src.metrics import compute_metrics
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -37,6 +37,8 @@ def main():
     parser.add_argument("--model", required=True,
                         help="HF model ID used at inference (e.g. Qwen/Qwen3-4B).")
     parser.add_argument("--config", default="config/mvp_config.yaml")
+    parser.add_argument("--data", default="test", choices=SPLITS,
+                        help="Data split: test (default) or eval (must match the inference split).")
     args = parser.parse_args()
 
     config_path = Path(args.config)
@@ -47,10 +49,12 @@ def main():
 
     h = config["harmlessness"]
     model_name = model_dir_name(args.model)
+    paths = resolve_paths(REPO_ROOT, config, model_name=model_name, split=args.data)
 
-    cls_path = REPO_ROOT / h["paths"]["wildguard_dir"] / model_name / "classifications.jsonl"
+    cls_path = paths["wildguard"]
     if not cls_path.exists():
-        print(f"ERROR: classifications not found at {cls_path}. Run 03_run_wildguard.py first.")
+        print(f"ERROR: '{args.data}' classifications not found at {cls_path}. "
+              f"Run 03_run_wildguard.py --data {args.data} first.")
         sys.exit(1)
 
     classifications = []
@@ -69,6 +73,7 @@ def main():
     summary = {
         "model_name": model_name,
         "hf_id": args.model,
+        "split": args.data,
         "benchmark": h["benchmark"]["hf"],
         "classifier": h["classifier"]["hf_id"],
         "config_snapshot": {
@@ -83,7 +88,7 @@ def main():
         **metrics,
     }
 
-    out_dir = REPO_ROOT / h["paths"]["analysis_dir"] / model_name
+    out_dir = paths["analysis_dir"]
     out_dir.mkdir(parents=True, exist_ok=True)
 
     metrics_path = out_dir / "metrics.json"

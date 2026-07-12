@@ -1,39 +1,41 @@
 # ---------------------------------------------------------------------------
-# Length-normalized, reference-free preference training — SimPO.
-#   Meng, Xia & Chen (2024), "SimPO: Simple Preference Optimization with a
-#   Reference-Free Reward."  https://arxiv.org/abs/2405.14734
+# Length-normalized DPO — "dpo_norm".
 #
-# Added ALONGSIDE standard DPO — train_dpo.py is NOT modified; train.sh selects
-# between the two via METHOD=dpo|simpo. All shared machinery (helpers + the four
-# training callbacks) is imported from train_dpo.py so the two methods stay directly
-# comparable (identical LoRA, eval/checkpoint schedule, per-step Hub push, best-
-# checkpoint selection, metric logging, dataset formatting).
+# Standard DPO scores a completion by the SUM of its per-token log-probs, which
+# mechanically rewards longer generations (the mechanism behind the observed post-DPO
+# response-length inflation — see RO1/notes/harmless_dpo_response_length_inflation.md).
+# Length-normalized DPO instead uses the length-AVERAGED per-token log-prob
+# (sum / #completion-tokens), removing that length bias while keeping DPO's
+# reference-based sigmoid loss (unlike SimPO, which is reference-free and adds a margin).
 #
-# SimPO differs from DPO in three ways, all handled by TRL's CPOTrainer with
-# loss_type="simpo":
-#   1. Length-normalized reward  r(x,y) = (beta/|y|) * sum_t log p(y_t | x, y_<t)
-#      — the AVERAGE (not sum) of per-token log-probs. This removes the sequence-length
-#      bias of DPO's unnormalized sum, which is the mechanism behind the observed
-#      post-DPO response-length inflation (see
-#      RO1/notes/harmless_dpo_response_length_inflation.md).
-#   2. Reference-free — no reference-model term, and no ref forward pass at all, so it
-#      uses less memory than DPO (relevant on the near-full 80GB H100).
-#   3. Target reward margin gamma — loss is -log sigmoid(beta*(r_w - r_l) - gamma),
-#      requiring the winner to beat the loser by at least gamma.
+# Length normalization for DPO was noted in the original DPO work (Rafailov et al.) and
+# established as a strong, well-tuned variant by Meng et al. (2024, "SimPO", which reports
+# length-normalized DPO as a baseline).
 #
-# cpo_alpha=0 gives PURE SimPO (no auxiliary SFT/NLL term); cpo_alpha>0 gives the
-# CPO-SimPO hybrid.
+# The length-normalization here follows AllenAI open-instruct's `dpo_norm`:
+#   https://github.com/allenai/open-instruct/blob/main/open_instruct/dpo_utils.py
+# whose `_get_batch_logps(average_log_prob=True)` computes
+#     (per_token_logps * loss_mask).sum(-1) / loss_mask.sum(-1).clamp(min=1)
+# (i.e. mean per-completion-token log-prob) and then applies the standard reference-based
+# `dpo_loss` (reference_free=False). TRL's DPOTrainer already computes this exact quantity
+# for loss_type="ipo" (`all_logps / loss_mask.sum(-1)`) but not for the sigmoid loss; we
+# apply that same normalization to the sigmoid DPO loss via a thin DPOTrainer subclass.
+#
+# Added ALONGSIDE standard DPO — train_dpo.py is NOT modified; train.sh selects via
+# METHOD=dpo|dpo_norm. All other machinery (LoRA, eval/checkpoint schedule, per-step Hub
+# push, best-checkpoint selection, metric logging, dataset formatting) is shared with
+# train_dpo.py and imported from it, so the two methods stay directly comparable.
 # ---------------------------------------------------------------------------
-"""LoRA SimPO training on the harmlessness preference pairs.
+"""LoRA length-normalized DPO training on the harmlessness preference pairs.
 
 Consumes the same DatasetDict exported by the curation module (stage 06):
     DatasetDict({"train","valid"}) with columns prompt / chosen / rejected.
 
 Run via train.sh (one command):
-    METHOD=simpo bash train.sh <.../dpo_dataset>
+    METHOD=dpo_norm bash train.sh <.../dpo_dataset>
 or directly:
-    python train_simpo.py --dataset_path <.../dpo_dataset> --model_name_or_path Qwen/Qwen3-4B \
-        --loss_type simpo --beta 5 --simpo_gamma 1.5 --cpo_alpha 0 ...
+    python train_dpo_norm.py --dataset_path <.../dpo_dataset> --model_name_or_path Qwen/Qwen3-4B \
+        --beta 5 ...   # loss_type stays "sigmoid" (DPO); logps are length-averaged
 """
 import json
 import os
@@ -41,11 +43,11 @@ import os
 import datasets
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
-from trl import CPOConfig, CPOTrainer, ModelConfig, TrlParser, get_peft_config
+from trl import DPOConfig, DPOTrainer, ModelConfig, TrlParser, get_peft_config
 
 # Reuse ALL shared machinery from train_dpo.py unchanged (that file is not modified).
-# Importing it also runs its module-level setup_hf_env(), so HF caches/token are
-# configured on import — we call it again in main() too (idempotent) for clarity.
+# Importing it also runs its module-level setup_hf_env(), so HF caches/token are configured
+# on import — we call it again in main() too (idempotent) for clarity.
 from train_dpo import (
     set_seed,
     setup_hf_env,
@@ -58,6 +60,40 @@ from train_dpo import (
 )
 
 
+class LengthNormalizedDPOTrainer(DPOTrainer):
+    """DPOTrainer with length-normalized (mean) completion log-probs — open-instruct `dpo_norm`.
+
+    Standard DPOTrainer sums per-token log-probs for the sigmoid loss; here we divide that sum
+    by the number of completion tokens, so neither chosen nor rejected is favoured for being
+    longer. Equivalent to open-instruct's `_get_batch_logps(average_log_prob=True)`:
+        (per_token_logps * loss_mask).sum(-1) / loss_mask.sum(-1).clamp(min=1)
+
+    Implementation: the parent `concatenated_forward` returns SUMMED chosen/rejected logps; we
+    recompute the completion lengths exactly the way the parent does (via `concatenated_inputs`,
+    reading `completion_attention_mask`) and divide. Applied to BOTH the policy and the reference
+    forward pass (no `is_ref_model` gate) so each logratio is consistently length-normalized on
+    both sides — matching open-instruct, which averages policy and reference log-probs alike.
+
+    Assumption: completions are not truncated by `max_length` (train.sh sets max_length=12288,
+    far above the ~1.5k-token completions), so `completion_attention_mask` here equals the
+    parent's internal per-token loss mask. If you lower `max_length` below the completion length,
+    revisit this (the normalization denominator would then differ from the tokens actually scored).
+    """
+
+    def concatenated_forward(self, model, batch, is_ref_model=False):
+        output = super().concatenated_forward(model, batch, is_ref_model=is_ref_model)
+        num_examples = batch["prompt_input_ids"].shape[0]
+        # Same call the parent makes; cheap tensor concat/pad, no extra model forward.
+        concatenated_batch = self.concatenated_inputs(batch, padding_value=self.padding_value)
+        # #completion tokens per example, ordered [chosen; rejected]. clamp(min=1) mirrors
+        # open-instruct and guards against a hypothetical empty completion.
+        completion_lengths = concatenated_batch["completion_attention_mask"].sum(dim=-1).clamp(min=1)
+        lengths = completion_lengths.to(output["chosen_logps"].dtype)
+        output["chosen_logps"] = output["chosen_logps"] / lengths[:num_examples]
+        output["rejected_logps"] = output["rejected_logps"] / lengths[num_examples:]
+        return output
+
+
 def main(script_args, training_args, model_config):
 
     setup_hf_env()
@@ -67,8 +103,7 @@ def main(script_args, training_args, model_config):
     print("Loading dataset from: ", script_args.dataset_path)
     dataset = datasets.load_from_disk(script_args.dataset_path)
 
-    # Load model and tokenizer. CPOTrainer/SimPO is reference-free, so unlike DPO there is
-    # no second (reference) model to load — only this policy model.
+    # Load model and tokenizer
     model = AutoModelForCausalLM.from_pretrained(
         model_config.model_name_or_path,
         device_map="auto",
@@ -78,20 +113,21 @@ def main(script_args, training_args, model_config):
 
     tokenizer = AutoTokenizer.from_pretrained(model_config.model_name_or_path)
     if tokenizer.pad_token is None:
+        # Model-agnostic fallback (Qwen3 already defines a pad token, so this no-ops).
         tokenizer.pad_token = tokenizer.eos_token
-    tokenizer.padding_side = "left"
-    tokenizer.truncation_side = "left"
+    tokenizer.padding_side = 'left'
+    tokenizer.truncation_side = 'left'
 
-    # Prepare training data — IDENTICAL formatting to train_dpo.py so DPO and SimPO see the
-    # exact same prompt/chosen/rejected text (kept in sync by hand; it's ~10 lines).
+    # Prepare training data — IDENTICAL formatting to train_dpo.py so DPO and length-normalized
+    # DPO see the exact same prompt/chosen/rejected text (kept in sync by hand; it's ~10 lines).
     def format_assistant_turn(content):
         # Format a single assistant turn WITHOUT routing through apply_chat_template:
         # Qwen3's chat template strips <think>...</think> from assistant messages, but for
-        # thinking-mode preference training we need the full reasoning response preserved in
-        # the chosen/rejected completions.
+        # thinking-mode DPO we need the full reasoning response preserved in the
+        # chosen/rejected completions.
         return f"<|im_start|>assistant\n{content}<|im_end|>\n"
 
-    def format_sample(sample):
+    def format_dpo_sample(sample):
         # Harmlessness pairs have a single user turn (the harmful prompt). The chosen/rejected
         # completions already contain the <think>…</think> reasoning from generation.
         prompt = tokenizer.apply_chat_template(
@@ -99,14 +135,12 @@ def main(script_args, training_args, model_config):
             tokenize=False,
             enable_thinking=True,
         )
-        return {
-            "prompt": prompt,
-            "chosen": format_assistant_turn(sample["chosen"]),
-            "rejected": format_assistant_turn(sample["rejected"]),
-        }
+        chosen = format_assistant_turn(sample["chosen"])
+        rejected = format_assistant_turn(sample["rejected"])
+        return {"prompt": prompt, "chosen": chosen, "rejected": rejected}
 
-    dataset = dataset.map(format_sample)
-    dataset = dataset.select_columns(["prompt", "chosen", "rejected"])
+    dataset = dataset.map(format_dpo_sample)
+    dataset = dataset.select_columns(['prompt', 'chosen', 'rejected'])
 
     # Eval/checkpoint schedule is fully owned by StepwiseEvalCallback (step 0, every ~20% of
     # total training steps, and the final step) — force off the trainer's own interval-based
@@ -117,13 +151,16 @@ def main(script_args, training_args, model_config):
     # LoRA config
     peft_config = get_peft_config(model_config)
     assert peft_config
+    # ref_model=None + PEFT: the reference is the base model with the LoRA adapter disabled
+    # (no separate model copy). Length normalization is applied to that reference pass too,
+    # via LengthNormalizedDPOTrainer.concatenated_forward.
+    ref_model = None
 
     best_checkpoint_callback = BestCheckpointCallback()
     stepwise_eval_callback = StepwiseEvalCallback(eval_fraction=0.2)
-    # eval_metrics.jsonl — per eval point (step 0, each ~20% interval, final step). For SimPO
-    # these are the CPO/SimPO eval metrics (eval_loss, eval_rewards/accuracies,
-    # eval_rewards/margins, eval_logps/*). Behavioural eval (safety + monitorability) is done
-    # separately, offline, on the pushed checkpoints — not here.
+    # eval_metrics.jsonl — DPO eval metrics per eval point (step 0, each ~20% interval, final
+    # step). Behavioural eval (safety + monitorability) is done separately, offline, on the
+    # pushed checkpoints — not here.
     metrics_logger = EvalMetricsLoggerCallback(
         os.path.join(training_args.output_dir, "eval_metrics.jsonl"))
     callbacks = [best_checkpoint_callback, stepwise_eval_callback, metrics_logger]
@@ -132,15 +169,12 @@ def main(script_args, training_args, model_config):
     if getattr(training_args, "push_to_hub", False) and getattr(training_args, "hub_model_id", None):
         callbacks.append(PushStepCheckpointCallback())
 
-    print(f"SimPO config: loss_type={training_args.loss_type} beta={training_args.beta} "
-          f"simpo_gamma={training_args.simpo_gamma} cpo_alpha={training_args.cpo_alpha} "
-          f"(cpo_alpha=0 -> pure SimPO; length-normalized, reference-free)")
+    print(f"dpo_norm config: loss_type={training_args.loss_type} beta={training_args.beta} "
+          f"(length-normalized log-probs; reference-based sigmoid DPO — open-instruct dpo_norm)")
 
-    # CPOTrainer is reference-free: no ref_model argument (unlike DPOTrainer). The SimPO
-    # length normalization + gamma margin are driven entirely by training_args.loss_type
-    # ("simpo"), training_args.beta, and training_args.simpo_gamma.
-    trainer = CPOTrainer(
+    trainer = LengthNormalizedDPOTrainer(
         model,
+        ref_model,
         args=training_args,
         train_dataset=dataset["train"],
         eval_dataset=dataset["valid"],
@@ -151,8 +185,8 @@ def main(script_args, training_args, model_config):
     stepwise_eval_callback.trainer = trainer
     trainer.train()
 
-    # Dump the trainer's FULL structured log history (every logging-step loss + LR + grad
-    # norm, and every eval point) as one JSON — the complete, W&B-independent record.
+    # Dump the trainer's FULL structured log history (every logging-step loss + LR + grad norm,
+    # and every eval point) as one JSON — the complete, W&B-independent record.
     log_history_path = os.path.join(training_args.output_dir, "train_log_history.json")
     with open(log_history_path, "w", encoding="utf-8") as f:
         json.dump(trainer.state.log_history, f, indent=2)
@@ -184,9 +218,8 @@ def main(script_args, training_args, model_config):
     best_info_path = os.path.join(training_args.output_dir, "best_checkpoint.txt")
     with open(best_info_path, "w", encoding="utf-8") as f:
         f.write("Best checkpoint (selected by eval reward-accuracy; ties broken by eval loss)\n")
-        f.write(f"method: simpo (length-normalized, reference-free; Meng et al. 2024)\n")
-        f.write(f"beta: {training_args.beta}  simpo_gamma: {training_args.simpo_gamma}  "
-                f"cpo_alpha: {training_args.cpo_alpha}\n")
+        f.write("method: dpo_norm (length-normalized DPO; open-instruct-style avg log-probs)\n")
+        f.write(f"beta: {training_args.beta}\n")
         f.write(f"step: {best_step}\n")
         f.write(f"eval_rewards/accuracies: {best_metrics.get('accuracy')}\n")
         f.write(f"eval_loss: {best_metrics.get('loss')}\n")
@@ -213,7 +246,7 @@ def main(script_args, training_args, model_config):
 
 
 if __name__ == '__main__':
-    parser = TrlParser((ScriptArguments, CPOConfig, ModelConfig))
+    parser = TrlParser((ScriptArguments, DPOConfig, ModelConfig))
     script_args, training_args, model_config = parser.parse_args_and_config()
     print(f"SCRIPT ARGS:\n{script_args}")
     print(f"TRAINING ARGS:\n{training_args}")

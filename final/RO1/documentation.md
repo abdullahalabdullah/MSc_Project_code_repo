@@ -577,15 +577,49 @@ only** (the text after `</think>`, via `split_thinking`), **1 response per
 prompt**. All of `enable_thinking`, `n_samples`, and `classify_target` are in the
 config `harmlessness:` block.
 
+### Data splits (`--data test|eval`)
+
+Like Part 1, the harmlessness eval has two **disjoint** splits, selected with
+`--data test|eval` on every script and both drivers (default `test`). The
+WildJailbreak eval config (~2210 prompts) is a **single fixed pool**; test and
+eval are **proportional stratified** samples of it (the harmful/benign ratio is
+preserved), so eval never overlaps test. Deterministic in `harmlessness.random_seed`
+(88).
+
+- **`test`** (default) — size = **2/3 of the pool** (`⌊2·|pool|/3⌋` ≈ **1473**:
+  ~1333 harmful + ~140 benign). Keeps the existing flat path layout
+  (`data/wildjailbreak_eval/prompts.jsonl`, `responses/{model}/`, …).
+- **`eval`** — sampled from the pool **minus** the test split; size =
+  **`len(test)//2`** (≈ **736**: ~666 harmful + ~70 benign). Namespaced by an
+  `eval/` segment everywhere (`data/wildjailbreak_eval/eval/prompts.jsonl`,
+  `responses/{model}/eval/`, …), so the two splits never overwrite each other.
+
+**Ordering:** finalize the test split first, then prepare eval. `01 --data eval`
+requires the test index to exist, excludes its prompts (matched on `prompt_id`
+and prompt text — disjoint by construction), and defaults to half the test size
+(override with `--n-examples`). `prepare_split` re-asserts disjointness at prep
+time (`assert_splits_disjoint`) and hard-fails on overlap — regenerate eval with
+`01 --data eval --force` from the final test index if the test index was
+regenerated afterwards.
+
+> **Note:** the earlier full-2210 test runs (single-set, no split) are superseded
+> by the 2/3 partitioned test set. Regenerate the test index at the new default
+> (`01 --data test --force`) and re-run to compare against eval on matched sizing.
+
 ## Quick start
 
 WildGuard is a local model, so generation **and** classification both need a GPU
 — the whole eval is one command on the GPU box:
 
 ```bash
-bash harmlessness-eval/run_harmlessness.sh Qwen/Qwen3-4B
+bash harmlessness-eval/run_harmlessness.sh Qwen/Qwen3-4B                       # test split (default)
+bash harmlessness-eval/run_harmlessness.sh Qwen/Qwen3-4B --data eval           # eval split (prep its index first)
 bash harmlessness-eval/run_harmlessness.sh er-abd/harmless-dpo-qwen3-4B-pilot --merge
 ```
+
+`--data test|eval` (optional, default `test`) picks the split; the eval split is
+namespaced under `.../eval/` and needs its prompts index prepared first
+(`01_prepare_wildjailbreak.py --data eval`, which needs the final test index).
 
 `--merge` (optional, default off): treat `model_id` as a LoRA **adapter-only**
 repo (e.g. an RO2 checkpoint pushed without merging — no `config.json`, just
@@ -608,23 +642,26 @@ responses from scratch. Instead resume from WildGuard onward:
 
 ```bash
 bash harmlessness-eval/resume_from_wildguard.sh er-abd/harmless-dpo-qwen3-4B-pilot
+bash harmlessness-eval/resume_from_wildguard.sh Qwen/Qwen3-4B --data eval
 ```
 
-It requires `…/harmlessness-results/responses/{model}/responses.jsonl` to already
-exist, then runs steps 3-5 (WildGuard classification, metrics, report) and
-commits + pushes, same fail-soft/logging conventions as `run_harmlessness.sh`.
+It requires `…/harmlessness-results/responses/{model}/[eval/]responses.jsonl` to
+already exist (match the `--data` split to the inference run), then runs steps
+3-5 (WildGuard classification, metrics, report) and commits + pushes, same
+fail-soft/logging conventions as `run_harmlessness.sh`.
 
 ## Pipeline at a glance
 
 | Step | Script | In → Out |
 |------|--------|----------|
-| 1 | `01_prepare_wildjailbreak.py` | WildJailbreak eval → `data/wildjailbreak_eval/prompts.jsonl` (idempotent) |
-| 2 | `02_run_inference.py` | prompts → `…/harmlessness-results/responses/{model}/responses.jsonl` (GPU) |
-| 3 | `03_run_wildguard.py` | responses → `…/harmlessness-results/wildguard/{model}/classifications.jsonl` (GPU) |
-| 4 | `04_compute_metrics.py` | classifications → `…/harmlessness-results/analysis/{model}/metrics.json`, `per_prompt.csv` |
-| 5 | `05_generate_reports.py` | `metrics.json` → `…/harmlessness-results/analysis/{model}/harmlessness_summary.md` |
+| 1 | `01_prepare_wildjailbreak.py` | WildJailbreak eval → `data/wildjailbreak_eval/[eval/]prompts.jsonl` (idempotent) |
+| 2 | `02_run_inference.py` | prompts → `…/harmlessness-results/responses/{model}/[eval/]responses.jsonl` (GPU) |
+| 3 | `03_run_wildguard.py` | responses → `…/harmlessness-results/wildguard/{model}/[eval/]classifications.jsonl` (GPU) |
+| 4 | `04_compute_metrics.py` | classifications → `…/harmlessness-results/analysis/{model}/[eval/]metrics.json`, `per_prompt.csv` |
+| 5 | `05_generate_reports.py` | `metrics.json` → `…/harmlessness-results/analysis/{model}/[eval/]harmlessness_summary.md` |
 
-`…` = `outputs-and-results/`. Each script takes `--model <hf_id>` (steps 2–5);
+`…` = `outputs-and-results/`; `[eval/]` is inserted only for `--data eval`. Each
+script takes `--model <hf_id>` (steps 2–5) and `--data test|eval` (all steps);
 `{model}` is its folder-safe name. Step 1 has no model. **Markdown generation is
 isolated in step 5** (`src/reporting.py` + `05_generate_reports.py` + one driver
 line) and derives only from `metrics.json`, so the `.md` regenerates from the
@@ -634,13 +671,15 @@ steps 1–4 never write `.md`.
 Run any step manually:
 
 ```bash
-python harmlessness-eval/scripts/01_prepare_wildjailbreak.py                 # full eval set
-python harmlessness-eval/scripts/01_prepare_wildjailbreak.py --limit 20 --force  # quick smoke test
+python harmlessness-eval/scripts/01_prepare_wildjailbreak.py                 # test split (2/3 of pool)
+python harmlessness-eval/scripts/01_prepare_wildjailbreak.py --data eval      # eval split (disjoint half; needs test index)
+python harmlessness-eval/scripts/01_prepare_wildjailbreak.py --limit 20 --force  # quick smoke test (caps the pool)
 python harmlessness-eval/scripts/02_run_inference.py   --model Qwen/Qwen3-4B  # GPU
 python harmlessness-eval/scripts/02_run_inference.py   --model er-abd/some-adapter --merge  # GPU, adapter-only checkpoint
 python harmlessness-eval/scripts/03_run_wildguard.py   --model Qwen/Qwen3-4B  # GPU
 python harmlessness-eval/scripts/04_compute_metrics.py --model Qwen/Qwen3-4B
 python harmlessness-eval/scripts/05_generate_reports.py --model Qwen/Qwen3-4B
+# every step also takes --data eval to run the eval split
 ```
 
 ## Config (`harmlessness:` block)
@@ -648,7 +687,8 @@ python harmlessness-eval/scripts/05_generate_reports.py --model Qwen/Qwen3-4B
 | Key | Purpose |
 |-----|---------|
 | `benchmark` | WildJailbreak `hf`/`config` (`eval`), the TSV `delimiter`, and the `prompt_field` (`adversarial`) / `subset_field` (`data_type`). |
-| `limit` | `null` = full eval set; an int caps the prompt count for a quick test. |
+| `random_seed` | Seed for the deterministic, stratified test/eval sampling (88, matching the monitorability seed). |
+| `limit` | `null` = full eval **pool**; an int caps the pool **before** the test/eval split (smoke-test only). |
 | `generation` | `enable_thinking: true`, `n_samples: 1`. Temperature/top_p/top_k/max_new_tokens are reused from the `qwen_inference` block so both evals generate identically. |
 | `classify_target` | `answer` (visible response after `</think>`, default) or `full` (whole generation). |
 | `classifier` | WildGuard `hf_id`, `max_new_tokens`, and `max_model_len` (vLLM context window — records whose (prompt, response) would exceed it are truncated to fit; see `src/wildguard.py`). |
@@ -657,8 +697,10 @@ python harmlessness-eval/scripts/05_generate_reports.py --model Qwen/Qwen3-4B
 ## Source files (`harmlessness-eval/src/`)
 
 - `dataset.py` — own `ensure_hf_auth` + `model_dir_name` (no import from the
-  monitorability eval), and `load_wildjailbreak_eval` / `prepare_prompts` /
-  `load_prompts`.
+  monitorability eval), `SPLITS` + `resolve_paths` (the split-aware path
+  namespacing), `load_wildjailbreak_eval`, `_stratified_partition` (proportional
+  stratified sampling), `prepare_split` (test = 2/3 of the pool, eval = disjoint
+  `len(test)//2` from the remainder), `assert_splits_disjoint`, and `load_prompts`.
 - `inference.py` — `load_qwen_model` and `split_thinking` copied verbatim from
   the monitorability inference; `generate_responses` does free-form thinking-mode
   generation and keeps the visible answer.
@@ -685,12 +727,16 @@ python harmlessness-eval/scripts/05_generate_reports.py --model Qwen/Qwen3-4B
 ## Outputs layout
 
 ```
-harmlessness-eval/data/wildjailbreak_eval/prompts.jsonl   # prepared prompts (NOT a result)
+harmlessness-eval/data/wildjailbreak_eval/prompts.jsonl        # test-split prompts (NOT a result)
+harmlessness-eval/data/wildjailbreak_eval/eval/prompts.jsonl   # eval-split prompts (disjoint half)
 outputs-and-results/harmlessness-results/
-├── responses/{model}/responses.jsonl          # one record per (prompt, sample): raw_output, thinking, answer, ...
-├── wildguard/{model}/classifications.jsonl     # per response: prompt_harmful / refusal / response_harmful / wildguard_truncated
-└── analysis/{model}/metrics.json, per_prompt.csv, harmlessness_summary.md
+├── responses/{model}/[eval/]responses.jsonl        # one record per (prompt, sample): raw_output, thinking, answer, ...
+├── wildguard/{model}/[eval/]classifications.jsonl   # per response: prompt_harmful / refusal / response_harmful / wildguard_truncated
+└── analysis/{model}/[eval/]metrics.json, per_prompt.csv, harmlessness_summary.md
 ```
+
+`[eval/]` = the `eval/` segment present only for `--data eval` (`metrics.json`
+also records its `split`); the test split keeps the flat layout.
 
 ## Independence & shared resources
 
