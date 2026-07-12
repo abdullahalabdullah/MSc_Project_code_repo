@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 #
-# One-command LoRA DPO training on the harmlessness preference pairs.
+# One-command LoRA preference training on the harmlessness pairs.
+#
+# METHOD selects the objective (both consume the SAME exported dataset):
+#   METHOD=dpo    (default) standard DPO            -> train_dpo.py
+#   METHOD=simpo  length-normalized, reference-free -> train_simpo.py
+#                 SimPO (Meng et al. 2024, arXiv:2405.14734). Fixes DPO's response-length
+#                 inflation by normalizing the reward by completion length. See
+#                 RO1/notes/harmless_dpo_response_length_inflation.md.
 #
 # It trains on the dataset exported by the curation module (stage 06). By default it
 # auto-discovers the MOST RECENT export under
@@ -10,8 +17,9 @@
 # HF hub repo, and W&B names, then call this script).
 #
 # Usage:
-#   bash train.sh                                  # newest exported dataset
+#   bash train.sh                                  # newest exported dataset, standard DPO
 #   bash train.sh path/to/dpo_dataset              # a specific dataset
+#   METHOD=simpo bash train.sh path/to/dpo_dataset # length-normalized SimPO instead of DPO
 #   EPOCHS=5 MODEL=Qwen/Qwen3-4B bash train.sh     # override via env vars
 #   HUB_MODEL_ID=<namespace>/harmless-dpo-qwen3-4B bash train.sh
 #                                                   # override the HF repo prefix. Pushing is
@@ -20,6 +28,12 @@
 #                                                   # to its own HF repo "<HUB_MODEL_ID>-step-<N>"
 #   WANDB_PROJECT=my-proj RUN_NAME=exp1 bash train.sh   # W&B logging (run `wandb login` first)
 #   REPORT_TO=none bash train.sh                        # disable W&B
+#
+# Loss knobs (env):
+#   DPO   : DPO_BETA (default 0.1)
+#   SimPO : SIMPO_BETA (default 5), SIMPO_GAMMA (default 1.5, target margin), CPO_ALPHA
+#           (default 0 = pure SimPO; >0 adds an SFT/NLL term -> CPO-SimPO hybrid)
+#   Both  : LEARNING_RATE (default 5.0e-6)
 #
 # Run inside tmux for long jobs:  tmux new -s train ;  bash train.sh
 set -euo pipefail
@@ -30,22 +44,53 @@ git config --global user.email "abd@example.com" 2>/dev/null || true
 git config --global user.name "abd" 2>/dev/null || true
 
 # ── Config (override via env) ───────────────────────────────────────────────
+# METHOD picks the objective + training script and the default output/Hub/W&B names.
+METHOD="${METHOD:-dpo}"
+case "${METHOD}" in
+  dpo)
+    TRAIN_SCRIPT="train_dpo.py"
+    DEFAULT_OUTPUT="checkpoints/qwen3-4B/harmless_dpo"
+    DEFAULT_HUB="er-abd/harmless-dpo-qwen3-4B"
+    DEFAULT_WANDB="harmless-dpo-qwen3-4B"
+    # Standard DPO loss (unchanged): sigmoid loss (DPOConfig default), beta 0.1.
+    DPO_BETA="${DPO_BETA:-0.1}"
+    LOSS_ARGS=(--beta "${DPO_BETA}")
+    ;;
+  simpo)
+    TRAIN_SCRIPT="train_simpo.py"
+    DEFAULT_OUTPUT="checkpoints/qwen3-4B/harmless_simpo"
+    DEFAULT_HUB="er-abd/harmless-simpo-qwen3-4B"
+    DEFAULT_WANDB="harmless-simpo-qwen3-4B"
+    # SimPO (Meng et al. 2024): length-normalized, reference-free reward with target margin.
+    #   SIMPO_BETA  reward scale (user-tuned; paper uses ~2-2.5, higher = sharper separation)
+    #   SIMPO_GAMMA target reward margin gamma (tunable; ~0.3-0.5 * beta is a common range)
+    #   CPO_ALPHA   0 = pure SimPO (no SFT term); >0 = CPO-SimPO hybrid
+    SIMPO_BETA="${SIMPO_BETA:-5}"
+    SIMPO_GAMMA="${SIMPO_GAMMA:-1.5}"
+    CPO_ALPHA="${CPO_ALPHA:-0}"
+    LOSS_ARGS=(--loss_type simpo --beta "${SIMPO_BETA}" --simpo_gamma "${SIMPO_GAMMA}" --cpo_alpha "${CPO_ALPHA}")
+    ;;
+  *)
+    echo "ERROR: unknown METHOD='${METHOD}' (expected 'dpo' or 'simpo')"; exit 1 ;;
+esac
+
 MODEL="${MODEL:-Qwen/Qwen3-4B}"
 EPOCHS="${EPOCHS:-3}"
-OUTPUT_DIR="${OUTPUT_DIR:-checkpoints/qwen3-4B/harmless_dpo}"
+OUTPUT_DIR="${OUTPUT_DIR:-${DEFAULT_OUTPUT}}"
 SEED="${SEED:-0}"
+LEARNING_RATE="${LEARNING_RATE:-5.0e-6}"
 # max_length must fit prompt + full (CoT) completion. The module generates up to 8192
 # completion tokens with a ~4096 prompt budget; lower this if you hit GPU OOM.
 MAX_LENGTH="${MAX_LENGTH:-12288}"
 MAX_PROMPT_LENGTH="${MAX_PROMPT_LENGTH:-4096}"
 # Hub pushing is ALWAYS ON: every checkpoint is pushed to its own private HF repo
 # "<HUB_MODEL_ID>-step-<N>" under the er-abd account (token ships in the committed .env).
-HUB_MODEL_ID="${HUB_MODEL_ID:-er-abd/harmless-dpo-qwen3-4B}"
+HUB_MODEL_ID="${HUB_MODEL_ID:-${DEFAULT_HUB}}"
 # Experiment tracking. Defaults to Weights & Biases (run `wandb login` once first, or set
 # WANDB_API_KEY). Set REPORT_TO=none to disable. WANDB_PROJECT / RUN_NAME name the run.
 REPORT_TO="${REPORT_TO:-wandb}"
-WANDB_PROJECT="${WANDB_PROJECT:-harmless-dpo-qwen3-4B}"
-RUN_NAME="${RUN_NAME:-harmless_dpo_$(basename "${OUTPUT_DIR}")_seed-${SEED}}"
+WANDB_PROJECT="${WANDB_PROJECT:-${DEFAULT_WANDB}}"
+RUN_NAME="${RUN_NAME:-harmless_${METHOD}_$(basename "${OUTPUT_DIR}")_seed-${SEED}}"
 export WANDB_PROJECT
 
 # ── Locate the exported DPO dataset ─────────────────────────────────────────
@@ -58,6 +103,7 @@ if [ -z "${DATASET_PATH}" ] || [ ! -d "${DATASET_PATH}" ]; then
 fi
 
 mkdir -p logs
+echo "== Method:  ${METHOD}  (loss args: ${LOSS_ARGS[*]})"
 echo "== Model:   ${MODEL}"
 echo "== Dataset: ${DATASET_PATH}"
 echo "== Output:  ${OUTPUT_DIR}  (epochs=${EPOCHS}, seed=${SEED})"
@@ -99,7 +145,7 @@ fi
 echo "== Hub:     pushing every checkpoint to ${HUB_MODEL_ID}-step-<N>"
 HUB_ARGS=(--push_to_hub --hub_model_id "${HUB_MODEL_ID}")
 
-python -u train_dpo.py \
+python -u "${TRAIN_SCRIPT}" \
     --dataset_path "${DATASET_PATH}" \
     --model_name_or_path "${MODEL}" \
     --output_dir "${OUTPUT_DIR}" \
@@ -109,7 +155,7 @@ python -u train_dpo.py \
     --per_device_eval_batch_size 1 \
     --gradient_checkpointing \
     --optim adamw_torch \
-    --learning_rate 5.0e-6 \
+    --learning_rate "${LEARNING_RATE}" \
     --weight_decay 0.01 \
     --lr_scheduler_type cosine \
     --warmup_ratio 0.1 \
@@ -120,7 +166,7 @@ python -u train_dpo.py \
     --tf32 True \
     --save_only_model \
     --no_remove_unused_columns \
-    --beta 0.1 \
+    "${LOSS_ARGS[@]}" \
     --seed "${SEED}" \
     --report_to "${REPORT_TO}" \
     --run_name "${RUN_NAME}" \
@@ -130,10 +176,10 @@ python -u train_dpo.py \
     --lora_dropout 0.05 \
     --lora_target_modules q_proj k_proj v_proj o_proj gate_proj up_proj down_proj \
     "${HUB_ARGS[@]+"${HUB_ARGS[@]}"}" \
-    2>&1 | tee logs/train.log
+    2>&1 | tee "logs/train_${METHOD}.log"
 
 echo "== Done. Best adapter: ${OUTPUT_DIR}/checkpoint-best =="
 echo "   Load it on top of the base model for inference"
 echo "   (transformers PeftModel, or vLLM with --enable-lora) — base: ${MODEL}"
-echo "== Eval metrics (per-eval DPO loss/reward curves): ${OUTPUT_DIR}/eval_metrics.jsonl =="
+echo "== Eval metrics (per-eval ${METHOD} loss/reward curves): ${OUTPUT_DIR}/eval_metrics.jsonl =="
 echo "== Best checkpoint id (incl. HF repo if pushed):    ${OUTPUT_DIR}/best_checkpoint.txt =="

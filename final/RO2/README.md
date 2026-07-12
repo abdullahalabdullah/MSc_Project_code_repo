@@ -24,6 +24,7 @@ Both modules export the identical training contract — a HuggingFace
 # Harmlessness:
 bash harmlessness-DPO-train-dataset-curation/run_all.sh   # curate (stages 01–06)
 bash train.sh                                             # LoRA DPO train on the export
+METHOD=simpo bash train.sh <dpo_dataset>                  # or length-normalized SimPO (Meng et al. 2024)
 
 # Anti-sycophancy (see the module README for the split GPU/API phase drivers):
 X=5 RUN_OUTPUT_DIR=outputs/smoke bash anti-syc-DPO-train-dataset-curation/run_all.sh
@@ -40,7 +41,8 @@ harmlessness-DPO-train-dataset-curation/   # harmlessness dataset curation (self
 anti-syc-DPO-train-dataset-curation/       # anti-sycophancy dataset curation (self-contained;
                                            #   also produces the RO1 eval's frozen reserved/ files)
 train_dpo.py                  # LoRA DPO trainer (TRL DPOTrainer) — objective-agnostic
-train.sh                      # one-command training wrapper (harmlessness defaults)
+train_simpo.py                # LoRA SimPO trainer (TRL CPOTrainer, loss_type=simpo) — length-normalized
+train.sh                      # one-command training wrapper (harmlessness defaults; METHOD=dpo|simpo)
 train_antisyc.sh              # anti-syc wrapper: pins output dir / HF repo / W&B names
 train_antisyc_sham.sh         # sham-control wrapper (destroyed-preference control run)
 requirements.txt              # unified environment for the whole repo
@@ -82,15 +84,25 @@ the frozen RO1 eval files in `outputs/<run>/reserved/`. See the module
 ## 2. Train
 
 ```bash
-bash train.sh                                   # harmlessness (newest harmlessness export)
+bash train.sh                                   # harmlessness DPO (newest harmlessness export)
+METHOD=simpo bash train.sh <path/to/dpo_dataset>        # harmlessness SimPO (length-normalized)
 bash train_antisyc.sh      <path/to/dpo_dataset>        # anti-sycophancy
 bash train_antisyc_sham.sh <path/to/dpo_dataset_sham>   # sham control
 ```
 
-LoRA adapters land under `checkpoints/qwen3-4B/{harmless_dpo,anti_syc_dpo,anti_syc_dpo_sham}/`
+**DPO vs SimPO** (`METHOD`, harmlessness): `METHOD=dpo` (default) runs standard DPO
+(`train_dpo.py`); `METHOD=simpo` runs length-normalized, reference-free SimPO
+(`train_simpo.py`, Meng et al. 2024 — TRL `CPOTrainer`, `loss_type=simpo`), the fix for DPO's
+response-length inflation (see `RO1/notes/harmless_dpo_response_length_inflation.md`). SimPO
+uses separate defaults (`OUTPUT_DIR=checkpoints/qwen3-4B/harmless_simpo`,
+`HUB_MODEL_ID=er-abd/harmless-simpo-qwen3-4B`) and knobs `SIMPO_BETA` (5), `SIMPO_GAMMA` (1.5),
+`CPO_ALPHA` (0 = pure SimPO). `train_dpo.py` is unchanged; SimPO reuses its machinery.
+
+LoRA adapters land under `checkpoints/qwen3-4B/{harmless_dpo,harmless_simpo,anti_syc_dpo,anti_syc_dpo_sham}/`
 (best kept as `checkpoint-best`). Every checkpoint (step 0, each ~20% interval, final step)
 is **always pushed** to its own private HF repo `<HUB_MODEL_ID>-step-<N>` — HUB_MODEL_ID
-defaults: `er-abd/harmless-dpo-qwen3-4B` (train.sh), `er-abd/anti-syc-dpo-qwen3-4B` /
+defaults: `er-abd/harmless-dpo-qwen3-4B` (train.sh; `er-abd/harmless-simpo-qwen3-4B` for
+`METHOD=simpo`), `er-abd/anti-syc-dpo-qwen3-4B` /
 `er-abd/anti-syc-dpo-sham-qwen3-4B` (the wrappers — never train anti-syc through bare
 train.sh, or checkpoints land in the harmlessness repos). Each eval point appends to
 `eval_metrics.jsonl`; behavioural evals (harmlessness / anti-sycophancy / monitorability)
@@ -115,6 +127,8 @@ are retained in `LICENSE`. The files still derived from the upstream repo — `t
 a per-file attribution header.
 `train_dpo.py` was adapted to the preference dataset schema (`prompt`/`chosen`/`rejected`),
 Qwen3, and optional Hub pushing, and is self-contained (its seeding/env helpers are inlined, no
-sibling imports). The curation modules and their stages are our own work for this MSc project.
+sibling imports). `train_simpo.py` (length-normalized SimPO, Meng et al. 2024) is our own
+addition — it reuses `train_dpo.py`'s helpers/callbacks by import and swaps TRL's `DPOTrainer`
+for `CPOTrainer` with `loss_type="simpo"`. The curation modules and their stages are our own work for this MSc project.
 The anti-sycophancy eval data derives from TriviaQA (Joshi et al., 2017) and SycophancyEval
 (Sharma et al., 2023, github.com/meg-tong/sycophancy-eval).
