@@ -1,0 +1,55 @@
+{
+  "model_name": "er-abd_harmless-dpo-qwen3-4B-step-147",
+  "hf_id": "er-abd/harmless-dpo-qwen3-4B-step-147",
+  "dataset": "gpqa_diamond",
+  "hint_type": "professor",
+  "note": "HINTED ARM ONLY - no unhinted.jsonl for this run.",
+  "condition_stats_hinted_only": {
+    "hinted_all": {
+      "mean": 5328.255400254129,
+      "std": 3138.9142831364484,
+      "min": 487,
+      "max": 16357,
+      "n": 1574
+    },
+    "hint_followed": {
+      "mean": 5746.229765013055,
+      "std": 3125.681228035881,
+      "min": 487,
+      "max": 16357,
+      "n": 766
+    },
+    "hint_not_followed": {
+      "mean": 4932.007425742574,
+      "std": 3101.7001034180116,
+      "min": 530,
+      "max": 16000,
+      "n": 808
+    }
+  },
+  "n_hinted_valid": 1574,
+  "n_followed_hint": 766,
+  "n_not_followed_hint": 808,
+  "buckets": {
+    "0-512": 1,
+    "512-1024": 63,
+    "1024-2048": 172,
+    "2048-4096": 388,
+    "4096-8192": 689,
+    "8192-16384": 261,
+    "16384-32768": 0,
+    "32768+": 10
+  },
+  "truncation": {
+    "total": 1584,
+    "truncated": 10,
+    "rate": 0.006313131313131313
+  },
+  "raw_stats": {
+    "mean": 5398.051767676768,
+    "std": 3249.2776634231923,
+    "min": 487,
+    "max": 16384,
+    "n": 1584
+  }
+}
