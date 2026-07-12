@@ -201,7 +201,8 @@ anti-syc-DPO-train-dataset-curation/outputs/*/dpo_dataset/
 anti-syc-DPO-train-dataset-curation/outputs/*/dpo_dataset_sham/
 anti-syc-DPO-train-dataset-curation/outputs/*/run_all.log
 # Track the SMALL training-result files under checkpoints/ (metrics, memory, best-ckpt
-# pointer, log history) — but NOT the heavy adapter weights, which live on HF.
+# pointer, log history, SFT dataset provenance) — but NOT the heavy adapter weights,
+# which live on HF.
 # Re-include the dirs first (a file cannot be un-ignored while its parent dir is ignored),
 # then the specific small files.
 !checkpoints/
@@ -210,3 +211,4 @@ anti-syc-DPO-train-dataset-curation/outputs/*/run_all.log
 !checkpoints/**/gpu_memory.json
 !checkpoints/**/best_checkpoint.txt
 !checkpoints/**/train_log_history.json
+!checkpoints/**/dataset_provenance.json

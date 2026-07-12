@@ -30,8 +30,9 @@ preference schema and saves it as a HuggingFace `DatasetDict`:
 ```
 outputs/<run>/dpo_dataset/        # DatasetDict, save_to_disk format
   train/   valid/
-outputs/<run>/sft_dataset/        # derived by ../convert_dpo_to_sft.py (SFT ablation arm):
-  train/   valid/                 #   prompt + chosen only, same rows/splits; provenance.json
+outputs/<run>_sft/sft_dataset/    # derived by ../convert_dpo_to_sft.py (SFT ablation arm):
+  train/   valid/                 #   prompt + chosen only, same rows/splits; provenance.json.
+                                  #   Own run folder — never shares the DPO run's <run>/ dir.
 ```
 
 Schema (both splits): **`prompt`**, **`chosen`**, **`rejected`** (strings).
@@ -183,10 +184,10 @@ are produced and the sign-convention sanity check prints `PASS`.
 
 - `dpo_dataset/` — **the handoff**: HF `DatasetDict({train,valid})` with `prompt`/`chosen`/`rejected`
   (see "Handoff / integration" above). This is what the trainer loads.
-- `sft_dataset/` — derived from `dpo_dataset/` by the repo-root `convert_dpo_to_sft.py`
-  (`prompt`/`chosen` only, same rows/splits, provenance SHAs in `provenance.json`) — the input
-  for the SFT ablation arm (`METHOD=sft`, see `../SFT_Arm_Developer_Spec.md`). Not produced by
-  this module's pipeline stages.
+- `../<run>_sft/sft_dataset/` — derived from `dpo_dataset/` by the repo-root
+  `convert_dpo_to_sft.py` into its own run folder (`prompt`/`chosen` only, same rows/splits,
+  provenance SHAs in `provenance.json`) — the input for the SFT ablation arm (`METHOD=sft`,
+  see `../SFT_Arm_Developer_Spec.md`). Not produced by this module's pipeline stages.
 - `final_pairs.joblib` — `{prompt, subset, chosen, rejected, chosen_cost, rejected_cost, margin,
   chosen_runner_up_gap, rejected_runner_up_gap, unsafe_frac, chosen_label, rejected_label,
   chosen/rejected_full_tokens, chosen/rejected_answer_words, chosen/rejected_think_words}`

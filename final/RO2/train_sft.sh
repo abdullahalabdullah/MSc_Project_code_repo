@@ -3,8 +3,9 @@
 # One-command SFT ablation arm: data prep + training (SFT_Arm_Developer_Spec.md).
 #
 # Runs the full METHOD=sft workflow, skipping anything already done:
-#   1. Convert  dpo_dataset -> sibling sft_dataset  (convert_dpo_to_sft.py)
-#      SKIPPED if the sft_dataset already exists (its provenance.json is the marker).
+#   1. Convert  outputs/<run>/dpo_dataset -> outputs/<run>_sft/sft_dataset
+#      (convert_dpo_to_sft.py — the SFT arm gets its OWN run folder, never sharing the
+#      DPO run's). SKIPPED if the sft_dataset already exists (provenance.json is the marker).
 #   2. Verify   tokenization equality vs the DPO pathway (verify_sft_tokenization.py)
 #      SKIPPED if verification already PASSED for this exact dataset content — a
 #      .verify_passed marker inside sft_dataset stores the dataset hash it passed with,
@@ -29,7 +30,9 @@ if [ -z "${DPO_DATASET}" ] || [ ! -d "${DPO_DATASET}" ]; then
   echo "  or pass an explicit path:          bash train_sft.sh path/to/dpo_dataset"
   exit 1
 fi
-SFT_DATASET="$(dirname "${DPO_DATASET}")/sft_dataset"
+# Own run folder for the SFT arm: outputs/<run>/dpo_dataset -> outputs/<run>_sft/sft_dataset
+RUN_DIR="$(dirname "${DPO_DATASET}")"
+SFT_DATASET="$(dirname "${RUN_DIR}")/$(basename "${RUN_DIR}")_sft/sft_dataset"
 echo "== Source (DPO): ${DPO_DATASET}"
 echo "== Target (SFT): ${SFT_DATASET}"
 

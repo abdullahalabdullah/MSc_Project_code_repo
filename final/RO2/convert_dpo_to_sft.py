@@ -21,9 +21,10 @@ and derived datasets so the lineage is auditable at train time (train_sft.py re-
 Usage:
     python convert_dpo_to_sft.py path/to/dpo_dataset [--output path/to/sft_dataset] [--limit N]
 
-Default output is a sibling directory named "sft_dataset" next to the source. --limit builds a
-small smoke-test dataset (marked non-canonical in provenance.json — never train the real run
-on one).
+Default output is a dedicated SFT run folder next to the source's run folder:
+outputs/<run>/dpo_dataset -> outputs/<run>_sft/sft_dataset — the SFT arm never shares a run
+folder with the DPO arm. --limit builds a small smoke-test dataset (marked non-canonical in
+provenance.json — never train the real run on one).
 """
 import argparse
 import datetime
@@ -79,14 +80,25 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("dpo_dataset", help="path to the exported dpo_dataset (DatasetDict dir)")
     ap.add_argument("--output", default=None,
-                    help="output dir (default: sibling 'sft_dataset' next to the source)")
+                    help="output dir (default: <run>_sft/sft_dataset next to the source's "
+                         "run folder, so the SFT arm gets its own outputs/<run>_sft/)")
     ap.add_argument("--limit", type=int, default=None,
                     help="keep only the first N rows per split (SMOKE TESTS ONLY — "
                          "marked non-canonical in provenance.json)")
     args = ap.parse_args()
 
     src = os.path.normpath(args.dpo_dataset)
-    out = os.path.normpath(args.output or os.path.join(os.path.dirname(src), "sft_dataset"))
+    if args.output:
+        out = os.path.normpath(args.output)
+    else:
+        # outputs/<run>/dpo_dataset -> outputs/<run>_sft/sft_dataset: the SFT arm gets its own
+        # run folder instead of sharing the DPO run's.
+        run_dir = os.path.dirname(os.path.abspath(src))
+        run_name = os.path.basename(run_dir)
+        if not run_name or run_name in (".", os.sep):
+            sys.exit("ERROR: cannot derive a default output for this source layout — "
+                     "pass --output explicitly")
+        out = os.path.join(os.path.dirname(run_dir), f"{run_name}_sft", "sft_dataset")
     if os.path.abspath(out) == os.path.abspath(src):
         sys.exit("ERROR: output dir must differ from the source dir")
     if os.path.exists(out) and os.listdir(out):

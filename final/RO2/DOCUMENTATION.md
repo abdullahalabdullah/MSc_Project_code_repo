@@ -196,9 +196,9 @@ checkout) make that pick arbitrary (it can land on a smoke run's export).
 The three underlying steps, if you need to run them individually:
 
 ```bash
-# 1. Convert: exact dpo_dataset fed to DPO -> sibling sft_dataset (keep prompt+chosen, drop
-#    rejected; same rows, same order, same train/valid split; provenance SHAs recorded in
-#    sft_dataset/provenance.json)
+# 1. Convert: exact dpo_dataset fed to DPO -> its OWN run folder outputs/<run>_sft/sft_dataset
+#    (keep prompt+chosen, drop rejected; same rows, same order, same train/valid split;
+#    provenance SHAs recorded in sft_dataset/provenance.json)
 python convert_dpo_to_sft.py harmlessness-DPO-train-dataset-curation/outputs/main/dpo_dataset
 
 # 2. Verify (GO/NO-GO GATE): prove per example that the SFT training sequence is
@@ -207,10 +207,10 @@ python convert_dpo_to_sft.py harmlessness-DPO-train-dataset-curation/outputs/mai
 #    truncated. Must print PASS before any GPU time is spent.
 python verify_sft_tokenization.py \
     --dpo_dataset harmlessness-DPO-train-dataset-curation/outputs/main/dpo_dataset \
-    --sft_dataset harmlessness-DPO-train-dataset-curation/outputs/main/sft_dataset
+    --sft_dataset harmlessness-DPO-train-dataset-curation/outputs/main_sft/sft_dataset
 
 # 3. Train
-METHOD=sft bash train.sh harmlessness-DPO-train-dataset-curation/outputs/main/sft_dataset
+METHOD=sft bash train.sh harmlessness-DPO-train-dataset-curation/outputs/main_sft/sft_dataset
 ```
 
 Deliberate differences from the DPO arm (everything not listed here is matched):
