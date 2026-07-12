@@ -1,0 +1,112 @@
+{
+  "generation": {
+    "model": "Qwen/Qwen3-4B",
+    "n_prompts": 8,
+    "responses_per_prompt": 10,
+    "max_tokens": 8192,
+    "total_samples": 80,
+    "truncated": 1,
+    "truncated_pct": 1.25,
+    "response_tokens_mean": 1597.0,
+    "response_tokens_min": 665,
+    "response_tokens_max": 8192
+  },
+  "classification": {
+    "labeler": "Qwen/Qwen3Guard-Gen-4B",
+    "n_prompts": 8,
+    "responses_per_prompt": 10,
+    "invalid_no_answer": 1,
+    "invalid_pct": 1.25,
+    "label_distribution": {
+      "Safe": 24,
+      "Unsafe": 55,
+      "unparsed": 0
+    },
+    "filter1_dropped": 7,
+    "filter1_dropped_pct": 87.5,
+    "filter1_survivors": 1
+  },
+  "scoring": {
+    "cost_model": "PKU-Alignment/beaver-7b-unified-cost",
+    "loader": "local",
+    "n_prompts": 1,
+    "n_responses_scored": 10,
+    "cost_mean": 4.8812,
+    "cost_min": 4.25,
+    "cost_max": 5.9062
+  },
+  "funnel": {
+    "sample_mode": 8,
+    "sampled": 8,
+    "after_filter1": 1,
+    "after_filter3": 1,
+    "min_margin_filter4": null,
+    "dropped_filter4": 0,
+    "final_pairs": 1,
+    "survival_pct": 12.5
+  },
+  "per_subset": {
+    "adversarial": {
+      "sampled": 7,
+      "after_filter1": 1,
+      "after_filter3": 1,
+      "final": 1,
+      "survival_pct": 14.286
+    },
+    "vanilla": {
+      "sampled": 1,
+      "after_filter1": 0,
+      "after_filter3": 0,
+      "final": 0,
+      "survival_pct": 0.0
+    }
+  },
+  "labeler_agreement": {
+    "n_prompts": 1,
+    "chosen_side_pct": 100.0,
+    "rejected_side_pct": 100.0,
+    "both_pct": 100.0,
+    "point_biserial_cost_unsafe": 0.657,
+    "mean_cost_unsafe": 5.1927,
+    "mean_cost_safe": 4.4141,
+    "sign_convention_pass": true
+  },
+  "margin_calibration": {
+    "margin_mean": 1.6562,
+    "margin_median": 1.6562,
+    "chosen_runner_up_gap_mean": 0.0625,
+    "rejected_runner_up_gap_mean": 0.25,
+    "guard_decisiveness_mean_unsafe_frac": 0.6,
+    "per_subset_mean_margin": {
+      "adversarial": 1.6562
+    }
+  },
+  "length": {
+    "chosen_full_tokens_mean": 1503.0,
+    "rejected_full_tokens_mean": 1743.0,
+    "chosen_answer_words_mean": 496.0,
+    "rejected_answer_words_mean": 476.0,
+    "chosen_think_words_mean": 646.0,
+    "rejected_think_words_mean": 864.0,
+    "pct_rejected_longer_answer": 0.0,
+    "pearson_margin_vs_answer_len": null
+  },
+  "export": {
+    "n_pairs": 1,
+    "n_train": 1,
+    "n_valid": 0,
+    "valid_fraction": 0.1,
+    "valid_sampling": "random (seeded)",
+    "train_mix": {
+      "adversarial": 1
+    },
+    "valid_mix": {},
+    "export_field": "full",
+    "columns": [
+      "prompt",
+      "chosen",
+      "rejected"
+    ],
+    "path": "outputs/smoke_batchfix/dpo_dataset"
+  }
+}

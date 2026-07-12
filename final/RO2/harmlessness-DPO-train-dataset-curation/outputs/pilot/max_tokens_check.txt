@@ -1,0 +1,22 @@
+run: outputs/pilot
+responses: 45000   budget (MAX_TOKENS): 8192
+
+── Truncation (budget too LOW if high) ──
+  truncated at budget: 118 / 45000 (0.26%)
+
+── Response length distribution (completion tokens) ──
+  p50   :     1236
+  p90   :     1947
+  p95   :     2170
+  p99   :     3024
+  p99.9 :     8192
+  max   :     8192
+  p99.9 uses 100% of the budget
+
+── Verdict: MAX_TOKENS ──
+  ABOUT RIGHT: truncation 0.26% (<=1%) and long responses actually use the budget (p99.9 = 8192).
+
+── Trainer MAX_LENGTH check (completions that survived into the DPO dataset) ──
+  final pairs: 867   longest completion: 8192 tokens (p99: 2911)
+  worst case prompt+completion: 8192 + 4096 (prompt budget) = 12288
+  OK: fits the trainer's MAX_LENGTH=12288 (0 tokens spare).

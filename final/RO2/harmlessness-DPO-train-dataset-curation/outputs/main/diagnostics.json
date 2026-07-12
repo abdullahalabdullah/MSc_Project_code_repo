@@ -1,0 +1,117 @@
+{
+  "generation": {
+    "model": "Qwen/Qwen3-4B",
+    "n_prompts": 24000,
+    "responses_per_prompt": 10,
+    "max_tokens": 8192,
+    "total_samples": 240000,
+    "truncated": 705,
+    "truncated_pct": 0.294,
+    "response_tokens_mean": 1284.0,
+    "response_tokens_min": 146,
+    "response_tokens_max": 8192
+  },
+  "classification": {
+    "labeler": "Qwen/Qwen3Guard-Gen-4B",
+    "n_prompts": 24000,
+    "responses_per_prompt": 10,
+    "invalid_no_answer": 415,
+    "invalid_pct": 0.173,
+    "label_distribution": {
+      "Safe": 122612,
+      "Unsafe": 116973,
+      "unparsed": 0
+    },
+    "filter1_dropped": 17988,
+    "filter1_dropped_pct": 74.95,
+    "filter1_survivors": 6012
+  },
+  "scoring": {
+    "cost_model": "PKU-Alignment/beaver-7b-unified-cost",
+    "loader": "local",
+    "n_prompts": 6012,
+    "n_responses_scored": 60004,
+    "cost_mean": 0.1144,
+    "cost_min": -15.625,
+    "cost_max": 10.75
+  },
+  "funnel": {
+    "sample_mode": "ALL",
+    "sampled": 24000,
+    "after_filter1": 6012,
+    "after_filter3": 4352,
+    "min_margin_filter4": null,
+    "dropped_filter4": 0,
+    "final_pairs": 4352,
+    "survival_pct": 18.133
+  },
+  "per_subset": {
+    "adversarial": {
+      "sampled": 14917,
+      "after_filter1": 4146,
+      "after_filter3": 2799,
+      "final": 2799,
+      "survival_pct": 18.764
+    },
+    "vanilla": {
+      "sampled": 9083,
+      "after_filter1": 1866,
+      "after_filter3": 1553,
+      "final": 1553,
+      "survival_pct": 17.098
+    }
+  },
+  "labeler_agreement": {
+    "n_prompts": 6012,
+    "chosen_side_pct": 85.196,
+    "rejected_side_pct": 85.679,
+    "both_pct": 72.389,
+    "point_biserial_cost_unsafe": 0.4859,
+    "mean_cost_unsafe": 1.8343,
+    "mean_cost_safe": -1.6245,
+    "sign_convention_pass": true
+  },
+  "margin_calibration": {
+    "margin_mean": 5.816,
+    "margin_median": 4.4268,
+    "chosen_runner_up_gap_mean": 1.0584,
+    "rejected_runner_up_gap_mean": 1.0088,
+    "guard_decisiveness_mean_unsafe_frac": 0.4992,
+    "per_subset_mean_margin": {
+      "adversarial": 4.6315,
+      "vanilla": 7.9509
+    }
+  },
+  "length": {
+    "chosen_full_tokens_mean": 1068.9,
+    "rejected_full_tokens_mean": 1467.9,
+    "chosen_answer_words_mean": 360.2,
+    "rejected_answer_words_mean": 504.1,
+    "chosen_think_words_mean": 450.7,
+    "rejected_think_words_mean": 568.0,
+    "pct_rejected_longer_answer": 71.2,
+    "pearson_margin_vs_answer_len": 0.4235
+  },
+  "export": {
+    "n_pairs": 4352,
+    "n_train": 3917,
+    "n_valid": 435,
+    "valid_fraction": 0.1,
+    "valid_sampling": "random (seeded)",
+    "train_mix": {
+      "adversarial": 2517,
+      "vanilla": 1400
+    },
+    "valid_mix": {
+      "adversarial": 282,
+      "vanilla": 153
+    },
+    "export_field": "full",
+    "columns": [
+      "prompt",
+      "chosen",
+      "rejected"
+    ],
+    "path": "outputs/main/dpo_dataset"
+  }
+}

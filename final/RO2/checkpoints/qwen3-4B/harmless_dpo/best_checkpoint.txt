@@ -1,0 +1,7 @@
+Best checkpoint (selected by eval reward-accuracy; ties broken by eval loss)
+step: 735
+eval_rewards/accuracies: 0.9126436710357666
+eval_loss: 0.19111286103725433
+local: checkpoints/qwen3-4B/harmless_dpo/checkpoint-best
+hf_repo: er-abd/harmless-dpo-qwen3-4B-step-735
+hf_url: https://huggingface.co/er-abd/harmless-dpo-qwen3-4B-step-735

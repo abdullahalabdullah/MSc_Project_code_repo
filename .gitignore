@@ -41,5 +41,5 @@ Thumbs.db
 
 # Raw lsat_ar inference outputs exceed GitHub 100MB limit — only the .gz
 # versions are tracked (see commit 43d2e07). Keeps git add -A from re-adding them.
-RO1/outputs-and-results/inference-outputs/Qwen_Qwen3-4B/lsat_ar/professor/hinted.jsonl
-RO1/outputs-and-results/inference-outputs/Qwen_Qwen3-4B/lsat_ar/professor/unhinted.jsonl
+final/RO1/outputs-and-results/inference-outputs/Qwen_Qwen3-4B/lsat_ar/professor/hinted.jsonl
+final/RO1/outputs-and-results/inference-outputs/Qwen_Qwen3-4B/lsat_ar/professor/unhinted.jsonl
