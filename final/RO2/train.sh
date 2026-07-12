@@ -1,26 +1,32 @@
 #!/usr/bin/env bash
 #
-# One-command LoRA preference training on the harmlessness pairs.
+# One-command LoRA training on the harmlessness pairs.
 #
-# METHOD selects the objective (both consume the SAME exported dataset):
+# METHOD selects the objective:
 #   METHOD=dpo       (default) standard DPO (summed log-probs)   -> train_dpo.py
 #   METHOD=dpo_norm  length-normalized DPO (averaged log-probs)  -> train_dpo_norm.py
 #                    Reference-based sigmoid DPO on length-AVERAGED log-probs (open-instruct
 #                    "dpo_norm"; length normalization noted in Rafailov et al. and tuned as a
 #                    strong variant by Meng et al. 2024). Fixes DPO's response-length inflation.
 #                    See RO1/notes/harmless_dpo_response_length_inflation.md.
+#   METHOD=sft       SFT on the CHOSEN responses only            -> train_sft.py
+#                    Controlled ablation of DPO (DPO minus the negative/rejected gradient) —
+#                    see SFT_Arm_Developer_Spec.md. Consumes the sft_dataset produced by
+#                    convert_dpo_to_sft.py (NOT the raw dpo_dataset); run
+#                    verify_sft_tokenization.py before the first real run.
 #
-# It trains on the dataset exported by the curation module (stage 06). By default it
-# auto-discovers the MOST RECENT export under
-# harmlessness-DPO-train-dataset-curation/outputs/*/dpo_dataset; pass an explicit path
-# as the first argument to override. For the anti-sycophancy objective use the
-# train_antisyc.sh / train_antisyc_sham.sh wrappers (they set the anti-syc output dir,
-# HF hub repo, and W&B names, then call this script).
+# dpo/dpo_norm train on the dataset exported by the curation module (stage 06); sft trains on
+# its convert_dpo_to_sft.py derivative. By default the script auto-discovers the MOST RECENT
+# harmlessness-DPO-train-dataset-curation/outputs/*/dpo_dataset (or */sft_dataset for
+# METHOD=sft); pass an explicit path as the first argument to override. For the
+# anti-sycophancy objective use the train_antisyc.sh / train_antisyc_sham.sh wrappers (they
+# set the anti-syc output dir, HF hub repo, and W&B names, then call this script).
 #
 # Usage:
 #   bash train.sh                                     # newest exported dataset, standard DPO
 #   bash train.sh path/to/dpo_dataset                 # a specific dataset
 #   METHOD=dpo_norm bash train.sh path/to/dpo_dataset # length-normalized DPO instead of DPO
+#   METHOD=sft bash train.sh path/to/sft_dataset      # SFT-on-chosen ablation arm
 #   EPOCHS=5 MODEL=Qwen/Qwen3-4B bash train.sh     # override via env vars
 #   HUB_MODEL_ID=<namespace>/harmless-dpo-qwen3-4B bash train.sh
 #                                                   # override the HF repo prefix. Pushing is
@@ -31,10 +37,13 @@
 #   REPORT_TO=none bash train.sh                        # disable W&B
 #
 # Loss knobs (env):
-#   DPO      : DPO_BETA (default 0.1)
+#   dpo      : DPO_BETA (default 0.1)
 #   dpo_norm : DPO_NORM_BETA (default 5 — larger than DPO's because averaged log-probs
 #              are ~1/|y| smaller)
-#   Both     : LEARNING_RATE (default 5.0e-6)
+#   sft      : EVAL_FRACTION (default 0.2 — checkpoint cadence as a fraction of total steps;
+#              lower it for denser dose–response checkpoints)
+#   All      : LEARNING_RATE (per-method default: 5.0e-6 for dpo/dpo_norm, 1.0e-4 for sft —
+#              LoRA SFT needs a far higher LR than DPO; see DOCUMENTATION.md)
 #
 # Run inside tmux for long jobs:  tmux new -s train ;  bash train.sh
 set -euo pipefail
@@ -56,6 +65,7 @@ case "${METHOD}" in
     # Standard DPO loss (unchanged): sigmoid loss (DPOConfig default), beta 0.1.
     DPO_BETA="${DPO_BETA:-0.1}"
     LOSS_ARGS=(--beta "${DPO_BETA}")
+    DEFAULT_LR="5.0e-6"
     ;;
   dpo_norm)
     TRAIN_SCRIPT="train_dpo_norm.py"
@@ -69,20 +79,47 @@ case "${METHOD}" in
     #                  (per-token) log-probs are ~1/|y| smaller. Default 5 (user-tuned).
     DPO_NORM_BETA="${DPO_NORM_BETA:-5}"
     LOSS_ARGS=(--beta "${DPO_NORM_BETA}")
+    DEFAULT_LR="5.0e-6"
+    ;;
+  sft)
+    TRAIN_SCRIPT="train_sft.py"
+    DEFAULT_OUTPUT="checkpoints/qwen3-4B/harmless_sft"
+    DEFAULT_HUB="er-abd/harmless-sft-qwen3-4B"
+    DEFAULT_WANDB="harmless-sft-qwen3-4B"
+    # SFT-on-chosen ablation (SFT_Arm_Developer_Spec.md): causal-LM loss on response tokens
+    # only (prompt masked, EOS in loss — train_sft.py enforces completion_only_loss).
+    #   EVAL_FRACTION  checkpoint/eval cadence as a fraction of total steps. 0.2 matches the
+    #                  DPO run's schedule; the spec allows denser (e.g. 0.1) for the
+    #                  dose–response curve.
+    EVAL_FRACTION="${EVAL_FRACTION:-0.2}"
+    LOSS_ARGS=(--completion_only_loss True --eval_fraction "${EVAL_FRACTION}")
+    # LoRA SFT canonical LR range is 1e-4–2e-4 (QLoRA; community LoRA recipes) — DPO's 5e-6
+    # would near-guarantee a null treatment on this on-policy data. See DOCUMENTATION.md for
+    # the sweep ladder if Gate 1 fails.
+    DEFAULT_LR="1.0e-4"
     ;;
   *)
-    echo "ERROR: unknown METHOD='${METHOD}' (expected 'dpo' or 'dpo_norm')"; exit 1 ;;
+    echo "ERROR: unknown METHOD='${METHOD}' (expected 'dpo', 'dpo_norm' or 'sft')"; exit 1 ;;
 esac
 
 MODEL="${MODEL:-Qwen/Qwen3-4B}"
 EPOCHS="${EPOCHS:-3}"
 OUTPUT_DIR="${OUTPUT_DIR:-${DEFAULT_OUTPUT}}"
 SEED="${SEED:-0}"
-LEARNING_RATE="${LEARNING_RATE:-5.0e-6}"
+LEARNING_RATE="${LEARNING_RATE:-${DEFAULT_LR}}"
 # max_length must fit prompt + full (CoT) completion. The module generates up to 8192
 # completion tokens with a ~4096 prompt budget; lower this if you hit GPU OOM.
 MAX_LENGTH="${MAX_LENGTH:-12288}"
 MAX_PROMPT_LENGTH="${MAX_PROMPT_LENGTH:-4096}"
+# SFTConfig has no --max_prompt_length (TrlParser rejects unknown flags); the SFT arm instead
+# relies on verify_sft_tokenization.py having proven that no prompt exceeds the DPO prompt
+# budget and no sequence exceeds MAX_LENGTH (SFT truncation is from the RIGHT, which would
+# silently drop the EOS from the loss).
+if [ "${METHOD}" = "sft" ]; then
+  LENGTH_ARGS=(--max_length "${MAX_LENGTH}")
+else
+  LENGTH_ARGS=(--max_length "${MAX_LENGTH}" --max_prompt_length "${MAX_PROMPT_LENGTH}")
+fi
 # Hub pushing is ALWAYS ON: every checkpoint is pushed to its own private HF repo
 # "<HUB_MODEL_ID>-step-<N>" under the er-abd account (token ships in the committed .env).
 HUB_MODEL_ID="${HUB_MODEL_ID:-${DEFAULT_HUB}}"
@@ -93,12 +130,25 @@ WANDB_PROJECT="${WANDB_PROJECT:-${DEFAULT_WANDB}}"
 RUN_NAME="${RUN_NAME:-harmless_${METHOD}_$(basename "${OUTPUT_DIR}")_seed-${SEED}}"
 export WANDB_PROJECT
 
-# ── Locate the exported DPO dataset ─────────────────────────────────────────
-DATASET_PATH="${1:-$(ls -dt harmlessness-DPO-train-dataset-curation/outputs/*/dpo_dataset 2>/dev/null | head -1 || true)}"
+# ── Locate the exported dataset (dpo_dataset, or its sft_dataset derivative for sft) ──
+if [ "${METHOD}" = "sft" ]; then
+  DATASET_GLOB="harmlessness-DPO-train-dataset-curation/outputs/*/sft_dataset"
+else
+  DATASET_GLOB="harmlessness-DPO-train-dataset-curation/outputs/*/dpo_dataset"
+fi
+DATASET_PATH="${1:-$(ls -dt ${DATASET_GLOB} 2>/dev/null | head -1 || true)}"
 if [ -z "${DATASET_PATH}" ] || [ ! -d "${DATASET_PATH}" ]; then
-  echo "ERROR: no exported dpo_dataset found."
-  echo "  Run the curation pipeline first:  bash harmlessness-DPO-train-dataset-curation/run_all.sh"
-  echo "  or pass an explicit path:          bash train.sh path/to/dpo_dataset"
+  if [ "${METHOD}" = "sft" ]; then
+    echo "ERROR: no converted sft_dataset found."
+    echo "  Convert the exported DPO dataset first:"
+    echo "    python convert_dpo_to_sft.py harmlessness-DPO-train-dataset-curation/outputs/<run>/dpo_dataset"
+    echo "  then verify:  python verify_sft_tokenization.py --dpo_dataset .../dpo_dataset --sft_dataset .../sft_dataset"
+    echo "  or pass an explicit path:  METHOD=sft bash train.sh path/to/sft_dataset"
+  else
+    echo "ERROR: no exported dpo_dataset found."
+    echo "  Run the curation pipeline first:  bash harmlessness-DPO-train-dataset-curation/run_all.sh"
+    echo "  or pass an explicit path:          bash train.sh path/to/dpo_dataset"
+  fi
   exit 1
 fi
 
@@ -134,7 +184,7 @@ if role == "fineGrained":
 print(f"HF preflight OK: user={info.get('name')}, token role={role or 'unknown'}")
 PY
 
-# Hub push is ALWAYS enabled: train_dpo.py pushes every checkpoint it writes (step 0,
+# Hub push is ALWAYS enabled: the training script pushes every checkpoint it writes (step 0,
 # every ~20% of training, and the final step) to "<HUB_MODEL_ID>-step-<N>" — none skipped.
 if [ -z "${HUB_MODEL_ID}" ]; then
   echo "ERROR: HUB_MODEL_ID is empty — checkpoint pushing is mandatory."
@@ -159,8 +209,7 @@ python -u "${TRAIN_SCRIPT}" \
     --weight_decay 0.01 \
     --lr_scheduler_type cosine \
     --warmup_ratio 0.1 \
-    --max_length "${MAX_LENGTH}" \
-    --max_prompt_length "${MAX_PROMPT_LENGTH}" \
+    "${LENGTH_ARGS[@]}" \
     --logging_steps 10 \
     --bf16 True \
     --tf32 True \

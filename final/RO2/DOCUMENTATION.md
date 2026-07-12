@@ -125,6 +125,7 @@ box and the API box (heavy JSONLs are gitignored).
 ```bash
 bash train.sh                                            # harmlessness, standard DPO
 METHOD=dpo_norm bash train.sh <path/to/dpo_dataset>      # harmlessness, length-normalized DPO
+METHOD=sft      bash train.sh <path/to/sft_dataset>      # harmlessness, SFT-on-chosen ablation
 bash train_antisyc.sh      <path/to/dpo_dataset>         # anti-sycophancy
 bash train_antisyc_sham.sh <path/to/dpo_dataset_sham>    # sham control
 ```
@@ -165,6 +166,97 @@ Note `dpo_norm` stays **reference-based** (`loss_type="sigmoid"`), so — like s
 PEFT — the reference is the base model with the LoRA adapter disabled (no separate model copy),
 and the length normalization is applied identically to the reference log-probs.
 
+### Objective: SFT on the chosen responses (`METHOD=sft`)
+
+The SFT arm is a **controlled ablation of DPO** (full rationale: `SFT_Arm_Developer_Spec.md`).
+DPO's gradient simultaneously pushes up the chosen response and pushes down the rejected one —
+and the rejected response contains a full CoT, so DPO applies a negative gradient to reasoning
+tokens no judge ever evaluated. `METHOD=sft` trains `train_sft.py` (TRL `SFTTrainer`) on the
+**chosen responses only** — DPO with the negative term removed (equivalently:
+rejection-sampling fine-tuning, RAFT/RFT). Everything else is held identical to the DPO run:
+base model, LoRA config (r16/α32/dropout 0.05, same target modules), max lengths, seed policy,
+optimizer/schedule (adamw, cosine, warmup 0.1, wd 0.01, bs 1 × grad-accum 16, 3 epochs), and
+the eval/checkpoint schedule — so with the same data the SFT run produces checkpoints at the
+same steps as the DPO run.
+
+**One-command driver** — `train_sft.sh` runs the whole workflow and skips anything already
+done (conversion is skipped when the `sft_dataset` already exists; verification is skipped
+when it already PASSED for the exact same dataset content, tracked by a hash-stamped
+`.verify_passed` marker inside the `sft_dataset`):
+
+```bash
+bash train_sft.sh harmlessness-DPO-train-dataset-curation/outputs/main/dpo_dataset
+PREP_ONLY=1 bash train_sft.sh <dpo_dataset>    # convert+verify only (any CPU box), no training
+```
+
+Prefer passing the dpo_dataset path explicitly — the no-argument form picks the
+most-recently-modified `outputs/*/dpo_dataset`, and identical mtimes (e.g. after a fresh git
+checkout) make that pick arbitrary (it can land on a smoke run's export).
+
+The three underlying steps, if you need to run them individually:
+
+```bash
+# 1. Convert: exact dpo_dataset fed to DPO -> sibling sft_dataset (keep prompt+chosen, drop
+#    rejected; same rows, same order, same train/valid split; provenance SHAs recorded in
+#    sft_dataset/provenance.json)
+python convert_dpo_to_sft.py harmlessness-DPO-train-dataset-curation/outputs/main/dpo_dataset
+
+# 2. Verify (GO/NO-GO GATE): prove per example that the SFT training sequence is
+#    token-identical to what DPOTrainer trained on for the chosen response, that the loss
+#    covers response tokens only with the final EOS included, and that nothing would be
+#    truncated. Must print PASS before any GPU time is spent.
+python verify_sft_tokenization.py \
+    --dpo_dataset harmlessness-DPO-train-dataset-curation/outputs/main/dpo_dataset \
+    --sft_dataset harmlessness-DPO-train-dataset-curation/outputs/main/sft_dataset
+
+# 3. Train
+METHOD=sft bash train.sh harmlessness-DPO-train-dataset-curation/outputs/main/sft_dataset
+```
+
+Deliberate differences from the DPO arm (everything not listed here is matched):
+
+- **Loss**: causal-LM on the completion only (`completion_only_loss` — prompt tokens masked,
+  EOS in loss), no reference model, no rejected term.
+- **Learning rate**: default **1e-4** (vs DPO's 5e-6). LoRA SFT sits in the 1e-4–2e-4
+  literature range (QLoRA used 2e-4; TRL's 2e-5 default targets full fine-tuning, and LoRA
+  needs ~5–10× that); the data is on-policy/self-generated, so gradients are small and DPO's
+  5e-6 would near-guarantee a null treatment. If Gate 1 (safety gain) fails at 1e-4, sweep the
+  ladder 2e-5 / 5e-5 / 1e-4 / 2e-4 via `LEARNING_RATE=... METHOD=sft bash train.sh ...`.
+- **Best checkpoint** is selected by **`eval_loss`** (lower is better; SFT has no
+  `eval_rewards/accuracies`), with `eval_mean_token_accuracy` recorded alongside. The
+  dose–response analysis uses ALL pushed step checkpoints regardless.
+- **Checkpoint cadence knob**: `EVAL_FRACTION` (default 0.2 = DPO's schedule). The spec allows
+  denser SFT checkpoints for the dose–response curve — e.g. `EVAL_FRACTION=0.1` for ~10
+  intermediate checkpoints.
+- **No `--max_prompt_length`**: `SFTConfig` doesn't have it, and SFT truncation is from the
+  RIGHT (which would silently drop the EOS from the loss). Instead, the verifier asserts that
+  no templated prompt exceeds the DPO prompt budget (4096) and no full sequence exceeds
+  `MAX_LENGTH` (12288) — on the main export the max sequence is ~8.6k tokens, so there is
+  ample headroom. If a future dataset violates these asserts, raise `MAX_LENGTH` rather than
+  accept truncation, and record the deviation.
+
+Formatting is byte-identical to the DPO chosen pathway by construction (same
+`apply_chat_template(..., enable_thinking=True)` prompt, same manual
+`<|im_start|>assistant\n…<|im_end|>\n` wrap that preserves the `<think>` block, plus the same
+trailing EOS token that `DPOTrainer.tokenize_row` appended — including its double-EOS quirk;
+do not "fix" that in `train_sft.py`, the ablation depends on it).
+
+**Provenance** (auditable lineage): `convert_dpo_to_sft.py` writes
+`sft_dataset/provenance.json` with SHA-256 hashes of the source `dpo_dataset` and the derived
+`sft_dataset`; `train_sft.py` recomputes the dataset hash at startup, warns loudly on
+mismatch, and writes the merged record to `OUTPUT_DIR/dataset_provenance.json` (also mirrored
+into the W&B config).
+
+Defaults for `METHOD=sft`: `OUTPUT_DIR=checkpoints/qwen3-4B/harmless_sft`,
+`HUB_MODEL_ID=er-abd/harmless-sft-qwen3-4B` (checkpoints push to
+`er-abd/harmless-sft-qwen3-4B-step-<N>`), W&B project `harmless-sft-qwen3-4B`, log
+`logs/train_sft.log`.
+
+After training, follow the spec's evaluation gates **in order**: Gate 1 — safety/refusal
+classifiers (RO1 `harmlessness-eval/`) on base vs SFT checkpoints; only if safety measurably
+improved, Gate 2 — the frozen monitorability suite. Never report monitorability numbers for a
+null-treatment SFT model.
+
 ### Shared behaviour
 
 The anti-syc wrappers take an explicit dataset path and set
@@ -186,12 +278,13 @@ max_new_tokens), but trivia CoT is much shorter in practice; check the curation
 `qa_report.md` length stats and raise `MAX_LENGTH` (default 12288) only if the >12k share
 is non-negligible.
 
-Output: LoRA adapters under `checkpoints/qwen3-4B/harmless_dpo/` (or `..._dpo_norm/` for
-`METHOD=dpo_norm`). The best checkpoint by eval reward-accuracy is kept as `checkpoint-best`;
+Output: LoRA adapters under `checkpoints/qwen3-4B/harmless_dpo/` (`..._dpo_norm/` for
+`METHOD=dpo_norm`, `..._sft/` for `METHOD=sft`). The best checkpoint — by eval
+reward-accuracy for the DPO methods, by `eval_loss` for SFT — is kept as `checkpoint-best`;
 others are pruned. Its identity — the winning step and the exact `<HUB_MODEL_ID>-step-<N>` HF
 repo it was pushed to — is written to `OUTPUT_DIR/best_checkpoint.txt` (and mirrored into the
 W&B run summary). A full log is written to `logs/train_<method>.log` (`logs/train_dpo.log` /
-`logs/train_dpo_norm.log`).
+`logs/train_dpo_norm.log` / `logs/train_sft.log`).
 
 **Eval/checkpoint schedule**: fixed step intervals are epoch-count-proof and derived from the
 trainer's own total-step count (dataset size × epochs × batch/grad-accum settings), not a fixed
@@ -201,13 +294,15 @@ number of steps. Eval + checkpoint fire at:
 - the final training step, always — even if it doesn't land on a 20%-boundary
 
 `--eval_strategy` / `--save_strategy` are forced to `"no"` inside `train_dpo.py` /
-`train_dpo_norm.py` regardless of CLI flags, so this schedule is the only thing that triggers
-eval/save — nothing here sets `num_train_epochs` early-stop behavior; the run always trains
-through every epoch.
+`train_dpo_norm.py` / `train_sft.py` regardless of CLI flags, so this schedule is the only thing
+that triggers eval/save — nothing here sets `num_train_epochs` early-stop behavior; the run
+always trains through every epoch. (For `METHOD=sft` the ~20% interval is tunable via
+`EVAL_FRACTION`.)
 
 **Eval metrics** — at every eval point the trainer writes one line to `OUTPUT_DIR/eval_metrics.jsonl`
-with `step`, `epoch`, and all DPO eval metrics (`eval_loss`, `eval_rewards/accuracies`,
-`eval_rewards/margins`, `eval_logps/*`, …). Plain JSONL for easy plotting of the training curves:
+with `step`, `epoch`, and all eval metrics for the method (DPO: `eval_loss`,
+`eval_rewards/accuracies`, `eval_rewards/margins`, `eval_logps/*`, …; SFT: `eval_loss`,
+`eval_mean_token_accuracy`). Plain JSONL for easy plotting of the training curves:
 `pandas.read_json("eval_metrics.jsonl", lines=True)`.
 
 `OUTPUT_DIR/train_log_history.json` is the **complete** structured record (every logging-step
@@ -280,6 +375,7 @@ or serve it directly with vLLM (`--enable-lora` / `LoRARequest`).
 | Curate anti-syc dataset | `anti-syc-DPO-train-dataset-curation/run_all.sh` (smoke) or `run_phase{1..4}_{gpu,api}.sh` |
 | Train harmlessness (DPO) | `bash train.sh` |
 | Train harmlessness (length-normalized DPO) | `METHOD=dpo_norm bash train.sh <dpo_dataset>` |
+| Train harmlessness (SFT-on-chosen ablation) | `bash train_sft.sh <dpo_dataset>` (convert → verify → train, idempotent; `PREP_ONLY=1` for data prep only) |
 | Train anti-syc (+ sham) | `bash train_antisyc.sh <dpo_dataset>` / `bash train_antisyc_sham.sh <dpo_dataset_sham>` |
 
 ## Notes
@@ -287,13 +383,19 @@ or serve it directly with vLLM (`--enable-lora` / `LoRARequest`).
 - **TRL version**: `train_dpo.py` and `train_dpo_norm.py` both use the TRL `DPOTrainer` /
   `DPOConfig` / `TrlParser` API (`processing_class`, `get_peft_config`); `train_dpo_norm.py`
   subclasses `DPOTrainer` (`LengthNormalizedDPOTrainer`) to length-average the completion
-  log-probs. `requirements.txt` pins `trl==0.22.2` **exactly** (not a floor) — `train.sh`'s CLI
-  flags for both methods were verified against this version, and the length-normalization hook
+  log-probs; `train_sft.py` uses the same-version `SFTTrainer` / `SFTConfig`.
+  `requirements.txt` pins `trl==0.22.2` **exactly** (not a floor) — `train.sh`'s CLI
+  flags for all three methods were verified against this version, the length-normalization hook
   relies on TRL internals (`concatenated_forward` returning summed `chosen_logps`/`rejected_logps`
-  and `concatenated_inputs(...)["completion_attention_mask"]`), which have changed across TRL
-  versions before. If you deliberately upgrade TRL, run `python train_dpo.py --help` and
-  `python train_dpo_norm.py --help`, re-verify the subclass hook against the new
-  `concatenated_forward`, then re-pin.
+  and `concatenated_inputs(...)["completion_attention_mask"]`), and the SFT arm's DPO-matched
+  tokenization relies on this version's `DPOTrainer.tokenize_row` (appends EOS to completions)
+  and `SFTTrainer` prompt/completion behaviour (no chat template on string columns; `add_eos`
+  no-ops when the completion already ends with EOS; `completion_only_loss` masks the prompt) —
+  all of which have changed across TRL versions before. If you deliberately upgrade TRL, run
+  `python train_dpo.py --help`, `python train_dpo_norm.py --help` and
+  `python train_sft.py --help`, re-verify the subclass hook against the new
+  `concatenated_forward`, re-run `verify_sft_tokenization.py` (it exercises the real TRL
+  pathways), then re-pin.
 - **dpo_norm knob** (`METHOD=dpo_norm`): `DPO_NORM_BETA` (default 5 — larger than standard DPO's
   0.1 because averaged per-token log-probs are ~1/|y| smaller; treat 5 as a starting point and
   tune). The length-averaging follows open-instruct's `dpo_norm` and is the fix for DPO's
@@ -302,7 +404,12 @@ or serve it directly with vLLM (`--enable-lora` / `LoRARequest`).
   **not** truncated by `max_length` (train.sh's 12288 default is well above the ~1.5k-token
   completions); if you lower `max_length` below the completion length, the normalization
   denominator would differ from the tokens actually scored — revisit the subclass then.
-- **Dataset schema contract**: training expects exactly `prompt` / `chosen` / `rejected` string
-  columns with `train` / `valid` splits — which is what stage 06 emits. `chosen`/`rejected` retain
-  the `<think>…</think>` reasoning (thinking-mode preference training); both `train_dpo.py` and
-  `train_dpo_norm.py` wrap them as assistant turns without stripping the CoT.
+- **Dataset schema contract**: DPO training expects exactly `prompt` / `chosen` / `rejected`
+  string columns with `train` / `valid` splits — which is what stage 06 emits. `chosen`/`rejected`
+  retain the `<think>…</think>` reasoning (thinking-mode preference training); both `train_dpo.py`
+  and `train_dpo_norm.py` wrap them as assistant turns without stripping the CoT. The SFT arm
+  expects the `prompt` / `chosen` derivative produced by `convert_dpo_to_sft.py` (same splits,
+  same rows, `rejected` dropped); `train_sft.py` refuses a dataset that still has a `rejected`
+  column so the provenance-recording converter can't be skipped. The converter is generic
+  across objectives — it works on any `dpo_dataset` following this contract (harmlessness and
+  anti-syc alike).

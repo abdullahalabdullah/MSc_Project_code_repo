@@ -26,6 +26,10 @@ bash harmlessness-DPO-train-dataset-curation/run_all.sh   # curate (stages 01–
 bash train.sh                                             # LoRA DPO train on the export
 METHOD=dpo_norm bash train.sh <dpo_dataset>               # or length-normalized DPO (open-instruct dpo_norm)
 
+# Harmlessness SFT ablation arm (SFT on chosen responses only — SFT_Arm_Developer_Spec.md):
+bash train_sft.sh <dpo_dataset>       # one command: convert -> verify -> train (skips steps
+                                      # already done; PREP_ONLY=1 for data prep without training)
+
 # Anti-sycophancy (see the module README for the split GPU/API phase drivers):
 X=5 RUN_OUTPUT_DIR=outputs/smoke bash anti-syc-DPO-train-dataset-curation/run_all.sh
 bash train_antisyc.sh      anti-syc-DPO-train-dataset-curation/outputs/smoke/dpo_dataset
@@ -42,7 +46,11 @@ anti-syc-DPO-train-dataset-curation/       # anti-sycophancy dataset curation (s
                                            #   also produces the RO1 eval's frozen reserved/ files)
 train_dpo.py                  # LoRA DPO trainer (TRL DPOTrainer) — objective-agnostic
 train_dpo_norm.py             # LoRA length-normalized DPO (DPOTrainer subclass, avg log-probs; open-instruct dpo_norm)
-train.sh                      # one-command training wrapper (harmlessness defaults; METHOD=dpo|dpo_norm)
+train_sft.py                  # LoRA SFT-on-chosen trainer (TRL SFTTrainer) — DPO ablation arm
+convert_dpo_to_sft.py         # dpo_dataset -> sft_dataset (drop `rejected`; records provenance SHAs)
+verify_sft_tokenization.py    # go/no-go gate: proves SFT tokenization == DPO chosen pathway
+train.sh                      # one-command training wrapper (harmlessness defaults; METHOD=dpo|dpo_norm|sft)
+train_sft.sh                  # SFT arm driver: convert -> verify -> METHOD=sft train.sh (idempotent prep)
 train_antisyc.sh              # anti-syc wrapper: pins output dir / HF repo / W&B names
 train_antisyc_sham.sh         # sham-control wrapper (destroyed-preference control run)
 requirements.txt              # unified environment for the whole repo
@@ -86,6 +94,8 @@ the frozen RO1 eval files in `outputs/<run>/reserved/`. See the module
 ```bash
 bash train.sh                                   # harmlessness DPO (newest harmlessness export)
 METHOD=dpo_norm bash train.sh <path/to/dpo_dataset>     # harmlessness length-normalized DPO
+bash train_sft.sh <path/to/dpo_dataset>                 # harmlessness SFT-on-chosen ablation
+                                                        #   (convert + verify + train, idempotent)
 bash train_antisyc.sh      <path/to/dpo_dataset>        # anti-sycophancy
 bash train_antisyc_sham.sh <path/to/dpo_dataset_sham>   # sham control
 ```
@@ -99,7 +109,22 @@ sigmoid DPO), the fix for DPO's response-length inflation (see
 `HUB_MODEL_ID=er-abd/harmless-dpo-norm-qwen3-4B`) and knob `DPO_NORM_BETA` (default 5).
 `train_dpo.py` is unchanged; `dpo_norm` reuses its machinery via a `DPOTrainer` subclass.
 
-LoRA adapters land under `checkpoints/qwen3-4B/{harmless_dpo,harmless_dpo_norm,anti_syc_dpo,anti_syc_dpo_sham}/`
+**SFT ablation arm** (`METHOD=sft`): trains `train_sft.py` (TRL `SFTTrainer`) on the **chosen
+responses only** — DPO with the negative/rejected gradient removed (rejection-sampling
+fine-tuning; see `SFT_Arm_Developer_Spec.md`). Consumes the `sft_dataset` produced by
+`convert_dpo_to_sft.py` from the exact `dpo_dataset` fed to DPO (prompt + chosen, `rejected`
+dropped; provenance SHAs recorded in `sft_dataset/provenance.json` and re-verified into
+`OUTPUT_DIR/dataset_provenance.json` at train time). Everything is matched to the DPO run
+(LoRA config, seq lengths, seed, optimizer/schedule, checkpoint cadence) except the loss and
+the learning rate (default **1e-4** — LoRA-SFT literature range; DPO's 5e-6 is far too low
+for SFT). Loss covers response tokens only, incl. the final EOS. Before the first real run,
+`verify_sft_tokenization.py` must PASS — it proves the SFT training sequences are
+token-identical to what DPO trained on for the chosen responses. Defaults:
+`OUTPUT_DIR=checkpoints/qwen3-4B/harmless_sft`, `HUB_MODEL_ID=er-abd/harmless-sft-qwen3-4B`;
+knob `EVAL_FRACTION` (default 0.2) for denser dose–response checkpoints; best checkpoint
+selected by `eval_loss` (SFT has no reward metrics).
+
+LoRA adapters land under `checkpoints/qwen3-4B/{harmless_dpo,harmless_dpo_norm,harmless_sft,anti_syc_dpo,anti_syc_dpo_sham}/`
 (best kept as `checkpoint-best`). Every checkpoint (step 0, each ~20% interval, final step)
 is **always pushed** to its own private HF repo `<HUB_MODEL_ID>-step-<N>` — HUB_MODEL_ID
 defaults: `er-abd/harmless-dpo-qwen3-4B` (train.sh; `er-abd/harmless-dpo-norm-qwen3-4B` for
@@ -128,7 +153,8 @@ are retained in `LICENSE`. The files still derived from the upstream repo — `t
 a per-file attribution header.
 `train_dpo.py` was adapted to the preference dataset schema (`prompt`/`chosen`/`rejected`),
 Qwen3, and optional Hub pushing, and is self-contained (its seeding/env helpers are inlined, no
-sibling imports). `train_dpo_norm.py` (length-normalized DPO) is our own addition — it reuses
+sibling imports). `train_sft.py` (the SFT ablation arm) is adapted from our `train_dpo.py` and
+carries the same lineage header. `train_dpo_norm.py` (length-normalized DPO) is our own addition — it reuses
 `train_dpo.py`'s helpers/callbacks by import and subclasses TRL's `DPOTrainer` to length-average
 the completion log-probs, following AllenAI **open-instruct**'s `dpo_norm`
 ([`open_instruct/dpo_utils.py`](https://github.com/allenai/open-instruct/blob/main/open_instruct/dpo_utils.py),

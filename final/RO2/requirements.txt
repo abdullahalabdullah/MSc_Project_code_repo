@@ -22,11 +22,13 @@ python-dotenv>=1.0.1
 openai>=1.14.0         # anti-syc module only: gpt-5-mini grading + wrong-answer generation
 tqdm>=4.66.0           # anti-syc module: progress bars for the concurrent API stages
 
-# ── DPO training (train_dpo.py / train.sh) + utilities ──
-trl==0.22.2            # LoRA DPO training (DPOTrainer / DPOConfig) — pinned exact: train_dpo.py's
-                        # CLI flags were verified against this version; TRL's DPOConfig API
-                        # changes across versions, so bump deliberately (run
-                        # `python train_dpo.py --help` after upgrading to confirm nothing broke,
+# ── DPO/SFT training (train_dpo.py / train_sft.py / train.sh) + utilities ──
+trl==0.22.2            # LoRA DPO/SFT training (DPOTrainer / SFTTrainer) — pinned exact: the
+                        # trainers' CLI flags AND the SFT arm's DPO-matched tokenization
+                        # (DPOTrainer.tokenize_row EOS append, SFTTrainer add_eos /
+                        # completion_only_loss) were verified against this version; the TRL API
+                        # changes across versions, so bump deliberately (run the trainers'
+                        # `--help` and re-run verify_sft_tokenization.py after upgrading,
                         # then re-pin) rather than floating.
-peft>=0.14.0           # LoRA adapters (train_dpo.py --use_peft)
+peft>=0.14.0           # LoRA adapters (--use_peft)
 wandb>=0.17.0          # experiment tracking (train.sh REPORT_TO=wandb) — run `wandb login` first

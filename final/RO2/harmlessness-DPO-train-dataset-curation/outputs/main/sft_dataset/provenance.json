@@ -1,0 +1,22 @@
+{
+  "source_path": "harmlessness-DPO-train-dataset-curation/outputs/main/dpo_dataset",
+  "source_sha256": "4b3ce2266f317d7dcfb6e275bfebd5198d9326e62dab3f751519f9d12b978dcf",
+  "derived_sha256": "4a7a1168b30413cbdbf83f70dcd7ebc7a36cab8ccee818e24f2d35c9d5be9efd",
+  "rows": {
+    "train": 3917,
+    "valid": 435
+  },
+  "source_rows": {
+    "train": 3917,
+    "valid": 435
+  },
+  "columns": [
+    "prompt",
+    "chosen"
+  ],
+  "canonical": true,
+  "limit": null,
+  "created_at": "2026-07-12T17:09:01.737731+00:00",
+  "git_commit": "2f9cd834acb6827e0f992160665872cd4284340b",
+  "converter": "convert_dpo_to_sft.py"
+}
