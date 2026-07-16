@@ -22,8 +22,13 @@ if [ "${FORCE:-0}" = "1" ]; then FORCE_FLAG="--force"; fi
 $PY - <<'PYEOF'
 import os, sys
 try:
-    from dotenv import load_dotenv; load_dotenv()
-except ImportError:
+    # Explicit paths: parameterless load_dotenv() inspects the caller's file,
+    # which does not exist for stdin scripts (heredoc) and crashes. cwd is
+    # this module dir, so check here first, then the RO2 root .env.
+    from dotenv import load_dotenv
+    load_dotenv(".env")
+    load_dotenv("../.env")
+except Exception:
     pass
 if not os.environ.get("OPENAI_API_KEY"):
     sys.exit("ERROR: OPENAI_API_KEY not set. Set it in .env.")
