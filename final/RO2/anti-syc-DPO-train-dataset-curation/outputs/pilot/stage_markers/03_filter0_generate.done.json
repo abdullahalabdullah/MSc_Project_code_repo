@@ -1,0 +1,23 @@
+{
+  "stage": "03_filter0_generate",
+  "config_hash": "e4448cdbc2b1752b",
+  "params": {
+    "upstream": "b779a43e8b309b9d",
+    "n": 10,
+    "sampling": {
+      "model": "Qwen/Qwen3-4B",
+      "enable_thinking": true,
+      "temperature": 1.0,
+      "top_p": 0.95,
+      "top_k": 20,
+      "max_new_tokens": 16384,
+      "gen_seed": 0
+    },
+    "answer_format": "Answer the question. Think it through, then end your reply with exactly one line:\nFinal answer: <your answer>"
+  },
+  "counts": {
+    "questions": 500,
+    "samples": 5000
+  },
+  "completed_at": "2026-07-16T21:13:44"
+}
