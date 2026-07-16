@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Phase 4 (API box, NO GPU): stages 08 (Filter-1 grading), 09 (pairs + balancing), then
-# either the pilot tail (11: QA + gates) or the full tail (10 sham, 11 QA, 12 export).
+# either the pilot tail (11: QA + gates) or the full tail (11 QA, 12 export).
 #
 # Usage:
 #   X=500 PILOT=1 X_FULL=20000 bash run_phase4_api.sh outputs/pilot
@@ -42,11 +42,9 @@ if [ "${PILOT:-0}" = "1" ]; then
     echo "== PILOT done. Gates: $RUN_OUTPUT_DIR/pilot_gates.json =="
     echo "== Gate 1 needs the hand audit:  python audit_grader_sample.py --make $RUN_OUTPUT_DIR =="
 else
-    echo "== Stage 10: sham control (CPU) =="
-    $PY 10_sham.py $FORCE_FLAG
     echo "== Stage 11: QA report + manifest =="
     $PY 11_qa_report.py
-    echo "== Stage 12: export DatasetDicts (main + sham) =="
+    echo "== Stage 12: export DatasetDict =="
     $PY 12_export_dpo_dataset.py $FORCE_FLAG
-    echo "== Done. DPO datasets: $RUN_OUTPUT_DIR/dpo_dataset{,_sham} =="
+    echo "== Done. DPO dataset: $RUN_OUTPUT_DIR/dpo_dataset =="
 fi

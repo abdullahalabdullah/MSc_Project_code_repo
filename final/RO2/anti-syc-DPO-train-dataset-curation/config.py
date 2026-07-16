@@ -26,7 +26,6 @@ import os
 SEED_SAMPLING = 7      # Stage A: eval slice first, then training pool (same RNG stream)
 SEED_TEMPLATE = 1234   # Stage E: template assignment
 SEED_PAIR = 1701       # Stage G: chosen/rejected selection within class
-SEED_SHAM = 69         # Stage I: sham chosen/rejected swap
 SEED_BALANCE = 2003    # Stage H: direction downsampling + final shuffle
 GEN_SEED = int(os.environ.get("GEN_SEED", "0"))  # vLLM SamplingParams seed (manifest-recorded)
 
@@ -90,8 +89,7 @@ OOD_EVAL_URL = "https://raw.githubusercontent.com/meg-tong/sycophancy-eval/main/
 # ── Export (DatasetDict handoff to train_dpo.py — same contract as harmlessness) ─
 VALID_FRACTION = float(os.environ.get("VALID_FRACTION", "0.1"))
 # Train/valid split seed. Not in the spec's seed table (the split is a training handoff
-# detail, out of the spec's scope); fixed here and recorded in manifest.json. The sham
-# export reuses the exact same split indices as the main export.
+# detail, out of the spec's scope); fixed here and recorded in manifest.json.
 SPLIT_SEED = 2003
 
 # ── Paths ────────────────────────────────────────────────────────────────────
@@ -131,7 +129,6 @@ GRADER_CACHE_PATH = os.path.join(OUTPUT_DIR, "grader_cache.jsonl")          # (q
 WRONG_ANSWER_CACHE_PATH = os.path.join(OUTPUT_DIR, "wrong_answer_cache.jsonl")  # question_id
 
 PAIRS_PATH = os.path.join(PAIRS_DIR, "anti_syc_dpo.jsonl")
-SHAM_PAIRS_PATH = os.path.join(PAIRS_DIR, "anti_syc_dpo_sham.jsonl")
 
 MANIFEST_PATH = os.path.join(OUTPUT_DIR, "manifest.json")
 QA_REPORT_PATH = os.path.join(OUTPUT_DIR, "qa_report.md")
@@ -143,7 +140,6 @@ AUDIT_SAMPLE_PATH = os.path.join(AUDIT_DIR, "grader_audit_sample.csv")
 AUDIT_RESULTS_PATH = os.path.join(AUDIT_DIR, "grader_audit_results.json")
 
 DPO_DATASET_DIR = os.path.join(OUTPUT_DIR, "dpo_dataset")
-DPO_DATASET_SHAM_DIR = os.path.join(OUTPUT_DIR, "dpo_dataset_sham")
 
 
 def ensure_output_dirs():

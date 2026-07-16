@@ -1,4 +1,4 @@
-"""Export (12) — training-ready DPO DatasetDicts for main AND sham (CPU).
+"""Export (12) — training-ready DPO DatasetDict (CPU).
 
 Identical handoff contract to the harmlessness module's stage 06: a HF DatasetDict
 ({"train","valid"}) with exactly three string columns (prompt / chosen / rejected),
@@ -6,13 +6,11 @@ saved via save_to_disk, loaded by train_dpo.py with load_from_disk — the train
 NO changes. chosen/rejected are the verbatim full completions (incl. <think>…</think>),
 matching what the model generates (the harmlessness EXPORT_FIELD="full" convention).
 
-The split is deterministic (SPLIT_SEED), stratified by direction (best-effort 50/50 in
-the holdout, mirroring the main file's balance), and — critically for the sham control —
-the SAME pair ids land in the same split in both exports, so main vs sham training
-differ ONLY in the preference signal.
+The split is deterministic (SPLIT_SEED) and stratified by direction (best-effort 50/50
+in the holdout, mirroring the main file's balance).
 
-Input : pairs/anti_syc_dpo.jsonl, pairs/anti_syc_dpo_sham.jsonl
-Output: dpo_dataset/ and dpo_dataset_sham/
+Input : pairs/anti_syc_dpo.jsonl
+Output: dpo_dataset/
 """
 import argparse
 import os
@@ -73,7 +71,7 @@ def _export(pairs, valid_ids, out_dir):
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Export DatasetDicts (main + sham) (CPU).")
+    ap = argparse.ArgumentParser(description="Export the DPO DatasetDict (CPU).")
     ap.add_argument("--force", action="store_true", help="Re-run even if cached.")
     args = ap.parse_args()
 
@@ -81,29 +79,22 @@ def main():
     config.ensure_output_dirs()
 
     params = {
-        "upstream": upstream_hash("10_sham"),
+        "upstream": upstream_hash("09_pairs"),
         "valid_fraction": config.VALID_FRACTION,
         "split_seed": config.SPLIT_SEED,
     }
-    outputs = [os.path.join(config.DPO_DATASET_DIR, "dataset_dict.json"),
-               os.path.join(config.DPO_DATASET_SHAM_DIR, "dataset_dict.json")]
+    outputs = [os.path.join(config.DPO_DATASET_DIR, "dataset_dict.json")]
     if check_stage_cache(STAGE, params, outputs, force=args.force):
         return
 
     pairs = read_jsonl(config.PAIRS_PATH)
-    sham = read_jsonl(config.SHAM_PAIRS_PATH)
     if not pairs:
-        raise SystemExit("No pairs to export — run stages up to 10 first.")
-    assert [p["pair_id"] for p in pairs] == [p["pair_id"] for p in sham], \
-        "main/sham pair order diverged — re-run stage 10"
+        raise SystemExit("No pairs to export — run stages up to 09 first.")
 
     valid_ids = _split_ids(pairs, config.VALID_FRACTION, config.SPLIT_SEED)
     n_train, n_valid = _export(pairs, valid_ids, config.DPO_DATASET_DIR)
-    s_train, s_valid = _export(sham, valid_ids, config.DPO_DATASET_SHAM_DIR)
-    assert (n_train, n_valid) == (s_train, s_valid)
 
-    print(f"Exported main -> {config.DPO_DATASET_DIR}  (train={n_train}, valid={n_valid})")
-    print(f"Exported sham -> {config.DPO_DATASET_SHAM_DIR}  (identical split indices)")
+    print(f"Exported -> {config.DPO_DATASET_DIR}  (train={n_train}, valid={n_valid})")
     print("  columns: prompt, chosen, rejected (full completions incl. <think>)")
     print(f"  load with: datasets.load_from_disk({config.DPO_DATASET_DIR!r})")
 
@@ -115,8 +106,7 @@ def main():
         "split_seed": config.SPLIT_SEED,
         "stratified_by": "direction",
         "columns": ["prompt", "chosen", "rejected"],
-        "main_path": config.DPO_DATASET_DIR,
-        "sham_path": config.DPO_DATASET_SHAM_DIR,
+        "path": config.DPO_DATASET_DIR,
     })
     write_stage_marker(STAGE, params, {"train": n_train, "valid": n_valid})
 

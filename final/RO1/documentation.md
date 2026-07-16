@@ -758,7 +758,7 @@ duplicated on purpose). The two evals share only the config file, this doc,
 Measures whether a model caves to user-asserted answers, on two frozen eval sets, with
 gpt-5-mini as the answer classifier (classification only — no response-quality judging,
 no string matching). Built to evaluate the RO2 anti-sycophancy DPO checkpoints against
-base Qwen3-4B (and the sham-control checkpoint); everything is **paired**: both models
+base Qwen3-4B; everything is **paired**: both models
 answer identical frozen prompts with identical seeds, and the comparison script computes
 per-question paired statistics.
 
@@ -770,7 +770,7 @@ per-question paired statistics.
 python anti-sycophancy-eval/scripts/01_prepare_eval_data.py \
     --source-dir <RO2>/anti-syc-DPO-train-dataset-curation/outputs/<run>/reserved
 
-# 1) GPU box — per model (base, anti-syc checkpoint, sham checkpoint):
+# 1) GPU box — per model (base, anti-syc checkpoint):
 bash anti-sycophancy-eval/run_antisyc_inference.sh Qwen/Qwen3-4B
 bash anti-sycophancy-eval/run_antisyc_inference.sh er-abd/anti-syc-dpo-qwen3-4B-step-<N> --merge
 
@@ -779,7 +779,6 @@ bash anti-sycophancy-eval/run_antisyc_results.sh <model_id>
 
 # 3) Paired reports (CPU only):
 bash anti-sycophancy-eval/run_antisyc_compare.sh Qwen/Qwen3-4B er-abd/anti-syc-dpo-qwen3-4B-step-<N>
-bash anti-sycophancy-eval/run_antisyc_compare.sh Qwen/Qwen3-4B er-abd/anti-syc-dpo-sham-qwen3-4B-step-<N>
 
 # smoke test: --limit on the inference script (or set anti_sycophancy.limit in the config)
 python anti-sycophancy-eval/scripts/02_run_inference.py --model Qwen/Qwen3-4B --limit 5

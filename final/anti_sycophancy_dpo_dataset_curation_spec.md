@@ -1,6 +1,6 @@
 # Anti-Sycophancy DPO — Dataset Curation Pipeline Specification
 
-**Scope:** This document specifies the complete pipeline for curating the anti-sycophancy DPO preference dataset (and its sham control). It covers data acquisition through final dataset assembly and QA. **Training is out of scope** — the pipeline's deliverable is the frozen JSONL datasets described in §9. **Monitorability evaluation is out of scope** — it is already built and is not referenced by this pipeline.
+**Scope:** This document specifies the complete pipeline for curating the anti-sycophancy DPO preference dataset. It covers data acquisition through final dataset assembly and QA. **Training is out of scope** — the pipeline's deliverable is the frozen JSONL datasets described in §9. **Monitorability evaluation is out of scope** — it is already built and is not referenced by this pipeline.
 
 All design decisions are final. Where a numeric threshold appears, use it as written. Every stochastic step takes an explicit seed from §2.
 
@@ -17,9 +17,11 @@ Stage E: Template assignment           →  one opinioned prompt per (question, 
 Stage F: Filter-1 (contrast sampling)  →  N samples per prompt; keep prompts with both classes
 Stage G: Pair selection                →  one (chosen, rejected) pair per surviving prompt
 Stage H: Balancing & assembly          →  50/50 direction balance; final DPO dataset
-Stage I: Sham dataset construction     →  shuffled-preference control
 Stage J: QA report + freeze            →  manifest, stats, acceptance checks
 ```
+
+(Stage I — a shuffled-preference sham control — existed in an earlier revision and was
+removed by owner decision; the stage lettering keeps the gap.)
 
 A **pilot run** (§10) executes Stages A–G with the training-pool size set to 500 first. The full run proceeds only if the pilot gates pass.
 
@@ -39,7 +41,7 @@ A **pilot run** (§10) executes Stages A–G with the training-pool size set to 
 | Filter-0 pass band                            | ≥ 70% of parseable samples correct, AND ≥ 9/10 samples parseable                                                                                                                                                                                                                                                                    |
 | Filter-1 pass rule                            | ≥ 1 chosen-class sample AND ≥ 1 rejected-class sample (per §7 class definitions)                                                                                                                                                                                                                                                    |
 | Direction balance                             | 50/50 wrong-opinion : right-opinion (downsample majority, seed `2003`)                                                                                                                                                                                                                                                              |
-| Seeds                                         | dataset sampling `7`; template assignment `1234`; pair selection `1701`; sham shuffle `69`; balancing `2003`                                                                                                                                                                                                                        |
+| Seeds                                         | dataset sampling `7`; template assignment `1234`; pair selection `1701`; balancing `2003`                                                                                                                                                                                                                        |
 | Serving                                       | vLLM (or equivalent batch server); store **raw full completions including `<think>…</think>`** for every sample. Reuse the serving setup from the existing monitorability repo.                                                                                                                                                     |
 | Caching                                       | Every stage writes its output to disk on first creation and is **not recreated if the output exists**, unless the command is run with `--force`. Cache keys must include the stage config hash so a config change invalidates stale outputs.                                                                                        |
 
@@ -273,9 +275,7 @@ Each pair stores the **complete raw completion** (thinking block + response + fi
 
 ---
 
-## 9. Stage I & outputs — Sham control and deliverables
-
-**Sham dataset:** copy `pairs/anti_syc_dpo.jsonl`; for each pair independently, swap chosen/rejected with probability 0.5 (seed `69`). Identical prompts, identical response pool, destroyed preference signal. Write `pairs/anti_syc_dpo_sham.jsonl`.
+## 9. Outputs — deliverables
 
 **Directory layout:**
 
@@ -286,7 +286,6 @@ datasets/anti_syc_dpo/
   filter0/             # per-question samples + grades + consistency
   filter1/             # per-instance samples + grades + syc_fraction
   pairs/anti_syc_dpo.jsonl
-  pairs/anti_syc_dpo_sham.jsonl
   manifest.json        # config §2, seeds, git hash, timestamps, all counts per stage
   qa_report.md         # §11
 ```
@@ -342,7 +341,7 @@ If gate 2 fails, report per-stratum yields to the owner and stop. (The documente
 - Per-template survival and class rates; list of any templates dropped at the pilot gate.
 - Grader audit results (agreement %, confusion table) and total classifier call volume.
 - `UNPARSEABLE` rate overall and the share attributable to truncation vs. missing final-answer line.
-- Direction composition of the final file; total pair counts for main and sham.
+- Direction composition of the final file; total pair count.
 - Mean/median completion length (tokens) for chosen vs. rejected, overall — flag if the classes differ by > 20% in mean length.
 
 **Acceptance criteria:** all pilot gates passed; final dataset ≥ 3,000 pairs (full run); 50/50 direction balance (±1%); zero overlap between `pairs/` and any `reserved/` file (asserted in code); manifest complete with seeds and git hash.

@@ -8,7 +8,7 @@ Writes everything spec §11 requires:
                      survival, syc_fraction distribution (histogram PNG + mean/median,
                      overall & per template), per-template survival/class rates,
                      grader-audit results (or PENDING), UNPARSEABLE rate + truncation
-                     vs missing-line attribution, direction composition, main/sham
+                     vs missing-line attribution, direction composition, pair
                      counts, chosen-vs-rejected token lengths (>20% mean-gap flag).
   pilot_gates.json — only with PILOT=1: the four blocking gates of spec §10.
 
@@ -117,7 +117,6 @@ def main():
     f0 = read_jsonl(config.FILTER0_SUMMARY_PATH) if os.path.exists(config.FILTER0_SUMMARY_PATH) else []
     f1 = read_jsonl(config.FILTER1_SUMMARY_PATH) if os.path.exists(config.FILTER1_SUMMARY_PATH) else []
     pairs = read_jsonl(config.PAIRS_PATH) if os.path.exists(config.PAIRS_PATH) else []
-    sham = read_jsonl(config.SHAM_PAIRS_PATH) if os.path.exists(config.SHAM_PAIRS_PATH) else []
     pool = read_jsonl(config.TRAINING_POOL_PATH) if os.path.exists(config.TRAINING_POOL_PATH) else []
     instances = read_jsonl(config.INSTANCES_PATH) if os.path.exists(config.INSTANCES_PATH) else []
 
@@ -132,7 +131,6 @@ def main():
         "filter1_pass": n_f1_pass,
         "pairs_selected": n_f1_pass,
         "pairs_post_balance": len(pairs),
-        "sham_pairs": len(sham),
     }
 
     # ── Filter-0 consistency distribution + per-stratum Filter-1 survival ────
@@ -242,7 +240,7 @@ def main():
         },
         "seeds": {
             "sampling": config.SEED_SAMPLING, "template": config.SEED_TEMPLATE,
-            "pair": config.SEED_PAIR, "sham": config.SEED_SHAM,
+            "pair": config.SEED_PAIR,
             "balance": config.SEED_BALANCE, "gen_seed_vllm": config.GEN_SEED,
             "split_seed_export": config.SPLIT_SEED,
         },
@@ -381,10 +379,8 @@ def main():
     a("")
     a("## Final dataset")
     a("")
-    a(f"- pairs (main): {len(pairs)}  |  wrong_opinion {n_wrong_final} / right_opinion "
+    a(f"- pairs: {len(pairs)}  |  wrong_opinion {n_wrong_final} / right_opinion "
       f"{len(pairs) - n_wrong_final}")
-    a(f"- pairs (sham): {len(sham)}"
-      + ("" if sham else "  (not built — pilot runs skip stage 10)"))
     a(f"- completion length (tokens): chosen mean {c_mean} / median {c_median}  |  "
       f"rejected mean {r_mean} / median {r_median}")
     if length_flag:

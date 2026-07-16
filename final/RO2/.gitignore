@@ -198,7 +198,6 @@ anti-syc-DPO-train-dataset-curation/outputs/*/filter0/grades.jsonl*
 anti-syc-DPO-train-dataset-curation/outputs/*/filter1/grades.jsonl*
 anti-syc-DPO-train-dataset-curation/outputs/*/grader_cache.jsonl
 anti-syc-DPO-train-dataset-curation/outputs/*/dpo_dataset/
-anti-syc-DPO-train-dataset-curation/outputs/*/dpo_dataset_sham/
 anti-syc-DPO-train-dataset-curation/outputs/*/run_all.log
 # Track the SMALL training-result files under checkpoints/ (metrics, memory, best-ckpt
 # pointer, log history, SFT dataset provenance) — but NOT the heavy adapter weights,

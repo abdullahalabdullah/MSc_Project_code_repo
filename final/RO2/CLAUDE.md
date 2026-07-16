@@ -12,7 +12,7 @@ relevant docs in the **same turn**, not as a follow-up:
   `anti-syc-DPO-train-dataset-curation/README.md` (modules)
 - `DOCUMENTATION.md` (end-to-end runbook)
 - `requirements.txt` if dependencies changed
-- Any inline usage comments in `train.sh` / `train_antisyc.sh` / `train_antisyc_sham.sh` /
+- Any inline usage comments in `train.sh` / `train_antisyc.sh` /
   the modules' `run_all.sh` + `run_phase*.sh` that echo commands
 
 Do not leave a documented command, path, or file listing that no longer matches the code. If a

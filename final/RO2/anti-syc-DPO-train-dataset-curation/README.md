@@ -1,13 +1,14 @@
 # Anti-Sycophancy DPO — training-dataset curation
 
 Self-contained module implementing the frozen curation spec
-(`../../anti_sycophancy_dpo_dataset_curation_spec.md`, Stages A–J): TriviaQA questions →
+(`../../anti_sycophancy_dpo_dataset_curation_spec.md`; the spec's Stage I sham control
+was dropped by owner decision — not implemented): TriviaQA questions →
 knowledge filter (Filter-0) → LLM-generated wrong answers → opinionated templates →
 contrast sampling (Filter-1) → one (chosen, rejected) pair per surviving prompt →
-50/50 direction balance → sham control → QA report — ending in the same training-ready
+50/50 direction balance → QA report — ending in the same training-ready
 `DatasetDict({train,valid})` with `prompt`/`chosen`/`rejected` columns that the
 harmlessness module exports, so `../train_dpo.py` consumes it **unchanged** (use the
-`../train_antisyc.sh` / `../train_antisyc_sham.sh` wrappers).
+`../train_antisyc.sh` wrapper).
 
 It also produces the **two frozen eval files** (`reserved/`) that the RO1
 `anti-sycophancy-eval` consumes — import them there once with its
@@ -26,9 +27,11 @@ It also produces the **two frozen eval files** (`reserved/`) that the RO1
 | 07 | `07_filter1_generate.py` | F — contrast sampling, N_FILTER1=10 | **GPU (vLLM)** | `filter1/generations.jsonl` |
 | 08 | `08_filter1_grade.py` | F — grading, classes, syc_fraction | **API** | `filter1/{grades,summary}.jsonl` |
 | 09 | `09_pairs.py` | G+H — pair selection (seed 1701) + 50/50 balance (seed 2003) | CPU | `pairs/anti_syc_dpo.jsonl` |
-| 10 | `10_sham.py` | I — sham control (p=0.5 swap, seed 69) | CPU | `pairs/anti_syc_dpo_sham.jsonl` |
 | 11 | `11_qa_report.py` | J — QA report, manifest, pilot gates | CPU | `qa_report.md`, `manifest.json`, `pilot_gates.json` |
-| 12 | `12_export_dpo_dataset.py` | (training handoff) | CPU | `dpo_dataset/`, `dpo_dataset_sham/` |
+| 12 | `12_export_dpo_dataset.py` | (training handoff) | CPU | `dpo_dataset/` |
+
+(There is no stage 10: the spec's Stage I sham control was dropped by owner decision;
+the script numbering keeps the gap rather than renumbering.)
 
 Support files: `config.py` (single source of truth — spec constants hardcoded, run knobs
 env-overridable), `prompts.py` (spec-verbatim prompt strings; the RO1 eval carries a twin),
@@ -98,4 +101,4 @@ Spec §9: `pair_id`, `question_id`, `source`, `direction`, `template_id`, `quest
 `gold`, `gold_aliases`, `asserted_answer`, `prompt`, `chosen`/`rejected`
 (`{full_text, final_answer, grade, num_tokens}` — `full_text` is the verbatim completion
 incl. `<think>…</think>`, never trimmed), `filter0_consistency`, `syc_fraction`,
-`n_chosen_class`, `n_rejected_class`. The sham file adds `sham_swapped`.
+`n_chosen_class`, `n_rejected_class`.

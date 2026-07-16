@@ -19,8 +19,8 @@
 # its convert_dpo_to_sft.py derivative. By default the script auto-discovers the MOST RECENT
 # harmlessness-DPO-train-dataset-curation/outputs/*/dpo_dataset (or */sft_dataset for
 # METHOD=sft); pass an explicit path as the first argument to override. For the
-# anti-sycophancy objective use the train_antisyc.sh / train_antisyc_sham.sh wrappers (they
-# set the anti-syc output dir, HF hub repo, and W&B names, then call this script).
+# anti-sycophancy objective use the train_antisyc.sh wrapper (it sets the anti-syc
+# output dir, HF hub repo, and W&B names, then calls this script).
 #
 # Usage:
 #   bash train.sh                                     # newest exported dataset, standard DPO

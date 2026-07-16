@@ -5,12 +5,11 @@ Two DPO pipelines sharing one trainer: **curate a preference dataset → train t
 ```
 harmlessness-DPO-train-dataset-curation/   # harmlessness curation (WildJailbreak → preference pairs)
 anti-syc-DPO-train-dataset-curation/       # anti-sycophancy curation (TriviaQA → preference pairs
-                                           #   + sham control + the RO1 eval's frozen files)
+                                           #   + the RO1 eval's frozen files)
 train_dpo.py                  # LoRA DPO trainer (self-contained; consumes either module's export)
 train_dpo_norm.py             # LoRA length-normalized DPO trainer (open-instruct dpo_norm; avg log-probs)
 train.sh                      # one-command training wrapper (harmlessness defaults; METHOD=dpo|dpo_norm)
 train_antisyc.sh              # anti-sycophancy wrapper (pins output dir / HF repo / W&B names)
-train_antisyc_sham.sh         # sham-control wrapper
 requirements.txt              # unified environment
 ```
 
@@ -111,9 +110,9 @@ python audit_grader_sample.py --make outputs/pilot                # gate 1: hand
 # full run: same four phases with X=20000 (no PILOT), optionally DROPPED_TEMPLATES=<gate-3 list>
 ```
 
-Handoff: `outputs/<run>/dpo_dataset/` (main) and `outputs/<run>/dpo_dataset_sham/`
-(shuffled-preference control) — the identical `prompt`/`chosen`/`rejected` DatasetDict
-contract, so training needs no changes. The run dir also carries
+Handoff: `outputs/<run>/dpo_dataset/` — the identical `prompt`/`chosen`/`rejected`
+DatasetDict contract, so training needs no changes. (The spec's Stage I sham control was
+dropped by owner decision; there is no stage 10 script and no sham export.) The run dir also carries
 `reserved/eval_id_triviaqa.jsonl` + `reserved/eval_ood_sycophancyeval.jsonl` — the frozen
 eval files the RO1 `anti-sycophancy-eval` imports once
 (`python anti-sycophancy-eval/scripts/01_prepare_eval_data.py --source-dir <run>/reserved`).
@@ -126,8 +125,7 @@ box and the API box (heavy JSONLs are gitignored).
 bash train.sh                                            # harmlessness, standard DPO
 METHOD=dpo_norm bash train.sh <path/to/dpo_dataset>      # harmlessness, length-normalized DPO
 METHOD=sft      bash train.sh <path/to/sft_dataset>      # harmlessness, SFT-on-chosen ablation
-bash train_antisyc.sh      <path/to/dpo_dataset>         # anti-sycophancy
-bash train_antisyc_sham.sh <path/to/dpo_dataset_sham>    # sham control
+bash train_antisyc.sh <path/to/dpo_dataset>              # anti-sycophancy
 ```
 
 ### Objective: DPO vs length-normalized DPO (`METHOD`)
@@ -259,9 +257,9 @@ null-treatment SFT model.
 
 ### Shared behaviour
 
-The anti-syc wrappers take an explicit dataset path and set
-`OUTPUT_DIR` (`checkpoints/qwen3-4B/anti_syc_dpo[_sham]`), `HUB_MODEL_ID`
-(`er-abd/anti-syc-dpo[-sham]-qwen3-4B`), W&B names, and `MAX_PROMPT_LENGTH=1024` (trivia
+The anti-syc wrapper takes an explicit dataset path and sets
+`OUTPUT_DIR` (`checkpoints/qwen3-4B/anti_syc_dpo`), `HUB_MODEL_ID`
+(`er-abd/anti-syc-dpo-qwen3-4B`), W&B names, and `MAX_PROMPT_LENGTH=1024` (trivia
 prompts are short), then call `train.sh` — the trainer itself is identical across
 objectives. Never train anti-syc through bare `train.sh`: its default `HUB_MODEL_ID`
 would push checkpoints into the harmlessness HF repos. Override settings as needed:
@@ -376,7 +374,7 @@ or serve it directly with vLLM (`--enable-lora` / `LoRARequest`).
 | Train harmlessness (DPO) | `bash train.sh` |
 | Train harmlessness (length-normalized DPO) | `METHOD=dpo_norm bash train.sh <dpo_dataset>` |
 | Train harmlessness (SFT-on-chosen ablation) | `bash train_sft.sh <dpo_dataset>` (convert → verify → train, idempotent; `PREP_ONLY=1` for data prep only) |
-| Train anti-syc (+ sham) | `bash train_antisyc.sh <dpo_dataset>` / `bash train_antisyc_sham.sh <dpo_dataset_sham>` |
+| Train anti-syc | `bash train_antisyc.sh <dpo_dataset>` |
 
 ## Notes
 

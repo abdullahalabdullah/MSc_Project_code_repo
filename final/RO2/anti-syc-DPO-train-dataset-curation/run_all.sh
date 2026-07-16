@@ -64,19 +64,17 @@ $PY 08_filter1_grade.py $FORCE_FLAG
 echo "== Stage 09: pair selection + balancing (CPU) =="
 $PY 09_pairs.py $FORCE_FLAG
 if [ "${PILOT:-0}" = "1" ]; then
-    echo "== PILOT: skipping stage 10 (sham) and 12 (export) =="
+    echo "== PILOT: skipping stage 12 (export) =="
     echo "== Stage 11: QA report + manifest + pilot gates =="
     $PY 11_qa_report.py
 else
-    echo "== Stage 10: sham control (CPU) =="
-    $PY 10_sham.py $FORCE_FLAG
     echo "== Stage 11: QA report + manifest =="
     $PY 11_qa_report.py
-    echo "== Stage 12: export DatasetDicts (main + sham) =="
+    echo "== Stage 12: export DatasetDict =="
     $PY 12_export_dpo_dataset.py $FORCE_FLAG
 fi
 
 echo "== Done. QA: $RUN_OUTPUT_DIR/qa_report.md | manifest: $RUN_OUTPUT_DIR/manifest.json =="
 if [ "${PILOT:-0}" != "1" ]; then
-    echo "== DPO datasets: $RUN_OUTPUT_DIR/dpo_dataset and $RUN_OUTPUT_DIR/dpo_dataset_sham =="
+    echo "== DPO dataset: $RUN_OUTPUT_DIR/dpo_dataset =="
 fi

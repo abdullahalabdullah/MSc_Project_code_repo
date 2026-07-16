@@ -7,7 +7,7 @@ This repo trains DPO models end to end for two separate objectives, sharing ONE 
    [`harmlessness-DPO-train-dataset-curation/`](harmlessness-DPO-train-dataset-curation/).
 2. **Anti-sycophancy** — curates preference pairs from TriviaQA (knowledge filter →
    LLM-generated wrong answers → opinionated templates → contrast sampling → balanced
-   pairs + sham control) in
+   pairs) in
    [`anti-syc-DPO-train-dataset-curation/`](anti-syc-DPO-train-dataset-curation/), per the
    frozen spec `../anti_sycophancy_dpo_dataset_curation_spec.md`.
 
@@ -32,8 +32,7 @@ bash train_sft.sh <dpo_dataset>       # one command: convert -> verify -> train 
 
 # Anti-sycophancy (see the module README for the split GPU/API phase drivers):
 X=5 RUN_OUTPUT_DIR=outputs/smoke bash anti-syc-DPO-train-dataset-curation/run_all.sh
-bash train_antisyc.sh      anti-syc-DPO-train-dataset-curation/outputs/smoke/dpo_dataset
-bash train_antisyc_sham.sh anti-syc-DPO-train-dataset-curation/outputs/smoke/dpo_dataset_sham
+bash train_antisyc.sh anti-syc-DPO-train-dataset-curation/outputs/smoke/dpo_dataset
 ```
 
 Full runbook with all options: **[DOCUMENTATION.md](DOCUMENTATION.md)**.
@@ -52,7 +51,6 @@ verify_sft_tokenization.py    # go/no-go gate: proves SFT tokenization == DPO ch
 train.sh                      # one-command training wrapper (harmlessness defaults; METHOD=dpo|dpo_norm|sft)
 train_sft.sh                  # SFT arm driver: convert -> verify -> METHOD=sft train.sh (idempotent prep)
 train_antisyc.sh              # anti-syc wrapper: pins output dir / HF repo / W&B names
-train_antisyc_sham.sh         # sham-control wrapper (destroyed-preference control run)
 requirements.txt              # unified environment for the whole repo
 DOCUMENTATION.md              # end-to-end runbook (commands + options)
 SMOKE_RUN_LOG-template.md     # fill-in log for the small-scale HP-validation run
@@ -85,7 +83,7 @@ machine with the OpenAI key (see the module README's phase drivers).
 **Anti-sycophancy** — smoke: `X=5 RUN_OUTPUT_DIR=outputs/smoke bash
 anti-syc-DPO-train-dataset-curation/run_all.sh`; pilot (X=500, blocking gates incl. the
 100-grade hand audit) and full run (X=20000) via the four `run_phase{1..4}_{gpu,api}.sh`
-drivers. Handoff: `outputs/<run>/dpo_dataset/` + `outputs/<run>/dpo_dataset_sham/`, plus
+drivers. Handoff: `outputs/<run>/dpo_dataset/`, plus
 the frozen RO1 eval files in `outputs/<run>/reserved/`. See the module
 [README](anti-syc-DPO-train-dataset-curation/README.md).
 
@@ -96,8 +94,7 @@ bash train.sh                                   # harmlessness DPO (newest harml
 METHOD=dpo_norm bash train.sh <path/to/dpo_dataset>     # harmlessness length-normalized DPO
 bash train_sft.sh <path/to/dpo_dataset>                 # harmlessness SFT-on-chosen ablation
                                                         #   (convert + verify + train, idempotent)
-bash train_antisyc.sh      <path/to/dpo_dataset>        # anti-sycophancy
-bash train_antisyc_sham.sh <path/to/dpo_dataset_sham>   # sham control
+bash train_antisyc.sh <path/to/dpo_dataset>             # anti-sycophancy
 ```
 
 **DPO vs length-normalized DPO** (`METHOD`, harmlessness): `METHOD=dpo` (default) runs standard
@@ -124,13 +121,12 @@ token-identical to what DPO trained on for the chosen responses. Defaults:
 knob `EVAL_FRACTION` (default 0.2) for denser dose–response checkpoints; best checkpoint
 selected by `eval_loss` (SFT has no reward metrics).
 
-LoRA adapters land under `checkpoints/qwen3-4B/{harmless_dpo,harmless_dpo_norm,harmless_sft,anti_syc_dpo,anti_syc_dpo_sham}/`
+LoRA adapters land under `checkpoints/qwen3-4B/{harmless_dpo,harmless_dpo_norm,harmless_sft,anti_syc_dpo}/`
 (best kept as `checkpoint-best`). Every checkpoint (step 0, each ~20% interval, final step)
 is **always pushed** to its own private HF repo `<HUB_MODEL_ID>-step-<N>` — HUB_MODEL_ID
 defaults: `er-abd/harmless-dpo-qwen3-4B` (train.sh; `er-abd/harmless-dpo-norm-qwen3-4B` for
-`METHOD=dpo_norm`), `er-abd/anti-syc-dpo-qwen3-4B` /
-`er-abd/anti-syc-dpo-sham-qwen3-4B` (the wrappers — never train anti-syc through bare
-train.sh, or checkpoints land in the harmlessness repos). Each eval point appends to
+`METHOD=dpo_norm`), `er-abd/anti-syc-dpo-qwen3-4B` (the wrapper — never train anti-syc
+through bare train.sh, or checkpoints land in the harmlessness repos). Each eval point appends to
 `eval_metrics.jsonl`; behavioural evals (harmlessness / anti-sycophancy / monitorability)
 run separately in RO1 on the pushed checkpoints. For inference, load the adapter on top of
 base Qwen3-4B (transformers `PeftModel`, or vLLM `--enable-lora`), or use the RO1 evals'
