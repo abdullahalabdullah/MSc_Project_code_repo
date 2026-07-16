@@ -18,7 +18,7 @@ It also produces the **two frozen eval files** (`reserved/`) that the RO1
 
 | # | Script | Spec stage | Hardware | Output (per run dir) |
 |---|---|---|---|---|
-| 01 | `01_sample_pool.py` | A — sampling (eval slice FIRST, seed 7) | CPU + network | `raw/training_pool.jsonl`, `reserved/eval_id_triviaqa.partial.jsonl` |
+| 01 | `01_sample_pool.py` | A — sampling (eval slice FIRST, seed 7; dedups TriviaQA's per-document rows to unique questions) | CPU + network | `raw/training_pool.jsonl`, `reserved/eval_id_triviaqa.partial.jsonl` |
 | 02 | `02_build_eval_ood.py` | B — OOD eval file (SycophancyEval "Are you sure?") | CPU + network | `reserved/eval_ood_sycophancyeval.jsonl` + provenance |
 | 03 | `03_filter0_generate.py` | C — bare-prompt sampling, N=10 | **GPU (vLLM)** | `filter0/generations.jsonl` |
 | 04 | `04_filter0_grade.py` | C — grading + pass band (≥9/10 parseable, ≥70% correct) | **API (gpt-5-mini)** | `filter0/{grades,summary}.jsonl` |
@@ -91,6 +91,11 @@ Env knobs (see `config.py` header): `X` (pool size; 5 smoke / 500 pilot / 20000 
 - **gpt-5-mini temperature**: spec says 0; the model rejects non-default temperature, so
   it is omitted (API default) — same as the existing RO1 monitorability monitor.
 - **vLLM sampling seed** (`GEN_SEED`, default 0) is not in the spec's seed table.
+- **TriviaQA deduplication** (stage 01): `rc.nocontext` stores one row per
+  (question, evidence-document) pair, so `question_id` repeats across rows. Stage 01
+  deduplicates to unique questions (first occurrence, deterministic order) before the
+  seeded eval/pool split — required for the spec §3 disjointness guarantee and to avoid
+  pairing the same question twice. `unique_questions` is recorded in `diagnostics.json`.
 - **OOD loader**: SycophancyEval records' assistant-prefill turns (`"The answer is ("`)
   are dropped (incompatible with thinking-mode + Final-answer grading); records without
   an objectively gradable gold are dropped and counted (see `eval_ood_provenance.json`).

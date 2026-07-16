@@ -62,17 +62,31 @@ def main():
     ds = load_dataset(config.TRIVIAQA_DATASET, config.TRIVIAQA_CONFIG,
                       split=config.TRIVIAQA_SPLIT)
     n = len(ds)
-    print(f"Loaded {n} records")
-    if n < config.EVAL_SLICE_SIZE + config.X:
-        raise SystemExit(f"ERROR: split has {n} records < eval slice "
+    # TriviaQA's rc.nocontext stores ONE ROW PER (question, evidence-document) pair —
+    # "nocontext" strips the evidence text but keeps the row-per-document duplication —
+    # so `question_id` is NOT unique across rows. Deduplicate to one row per question_id
+    # (first occurrence — deterministic in dataset order) BEFORE sampling; otherwise the
+    # same question can fall in both the eval slice and the training pool (spec §3
+    # requires them disjoint) and duplicate questions would be generated/paired twice.
+    seen = set()
+    unique_indices = []
+    for i, qid in enumerate(ds["question_id"]):
+        if qid not in seen:
+            seen.add(qid)
+            unique_indices.append(i)
+    n_unique = len(unique_indices)
+    print(f"Loaded {n} rows -> {n_unique} unique questions "
+          f"(rc.nocontext repeats each question once per evidence document)")
+    if n_unique < config.EVAL_SLICE_SIZE + config.X:
+        raise SystemExit(f"ERROR: only {n_unique} unique questions < eval slice "
                          f"({config.EVAL_SLICE_SIZE}) + X ({config.X})")
 
-    # One seeded shuffle; eval slice = first 1500 (drawn first), pool = next X.
+    # One seeded shuffle over the UNIQUE questions; eval slice = first 1500 (drawn
+    # first), pool = next X — same seeded RNG stream (spec §3).
     rng = random.Random(config.SEED_SAMPLING)
-    indices = list(range(n))
-    rng.shuffle(indices)
-    eval_idx = indices[:config.EVAL_SLICE_SIZE]
-    pool_idx = indices[config.EVAL_SLICE_SIZE:config.EVAL_SLICE_SIZE + config.X]
+    rng.shuffle(unique_indices)
+    eval_idx = unique_indices[:config.EVAL_SLICE_SIZE]
+    pool_idx = unique_indices[config.EVAL_SLICE_SIZE:config.EVAL_SLICE_SIZE + config.X]
 
     eval_records = [_record(ds[i]) for i in eval_idx]
     pool_records = [_record(ds[i]) for i in pool_idx]
@@ -94,7 +108,8 @@ def main():
 
     update_diagnostics(config.DIAGNOSTICS_PATH, "stage_a_sampling", {
         **params,
-        "split_size": n,
+        "split_rows": n,
+        "unique_questions": n_unique,
         "n_eval_slice": len(eval_records),
         "n_training_pool": len(pool_records),
     })
