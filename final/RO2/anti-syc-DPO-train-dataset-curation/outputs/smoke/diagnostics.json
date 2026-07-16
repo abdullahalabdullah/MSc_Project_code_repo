@@ -51,5 +51,101 @@
     "response_tokens_min": 282,
     "response_tokens_max": 1442,
     "newly_generated_samples": 50
+  },
+  "filter0_grading": {
+    "grader_model": "gpt-5-mini",
+    "n_questions": 5,
+    "n_pass": 5,
+    "pass_rate": 1.0,
+    "n_samples": 50,
+    "n_unparseable": 0,
+    "unparseable_rate": 0.0
+  },
+  "stage_d_wrong_answers": {
+    "generator_model": "gpt-5-mini",
+    "n_pool_survivors": 5,
+    "n_pool_with_w": 5,
+    "n_pool_dropped": 0,
+    "n_eval": 1500
+  },
+  "stage_e_templates": {
+    "n_instances": 10,
+    "active_templates": [
+      "T1",
+      "T2",
+      "T3",
+      "T4",
+      "T5",
+      "T6",
+      "T7",
+      "T8"
+    ],
+    "dropped_templates": [],
+    "per_template": {
+      "T8": 1,
+      "T2": 4,
+      "T1": 3,
+      "T6": 1,
+      "T4": 1
+    },
+    "seed_template": 1234
+  },
+  "filter1_generation": {
+    "model": "Qwen/Qwen3-4B",
+    "enable_thinking": true,
+    "temperature": 1.0,
+    "top_p": 0.95,
+    "top_k": 20,
+    "max_new_tokens": 16384,
+    "gen_seed": 0,
+    "n_items": 10,
+    "samples_per_item": 10,
+    "total_samples": 100,
+    "truncated": 0,
+    "truncated_pct": 0.0,
+    "response_tokens_mean": 622.3,
+    "response_tokens_min": 111,
+    "response_tokens_max": 2327,
+    "newly_generated_samples": 100
+  },
+  "filter1_grading": {
+    "grader_model": "gpt-5-mini",
+    "n_instances": 10,
+    "n_pass": 4,
+    "pass_rate": 0.4,
+    "per_direction": {
+      "right_opinion": {
+        "n": 5,
+        "pass": 2
+      },
+      "wrong_opinion": {
+        "n": 5,
+        "pass": 2
+      }
+    }
+  },
+  "pairs": {
+    "n_pairs_selected": 4,
+    "n_pairs_balanced": 4,
+    "pre_balance_per_direction": {
+      "wrong_opinion": 2,
+      "right_opinion": 2
+    },
+    "seed_pair": 1701,
+    "seed_balance": 2003
+  },
+  "export": {
+    "n_pairs": 4,
+    "n_train": 3,
+    "n_valid": 1,
+    "valid_fraction": 0.1,
+    "split_seed": 2003,
+    "stratified_by": "direction",
+    "columns": [
+      "prompt",
+      "chosen",
+      "rejected"
+    ],
+    "path": "outputs/smoke/dpo_dataset"
   }
 }

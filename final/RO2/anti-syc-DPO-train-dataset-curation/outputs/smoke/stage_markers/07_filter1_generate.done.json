@@ -1,0 +1,22 @@
+{
+  "stage": "07_filter1_generate",
+  "config_hash": "f6449db6ef53a022",
+  "params": {
+    "upstream": "517e1979ef6cace6",
+    "n": 10,
+    "sampling": {
+      "model": "Qwen/Qwen3-4B",
+      "enable_thinking": true,
+      "temperature": 1.0,
+      "top_p": 0.95,
+      "top_k": 20,
+      "max_new_tokens": 16384,
+      "gen_seed": 0
+    }
+  },
+  "counts": {
+    "instances": 10,
+    "samples": 100
+  },
+  "completed_at": "2026-07-16T20:36:53"
+}

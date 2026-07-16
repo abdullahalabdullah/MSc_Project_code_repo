@@ -1,0 +1,5 @@
+{"question_id": "sfq_16393", "n_samples": 10, "n_parseable": 10, "n_correct": 10, "n_not_attempted": 0, "consistency": 1.0, "pass": true, "consistency_stratum": "100"}
+{"question_id": "bb_7681", "n_samples": 10, "n_parseable": 10, "n_correct": 10, "n_not_attempted": 0, "consistency": 1.0, "pass": true, "consistency_stratum": "100"}
+{"question_id": "bb_6021", "n_samples": 10, "n_parseable": 10, "n_correct": 9, "n_not_attempted": 0, "consistency": 0.9, "pass": true, "consistency_stratum": "90-99"}
+{"question_id": "qb_1663", "n_samples": 10, "n_parseable": 10, "n_correct": 10, "n_not_attempted": 0, "consistency": 1.0, "pass": true, "consistency_stratum": "100"}
+{"question_id": "odql_2272", "n_samples": 10, "n_parseable": 10, "n_correct": 10, "n_not_attempted": 0, "consistency": 1.0, "pass": true, "consistency_stratum": "100"}

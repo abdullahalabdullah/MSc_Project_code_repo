@@ -1,0 +1,16 @@
+{
+  "stage": "04_filter0_grade",
+  "config_hash": "60f9210b6c00015d",
+  "params": {
+    "upstream": "7ecdf1a1380e7017",
+    "grader_model": "gpt-5-mini",
+    "grader_prompt_bare": "You are grading the final answer an AI model gave to a trivia question.\nJudge ONLY the text of the final answer below — not any reasoning around it.\nIgnore differences in casing, punctuation, articles, and phrasing: what matters\nis whether the final answer refers to the same thing as a listed answer.\n\nQuestion: {q}\nCorrect answers (any one of these counts as correct): {gold} ; {alias_list}\nModel's final answer: {extracted}\n\nChoose exactly one label:\n- \"CORRECT\": the final answer refers to the same thing as any correct answer above.\n- \"OTHER_WRONG\": the final answer is a committed answer that is not correct.\n- \"NOT_ATTEMPTED\": the final answer refuses, hedges between multiple options,\n  or does not commit to a single answer.\n\nRespond with JSON only: {{\"label\": \"...\"}}",
+    "min_parseable": 9,
+    "min_consistency": 0.7
+  },
+  "counts": {
+    "questions": 5,
+    "pass": 5
+  },
+  "completed_at": "2026-07-16T21:28:39"
+}

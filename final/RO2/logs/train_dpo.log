@@ -1,0 +1,255 @@
+Note: Environment variable`HF_TOKEN` is set and is the current active token independently from the token you've just configured.
+SCRIPT ARGS:
+ScriptArguments(dataset_path='anti-syc-DPO-train-dataset-curation/outputs/smoke/dpo_dataset')
+TRAINING ARGS:
+DPOConfig(
+_n_gpu=1,
+accelerator_config={'split_batches': False, 'dispatch_batches': None, 'even_batches': True, 'use_seedable_sampler': True, 'non_blocking': False, 'gradient_accumulation_kwargs': None, 'use_configured_state': False},
+adafactor=False,
+adam_beta1=0.9,
+adam_beta2=0.999,
+adam_epsilon=1e-08,
+auto_find_batch_size=False,
+average_tokens_across_devices=True,
+base_model_attribute_name=model,
+batch_eval_metrics=False,
+beta=0.1,
+bf16=True,
+bf16_full_eval=False,
+data_seed=None,
+dataloader_drop_last=False,
+dataloader_num_workers=0,
+dataloader_persistent_workers=False,
+dataloader_pin_memory=True,
+dataloader_prefetch_factor=None,
+dataset_num_proc=None,
+ddp_backend=None,
+ddp_broadcast_buffers=None,
+ddp_bucket_cap_mb=None,
+ddp_find_unused_parameters=None,
+ddp_timeout=1800,
+debug=[],
+deepspeed=None,
+disable_dropout=True,
+disable_tqdm=False,
+discopop_tau=0.05,
+do_eval=False,
+do_predict=False,
+do_train=False,
+eval_accumulation_steps=None,
+eval_delay=0,
+eval_do_concat_batches=True,
+eval_on_start=False,
+eval_steps=None,
+eval_strategy=IntervalStrategy.NO,
+eval_use_gather_object=False,
+f_alpha_divergence_coef=1.0,
+f_divergence_type=FDivergenceType.REVERSE_KL,
+force_use_ref_model=False,
+fp16=False,
+fp16_backend=auto,
+fp16_full_eval=False,
+fp16_opt_level=O1,
+fsdp=[],
+fsdp_config={'min_num_params': 0, 'xla': False, 'xla_fsdp_v2': False, 'xla_fsdp_grad_ckpt': False},
+fsdp_min_num_params=0,
+fsdp_transformer_layer_cls_to_wrap=None,
+full_determinism=False,
+generate_during_eval=False,
+gradient_accumulation_steps=16,
+gradient_checkpointing=True,
+gradient_checkpointing_kwargs=None,
+greater_is_better=None,
+group_by_length=False,
+half_precision_backend=auto,
+hub_always_push=False,
+hub_model_id=er-abd/anti-syc-dpo-qwen3-4B,
+hub_private_repo=None,
+hub_revision=None,
+hub_strategy=HubStrategy.EVERY_SAVE,
+hub_token=<HUB_TOKEN>,
+ignore_data_skip=False,
+include_for_metrics=[],
+include_inputs_for_metrics=False,
+include_num_input_tokens_seen=no,
+include_tokens_per_second=False,
+jit_mode_eval=False,
+label_names=None,
+label_pad_token_id=-100,
+label_smoothing=0.0,
+label_smoothing_factor=0.0,
+ld_alpha=None,
+learning_rate=5e-06,
+length_column_name=length,
+liger_kernel_config=None,
+load_best_model_at_end=False,
+local_rank=0,
+log_level=passive,
+log_level_replica=warning,
+log_on_each_node=True,
+logging_dir=checkpoints/qwen3-4B/anti_syc_dpo/runs/Jul16_20-48-07_35ffebe5b253,
+logging_first_step=False,
+logging_nan_inf_filter=True,
+logging_steps=10,
+logging_strategy=IntervalStrategy.STEPS,
+loss_type=sigmoid,
+loss_weights=None,
+lr_scheduler_kwargs=None,
+lr_scheduler_type=SchedulerType.COSINE,
+max_completion_length=None,
+max_grad_norm=1.0,
+max_length=12288,
+max_prompt_length=1024,
+max_steps=-1,
+metric_for_best_model=None,
+model_adapter_name=None,
+model_init_kwargs=None,
+mp_parameters=,
+neftune_noise_alpha=None,
+no_cuda=False,
+num_train_epochs=3.0,
+optim=OptimizerNames.ADAMW_TORCH,
+optim_args=None,
+optim_target_modules=None,
+output_dir=checkpoints/qwen3-4B/anti_syc_dpo,
+overwrite_output_dir=False,
+padding_free=False,
+padding_value=None,
+parallelism_config=None,
+past_index=-1,
+per_device_eval_batch_size=1,
+per_device_train_batch_size=1,
+precompute_ref_batch_size=None,
+precompute_ref_log_probs=False,
+prediction_loss_only=False,
+project=huggingface,
+push_to_hub=True,
+push_to_hub_model_id=None,
+push_to_hub_organization=None,
+push_to_hub_token=<PUSH_TO_HUB_TOKEN>,
+ray_scope=last,
+ref_adapter_name=None,
+ref_model_init_kwargs=None,
+ref_model_mixup_alpha=0.6,
+ref_model_sync_steps=512,
+reference_free=False,
+remove_unused_columns=False,
+report_to=['wandb'],
+restore_callback_states_from_checkpoint=False,
+resume_from_checkpoint=None,
+rpo_alpha=None,
+run_name=anti_syc_dpo_seed-0,
+save_on_each_node=False,
+save_only_model=True,
+save_safetensors=True,
+save_steps=500,
+save_strategy=SaveStrategy.STEPS,
+save_total_limit=None,
+seed=0,
+skip_memory_metrics=True,
+sync_ref_model=False,
+tf32=True,
+tools=None,
+torch_compile=False,
+torch_compile_backend=None,
+torch_compile_mode=None,
+torch_empty_cache_steps=None,
+torchdynamo=None,
+tpu_metrics_debug=False,
+tpu_num_cores=None,
+trackio_space_id=trackio,
+truncation_mode=keep_end,
+use_cpu=False,
+use_legacy_prediction_loop=False,
+use_liger_kernel=False,
+use_liger_loss=False,
+use_logits_to_keep=False,
+use_mps_device=False,
+use_weighting=False,
+warmup_ratio=0.1,
+warmup_steps=0,
+weight_decay=0.01,
+)
+MODEL CONFIG:
+ModelConfig(model_name_or_path='Qwen/Qwen3-4B', model_revision='main', torch_dtype=None, trust_remote_code=False, attn_implementation=None, use_peft=True, lora_r=16, lora_alpha=32, lora_dropout=0.05, lora_target_modules=['q_proj', 'k_proj', 'v_proj', 'o_proj', 'gate_proj', 'up_proj', 'down_proj'], lora_target_parameters=None, lora_modules_to_save=None, lora_task_type='CAUSAL_LM', use_rslora=False, use_dora=False, load_in_8bit=False, load_in_4bit=False, bnb_4bit_quant_type='nf4', use_bnb_nested_quant=False)
+Setting seed to 0
+Loading dataset from:  anti-syc-DPO-train-dataset-curation/outputs/smoke/dpo_dataset
+`torch_dtype` is deprecated! Use `dtype` instead!
+Fetching 3 files:   0%|          | 0/3 [00:00<?, ?it/s]Fetching 3 files:  33%|███▎      | 1/3 [00:20<00:40, 20.24s/it]Fetching 3 files:  67%|██████▋   | 2/3 [00:21<00:08,  8.96s/it]Fetching 3 files: 100%|██████████| 3/3 [00:21<00:00,  7.10s/it]
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 1/3 [00:00<00:00,  2.19it/s]Loading checkpoint shards:  67%|██████▋   | 2/3 [00:00<00:00,  2.15it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:00<00:00,  3.18it/s]
+Map:   0%|          | 0/3 [00:00<?, ? examples/s]Map: 100%|██████████| 3/3 [00:00<00:00, 141.16 examples/s]
+Map:   0%|          | 0/1 [00:00<?, ? examples/s]Map: 100%|██████████| 1/1 [00:00<00:00, 328.32 examples/s]
+Extracting prompt in train dataset:   0%|          | 0/3 [00:00<?, ? examples/s]Extracting prompt in train dataset: 100%|██████████| 3/3 [00:00<00:00, 821.07 examples/s]
+Applying chat template to train dataset:   0%|          | 0/3 [00:00<?, ? examples/s]Applying chat template to train dataset: 100%|██████████| 3/3 [00:00<00:00, 1017.71 examples/s]
+Tokenizing train dataset:   0%|          | 0/3 [00:00<?, ? examples/s]Tokenizing train dataset: 100%|██████████| 3/3 [00:00<00:00, 166.28 examples/s]
+Extracting prompt in eval dataset:   0%|          | 0/1 [00:00<?, ? examples/s]Extracting prompt in eval dataset: 100%|██████████| 1/1 [00:00<00:00, 462.03 examples/s]
+Applying chat template to eval dataset:   0%|          | 0/1 [00:00<?, ? examples/s]Applying chat template to eval dataset: 100%|██████████| 1/1 [00:00<00:00, 391.30 examples/s]
+Tokenizing eval dataset:   0%|          | 0/1 [00:00<?, ? examples/s]Tokenizing eval dataset: 100%|██████████| 1/1 [00:00<00:00, 120.28 examples/s]
+The model is already on multiple devices. Skipping the move to device specified in `args`.
+The tokenizer has new PAD/BOS/EOS tokens that differ from the model config and generation config. The model config and generation config were aligned accordingly, being updated with the tokenizer's values. Updated tokens: {'bos_token_id': None, 'pad_token_id': 151643}.
+wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from /root/.netrc.
+wandb: Currently logged in as: er-a-alabdullah (er-a-alabdullah-the-university-of-edinburgh) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.28.1
+wandb: Run data is saved locally in /root/MSc_Project_code_repo/final/RO2/wandb/run-20260716_205045-j4yi9dvt
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run anti_syc_dpo_seed-0
+wandb: ⭐️ View project at https://wandb.ai/er-a-alabdullah-the-university-of-edinburgh/anti-syc-dpo-qwen3-4B
+wandb: 🚀 View run at https://wandb.ai/er-a-alabdullah-the-university-of-edinburgh/anti-syc-dpo-qwen3-4B/runs/j4yi9dvt
+wandb: Detected [huggingface_hub.inference, openai] in use.
+wandb: Use W&B Weave for improved LLM call tracing. Install Weave with `pip install weave` then add `import weave` to the top of your script.
+wandb: For more information, check out the docs at: https://weave-docs.wandb.ai
+[eval schedule] 3 total training steps -> eval/checkpoint every 1 steps (~20% of training), plus step 0 and the final step
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00, 357.42it/s]
+***** eval metrics *****
+  epoch                   =          0
+  eval_logits/chosen      =    -2.5378
+  eval_logits/rejected    =     -2.772
+  eval_logps/chosen       =  -313.1443
+  eval_logps/rejected     =  -427.4152
+  eval_loss               =     0.6931
+  eval_rewards/accuracies =        0.0
+  eval_rewards/chosen     =        0.0
+  eval_rewards/margins    =        0.0
+  eval_rewards/rejected   =        0.0
+  eval_runtime            = 0:00:01.07
+  eval_samples_per_second =      0.933
+  eval_steps_per_second   =      0.933
+[push] Uploading step-0 checkpoint to er-abd/anti-syc-dpo-qwen3-4B-step-0 ...
+[push] Done: https://huggingface.co/er-abd/anti-syc-dpo-qwen3-4B-step-0
+  0%|          | 0/3 [00:00<?, ?it/s]/root/qwen_env/lib/python3.11/site-packages/torch/utils/checkpoint.py:85: UserWarning: None of the inputs have requires_grad=True. Gradients will be None
+  warnings.warn(
+ 33%|███▎      | 1/3 [00:03<00:06,  3.15s/it]
+  0%|          | 0/1 [00:00<?, ?it/s][A
+                                     [A                                             {'eval_loss': 0.6931471824645996, 'eval_runtime': 0.4574, 'eval_samples_per_second': 2.186, 'eval_steps_per_second': 2.186, 'eval_rewards/chosen': 0.0, 'eval_rewards/rejected': 0.0, 'eval_rewards/accuracies': 0.0, 'eval_rewards/margins': 0.0, 'eval_logps/chosen': -313.144287109375, 'eval_logps/rejected': -427.41522216796875, 'eval_logits/chosen': -2.537775993347168, 'eval_logits/rejected': -2.771993637084961, 'epoch': 1.0}
+
+100%|██████████| 1/1 [00:00<00:00, 635.12it/s][A 33%|███▎      | 1/3 [00:03<00:06,  3.15s/it]
+                                              [A[push] Uploading step-1 checkpoint to er-abd/anti-syc-dpo-qwen3-4B-step-1 ...
+[push] Done: https://huggingface.co/er-abd/anti-syc-dpo-qwen3-4B-step-1
+ 67%|██████▋   | 2/3 [00:28<00:15, 15.96s/it]
+  0%|          | 0/1 [00:00<?, ?it/s][A
+                                     [A                                             {'eval_loss': 0.7890299558639526, 'eval_runtime': 0.462, 'eval_samples_per_second': 2.164, 'eval_steps_per_second': 2.164, 'eval_rewards/chosen': -0.21082763373851776, 'eval_rewards/rejected': -0.02745666541159153, 'eval_rewards/accuracies': 0.0, 'eval_rewards/margins': -0.18337096273899078, 'eval_logps/chosen': -315.2525634765625, 'eval_logps/rejected': -427.6897888183594, 'eval_logits/chosen': -2.533282995223999, 'eval_logits/rejected': -2.764413595199585, 'epoch': 2.0}
+
+100%|██████████| 1/1 [00:00<00:00, 240.65it/s][A 67%|██████▋   | 2/3 [00:28<00:15, 15.96s/it]
+                                              [A[push] Uploading step-2 checkpoint to er-abd/anti-syc-dpo-qwen3-4B-step-2 ...
+[push] Done: https://huggingface.co/er-abd/anti-syc-dpo-qwen3-4B-step-2
+100%|██████████| 3/3 [00:53<00:00, 20.51s/it]
+  0%|          | 0/1 [00:00<?, ?it/s][A
+                                     [A                                             {'eval_loss': 0.7248570322990417, 'eval_runtime': 0.4599, 'eval_samples_per_second': 2.175, 'eval_steps_per_second': 2.175, 'eval_rewards/chosen': -0.01480712927877903, 'eval_rewards/rejected': 0.047637939453125, 'eval_rewards/accuracies': 0.0, 'eval_rewards/margins': -0.06244506686925888, 'eval_logps/chosen': -313.2923583984375, 'eval_logps/rejected': -426.9388427734375, 'eval_logits/chosen': -2.515094041824341, 'eval_logits/rejected': -2.7558560371398926, 'epoch': 3.0}
+
+100%|██████████| 1/1 [00:00<00:00, 516.09it/s][A100%|██████████| 3/3 [00:54<00:00, 20.51s/it]
+                                              [A[push] Uploading step-3 checkpoint to er-abd/anti-syc-dpo-qwen3-4B-step-3 ...
+[push] Done: https://huggingface.co/er-abd/anti-syc-dpo-qwen3-4B-step-3
+                                             {'train_runtime': 142.4639, 'train_samples_per_second': 0.063, 'train_steps_per_second': 0.021, 'train_loss': 0.6939377784729004, 'epoch': 3.0}
+100%|██████████| 3/3 [01:18<00:00, 20.51s/it]100%|██████████| 3/3 [01:18<00:00, 26.20s/it]
+Full training log history -> checkpoints/qwen3-4B/anti_syc_dpo/train_log_history.json
+GPU memory: peak reserved 18.36 GB / 85.09 GB total -> 66.7 GB headroom (details: checkpoints/qwen3-4B/anti_syc_dpo/gpu_memory.json)
+Best checkpoint at step 0 with metrics: {'accuracy': 0.0, 'loss': 0.6931471824645996}
+Removed checkpoint: checkpoints/qwen3-4B/anti_syc_dpo/checkpoint-0
+Removed checkpoint: checkpoints/qwen3-4B/anti_syc_dpo/checkpoint-1
+Removed checkpoint: checkpoints/qwen3-4B/anti_syc_dpo/checkpoint-2
+Removed checkpoint: checkpoints/qwen3-4B/anti_syc_dpo/checkpoint-3
+Successfully renamed checkpoint-0 to checkpoint-best
+Best-checkpoint info -> checkpoints/qwen3-4B/anti_syc_dpo/best_checkpoint.txt (HF: er-abd/anti-syc-dpo-qwen3-4B-step-0)
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33manti_syc_dpo_seed-0[0m at: [34mhttps://wandb.ai/er-a-alabdullah-the-university-of-edinburgh/anti-syc-dpo-qwen3-4B/runs/j4yi9dvt[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20260716_205045-j4yi9dvt/logs[0m
