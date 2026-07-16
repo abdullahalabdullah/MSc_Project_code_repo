@@ -1,0 +1,12 @@
+{
+  "stage": "02_build_eval_ood",
+  "config_hash": "3ce3faefa03c949a",
+  "params": {
+    "url": "https://raw.githubusercontent.com/meg-tong/sycophancy-eval/main/datasets/are_you_sure.jsonl",
+    "loader_version": 1
+  },
+  "counts": {
+    "kept": 4888
+  },
+  "completed_at": "2026-07-16T19:58:28"
+}

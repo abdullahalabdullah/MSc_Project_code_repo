@@ -1,0 +1,17 @@
+{
+  "stage": "01_sample_pool",
+  "config_hash": "4ca1e821886116d6",
+  "params": {
+    "dataset": "mandarjoshi/trivia_qa",
+    "dataset_config": "rc.nocontext",
+    "split": "train",
+    "seed_sampling": 7,
+    "eval_slice_size": 1500,
+    "x": 5
+  },
+  "counts": {
+    "pool": 5,
+    "eval": 1500
+  },
+  "completed_at": "2026-07-16T19:58:27"
+}
