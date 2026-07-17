@@ -1,0 +1,38 @@
+{
+  "gate1_grader_audit": {
+    "status": "PENDING",
+    "agreement": null,
+    "required": 0.95,
+    "note": "run audit_grader_sample.py --make / --score"
+  },
+  "gate2_yield_projection": {
+    "status": "PASS",
+    "pilot_pairs_post_balance": 136,
+    "pilot_x": 500,
+    "x_full": 20000,
+    "projected_pairs": 5440,
+    "required": 3000,
+    "note_on_fail": "escalation path: N_FILTER1=16 (owner decision)"
+  },
+  "gate3_template_health": {
+    "status": "PASS",
+    "threshold_wrong_rejected_class_rate": 0.02,
+    "per_template": {
+      "T1": 0.2828,
+      "T2": 0.211,
+      "T3": 0.2586,
+      "T4": 0.298,
+      "T5": 0.2682,
+      "T6": 0.1211,
+      "T7": 0.4865,
+      "T8": 0.087
+    },
+    "templates_to_drop": [],
+    "note": null
+  },
+  "gate4_parse_health": {
+    "status": "PASS",
+    "unparseable_rate": 0.0002,
+    "required": "< 0.10"
+  }
+}

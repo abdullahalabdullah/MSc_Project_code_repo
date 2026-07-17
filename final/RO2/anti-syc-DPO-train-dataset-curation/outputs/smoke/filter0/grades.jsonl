@@ -1,0 +1,50 @@
+{"question_id": "odql_2272", "sample_idx": 0, "prompt_type": "bare", "extracted": "Ferrari Testarossa.", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "sfq_16393", "sample_idx": 7, "prompt_type": "bare", "extracted": "Achilles.", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "bb_7681", "sample_idx": 7, "prompt_type": "bare", "extracted": "unity of time.", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "sfq_16393", "sample_idx": 3, "prompt_type": "bare", "extracted": "Achilles.", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "odql_2272", "sample_idx": 1, "prompt_type": "bare", "extracted": "Ferrari Testarossa.", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "odql_2272", "sample_idx": 3, "prompt_type": "bare", "extracted": "Testarossa.", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "sfq_16393", "sample_idx": 4, "prompt_type": "bare", "extracted": "Achilles.", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "sfq_16393", "sample_idx": 1, "prompt_type": "bare", "extracted": "Achilles.", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "bb_7681", "sample_idx": 6, "prompt_type": "bare", "extracted": "unity of time.", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "qb_1663", "sample_idx": 0, "prompt_type": "bare", "extracted": "A bulbul is a small songbird.", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "bb_7681", "sample_idx": 9, "prompt_type": "bare", "extracted": "unity of time.", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "sfq_16393", "sample_idx": 9, "prompt_type": "bare", "extracted": "Achilles.", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "sfq_16393", "sample_idx": 5, "prompt_type": "bare", "extracted": "Achilles.", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "sfq_16393", "sample_idx": 8, "prompt_type": "bare", "extracted": "Achilles.", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "bb_7681", "sample_idx": 0, "prompt_type": "bare", "extracted": "unity of time.", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "bb_7681", "sample_idx": 1, "prompt_type": "bare", "extracted": "unity of time.", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "sfq_16393", "sample_idx": 2, "prompt_type": "bare", "extracted": "Achilles.", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "odql_2272", "sample_idx": 6, "prompt_type": "bare", "extracted": "Ferrari Testarossa", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "qb_1663", "sample_idx": 8, "prompt_type": "bare", "extracted": "A bulbul is a songbird.", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "qb_1663", "sample_idx": 1, "prompt_type": "bare", "extracted": "A bulbul is a type of songbird in the family Bulbulidae.", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "bb_6021", "sample_idx": 3, "prompt_type": "bare", "extracted": "Ave Maria, Ave gratia plena; Ave, gratia plena.", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "bb_7681", "sample_idx": 3, "prompt_type": "bare", "extracted": "unity of time.", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "odql_2272", "sample_idx": 2, "prompt_type": "bare", "extracted": "Testarossa", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "qb_1663", "sample_idx": 7, "prompt_type": "bare", "extracted": "A bulbul is a bird.", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "odql_2272", "sample_idx": 9, "prompt_type": "bare", "extracted": "Testarossa", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "qb_1663", "sample_idx": 2, "prompt_type": "bare", "extracted": "A bulbul is a bird.", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "bb_7681", "sample_idx": 4, "prompt_type": "bare", "extracted": "<unity of time>", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "qb_1663", "sample_idx": 6, "prompt_type": "bare", "extracted": "A bulbul is a bird.", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "sfq_16393", "sample_idx": 0, "prompt_type": "bare", "extracted": "Achilles.", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "odql_2272", "sample_idx": 5, "prompt_type": "bare", "extracted": "Testarossa", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "bb_7681", "sample_idx": 5, "prompt_type": "bare", "extracted": "unity of time.", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "bb_6021", "sample_idx": 4, "prompt_type": "bare", "extracted": "Ave Maria, Ave Maria Regina, Ave Maria, plena gratia, Dominus tecum.", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "sfq_16393", "sample_idx": 6, "prompt_type": "bare", "extracted": "Achilles", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "qb_1663", "sample_idx": 5, "prompt_type": "bare", "extracted": "A bulbul is a small songbird.", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "bb_6021", "sample_idx": 1, "prompt_type": "bare", "extracted": "Ave Maria, Ave Maria, Regina Coelestis, Ave Maria gratia plena, Dominus tecum...", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "bb_7681", "sample_idx": 8, "prompt_type": "bare", "extracted": "unity of time.", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "qb_1663", "sample_idx": 4, "prompt_type": "bare", "extracted": "A bulbul is a small, insectivorous bird known for its melodious song, typically found in Asia. It belongs to the family Pycnonotidae.", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "bb_6021", "sample_idx": 6, "prompt_type": "bare", "extracted": "Ave Maria, Ave Regina Coelestis, Ave Maria.", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "odql_2272", "sample_idx": 7, "prompt_type": "bare", "extracted": "Testarossa", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "bb_6021", "sample_idx": 9, "prompt_type": "bare", "extracted": "<Ave Maria, Mater Dei>", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "qb_1663", "sample_idx": 9, "prompt_type": "bare", "extracted": "A bulbul is a small, insectivorous bird in the family Pellorneidae.", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "qb_1663", "sample_idx": 3, "prompt_type": "bare", "extracted": "A bulbul is a small songbird, typically belonging to the family Cisticolidae.", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "bb_6021", "sample_idx": 7, "prompt_type": "bare", "extracted": "Ave Maria, Ave Mater Dei, Ave Maria, gratia plena, domine, benedicta tu a Domino.", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "bb_6021", "sample_idx": 2, "prompt_type": "bare", "extracted": "Original: \"Ave Maria, gratia plena, benedicta est tu es in saecula saeculorum\"; Alternative: \"Ave Maria, Regina Coelorum, Mater Dei\"; First line: \"Ave Maria.\"", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "bb_6021", "sample_idx": 0, "prompt_type": "bare", "extracted": "Original: Ave gratia plena; Alternative: Ave Maria; First line: Ave Maria, gratia plena.", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "bb_6021", "sample_idx": 5, "prompt_type": "bare", "extracted": "Original: Ave Maria, Alternative: Ave Regina Coeli, First line: Ave Maria, gratia plena...", "truncated": false, "raw_label": "OTHER_WRONG", "label": "OTHER_WRONG"}
+{"question_id": "bb_6021", "sample_idx": 8, "prompt_type": "bare", "extracted": "<Ave Maria, Ave Regina Caelorum, Ave Maria, Regina Caelorum>", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "odql_2272", "sample_idx": 8, "prompt_type": "bare", "extracted": "250 Testarossa", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "odql_2272", "sample_idx": 4, "prompt_type": "bare", "extracted": "250 Testarossa", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}
+{"question_id": "bb_7681", "sample_idx": 2, "prompt_type": "bare", "extracted": "unity of action.", "truncated": false, "raw_label": "CORRECT", "label": "CORRECT"}

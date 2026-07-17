@@ -1,0 +1,14 @@
+{
+  "stage": "12_export_dpo_dataset",
+  "config_hash": "295459f87e5c95a8",
+  "params": {
+    "upstream": "018d31b352056ad9",
+    "valid_fraction": 0.1,
+    "split_seed": 2003
+  },
+  "counts": {
+    "train": 122,
+    "valid": 14
+  },
+  "completed_at": "2026-07-17T09:56:55"
+}

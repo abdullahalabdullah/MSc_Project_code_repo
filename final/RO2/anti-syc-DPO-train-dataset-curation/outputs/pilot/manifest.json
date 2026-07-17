@@ -1,0 +1,126 @@
+{
+  "created_at": "2026-07-17T09:54:49",
+  "git_hash": "767053411d3ac7741ceb36515ee63d4be443a8b0",
+  "config": {
+    "x": 500,
+    "x_full": 20000,
+    "pilot": true,
+    "eval_slice_size": 1500,
+    "n_filter0": 10,
+    "n_filter1": 10,
+    "sampling": {
+      "model": "Qwen/Qwen3-4B",
+      "enable_thinking": true,
+      "temperature": 1.0,
+      "top_p": 0.95,
+      "top_k": 20,
+      "max_new_tokens": 16384,
+      "gen_seed": 0
+    },
+    "filter0_pass_band": {
+      "min_parseable": 9,
+      "min_consistency": 0.7
+    },
+    "grader_model": "gpt-5-mini",
+    "grader_temperature_note": "spec says temperature=0 but gpt-5-mini rejects non-default temperature; it is omitted from every call (API default), matching the existing monitorability monitor",
+    "dropped_templates": [],
+    "valid_fraction": 0.1,
+    "dataset": {
+      "name": "mandarjoshi/trivia_qa",
+      "config": "rc.nocontext",
+      "split": "train"
+    },
+    "ood_eval_url": "https://raw.githubusercontent.com/meg-tong/sycophancy-eval/main/datasets/are_you_sure.jsonl"
+  },
+  "seeds": {
+    "sampling": 7,
+    "template": 1234,
+    "pair": 1701,
+    "balance": 2003,
+    "gen_seed_vllm": 0,
+    "split_seed_export": 2003
+  },
+  "funnel": {
+    "sampled_pool": 500,
+    "filter0_graded": 500,
+    "filter0_pass": 248,
+    "instances": 496,
+    "filter1_pass": 140,
+    "pairs_selected": 140,
+    "pairs_post_balance": 136
+  },
+  "stage_markers": {
+    "01_sample_pool": {
+      "counts": {
+        "pool": 500,
+        "eval": 1500
+      },
+      "completed_at": "2026-07-16T20:56:42"
+    },
+    "02_build_eval_ood": {
+      "counts": {
+        "kept": 4888
+      },
+      "completed_at": "2026-07-16T20:56:43"
+    },
+    "03_filter0_generate": {
+      "counts": {
+        "questions": 500,
+        "samples": 5000
+      },
+      "completed_at": "2026-07-16T21:13:44"
+    },
+    "04_filter0_grade": {
+      "counts": {
+        "questions": 500,
+        "pass": 248
+      },
+      "completed_at": "2026-07-17T09:28:26"
+    },
+    "05_wrong_answers": {
+      "counts": {
+        "pool_w": 248,
+        "eval_w": 1500
+      },
+      "completed_at": "2026-07-17T09:31:37"
+    },
+    "06_templates": {
+      "counts": {
+        "instances": 496
+      },
+      "completed_at": "2026-07-17T09:31:37"
+    },
+    "07_filter1_generate": {
+      "counts": {
+        "instances": 496,
+        "samples": 4960
+      },
+      "completed_at": "2026-07-17T08:44:59"
+    },
+    "08_filter1_grade": {
+      "counts": {
+        "instances": 496,
+        "pass": 140
+      },
+      "completed_at": "2026-07-17T09:54:49"
+    },
+    "09_pairs": {
+      "counts": {
+        "selected": 140,
+        "balanced": 136
+      },
+      "completed_at": "2026-07-17T09:54:49"
+    }
+  },
+  "call_volume": {
+    "classifier": {
+      "classifier_api_calls": 9958,
+      "classifier_cache_hits": 0
+    },
+    "wrong_answer_generator_unique_calls": 1748
+  },
+  "reserved_sha256": {
+    "eval_id_triviaqa.jsonl": "a32a7a7a8e47fff54d4a8e8d6f2e3b6a685b09ef3ae44fa5e4c30855b164d563",
+    "eval_ood_sycophancyeval.jsonl": "042a675c475b6cbdc2518bb536ffdee98d600f13c14717b853fdaedc2021367e"
+  }
+}

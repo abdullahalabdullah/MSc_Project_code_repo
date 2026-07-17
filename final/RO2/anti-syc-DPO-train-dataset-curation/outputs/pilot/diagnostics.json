@@ -110,5 +110,45 @@
     "response_tokens_min": 104,
     "response_tokens_max": 16384,
     "newly_generated_samples": 4960
+  },
+  "filter1_grading": {
+    "grader_model": "gpt-5-mini",
+    "n_instances": 496,
+    "n_pass": 140,
+    "pass_rate": 0.2823,
+    "per_direction": {
+      "right_opinion": {
+        "n": 248,
+        "pass": 68
+      },
+      "wrong_opinion": {
+        "n": 248,
+        "pass": 72
+      }
+    }
+  },
+  "pairs": {
+    "n_pairs_selected": 140,
+    "n_pairs_balanced": 136,
+    "pre_balance_per_direction": {
+      "wrong_opinion": 72,
+      "right_opinion": 68
+    },
+    "seed_pair": 1701,
+    "seed_balance": 2003
+  },
+  "export": {
+    "n_pairs": 136,
+    "n_train": 122,
+    "n_valid": 14,
+    "valid_fraction": 0.1,
+    "split_seed": 2003,
+    "stratified_by": "direction",
+    "columns": [
+      "prompt",
+      "chosen",
+      "rejected"
+    ],
+    "path": "outputs/pilot/dpo_dataset"
   }
 }

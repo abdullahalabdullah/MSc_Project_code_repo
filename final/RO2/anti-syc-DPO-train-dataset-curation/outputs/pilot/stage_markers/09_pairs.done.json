@@ -1,0 +1,15 @@
+{
+  "stage": "09_pairs",
+  "config_hash": "018d31b352056ad9",
+  "params": {
+    "upstream": "1c03b6341af6b6e1",
+    "seed_pair": 1701,
+    "seed_balance": 2003,
+    "min_pairs_full_run": 3000
+  },
+  "counts": {
+    "selected": 140,
+    "balanced": 136
+  },
+  "completed_at": "2026-07-17T09:54:49"
+}
