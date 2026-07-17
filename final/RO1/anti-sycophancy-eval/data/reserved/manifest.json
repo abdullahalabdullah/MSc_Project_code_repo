@@ -1,0 +1,8 @@
+{
+  "imported_at": "2026-07-17T09:28:29",
+  "source_dir": "../RO2/anti-syc-DPO-train-dataset-curation/outputs/pilot/reserved",
+  "sha256": {
+    "eval_id_triviaqa.jsonl": "a32a7a7a8e47fff54d4a8e8d6f2e3b6a685b09ef3ae44fa5e4c30855b164d563",
+    "eval_ood_sycophancyeval.jsonl": "042a675c475b6cbdc2518bb536ffdee98d600f13c14717b853fdaedc2021367e"
+  }
+}

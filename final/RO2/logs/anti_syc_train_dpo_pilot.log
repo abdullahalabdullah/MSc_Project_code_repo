@@ -1,0 +1,332 @@
+Note: Environment variable`HF_TOKEN` is set and is the current active token independently from the token you've just configured.
+SCRIPT ARGS:
+ScriptArguments(dataset_path='anti-syc-DPO-train-dataset-curation/outputs/pilot/dpo_dataset')
+TRAINING ARGS:
+DPOConfig(
+_n_gpu=1,
+accelerator_config={'split_batches': False, 'dispatch_batches': None, 'even_batches': True, 'use_seedable_sampler': True, 'non_blocking': False, 'gradient_accumulation_kwargs': None, 'use_configured_state': False},
+adafactor=False,
+adam_beta1=0.9,
+adam_beta2=0.999,
+adam_epsilon=1e-08,
+auto_find_batch_size=False,
+average_tokens_across_devices=True,
+base_model_attribute_name=model,
+batch_eval_metrics=False,
+beta=0.1,
+bf16=True,
+bf16_full_eval=False,
+data_seed=None,
+dataloader_drop_last=False,
+dataloader_num_workers=0,
+dataloader_persistent_workers=False,
+dataloader_pin_memory=True,
+dataloader_prefetch_factor=None,
+dataset_num_proc=None,
+ddp_backend=None,
+ddp_broadcast_buffers=None,
+ddp_bucket_cap_mb=None,
+ddp_find_unused_parameters=None,
+ddp_timeout=1800,
+debug=[],
+deepspeed=None,
+disable_dropout=True,
+disable_tqdm=False,
+discopop_tau=0.05,
+do_eval=False,
+do_predict=False,
+do_train=False,
+eval_accumulation_steps=None,
+eval_delay=0,
+eval_do_concat_batches=True,
+eval_on_start=False,
+eval_steps=None,
+eval_strategy=IntervalStrategy.NO,
+eval_use_gather_object=False,
+f_alpha_divergence_coef=1.0,
+f_divergence_type=FDivergenceType.REVERSE_KL,
+force_use_ref_model=False,
+fp16=False,
+fp16_backend=auto,
+fp16_full_eval=False,
+fp16_opt_level=O1,
+fsdp=[],
+fsdp_config={'min_num_params': 0, 'xla': False, 'xla_fsdp_v2': False, 'xla_fsdp_grad_ckpt': False},
+fsdp_min_num_params=0,
+fsdp_transformer_layer_cls_to_wrap=None,
+full_determinism=False,
+generate_during_eval=False,
+gradient_accumulation_steps=16,
+gradient_checkpointing=True,
+gradient_checkpointing_kwargs=None,
+greater_is_better=None,
+group_by_length=False,
+half_precision_backend=auto,
+hub_always_push=False,
+hub_model_id=er-abd/anti-syc-dpo-qwen3-4B,
+hub_private_repo=None,
+hub_revision=None,
+hub_strategy=HubStrategy.EVERY_SAVE,
+hub_token=<HUB_TOKEN>,
+ignore_data_skip=False,
+include_for_metrics=[],
+include_inputs_for_metrics=False,
+include_num_input_tokens_seen=no,
+include_tokens_per_second=False,
+jit_mode_eval=False,
+label_names=None,
+label_pad_token_id=-100,
+label_smoothing=0.0,
+label_smoothing_factor=0.0,
+ld_alpha=None,
+learning_rate=5e-06,
+length_column_name=length,
+liger_kernel_config=None,
+load_best_model_at_end=False,
+local_rank=0,
+log_level=passive,
+log_level_replica=warning,
+log_on_each_node=True,
+logging_dir=checkpoints/qwen3-4B/anti_syc_dpo/runs/Jul17_09-02-39_1c939d8e7e49,
+logging_first_step=False,
+logging_nan_inf_filter=True,
+logging_steps=10,
+logging_strategy=IntervalStrategy.STEPS,
+loss_type=sigmoid,
+loss_weights=None,
+lr_scheduler_kwargs=None,
+lr_scheduler_type=SchedulerType.COSINE,
+max_completion_length=None,
+max_grad_norm=1.0,
+max_length=12288,
+max_prompt_length=1024,
+max_steps=-1,
+metric_for_best_model=None,
+model_adapter_name=None,
+model_init_kwargs=None,
+mp_parameters=,
+neftune_noise_alpha=None,
+no_cuda=False,
+num_train_epochs=3.0,
+optim=OptimizerNames.ADAMW_TORCH,
+optim_args=None,
+optim_target_modules=None,
+output_dir=checkpoints/qwen3-4B/anti_syc_dpo,
+overwrite_output_dir=False,
+padding_free=False,
+padding_value=None,
+parallelism_config=None,
+past_index=-1,
+per_device_eval_batch_size=1,
+per_device_train_batch_size=1,
+precompute_ref_batch_size=None,
+precompute_ref_log_probs=False,
+prediction_loss_only=False,
+project=huggingface,
+push_to_hub=True,
+push_to_hub_model_id=None,
+push_to_hub_organization=None,
+push_to_hub_token=<PUSH_TO_HUB_TOKEN>,
+ray_scope=last,
+ref_adapter_name=None,
+ref_model_init_kwargs=None,
+ref_model_mixup_alpha=0.6,
+ref_model_sync_steps=512,
+reference_free=False,
+remove_unused_columns=False,
+report_to=['wandb'],
+restore_callback_states_from_checkpoint=False,
+resume_from_checkpoint=None,
+rpo_alpha=None,
+run_name=anti_syc_dpo_pilot_seed-0,
+save_on_each_node=False,
+save_only_model=True,
+save_safetensors=True,
+save_steps=500,
+save_strategy=SaveStrategy.STEPS,
+save_total_limit=None,
+seed=0,
+skip_memory_metrics=True,
+sync_ref_model=False,
+tf32=True,
+tools=None,
+torch_compile=False,
+torch_compile_backend=None,
+torch_compile_mode=None,
+torch_empty_cache_steps=None,
+torchdynamo=None,
+tpu_metrics_debug=False,
+tpu_num_cores=None,
+trackio_space_id=trackio,
+truncation_mode=keep_end,
+use_cpu=False,
+use_legacy_prediction_loop=False,
+use_liger_kernel=False,
+use_liger_loss=False,
+use_logits_to_keep=False,
+use_mps_device=False,
+use_weighting=False,
+warmup_ratio=0.1,
+warmup_steps=0,
+weight_decay=0.01,
+)
+MODEL CONFIG:
+ModelConfig(model_name_or_path='Qwen/Qwen3-4B', model_revision='main', torch_dtype=None, trust_remote_code=False, attn_implementation=None, use_peft=True, lora_r=16, lora_alpha=32, lora_dropout=0.05, lora_target_modules=['q_proj', 'k_proj', 'v_proj', 'o_proj', 'gate_proj', 'up_proj', 'down_proj'], lora_target_parameters=None, lora_modules_to_save=None, lora_task_type='CAUSAL_LM', use_rslora=False, use_dora=False, load_in_8bit=False, load_in_4bit=False, bnb_4bit_quant_type='nf4', use_bnb_nested_quant=False)
+Setting seed to 0
+Loading dataset from:  anti-syc-DPO-train-dataset-curation/outputs/pilot/dpo_dataset
+`torch_dtype` is deprecated! Use `dtype` instead!
+Fetching 3 files:   0%|          | 0/3 [00:00<?, ?it/s]Fetching 3 files:  33%|███▎      | 1/3 [00:03<00:07,  3.79s/it]Fetching 3 files:  67%|██████▋   | 2/3 [00:04<00:02,  2.25s/it]Fetching 3 files: 100%|██████████| 3/3 [00:04<00:00,  1.66s/it]
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 1/3 [00:00<00:01,  1.69it/s]Loading checkpoint shards:  67%|██████▋   | 2/3 [00:01<00:00,  1.75it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:01<00:00,  2.57it/s]
+Map:   0%|          | 0/122 [00:00<?, ? examples/s]Map: 100%|██████████| 122/122 [00:00<00:00, 3412.69 examples/s]
+Map:   0%|          | 0/14 [00:00<?, ? examples/s]Map: 100%|██████████| 14/14 [00:00<00:00, 3328.06 examples/s]
+Extracting prompt in train dataset:   0%|          | 0/122 [00:00<?, ? examples/s]Extracting prompt in train dataset: 100%|██████████| 122/122 [00:00<00:00, 11325.17 examples/s]
+Applying chat template to train dataset:   0%|          | 0/122 [00:00<?, ? examples/s]Applying chat template to train dataset: 100%|██████████| 122/122 [00:00<00:00, 13585.33 examples/s]
+Tokenizing train dataset:   0%|          | 0/122 [00:00<?, ? examples/s]Tokenizing train dataset:  35%|███▌      | 43/122 [00:00<00:00, 426.30 examples/s]Tokenizing train dataset:  83%|████████▎ | 101/122 [00:00<00:00, 386.56 examples/s]Tokenizing train dataset: 100%|██████████| 122/122 [00:00<00:00, 389.77 examples/s]
+Extracting prompt in eval dataset:   0%|          | 0/14 [00:00<?, ? examples/s]Extracting prompt in eval dataset: 100%|██████████| 14/14 [00:00<00:00, 4115.81 examples/s]
+Applying chat template to eval dataset:   0%|          | 0/14 [00:00<?, ? examples/s]Applying chat template to eval dataset: 100%|██████████| 14/14 [00:00<00:00, 4358.04 examples/s]
+Tokenizing eval dataset:   0%|          | 0/14 [00:00<?, ? examples/s]Tokenizing eval dataset: 100%|██████████| 14/14 [00:00<00:00, 338.75 examples/s]
+The model is already on multiple devices. Skipping the move to device specified in `args`.
+The tokenizer has new PAD/BOS/EOS tokens that differ from the model config and generation config. The model config and generation config were aligned accordingly, being updated with the tokenizer's values. Updated tokens: {'bos_token_id': None, 'pad_token_id': 151643}.
+wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from /root/.netrc.
+wandb: Currently logged in as: er-a-alabdullah (er-a-alabdullah-the-university-of-edinburgh) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.28.1
+wandb: Run data is saved locally in /root/MSc_Project_code_repo/final/RO2/wandb/run-20260717_090257-8dl5k8sh
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run anti_syc_dpo_pilot_seed-0
+wandb: ⭐️ View project at https://wandb.ai/er-a-alabdullah-the-university-of-edinburgh/anti-syc-dpo-qwen3-4B
+wandb: 🚀 View run at https://wandb.ai/er-a-alabdullah-the-university-of-edinburgh/anti-syc-dpo-qwen3-4B/runs/8dl5k8sh
+wandb: Detected [huggingface_hub.inference, openai] in use.
+wandb: Use W&B Weave for improved LLM call tracing. Install Weave with `pip install weave` then add `import weave` to the top of your script.
+wandb: For more information, check out the docs at: https://weave-docs.wandb.ai
+[eval schedule] 24 total training steps -> eval/checkpoint every 5 steps (~20% of training), plus step 0 and the final step
+  0%|          | 0/14 [00:00<?, ?it/s] 14%|█▍        | 2/14 [00:00<00:01,  7.75it/s] 21%|██▏       | 3/14 [00:00<00:02,  5.00it/s] 29%|██▊       | 4/14 [00:00<00:02,  4.84it/s] 36%|███▌      | 5/14 [00:01<00:02,  4.15it/s] 43%|████▎     | 6/14 [00:01<00:02,  3.83it/s] 50%|█████     | 7/14 [00:02<00:02,  2.42it/s] 57%|█████▋    | 8/14 [00:02<00:02,  2.90it/s] 64%|██████▍   | 9/14 [00:02<00:01,  3.18it/s] 71%|███████▏  | 10/14 [00:02<00:01,  3.43it/s] 79%|███████▊  | 11/14 [00:03<00:01,  2.43it/s] 86%|████████▌ | 12/14 [00:03<00:00,  2.78it/s] 93%|█████████▎| 13/14 [00:03<00:00,  3.07it/s]100%|██████████| 14/14 [00:04<00:00,  2.88it/s]100%|██████████| 14/14 [00:04<00:00,  3.20it/s]
+***** eval metrics *****
+  epoch                   =          0
+  eval_logits/chosen      =    -3.0911
+  eval_logits/rejected    =    -3.0591
+  eval_logps/chosen       =  -241.0338
+  eval_logps/rejected     =  -291.8698
+  eval_loss               =     0.6931
+  eval_rewards/accuracies =        0.0
+  eval_rewards/chosen     =        0.0
+  eval_rewards/margins    =        0.0
+  eval_rewards/rejected   =        0.0
+  eval_runtime            = 0:00:04.96
+  eval_samples_per_second =      2.817
+  eval_steps_per_second   =      2.817
+[push] Uploading step-0 checkpoint to er-abd/anti-syc-dpo-qwen3-4B-step-0 ...
+[push] Done: https://huggingface.co/er-abd/anti-syc-dpo-qwen3-4B-step-0
+  0%|          | 0/24 [00:00<?, ?it/s]/root/qwen_env/lib/python3.11/site-packages/torch/utils/checkpoint.py:85: UserWarning: None of the inputs have requires_grad=True. Gradients will be None
+  warnings.warn(
+  4%|▍         | 1/24 [00:13<05:19, 13.90s/it]  8%|▊         | 2/24 [00:28<05:10, 14.09s/it] 12%|█▎        | 3/24 [00:36<04:05, 11.70s/it] 17%|█▋        | 4/24 [00:48<03:49, 11.49s/it] 21%|██        | 5/24 [01:00<03:47, 11.95s/it]
+  0%|          | 0/14 [00:00<?, ?it/s][A
+ 14%|█▍        | 2/14 [00:00<00:01,  8.15it/s][A
+ 21%|██▏       | 3/14 [00:00<00:02,  5.08it/s][A
+ 29%|██▊       | 4/14 [00:00<00:02,  4.90it/s][A
+ 36%|███▌      | 5/14 [00:01<00:02,  4.18it/s][A
+ 43%|████▎     | 6/14 [00:01<00:02,  3.85it/s][A
+ 50%|█████     | 7/14 [00:02<00:02,  2.42it/s][A
+ 57%|█████▋    | 8/14 [00:02<00:02,  2.91it/s][A
+ 64%|██████▍   | 9/14 [00:02<00:01,  3.18it/s][A
+ 71%|███████▏  | 10/14 [00:02<00:01,  3.43it/s][A
+ 79%|███████▊  | 11/14 [00:03<00:01,  2.44it/s][A
+ 86%|████████▌ | 12/14 [00:03<00:00,  2.78it/s][A
+ 93%|█████████▎| 13/14 [00:03<00:00,  3.08it/s][A
+100%|██████████| 14/14 [00:04<00:00,  2.88it/s][A
+                                               [A                                              {'eval_loss': 0.6837494969367981, 'eval_runtime': 4.5716, 'eval_samples_per_second': 3.062, 'eval_steps_per_second': 3.062, 'eval_rewards/chosen': 0.005024774931371212, 'eval_rewards/rejected': -0.020932331681251526, 'eval_rewards/accuracies': 0.5714285969734192, 'eval_rewards/margins': 0.02595710940659046, 'eval_logps/chosen': -240.98355102539062, 'eval_logps/rejected': -292.07904052734375, 'eval_logits/chosen': -3.0882935523986816, 'eval_logits/rejected': -3.0569591522216797, 'epoch': 0.66}
+
+100%|██████████| 14/14 [00:04<00:00,  2.88it/s][A 21%|██        | 5/24 [01:05<03:47, 11.95s/it]
+                                               [A[push] Uploading step-5 checkpoint to er-abd/anti-syc-dpo-qwen3-4B-step-5 ...
+[push] Done: https://huggingface.co/er-abd/anti-syc-dpo-qwen3-4B-step-5
+ 25%|██▌       | 6/24 [01:28<05:07, 17.10s/it] 29%|██▉       | 7/24 [01:41<04:27, 15.76s/it] 33%|███▎      | 8/24 [01:49<03:36, 13.54s/it] 38%|███▊      | 9/24 [02:01<03:15, 13.03s/it] 42%|████▏     | 10/24 [02:13<02:56, 12.59s/it]                                               {'loss': 0.6942, 'grad_norm': 8.1157865524292, 'learning_rate': 4.058724504646834e-06, 'rewards/chosen': -0.007104844320565462, 'rewards/rejected': -0.009316896088421345, 'rewards/accuracies': 0.3896103799343109, 'rewards/margins': 0.002212050836533308, 'logps/chosen': -241.07371520996094, 'logps/rejected': -240.7654266357422, 'logits/chosen': -3.409454345703125, 'logits/rejected': -3.3859407901763916, 'epoch': 1.26}
+ 42%|████▏     | 10/24 [02:13<02:56, 12.59s/it]
+  0%|          | 0/14 [00:00<?, ?it/s][A
+ 14%|█▍        | 2/14 [00:00<00:01,  8.19it/s][A
+ 21%|██▏       | 3/14 [00:00<00:02,  5.10it/s][A
+ 29%|██▊       | 4/14 [00:00<00:02,  4.91it/s][A
+ 36%|███▌      | 5/14 [00:01<00:02,  4.19it/s][A
+ 43%|████▎     | 6/14 [00:01<00:02,  3.86it/s][A
+ 50%|█████     | 7/14 [00:02<00:02,  2.43it/s][A
+ 57%|█████▋    | 8/14 [00:02<00:02,  2.91it/s][A
+ 64%|██████▍   | 9/14 [00:02<00:01,  3.19it/s][A
+ 71%|███████▏  | 10/14 [00:02<00:01,  3.44it/s][A
+ 79%|███████▊  | 11/14 [00:03<00:01,  2.44it/s][A
+ 86%|████████▌ | 12/14 [00:03<00:00,  2.79it/s][A
+ 93%|█████████▎| 13/14 [00:03<00:00,  3.09it/s][A
+100%|██████████| 14/14 [00:04<00:00,  2.89it/s][A
+                                               [A                                               {'eval_loss': 0.6711245775222778, 'eval_runtime': 4.5627, 'eval_samples_per_second': 3.068, 'eval_steps_per_second': 3.068, 'eval_rewards/chosen': 0.02506643533706665, 'eval_rewards/rejected': -0.027467835694551468, 'eval_rewards/accuracies': 0.5714285969734192, 'eval_rewards/margins': 0.05253425985574722, 'eval_logps/chosen': -240.7831268310547, 'eval_logps/rejected': -292.1444396972656, 'eval_logits/chosen': -3.084329605102539, 'eval_logits/rejected': -3.0539183616638184, 'epoch': 1.26}
+
+100%|██████████| 14/14 [00:04<00:00,  2.89it/s][A 42%|████▏     | 10/24 [02:17<02:56, 12.59s/it]
+                                               [A[push] Uploading step-10 checkpoint to er-abd/anti-syc-dpo-qwen3-4B-step-10 ...
+[push] Done: https://huggingface.co/er-abd/anti-syc-dpo-qwen3-4B-step-10
+ 46%|████▌     | 11/24 [02:37<03:28, 16.02s/it] 50%|█████     | 12/24 [02:54<03:18, 16.54s/it] 54%|█████▍    | 13/24 [03:04<02:37, 14.34s/it] 58%|█████▊    | 14/24 [03:18<02:23, 14.34s/it] 62%|██████▎   | 15/24 [03:33<02:11, 14.57s/it]
+  0%|          | 0/14 [00:00<?, ?it/s][A
+ 14%|█▍        | 2/14 [00:00<00:01,  8.14it/s][A
+ 21%|██▏       | 3/14 [00:00<00:02,  5.08it/s][A
+ 29%|██▊       | 4/14 [00:00<00:02,  4.89it/s][A
+ 36%|███▌      | 5/14 [00:01<00:02,  4.18it/s][A
+ 43%|████▎     | 6/14 [00:01<00:02,  3.85it/s][A
+ 50%|█████     | 7/14 [00:02<00:02,  2.42it/s][A
+ 57%|█████▋    | 8/14 [00:02<00:02,  2.90it/s][A
+ 64%|██████▍   | 9/14 [00:02<00:01,  3.18it/s][A
+ 71%|███████▏  | 10/14 [00:02<00:01,  3.43it/s][A
+ 79%|███████▊  | 11/14 [00:03<00:01,  2.43it/s][A
+ 86%|████████▌ | 12/14 [00:03<00:00,  2.78it/s][A
+ 93%|█████████▎| 13/14 [00:03<00:00,  3.07it/s][A
+100%|██████████| 14/14 [00:04<00:00,  2.88it/s][A
+                                               [A                                               {'eval_loss': 0.6612184643745422, 'eval_runtime': 4.5774, 'eval_samples_per_second': 3.059, 'eval_steps_per_second': 3.059, 'eval_rewards/chosen': 0.06569873541593552, 'eval_rewards/rejected': -0.004440580494701862, 'eval_rewards/accuracies': 0.5714285969734192, 'eval_rewards/margins': 0.0701393112540245, 'eval_logps/chosen': -240.37680053710938, 'eval_logps/rejected': -291.9141845703125, 'eval_logits/chosen': -3.095637798309326, 'eval_logits/rejected': -3.061091184616089, 'epoch': 1.92}
+
+100%|██████████| 14/14 [00:04<00:00,  2.88it/s][A 62%|██████▎   | 15/24 [03:38<02:11, 14.57s/it]
+                                               [A[push] Uploading step-15 checkpoint to er-abd/anti-syc-dpo-qwen3-4B-step-15 ...
+[push] Done: https://huggingface.co/er-abd/anti-syc-dpo-qwen3-4B-step-15
+ 67%|██████▋   | 16/24 [03:54<02:11, 16.49s/it] 71%|███████   | 17/24 [04:06<01:46, 15.22s/it] 75%|███████▌  | 18/24 [04:19<01:27, 14.62s/it] 79%|███████▉  | 19/24 [04:33<01:11, 14.25s/it] 83%|████████▎ | 20/24 [04:46<00:55, 13.82s/it]                                               {'loss': 0.6832, 'grad_norm': 8.345020294189453, 'learning_rate': 6.673703204254348e-07, 'rewards/chosen': 0.028771335259079933, 'rewards/rejected': 0.003879240248352289, 'rewards/accuracies': 0.5649350881576538, 'rewards/margins': 0.02489209547638893, 'logps/chosen': -256.2566833496094, 'logps/rejected': -250.3130645751953, 'logits/chosen': -3.3657994270324707, 'logits/rejected': -3.3457114696502686, 'epoch': 2.52}
+ 83%|████████▎ | 20/24 [04:46<00:55, 13.82s/it]
+  0%|          | 0/14 [00:00<?, ?it/s][A
+ 14%|█▍        | 2/14 [00:00<00:01,  8.18it/s][A
+ 21%|██▏       | 3/14 [00:00<00:02,  5.10it/s][A
+ 29%|██▊       | 4/14 [00:00<00:02,  4.91it/s][A
+ 36%|███▌      | 5/14 [00:01<00:02,  4.19it/s][A
+ 43%|████▎     | 6/14 [00:01<00:02,  3.86it/s][A
+ 50%|█████     | 7/14 [00:02<00:02,  2.43it/s][A
+ 57%|█████▋    | 8/14 [00:02<00:02,  2.91it/s][A
+ 64%|██████▍   | 9/14 [00:02<00:01,  3.19it/s][A
+ 71%|███████▏  | 10/14 [00:02<00:01,  3.44it/s][A
+ 79%|███████▊  | 11/14 [00:03<00:01,  2.44it/s][A
+ 86%|████████▌ | 12/14 [00:03<00:00,  2.79it/s][A
+ 93%|█████████▎| 13/14 [00:03<00:00,  3.08it/s][A
+100%|██████████| 14/14 [00:04<00:00,  2.89it/s][A
+                                               [A                                               {'eval_loss': 0.677934467792511, 'eval_runtime': 4.5634, 'eval_samples_per_second': 3.068, 'eval_steps_per_second': 3.068, 'eval_rewards/chosen': 0.0634089857339859, 'eval_rewards/rejected': 0.02407444640994072, 'eval_rewards/accuracies': 0.5714285969734192, 'eval_rewards/margins': 0.03933453932404518, 'eval_logps/chosen': -240.3997039794922, 'eval_logps/rejected': -291.6289978027344, 'eval_logits/chosen': -3.088961362838745, 'eval_logits/rejected': -3.057814121246338, 'epoch': 2.52}
+
+100%|██████████| 14/14 [00:04<00:00,  2.89it/s][A 83%|████████▎ | 20/24 [04:50<00:55, 13.82s/it]
+                                               [A[push] Uploading step-20 checkpoint to er-abd/anti-syc-dpo-qwen3-4B-step-20 ...
+[push] Done: https://huggingface.co/er-abd/anti-syc-dpo-qwen3-4B-step-20
+ 88%|████████▊ | 21/24 [05:10<00:50, 16.89s/it] 92%|█████████▏| 22/24 [05:22<00:30, 15.39s/it] 96%|█████████▌| 23/24 [05:33<00:14, 14.18s/it]100%|██████████| 24/24 [05:44<00:00, 13.21s/it]
+  0%|          | 0/14 [00:00<?, ?it/s][A
+ 14%|█▍        | 2/14 [00:00<00:01,  8.18it/s][A
+ 21%|██▏       | 3/14 [00:00<00:02,  5.10it/s][A
+ 29%|██▊       | 4/14 [00:00<00:02,  4.92it/s][A
+ 36%|███▌      | 5/14 [00:01<00:02,  4.19it/s][A
+ 43%|████▎     | 6/14 [00:01<00:02,  3.86it/s][A
+ 50%|█████     | 7/14 [00:02<00:02,  2.43it/s][A
+ 57%|█████▋    | 8/14 [00:02<00:02,  2.91it/s][A
+ 64%|██████▍   | 9/14 [00:02<00:01,  3.19it/s][A
+ 71%|███████▏  | 10/14 [00:02<00:01,  3.44it/s][A
+ 79%|███████▊  | 11/14 [00:03<00:01,  2.44it/s][A
+ 86%|████████▌ | 12/14 [00:03<00:00,  2.79it/s][A
+ 93%|█████████▎| 13/14 [00:03<00:00,  3.08it/s][A
+100%|██████████| 14/14 [00:04<00:00,  2.89it/s][A
+                                               [A                                               {'eval_loss': 0.657983660697937, 'eval_runtime': 4.5634, 'eval_samples_per_second': 3.068, 'eval_steps_per_second': 3.068, 'eval_rewards/chosen': 0.0638199895620346, 'eval_rewards/rejected': -0.0172206349670887, 'eval_rewards/accuracies': 0.5714285969734192, 'eval_rewards/margins': 0.0810406357049942, 'eval_logps/chosen': -240.3955841064453, 'eval_logps/rejected': -292.04193115234375, 'eval_logits/chosen': -3.0872671604156494, 'eval_logits/rejected': -3.056180238723755, 'epoch': 3.0}
+
+100%|██████████| 14/14 [00:04<00:00,  2.89it/s][A100%|██████████| 24/24 [05:49<00:00, 13.21s/it]
+                                               [A[push] Uploading step-24 checkpoint to er-abd/anti-syc-dpo-qwen3-4B-step-24 ...
+[push] Done: https://huggingface.co/er-abd/anti-syc-dpo-qwen3-4B-step-24
+                                               {'train_runtime': 370.3156, 'train_samples_per_second': 0.988, 'train_steps_per_second': 0.065, 'train_loss': 0.6867947280406952, 'epoch': 3.0}
+100%|██████████| 24/24 [05:55<00:00, 13.21s/it]100%|██████████| 24/24 [05:55<00:00, 14.81s/it]
+Full training log history -> checkpoints/qwen3-4B/anti_syc_dpo/train_log_history.json
+GPU memory: peak reserved 53.61 GB / 85.1 GB total -> 31.5 GB headroom (details: checkpoints/qwen3-4B/anti_syc_dpo/gpu_memory.json)
+Best checkpoint at step 24 with metrics: {'accuracy': 0.5714285969734192, 'loss': 0.657983660697937}
+Checkpoint-best already exists
+Best-checkpoint info -> checkpoints/qwen3-4B/anti_syc_dpo/best_checkpoint.txt (HF: er-abd/anti-syc-dpo-qwen3-4B-step-24)
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33manti_syc_dpo_pilot_seed-0[0m at: [34mhttps://wandb.ai/er-a-alabdullah-the-university-of-edinburgh/anti-syc-dpo-qwen3-4B/runs/8dl5k8sh[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20260717_090257-8dl5k8sh/logs[0m
