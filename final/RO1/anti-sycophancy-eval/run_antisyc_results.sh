@@ -22,8 +22,12 @@ if [[ -z "${OPENAI_API_KEY:-}" ]]; then
     exit 1
 fi
 RESP_DIR="outputs-and-results/anti-sycophancy-results/responses/${MODEL_NAME}"
-if [[ ! -f "$RESP_DIR/id_responses.jsonl" || ! -f "$RESP_DIR/ood_responses.jsonl" ]]; then
-    echo "ERROR: responses not found under $RESP_DIR — run run_antisyc_inference.sh first."
+# Only the ID responses are required. ood_responses.jsonl exists only when M3 is
+# enabled (anti_sycophancy.run_ood=true); the grader/metrics scripts read the same
+# config flag and skip OOD when it's off, so requiring it here would wrongly block
+# M1/M2-only runs.
+if [[ ! -f "$RESP_DIR/id_responses.jsonl" ]]; then
+    echo "ERROR: $RESP_DIR/id_responses.jsonl not found — run run_antisyc_inference.sh first."
     exit 1
 fi
 
