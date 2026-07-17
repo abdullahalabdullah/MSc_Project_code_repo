@@ -18,17 +18,24 @@ import numpy as np
 
 
 def resolve_jsonl(path: Path) -> Path:
-    """Return `path` if it exists, else its gzipped sibling (`<path>.gz`) if
-    that exists instead. Large hinted/unhinted runs are committed gzipped for
-    GitHub's 100MB limit (see 02_run_inference_qwen.py's shared-unhinted
-    reuse, which already does this for unhinted.jsonl.gz) — this extends the
-    same fallback to every step that reads hinted/unhinted.jsonl. Falls back
-    to `path` unchanged when neither exists, so callers get the normal
-    'not found' error."""
-    if path.exists():
-        return path
+    """Return `path` if it exists and is NON-EMPTY, else its gzipped sibling
+    (`<path>.gz`) if that exists non-empty instead. Large hinted/unhinted runs
+    are committed gzipped for GitHub's 100MB limit (see 02_run_inference_qwen.py's
+    shared-unhinted reuse, which already does this for unhinted.jsonl.gz) — this
+    extends the same fallback to every step that reads hinted/unhinted.jsonl.
+
+    The non-empty check is important: a 0-byte plain file (e.g. a failed/partial
+    write) sitting next to a valid `.gz` must NOT shadow the real data. This was
+    observed for harmless mmlu_pro/unethical's unhinted arm, where an empty
+    unhinted.jsonl masked a 4.5MB unhinted.jsonl.gz and silently dropped the whole
+    slice (n_total=0). Falls back to `path` unchanged when neither is usable, so
+    callers get the normal 'not found' error."""
     gz_path = path.with_suffix(path.suffix + ".gz")
-    return gz_path if gz_path.exists() else path
+    if path.exists() and path.stat().st_size > 0:
+        return path
+    if gz_path.exists() and gz_path.stat().st_size > 0:
+        return gz_path
+    return path
 
 
 def load_jsonl(path: Path) -> list:

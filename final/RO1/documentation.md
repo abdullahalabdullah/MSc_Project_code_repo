@@ -124,6 +124,10 @@ labels each response for hint-acknowledgement (Z).
 | 6 | `06_export_excel.py` | inference + monitor → `…/monitorability-results/{model}/{ds}/{hint}/qualitative_export.xlsx` |
 | 8 | `08_cot_token_analysis.py` | inference (all ds) → `…/monitorability-results/{model}/{ds}/{hint}/cot_token_stats.json` |
 | 9 | `09_generate_reports.py` | 04 + 08's JSON/CSV artifacts → all `.md` reports (see **Reports**) |
+| 10 | `10_length_bucket_gmean2.py` | inference + monitor (two hard-coded models, all ds/hint) → stdout table (see **Length-bucketed g-mean² comparison**) |
+| 11 | `11_length_cumulative_gmean2.py` | inference + monitor (two hard-coded models, all ds/hint) → stdout cumulative g-mean²@≤length table (see **Length-bucketed g-mean² comparison**) |
+| 12 | `12_length_standardized_gmean2.py` | inference + monitor (two hard-coded models, all ds/hint) → stdout length-standardized g-mean² + bootstrap-CI gap decomposition (see **Length-bucketed g-mean² comparison**) |
+| 13 | `13_length_standardized_withinslice_gmean2.py` | inference + monitor (two hard-coded models, all ds/hint) → stdout **within-slice** length-standardized g-mean² (length + dataset/hint held fixed) + bootstrap-CI gap decomposition (see **Length-bucketed g-mean² comparison**) |
 
 Steps 2–6 and 8 take `--model` (an HF model ID or local model dir; `{model}` in the
 paths is its folder-safe name, `/` → `_`), plus a `--dataset` **and** a `--hint-type`
@@ -406,6 +410,64 @@ Step 4 computes all of this into machine-readable artifacts
 (`results_summary.json` — including a config snapshot of the sampling recipe,
 budgets, and monitor model — plus `results_per_instance.{csv,json}`). Step 8
 computes token-length statistics into `cot_token_stats.json`.
+
+## Length-bucketed g-mean² comparison (step 10 — `10_length_bucket_gmean2.py`)
+
+Ad-hoc analysis to separate a **response-length confound** from a genuine
+training effect when comparing two models' monitorability. The harmlessness-DPO
+model writes longer CoTs than base, and longer CoTs tend to be more monitorable,
+so a raw g-mean² gap could be pure length composition. This script pools every
+per-instance g-mean² that ENTERS the metric (Level-1 pass and `gmean2_i` defined)
+across all `(dataset, hint)` slices present in **both** models, buckets instances
+by `mean_cot_tokens_hinted` (mean token length of the 8 hinted responses), and
+prints a side-by-side table: `bucket (tok) | BASE n | BASE g² | HARM n | HARM g²`,
+plus an overall line (n, median length, g² per model). Within a bucket both
+models sit at ~the same length, so a within-bucket difference is closer to a
+pure training effect. The two compared models are hard-coded at the top
+(`BASE_MODEL`, `HARM_MODEL`); bucket width is the sole CLI arg (default 500 tok):
+
+    python monitorability-eval/scripts/10_length_bucket_gmean2.py [BUCKET_WIDTH]
+
+Prints only (does not write artifacts).
+
+`11_length_cumulative_gmean2.py` is the **cumulative** companion: same pooling and
+entering-instance logic, but each row reports g-mean² over all instances with
+`mean_cot_tokens_hinted <= T` for a running threshold `T` (step is the sole CLI
+arg, default 500). It answers "cap both models at the same max response length —
+who is more monitorable?", is smoother than the disjoint buckets (n only grows),
+and its final row equals each model's overall g-mean². Use the two together: the
+buckets give the *local, matched-length* comparison (cleanest confound isolation);
+the cumulative curve gives the *robustness-to-length-cap* view (shows the
+conclusion doesn't hinge on the long tail).
+
+`12_length_standardized_gmean2.py` is the **rigorous single-number** version:
+direct standardization (post-stratification). It reweights HARM's per-length-bin
+g-mean² by BASE's length distribution to get "HARM's g-mean² if it had base's
+lengths", then decomposes the raw gap into a *length-driven* part
+(`harm_raw − harm_std`) and a *training-driven* part (`harm_std − base_raw`), each
+with a 95% percentile-bootstrap CI (resampling instances within each model). Args:
+`BIN_WIDTH` (default 500 tok) and `N_BOOT` (default 10000); also prints the reverse
+standardization (BASE → HARM lengths) as a robustness check. This is the analysis
+to quote a headline "length-adjusted" number and CI from.
+
+`13_length_standardized_withinslice_gmean2.py` is the **strictest** version:
+it standardizes length *inside each `(dataset, hint)` slice* and aggregates, so
+BOTH length AND dataset/hint composition are held fixed. It reports the raw gap
+split into a *confound-driven* part (length + dataset/hint) and a *training-driven*
+part (slice + length fixed), each with a stratified-bootstrap CI, plus slice and
+within-slice-length coverage. Use this to check whether a length-adjusted
+difference survives once dataset/hint composition is also controlled. (For
+Base vs harmless-step-735 the training-driven residual is +0.019, CI [−0.001,
++0.039] — borderline, not clearly non-zero; length itself contributes ≈0.)
+
+**Data-integrity note surfaced by script 13:** `resolve_jsonl()` was fixed to
+ignore a **0-byte plain file** and fall back to a non-empty `.gz` sibling — an empty
+`unhinted.jsonl` was shadowing a valid `unhinted.jsonl.gz` for harmless
+`mmlu_pro/unethical` and silently dropping the slice (`n_total=0`) everywhere.
+The inference data is recovered, but that slice's **monitor** was only run on the
+hinted arm (no unhinted verdicts → `TNR_X=0` undefined → g² undefined), so it still
+cannot enter g² until step 03 is re-run on its unhinted arm. See
+`notes/length-confound/withinslice_standardized_base_vs_harmless_step735.md`.
 
 ## Reports (step 9 — `monitorability-eval/scripts/09_generate_reports.py`, `monitorability-eval/src/reporting.py`)
 
