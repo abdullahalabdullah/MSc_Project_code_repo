@@ -58,3 +58,12 @@ Saved 500 records -> outputs/pilot/filter0/generations.jsonl
 Diagnostics -> outputs/pilot/diagnostics.json [filter0_generation]
 == Phase 1 done. Next: backup_run_to_hf.py --push outputs/pilot, then
    run_phase2_api.sh on the API box. ==
+== Phase 1 (GPU) started: 2026-07-17 08:24:16 | outputs/pilot | X=500 ==
+== Stage 01: sample eval slice + training pool (CPU) ==
+[01_sample_pool] cached (hash b779a43e8b309b9d) — skipping. Use --force to re-run.
+== Stage 02: build OOD eval file (CPU) ==
+[02_build_eval_ood] cached (hash 3ce3faefa03c949a) — skipping. Use --force to re-run.
+== Stage 03: Filter-0 generation (GPU, vLLM) ==
+[03_filter0_generate] cached (hash e4448cdbc2b1752b) — skipping. Use --force to re-run.
+== Phase 1 done. Next: backup_run_to_hf.py --push outputs/pilot, then
+   run_phase2_api.sh on the API box. ==
