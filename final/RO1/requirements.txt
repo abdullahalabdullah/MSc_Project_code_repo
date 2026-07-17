@@ -47,6 +47,15 @@
 # one error at a time. A fresh venv needs ~8-10 GB free for the torch+CUDA stack.
 # =============================================================================
 
+# Build backend — MUST be present in the venv. A fresh `python -m venv` does not
+# always seed setuptools, but vLLM's Triton kernel JIT does `import setuptools`
+# (triton/runtime/build.py) at GPU-worker init and hard-fails without it:
+#   ModuleNotFoundError: No module named 'setuptools'
+# wheel is its usual companion for building. Keep these FIRST so they're present
+# before anything triggers a build.
+setuptools>=68.0.0
+wheel>=0.41.0
+
 # Inference engine — pinned exactly; pulls torch 2.6.0 (cu124), runs on a
 # CUDA-12.8 driver. Newer vLLM bundles torch for CUDA 12.9+ and will NOT load.
 vllm==0.8.5

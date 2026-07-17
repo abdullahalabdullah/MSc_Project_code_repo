@@ -25,6 +25,13 @@ def main():
     group.add_argument("--pull", metavar="RUN_DIR", help="Download into the run dir.")
     ap.add_argument("--repo", default=None,
                     help="HF dataset repo id (default: <username>/ro2-antisyc-curation-<run-name>)")
+    ap.add_argument("--only", nargs="*", default=None, metavar="GLOB",
+                    help="Transfer ONLY paths matching these globs (relative to the run dir). "
+                         "Default: the whole run dir. Use it so a fresh pod doesn't download GBs "
+                         "it never reads — e.g. stage 07 only needs the instances file, and "
+                         "training only needs the exported dataset:\n"
+                         "  --pull outputs/full_run --only 'filter1/instances.jsonl' 'stage_markers/*'\n"
+                         "  --pull outputs/full_run --only 'dpo_dataset/*'")
     args = ap.parse_args()
 
     env_setup.setup_env()
@@ -39,18 +46,23 @@ def main():
     run_name = os.path.basename(os.path.normpath(run_dir))
     repo_id = args.repo or f"{api.whoami()['name']}/ro2-antisyc-curation-{run_name}"
 
+    scope = f" [only: {' '.join(args.only)}]" if args.only else ""
     if args.push:
         if not os.path.isdir(run_dir):
             sys.exit(f"ERROR: run dir not found: {run_dir}")
-        print(f"Uploading {run_dir} -> {repo_id} (private)")
+        print(f"Uploading {run_dir} -> {repo_id} (private){scope}")
         api.create_repo(repo_id, repo_type="dataset", private=True, exist_ok=True)
+        # upload_folder skips files whose content already matches the remote, so a
+        # repeat push only sends what changed. --only narrows it further.
         api.upload_folder(folder_path=run_dir, repo_id=repo_id, repo_type="dataset",
+                          allow_patterns=args.only,
                           commit_message=f"backup {run_name}")
         print(f"Done -> https://huggingface.co/datasets/{repo_id}")
     else:
-        print(f"Downloading {repo_id} -> {run_dir}")
+        print(f"Downloading {repo_id} -> {run_dir}{scope}")
         os.makedirs(run_dir, exist_ok=True)
         snapshot_download(repo_id=repo_id, repo_type="dataset", token=token,
+                          allow_patterns=args.only,
                           local_dir=run_dir)
         print(f"Done -> {run_dir}")
 
