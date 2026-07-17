@@ -92,5 +92,23 @@
       "T7": 62
     },
     "seed_template": 1234
+  },
+  "filter1_generation": {
+    "model": "Qwen/Qwen3-4B",
+    "enable_thinking": true,
+    "temperature": 1.0,
+    "top_p": 0.95,
+    "top_k": 20,
+    "max_new_tokens": 16384,
+    "gen_seed": 0,
+    "n_items": 496,
+    "samples_per_item": 10,
+    "total_samples": 4960,
+    "truncated": 1,
+    "truncated_pct": 0.02,
+    "response_tokens_mean": 469.4,
+    "response_tokens_min": 104,
+    "response_tokens_max": 16384,
+    "newly_generated_samples": 4960
   }
 }
