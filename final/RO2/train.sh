@@ -129,6 +129,9 @@ REPORT_TO="${REPORT_TO:-wandb}"
 WANDB_PROJECT="${WANDB_PROJECT:-${DEFAULT_WANDB}}"
 RUN_NAME="${RUN_NAME:-harmless_${METHOD}_$(basename "${OUTPUT_DIR}")_seed-${SEED}}"
 export WANDB_PROJECT
+# Full training log (tee'd from the python run). Wrappers (e.g. train_antisyc.sh) override
+# LOG_FILE to keep each experiment's log distinct; the default keeps harmlessness runs stable.
+LOG_FILE="${LOG_FILE:-logs/train_${METHOD}.log}"
 
 # ── Locate the exported dataset (dpo_dataset, or its sft_dataset derivative for sft) ──
 if [ "${METHOD}" = "sft" ]; then
@@ -157,6 +160,7 @@ echo "== Method:  ${METHOD}  (loss args: ${LOSS_ARGS[*]})"
 echo "== Model:   ${MODEL}"
 echo "== Dataset: ${DATASET_PATH}"
 echo "== Output:  ${OUTPUT_DIR}  (epochs=${EPOCHS}, seed=${SEED})"
+echo "== Log:     ${LOG_FILE}"
 
 # ── Preflight: pushing is mandatory, so fail here (before any GPU time) if the HF
 # credentials are missing or read-only ─────────────────────────────────────────────
@@ -225,7 +229,7 @@ python -u "${TRAIN_SCRIPT}" \
     --lora_dropout 0.05 \
     --lora_target_modules q_proj k_proj v_proj o_proj gate_proj up_proj down_proj \
     "${HUB_ARGS[@]+"${HUB_ARGS[@]}"}" \
-    2>&1 | tee "logs/train_${METHOD}.log"
+    2>&1 | tee "${LOG_FILE}"
 
 echo "== Done. Best adapter: ${OUTPUT_DIR}/checkpoint-best =="
 echo "   Load it on top of the base model for inference"

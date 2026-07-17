@@ -282,7 +282,11 @@ reward-accuracy for the DPO methods, by `eval_loss` for SFT — is kept as `chec
 others are pruned. Its identity — the winning step and the exact `<HUB_MODEL_ID>-step-<N>` HF
 repo it was pushed to — is written to `OUTPUT_DIR/best_checkpoint.txt` (and mirrored into the
 W&B run summary). A full log is written to `logs/train_<method>.log` (`logs/train_dpo.log` /
-`logs/train_dpo_norm.log` / `logs/train_sft.log`).
+`logs/train_dpo_norm.log` / `logs/train_sft.log`). Override the log path with the `LOG_FILE`
+env var. Anti-sycophancy runs (`train_antisyc.sh`) set it automatically to
+`logs/anti_syc_train_<method>_<run_tag>.log`, where `<run_tag>` is the curation output dir
+feeding the run (e.g. `logs/anti_syc_train_dpo_pilot.log` vs `logs/anti_syc_train_dpo_full_run.log`),
+so pilot and full runs never overwrite each other or the harmlessness logs.
 
 **Eval/checkpoint schedule**: fixed step intervals are epoch-count-proof and derived from the
 trainer's own total-step count (dataset size × epochs × batch/grad-accum settings), not a fixed

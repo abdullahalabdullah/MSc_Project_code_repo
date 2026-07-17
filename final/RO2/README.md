@@ -50,7 +50,7 @@ convert_dpo_to_sft.py         # dpo_dataset -> sft_dataset (drop `rejected`; rec
 verify_sft_tokenization.py    # go/no-go gate: proves SFT tokenization == DPO chosen pathway
 train.sh                      # one-command training wrapper (harmlessness defaults; METHOD=dpo|dpo_norm|sft)
 train_sft.sh                  # SFT arm driver: convert -> verify -> METHOD=sft train.sh (idempotent prep)
-train_antisyc.sh              # anti-syc wrapper: pins output dir / HF repo / W&B names
+train_antisyc.sh              # anti-syc wrapper: pins output dir / HF repo / W&B names + per-run log (logs/anti_syc_train_<method>_<run_tag>.log)
 requirements.txt              # unified environment for the whole repo
 DOCUMENTATION.md              # end-to-end runbook (commands + options)
 SMOKE_RUN_LOG-template.md     # fill-in log for the small-scale HP-validation run

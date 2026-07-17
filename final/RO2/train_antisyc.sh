@@ -24,7 +24,17 @@ fi
 export OUTPUT_DIR="${OUTPUT_DIR:-checkpoints/qwen3-4B/anti_syc_dpo}"
 export HUB_MODEL_ID="${HUB_MODEL_ID:-er-abd/anti-syc-dpo-qwen3-4B}"
 export WANDB_PROJECT="${WANDB_PROJECT:-anti-syc-dpo-qwen3-4B}"
-export RUN_NAME="${RUN_NAME:-anti_syc_dpo_seed-${SEED:-0}}"
 export MAX_PROMPT_LENGTH="${MAX_PROMPT_LENGTH:-1024}"
+
+# Run tag distinguishes a pilot from the full run in log/W&B names. It is derived from the
+# curation output dir feeding this run (…/outputs/<run_tag>/dpo_dataset), so a pilot export
+# (…/outputs/pilot/dpo_dataset) and the full export (…/outputs/full_run/dpo_dataset) never
+# share a log. Override with RUN_TAG=<name> if your dataset path is non-standard.
+RUN_TAG="${RUN_TAG:-$(basename "$(dirname "$1")")}"
+export RUN_NAME="${RUN_NAME:-anti_syc_dpo_${RUN_TAG}_seed-${SEED:-0}}"
+
+# Unique, non-colliding log per experiment: anti-syc, its method, and the run tag — never the
+# generic logs/train_dpo.log that the harmlessness runs write.
+export LOG_FILE="${LOG_FILE:-logs/anti_syc_train_${METHOD:-dpo}_${RUN_TAG}.log}"
 
 bash train.sh "$1"
