@@ -187,18 +187,17 @@ cache-*.arrow
 !harmlessness-DPO-train-dataset-curation/outputs/*/01_prompts_meta.joblib
 !harmlessness-DPO-train-dataset-curation/outputs/*/final_pairs.joblib
 
-# Anti-sycophancy curation module: its run dirs hold multi-GB raw generation/grade
-# JSONLs and Arrow DatasetDicts — ignore those; the small decision-bearing artifacts
-# (reserved eval files, instances, summaries, pairs, manifest, qa_report, gates,
-# diagnostics) stay tracked. Full run dirs travel between boxes via
-# backup_run_to_hf.py, not git.
-anti-syc-DPO-train-dataset-curation/outputs/*/filter0/generations*
-anti-syc-DPO-train-dataset-curation/outputs/*/filter1/generations*
-anti-syc-DPO-train-dataset-curation/outputs/*/filter0/grades.jsonl*
-anti-syc-DPO-train-dataset-curation/outputs/*/filter1/grades.jsonl*
-anti-syc-DPO-train-dataset-curation/outputs/*/grader_cache.jsonl
-anti-syc-DPO-train-dataset-curation/outputs/*/dpo_dataset/
-anti-syc-DPO-train-dataset-curation/outputs/*/run_all.log
+# Anti-sycophancy curation module: run-dir output files are TRACKED (via the
+# `!outputs/**` re-include above) so a run dir transports between machines with a plain
+# `git add RO2/anti-syc-DPO-train-dataset-curation/outputs/<run>` — no `-f` needed. This
+# is fine at smoke/pilot scale (per-file sizes are tens of MB, under GitHub's 100 MB cap).
+#
+# WARNING: the FULL run (X=20000) is different. Its filter0/filter1 generation files are
+# ~1-2 GB EACH — do NOT `git add` a full run dir: GitHub rejects >100 MB files and large
+# blobs bloat the repo history permanently. Move full run dirs with `scp` or
+# `backup_run_to_hf.py --push/--pull` instead, and keep the full run dir out of git
+# (e.g. name it outputs/full_run and add `anti-syc-DPO-train-dataset-curation/outputs/full_run/`
+# here before you run it).
 # Track the SMALL training-result files under checkpoints/ (metrics, memory, best-ckpt
 # pointer, log history, SFT dataset provenance) — but NOT the heavy adapter weights,
 # which live on HF.
