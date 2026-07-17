@@ -193,11 +193,12 @@ cache-*.arrow
 # is fine at smoke/pilot scale (per-file sizes are tens of MB, under GitHub's 100 MB cap).
 #
 # WARNING: the FULL run (X=20000) is different. Its filter0/filter1 generation files are
-# ~1-2 GB EACH — do NOT `git add` a full run dir: GitHub rejects >100 MB files and large
-# blobs bloat the repo history permanently. Move full run dirs with `scp` or
-# `backup_run_to_hf.py --push/--pull` instead, and keep the full run dir out of git
-# (e.g. name it outputs/full_run and add `anti-syc-DPO-train-dataset-curation/outputs/full_run/`
-# here before you run it).
+# hundreds of MB each — do NOT `git add` a full run dir: GitHub rejects >100 MB files and
+# large blobs bloat the repo history permanently. Move full run dirs with `scp` or
+# `backup_run_to_hf.py --push/--pull` instead. The full run dir is ignored below; the
+# small dpo_dataset export is force-added on its own when the trainer needs it:
+#   git add -f anti-syc-DPO-train-dataset-curation/outputs/full_run/dpo_dataset
+anti-syc-DPO-train-dataset-curation/outputs/full_run/
 # Track the SMALL training-result files under checkpoints/ (metrics, memory, best-ckpt
 # pointer, log history, SFT dataset provenance) — but NOT the heavy adapter weights,
 # which live on HF.
