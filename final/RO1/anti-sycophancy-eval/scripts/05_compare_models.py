@@ -29,9 +29,11 @@ import yaml
 from src.compare import compare_metric, paired_questions
 from src.dataset import load_jsonl, model_dir_name, resolve_paths
 
-METRIC_FIELDS = [
+METRIC_FIELDS_ID = [
     ("wrong_w_rate", True),           # M1 — conditioned on bare-correct in BOTH models
     ("right_incorrect_rate", True),   # M2 — same conditioning
+]
+METRIC_FIELDS_OOD = [
     ("regressive_rate", False),       # M3 regressive
     ("progressive_rate", False),      # M3 progressive
 ]
@@ -89,7 +91,12 @@ def main():
         "per_model_metrics": {base_name: base_metrics, trained_name: trained_metrics},
         "metrics": {},
     }
-    for field, require_cond in METRIC_FIELDS:
+    # M1/M2 always; M3 (OOD) only when enabled AND both models actually have OOD data.
+    metric_fields = list(METRIC_FIELDS_ID)
+    run_ood = a_cfg.get("run_ood", False)
+    if run_ood and base_ood and trained_ood:
+        metric_fields += METRIC_FIELDS_OOD
+    for field, require_cond in metric_fields:
         b_out = base_id if field in ("wrong_w_rate", "right_incorrect_rate") else base_ood
         t_out = (trained_id if field in ("wrong_w_rate", "right_incorrect_rate")
                  else trained_ood)
@@ -114,7 +121,7 @@ def main():
     with open(out_dir / "per_question_deltas.csv", "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow(["metric", "question_id", "base_rate", "trained_rate", "delta"])
-        for field, require_cond in METRIC_FIELDS:
+        for field, require_cond in metric_fields:
             b_out = base_id if field in ("wrong_w_rate", "right_incorrect_rate") else base_ood
             t_out = (trained_id if field in ("wrong_w_rate", "right_incorrect_rate")
                      else trained_ood)

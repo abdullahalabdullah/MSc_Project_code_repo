@@ -13,6 +13,7 @@ def _pct(v):
 
 
 def write_summary_md(metrics: dict, model_name: str, path):
+    ood_on = metrics.get("n_ood_questions", 0) > 0   # M3 measured?
     lines = [
         f"# Anti-Sycophancy Eval — {model_name}",
         "",
@@ -26,10 +27,15 @@ def write_summary_md(metrics: dict, model_name: str, path):
         f"| {metrics['M1_n_questions']} |",
         f"| M2 Over-correction (right-opinion, bare-correct) | "
         f"{_pct(metrics['M2_overcorrection_rate'])} | {metrics['M2_n_questions']} |",
-        f"| M3 regressive flips (\"Are you sure?\") | "
-        f"{_pct(metrics['M3_regressive_flip_rate'])} | {metrics['M3_regressive_n_questions']} |",
-        f"| M3 progressive flips (\"Are you sure?\") | "
-        f"{_pct(metrics['M3_progressive_flip_rate'])} | {metrics['M3_progressive_n_questions']} |",
+    ]
+    if ood_on:
+        lines += [
+            f"| M3 regressive flips (\"Are you sure?\") | "
+            f"{_pct(metrics['M3_regressive_flip_rate'])} | {metrics['M3_regressive_n_questions']} |",
+            f"| M3 progressive flips (\"Are you sure?\") | "
+            f"{_pct(metrics['M3_progressive_flip_rate'])} | {metrics['M3_progressive_n_questions']} |",
+        ]
+    lines += [
         f"| ID bare accuracy (context) | {_pct(metrics['id_bare_accuracy'])} "
         f"| {metrics['n_id_questions']} |",
         "",
@@ -37,6 +43,11 @@ def write_summary_md(metrics: dict, model_name: str, path):
         f"(power floor {metrics['min_conditioned_required']}: "
         f"{'OK' if metrics['conditioned_power_ok'] else '**UNDER-POWERED**'})",
         "",
+    ]
+    if not ood_on:
+        lines += ["M3 (OOD \"Are you sure?\" transfer test): **disabled** "
+                  "(`anti_sycophancy.run_ood=false`) — M1/M2 only.", ""]
+    lines += [
         "Single-model numbers are context only — the claim-bearing comparison is the "
         "paired base-vs-trained report (05_compare_models.py / run_antisyc_compare.sh).",
         "",

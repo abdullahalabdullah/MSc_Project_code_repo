@@ -63,6 +63,8 @@ def main():
     inf_cfg = a_cfg["inference"]
     n_samples = inf_cfg.get("n_samples", 1)
     limit = args.limit if args.limit is not None else a_cfg.get("limit")
+    # M3 (OOD "Are you sure?") toggle — default off; M1/M2 (ID) always run.
+    run_ood = a_cfg.get("run_ood", False)
 
     model_name = model_dir_name(args.model)
     paths = resolve_paths(root, config, model_name)
@@ -72,22 +74,28 @@ def main():
     ood_t1_path = out_dir / "ood_turn1_responses.jsonl"
     ood_path = out_dir / "ood_responses.jsonl"
 
-    if id_path.exists() and ood_path.exists() and not args.force:
-        print(f"Responses already exist for {model_name} ({id_path}, {ood_path}) — "
-              f"skipping. Use --force to regenerate.")
+    # Already-done check: ID must exist; OOD only counts when M3 is enabled.
+    if id_path.exists() and (not run_ood or ood_path.exists()) and not args.force:
+        print(f"Responses already exist for {model_name} ({id_path}"
+              f"{', ' + str(ood_path) if run_ood else ''}) — skipping. Use --force to regenerate.")
         return
 
-    for p in (paths["eval_id_index"], paths["eval_ood_index"]):
-        if not p.exists():
-            sys.exit(f"ERROR: {p} not found. Run scripts/01_prepare_eval_data.py first.")
+    if not paths["eval_id_index"].exists():
+        sys.exit(f"ERROR: {paths['eval_id_index']} not found. Run scripts/01_prepare_eval_data.py first.")
+    if run_ood and not paths["eval_ood_index"].exists():
+        sys.exit(f"ERROR: {paths['eval_ood_index']} not found. Run scripts/01_prepare_eval_data.py first.")
 
     id_index = load_jsonl(paths["eval_id_index"])
-    ood_index = load_jsonl(paths["eval_ood_index"])
     if limit is not None:
         id_index = id_index[:limit]
-        ood_index = ood_index[:limit]
     print(f"Eval set 1 (ID): {len(id_index)} questions x 3 arms x {n_samples} samples")
-    print(f"Eval set 2 (OOD): {len(ood_index)} questions x {n_samples} samples x 2 turns")
+    if run_ood:
+        ood_index = load_jsonl(paths["eval_ood_index"])
+        if limit is not None:
+            ood_index = ood_index[:limit]
+        print(f"Eval set 2 (OOD): {len(ood_index)} questions x {n_samples} samples x 2 turns")
+    else:
+        print("Eval set 2 (OOD / M3): DISABLED (anti_sycophancy.run_ood=false) — M1/M2 only")
 
     ensure_hf_auth()
 
@@ -133,53 +141,55 @@ def main():
         n_trunc = sum(1 for l in lines if l["truncated"])
         print(f"  -> {id_path} ({len(lines)} responses, {n_trunc} truncated)")
 
-    # --- Pass 2: OOD turn 1 -------------------------------------------------------
-    if ood_t1_path.exists() and not args.force:
-        print(f"Pass 2 output exists ({ood_t1_path}) — reusing.")
-        turn1_lines = load_jsonl(ood_t1_path)
-    else:
-        metas, prompt_strs, seeds = [], [], []
-        for rec in ood_index:
-            templated = build_prompt(tokenizer, rec["turn1_prompt"], enable_thinking)
-            for s in range(n_samples):
-                metas.append((rec, s))
-                prompt_strs.append(templated)
-                seeds.append(ID_TURN_SEED_BASE + s)
-        print(f"Pass 2 (OOD turn 1): {len(prompt_strs)} requests")
-        results = generate_batch(llm, prompt_strs, inf_cfg, seeds)
-        turn1_lines = [{"question_id": rec["question_id"], "sample_idx": s, **r}
-                       for (rec, s), r in zip(metas, results)]
-        write_jsonl(ood_t1_path, turn1_lines)
-        print(f"  -> {ood_t1_path} ({len(turn1_lines)} responses)")
+    # --- Passes 2 & 3: OOD (M3) — only when enabled ------------------------------
+    if run_ood:
+        # --- Pass 2: OOD turn 1 --------------------------------------------------
+        if ood_t1_path.exists() and not args.force:
+            print(f"Pass 2 output exists ({ood_t1_path}) — reusing.")
+            turn1_lines = load_jsonl(ood_t1_path)
+        else:
+            metas, prompt_strs, seeds = [], [], []
+            for rec in ood_index:
+                templated = build_prompt(tokenizer, rec["turn1_prompt"], enable_thinking)
+                for s in range(n_samples):
+                    metas.append((rec, s))
+                    prompt_strs.append(templated)
+                    seeds.append(ID_TURN_SEED_BASE + s)
+            print(f"Pass 2 (OOD turn 1): {len(prompt_strs)} requests")
+            results = generate_batch(llm, prompt_strs, inf_cfg, seeds)
+            turn1_lines = [{"question_id": rec["question_id"], "sample_idx": s, **r}
+                           for (rec, s), r in zip(metas, results)]
+            write_jsonl(ood_t1_path, turn1_lines)
+            print(f"  -> {ood_t1_path} ({len(turn1_lines)} responses)")
 
-    # --- Pass 3: OOD turn 2 (challenge appended to EVERY turn-1 sample) -----------
-    if ood_path.exists() and not args.force:
-        print(f"Pass 3 output exists ({ood_path}) — skipping.")
-    else:
-        turn1_prompt_of = {rec["question_id"]: rec["turn1_prompt"] for rec in ood_index}
-        challenge_msg = f"{a_cfg['challenge_text']}\n\n{ANSWER_FORMAT_INSTRUCTION}"
-        metas, prompt_strs, seeds = [], [], []
-        for t1 in turn1_lines:
-            templated = build_challenge_prompt(
-                tokenizer, turn1_prompt_of[t1["question_id"]], t1["answer"],
-                challenge_msg, enable_thinking)
-            metas.append(t1)
-            prompt_strs.append(templated)
-            seeds.append(CHALLENGE_SEED_BASE + t1["sample_idx"])
-        print(f"Pass 3 (OOD turn 2): {len(prompt_strs)} requests")
-        results = generate_batch(llm, prompt_strs, inf_cfg, seeds)
-        lines = []
-        for t1, r in zip(metas, results):
-            lines.append({
-                "question_id": t1["question_id"],
-                "sample_idx": t1["sample_idx"],
-                **{f"turn1_{k}": t1[k] for k in
-                   ("raw_output", "thinking", "answer", "token_count", "truncated", "seed")},
-                **{f"turn2_{k}": r[k] for k in
-                   ("raw_output", "thinking", "answer", "token_count", "truncated", "seed")},
-            })
-        write_jsonl(ood_path, lines)
-        print(f"  -> {ood_path} ({len(lines)} two-turn records)")
+        # --- Pass 3: OOD turn 2 (challenge appended to EVERY turn-1 sample) ------
+        if ood_path.exists() and not args.force:
+            print(f"Pass 3 output exists ({ood_path}) — skipping.")
+        else:
+            turn1_prompt_of = {rec["question_id"]: rec["turn1_prompt"] for rec in ood_index}
+            challenge_msg = f"{a_cfg['challenge_text']}\n\n{ANSWER_FORMAT_INSTRUCTION}"
+            metas, prompt_strs, seeds = [], [], []
+            for t1 in turn1_lines:
+                templated = build_challenge_prompt(
+                    tokenizer, turn1_prompt_of[t1["question_id"]], t1["answer"],
+                    challenge_msg, enable_thinking)
+                metas.append(t1)
+                prompt_strs.append(templated)
+                seeds.append(CHALLENGE_SEED_BASE + t1["sample_idx"])
+            print(f"Pass 3 (OOD turn 2): {len(prompt_strs)} requests")
+            results = generate_batch(llm, prompt_strs, inf_cfg, seeds)
+            lines = []
+            for t1, r in zip(metas, results):
+                lines.append({
+                    "question_id": t1["question_id"],
+                    "sample_idx": t1["sample_idx"],
+                    **{f"turn1_{k}": t1[k] for k in
+                       ("raw_output", "thinking", "answer", "token_count", "truncated", "seed")},
+                    **{f"turn2_{k}": r[k] for k in
+                       ("raw_output", "thinking", "answer", "token_count", "truncated", "seed")},
+                })
+            write_jsonl(ood_path, lines)
+            print(f"  -> {ood_path} ({len(lines)} two-turn records)")
 
     print(f"\nInference complete for {model_name}. Next (no GPU needed): "
           f"bash anti-sycophancy-eval/run_antisyc_results.sh {args.model}")

@@ -93,7 +93,9 @@ def main():
     root = Path(__file__).resolve().parents[2]
     with open(root / args.config) as f:
         config = yaml.safe_load(f)
-    grader_cfg = config["anti_sycophancy"]["grader"]
+    a_cfg = config["anti_sycophancy"]
+    grader_cfg = a_cfg["grader"]
+    run_ood = a_cfg.get("run_ood", False)   # M3 toggle — default off
 
     model_name = model_dir_name(args.model)
     paths = resolve_paths(root, config, model_name)
@@ -103,16 +105,20 @@ def main():
 
     id_resp_path = resp_dir / "id_responses.jsonl"
     ood_resp_path = resp_dir / "ood_responses.jsonl"
-    if not id_resp_path.exists() or not ood_resp_path.exists():
-        sys.exit(f"ERROR: responses not found under {resp_dir} — run 02_run_inference.py first.")
+    if not id_resp_path.exists():
+        sys.exit(f"ERROR: {id_resp_path} not found — run 02_run_inference.py first.")
+    if run_ood and not ood_resp_path.exists():
+        sys.exit(f"ERROR: {ood_resp_path} not found (M3 enabled) — run 02_run_inference.py first.")
 
     id_index = load_jsonl(paths["eval_id_index"])
-    ood_index = load_jsonl(paths["eval_ood_index"])
     id_responses = load_jsonl(id_resp_path)
-    ood_responses = load_jsonl(ood_resp_path)
+    items = build_items(id_index, id_responses)
 
-    items = (build_items(id_index, id_responses)
-             + build_ood_items(ood_index, ood_responses))
+    ood_responses = []
+    if run_ood:
+        ood_index = load_jsonl(paths["eval_ood_index"])
+        ood_responses = load_jsonl(ood_resp_path)
+        items += build_ood_items(ood_index, ood_responses)
 
     progress_path = grades_dir / "progress.json"
     flat_path = grades_dir / "grades_flat.jsonl"
@@ -201,23 +207,27 @@ def main():
     write_jsonl(grades_dir / "id_grades.jsonl", id_lines)
 
     ood_lines = []
-    for r in ood_responses:
-        t1 = flat[(r["question_id"], "ood_turn1", r["sample_idx"])]
-        t2 = flat[(r["question_id"], "ood_turn2", r["sample_idx"])]
-        ood_lines.append({
-            "question_id": r["question_id"], "sample_idx": r["sample_idx"],
-            "turn1_label": t1["label"], "turn1_extracted": t1["extracted"],
-            "turn1_truncated": t1["truncated"],
-            "turn2_label": t2["label"], "turn2_extracted": t2["extracted"],
-            "turn2_truncated": t2["truncated"],
-        })
-    write_jsonl(grades_dir / "ood_grades.jsonl", ood_lines)
+    if run_ood:
+        for r in ood_responses:
+            t1 = flat[(r["question_id"], "ood_turn1", r["sample_idx"])]
+            t2 = flat[(r["question_id"], "ood_turn2", r["sample_idx"])]
+            ood_lines.append({
+                "question_id": r["question_id"], "sample_idx": r["sample_idx"],
+                "turn1_label": t1["label"], "turn1_extracted": t1["extracted"],
+                "turn1_truncated": t1["truncated"],
+                "turn2_label": t2["label"], "turn2_extracted": t2["extracted"],
+                "turn2_truncated": t2["truncated"],
+            })
+        write_jsonl(grades_dir / "ood_grades.jsonl", ood_lines)
 
     n_unparse = sum(1 for l in flat.values() if l["label"] == "UNPARSEABLE")
     print(f"\nGrading complete for {model_name}: {len(flat)} grades "
           f"({n_unparse} UNPARSEABLE, {n_unparse / max(len(flat), 1):.1%}).")
     print(f"  -> {grades_dir / 'id_grades.jsonl'}  ({len(id_lines)} lines)")
-    print(f"  -> {grades_dir / 'ood_grades.jsonl'} ({len(ood_lines)} lines)")
+    if run_ood:
+        print(f"  -> {grades_dir / 'ood_grades.jsonl'} ({len(ood_lines)} lines)")
+    else:
+        print("  OOD/M3 grading skipped (anti_sycophancy.run_ood=false)")
 
 
 if __name__ == "__main__":

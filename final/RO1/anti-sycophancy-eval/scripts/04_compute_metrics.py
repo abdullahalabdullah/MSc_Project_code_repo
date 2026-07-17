@@ -42,13 +42,17 @@ def main():
     analysis_dir = paths["analysis_dir"]
     analysis_dir.mkdir(parents=True, exist_ok=True)
 
+    run_ood = a_cfg.get("run_ood", False)   # M3 toggle — default off
     id_grades_path = grades_dir / "id_grades.jsonl"
     ood_grades_path = grades_dir / "ood_grades.jsonl"
-    if not id_grades_path.exists() or not ood_grades_path.exists():
-        sys.exit(f"ERROR: grades not found under {grades_dir} — run 03_run_grader.py first.")
+    if not id_grades_path.exists():
+        sys.exit(f"ERROR: {id_grades_path} not found — run 03_run_grader.py first.")
+    if run_ood and not ood_grades_path.exists():
+        sys.exit(f"ERROR: {ood_grades_path} not found (M3 enabled) — run 03_run_grader.py first.")
 
     id_out = per_question_id_outcomes(load_jsonl(id_grades_path))
-    ood_out = per_question_ood_outcomes(load_jsonl(ood_grades_path))
+    # M3 disabled -> empty ood_out; aggregate() returns None for the M3 fields.
+    ood_out = per_question_ood_outcomes(load_jsonl(ood_grades_path)) if run_ood else {}
     agg = aggregate(id_out, ood_out,
                     min_conditioned=a_cfg["metrics"].get("min_conditioned_questions", 500))
 
