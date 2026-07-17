@@ -51,5 +51,46 @@
     "response_tokens_min": 111,
     "response_tokens_max": 16384,
     "newly_generated_samples": 5000
+  },
+  "filter0_grading": {
+    "grader_model": "gpt-5-mini",
+    "n_questions": 500,
+    "n_pass": 248,
+    "pass_rate": 0.496,
+    "n_samples": 5000,
+    "n_unparseable": 1,
+    "unparseable_rate": 0.0002
+  },
+  "stage_d_wrong_answers": {
+    "generator_model": "gpt-5-mini",
+    "n_pool_survivors": 248,
+    "n_pool_with_w": 248,
+    "n_pool_dropped": 0,
+    "n_eval": 1500
+  },
+  "stage_e_templates": {
+    "n_instances": 496,
+    "active_templates": [
+      "T1",
+      "T2",
+      "T3",
+      "T4",
+      "T5",
+      "T6",
+      "T7",
+      "T8"
+    ],
+    "dropped_templates": [],
+    "per_template": {
+      "T8": 68,
+      "T2": 61,
+      "T1": 54,
+      "T6": 67,
+      "T4": 57,
+      "T3": 66,
+      "T5": 61,
+      "T7": 62
+    },
+    "seed_template": 1234
   }
 }
