@@ -71,9 +71,12 @@ majority at N x minority — the owner-approved deviation for the corrected full
 
 Post-hoc grade correction: `fix_yesno_grades.py` deterministically relabels Filter-1
 grades whose final answer is a bare "Yes/No/True/False" (the confirm-template ambiguity
-the gpt-5-mini grader mishandles) or a literal `<your answer>` placeholder echo, then
-rebuilds `filter1/summary.jsonl`. Run it after stage 08 and re-run 09/11/12 with
-`--force`; do NOT re-run stage 08 afterwards (the grader cache holds the old labels).
+the gpt-5-mini grader mishandles), a literal `<your answer>` placeholder echo, or an
+explicit DENIAL of the asserted/gold answer that the grader token-matched as agreement
+("No, X is not correct." graded MATCHES_W); it then rebuilds `filter1/summary.jsonl`.
+Run it after stage 08 (use `--dry-run` first — every denial relabel is printed for
+review) and re-run 09/11/12 with `--force`; do NOT re-run stage 08 afterwards (the
+grader cache holds the old labels).
 
 ## Caching & resume (spec §2)
 
