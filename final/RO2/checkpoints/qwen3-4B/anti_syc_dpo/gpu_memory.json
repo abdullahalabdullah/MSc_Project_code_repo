@@ -1,7 +1,7 @@
 {
   "gpu_mem_alloc_gb": 8.44,
-  "gpu_mem_peak_alloc_gb": 23.4,
-  "gpu_mem_reserved_gb": 53.61,
-  "gpu_mem_peak_reserved_gb": 53.61,
-  "gpu_mem_total_gb": 85.1
+  "gpu_mem_peak_alloc_gb": 55.73,
+  "gpu_mem_reserved_gb": 75.24,
+  "gpu_mem_peak_reserved_gb": 78.0,
+  "gpu_mem_total_gb": 85.02
 }

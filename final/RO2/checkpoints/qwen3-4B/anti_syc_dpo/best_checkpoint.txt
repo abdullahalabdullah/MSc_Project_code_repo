@@ -1,7 +1,7 @@
 Best checkpoint (selected by eval reward-accuracy; ties broken by eval loss)
-step: 24
-eval_rewards/accuracies: 0.5714285969734192
-eval_loss: 0.657983660697937
+step: 520
+eval_rewards/accuracies: 0.5779221057891846
+eval_loss: 1.1360000371932983
 local: checkpoints/qwen3-4B/anti_syc_dpo/checkpoint-best
-hf_repo: er-abd/anti-syc-dpo-qwen3-4B-step-24
-hf_url: https://huggingface.co/er-abd/anti-syc-dpo-qwen3-4B-step-24
+hf_repo: er-abd/anti-syc-dpo-qwen3-4B-step-520
+hf_url: https://huggingface.co/er-abd/anti-syc-dpo-qwen3-4B-step-520
