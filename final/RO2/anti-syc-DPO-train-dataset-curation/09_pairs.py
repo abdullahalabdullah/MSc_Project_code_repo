@@ -5,7 +5,8 @@ uniformly at random within each class (seed 1701, one stream over instances sort
 instance_id). No ranking by any judge/heuristic/length/style, by design (spec §7).
 
 Stage H: pool pairs, downsample the majority direction to exactly 50/50 (seed 2003),
-shuffle (same stream), write pairs/anti_syc_dpo.jsonl. Asserts zero overlap with
+shuffle (same stream), write pairs/anti_syc_dpo.jsonl. DIRECTION_BALANCE=off (env)
+skips the downsample and keeps all pairs at their natural direction ratio. Asserts zero overlap with
 reserved/ (question_id vs Eval set 1; exact question text vs Eval set 2). Full runs
 (X > 500, not PILOT) abort below 3,000 pairs (spec §8 — report to owner, do not lower
 thresholds).
@@ -15,6 +16,7 @@ Output: pairs/anti_syc_dpo.jsonl (spec §9 pair schema, verbatim full_text incl.
 """
 import argparse
 import random
+import re
 
 import config
 import env_setup
@@ -51,6 +53,7 @@ def main():
         "seed_pair": config.SEED_PAIR,
         "seed_balance": config.SEED_BALANCE,
         "min_pairs_full_run": config.MIN_PAIRS_FULL_RUN,
+        "direction_balance": config.DIRECTION_BALANCE,
     }
     if check_stage_cache(STAGE, params, [config.PAIRS_PATH], force=args.force):
         return
@@ -102,13 +105,35 @@ def main():
     print(f"Stage G pairs: {len(pairs)} "
           f"(wrong={len(by_dir['wrong_opinion'])}, right={len(by_dir['right_opinion'])})")
 
-    # ── Stage H: 50/50 direction balance (downsample majority, seed 2003) + shuffle ──
+    # ── Stage H: direction balance + shuffle (seed 2003) ────────────────────────
+    # DIRECTION_BALANCE="50_50" (spec §8 default): downsample the majority to 1:1.
+    # DIRECTION_BALANCE="off": keep ALL selected pairs at their natural ratio.
+    # DIRECTION_BALANCE="N:1" (e.g. "6:1"): keep all minority pairs, cap the majority
+    # at N x minority. The ratio modes are the owner-approved deviation for the
+    # corrected full run (see config.py comment).
     rng_bal = random.Random(config.SEED_BALANCE)
-    n_keep = min(len(by_dir["wrong_opinion"]), len(by_dir["right_opinion"]))
-    balanced = []
-    for direction in ("wrong_opinion", "right_opinion"):
-        group = by_dir[direction]
-        balanced.extend(rng_bal.sample(group, n_keep) if len(group) > n_keep else group)
+    mode = config.DIRECTION_BALANCE
+    if mode == "off":
+        balanced = list(pairs)
+        print("Stage H: DIRECTION_BALANCE=off — keeping all pairs "
+              f"(wrong={len(by_dir['wrong_opinion'])}, right={len(by_dir['right_opinion'])})")
+    else:
+        if mode == "50_50":
+            ratio = 1
+        else:
+            m = re.fullmatch(r"(\d+):1", mode)
+            if not m:
+                raise SystemExit(f"ERROR: DIRECTION_BALANCE must be '50_50', 'off' or 'N:1' (got '{mode}')")
+            ratio = int(m.group(1))
+        n_minority = min(len(by_dir["wrong_opinion"]), len(by_dir["right_opinion"]))
+        n_keep_majority = n_minority * ratio
+        balanced = []
+        for direction in ("wrong_opinion", "right_opinion"):
+            group = by_dir[direction]
+            cap = n_keep_majority if len(group) > n_minority else n_minority
+            balanced.extend(rng_bal.sample(group, cap) if len(group) > cap else group)
+        if ratio != 1:
+            print(f"Stage H: DIRECTION_BALANCE={mode} — majority capped at {n_keep_majority}")
     rng_bal.shuffle(balanced)
 
     # ── Spec §8 assertion: zero overlap with reserved/ ─────────────────────────
@@ -135,6 +160,7 @@ def main():
         "n_pairs_selected": len(pairs),
         "n_pairs_balanced": len(balanced),
         "pre_balance_per_direction": {d: len(v) for d, v in by_dir.items()},
+        "direction_balance": config.DIRECTION_BALANCE,
         "seed_pair": config.SEED_PAIR,
         "seed_balance": config.SEED_BALANCE,
     })

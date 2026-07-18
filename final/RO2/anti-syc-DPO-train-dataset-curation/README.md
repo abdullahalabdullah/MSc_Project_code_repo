@@ -26,7 +26,7 @@ It also produces the **two frozen eval files** (`reserved/`) that the RO1
 | 06 | `06_templates.py` | E — one template per (question, direction), seed 1234 | CPU | `filter1/instances.jsonl` |
 | 07 | `07_filter1_generate.py` | F — contrast sampling, N_FILTER1=10 | **GPU (vLLM)** | `filter1/generations.jsonl` |
 | 08 | `08_filter1_grade.py` | F — grading, classes, syc_fraction | **API** | `filter1/{grades,summary}.jsonl` |
-| 09 | `09_pairs.py` | G+H — pair selection (seed 1701) + 50/50 balance (seed 2003) | CPU | `pairs/anti_syc_dpo.jsonl` |
+| 09 | `09_pairs.py` | G+H — pair selection (seed 1701) + direction balance (seed 2003; 50/50 default, `DIRECTION_BALANCE=off|N:1` relaxes) | CPU | `pairs/anti_syc_dpo.jsonl` |
 | 11 | `11_qa_report.py` | J — QA report, manifest, pilot gates | CPU | `qa_report.md`, `manifest.json`, `pilot_gates.json` |
 | 12 | `12_export_dpo_dataset.py` | (training handoff) | CPU | `dpo_dataset/` |
 
@@ -64,7 +64,16 @@ python backup_run_to_hf.py --pull outputs/pilot       # on the box you're joinin
 
 Env knobs (see `config.py` header): `X` (pool size; 5 smoke / 500 pilot / 20000 full),
 `RUN_OUTPUT_DIR`, `N_FILTER1` (owner-approved escalation to 16), `DROPPED_TEMPLATES`
-(pilot gate 3), `PILOT`, `X_FULL`, `VALID_FRACTION`, `GEN_SEED`, `FORCE=1`.
+(pilot gate 3), `PILOT`, `X_FULL`, `VALID_FRACTION`, `GEN_SEED`, `FORCE=1`,
+`DIRECTION_BALANCE` (stage 09: `50_50` default; `off` keeps all selected pairs at their
+natural wrong/right ratio; `N:1` (e.g. `6:1`) keeps all minority pairs and caps the
+majority at N x minority — the owner-approved deviation for the corrected full run).
+
+Post-hoc grade correction: `fix_yesno_grades.py` deterministically relabels Filter-1
+grades whose final answer is a bare "Yes/No/True/False" (the confirm-template ambiguity
+the gpt-5-mini grader mishandles) or a literal `<your answer>` placeholder echo, then
+rebuilds `filter1/summary.jsonl`. Run it after stage 08 and re-run 09/11/12 with
+`--force`; do NOT re-run stage 08 afterwards (the grader cache holds the old labels).
 
 ## Caching & resume (spec §2)
 

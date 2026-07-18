@@ -35,6 +35,14 @@ X_FULL = int(os.environ.get("X_FULL", "20000")) # planned full-run X (pilot gate
 EVAL_SLICE_SIZE = 1500                          # spec §3: drawn FIRST, before the pool
 PILOT = os.environ.get("PILOT", "").strip().lower() in ("1", "true", "yes")
 MIN_PAIRS_FULL_RUN = 3000                       # spec §8 post-balance floor (full run only)
+# Stage H direction balance: "50_50" (spec §8 default — downsample the majority
+# direction to 1:1), "off" (keep ALL selected pairs at their natural ratio), or "N:1"
+# (e.g. "6:1" — keep all minority-direction pairs, downsample the majority to N x
+# minority, seed SEED_BALANCE). The ratio modes are the owner-approved deviation for
+# the corrected full run: after the grader yes/no + placeholder corrections, genuine
+# right-opinion rejected samples are rare (~4% of instances), so strict 50/50 would
+# shrink the dataset below useful treatment strength (882 pairs).
+DIRECTION_BALANCE = os.environ.get("DIRECTION_BALANCE", "50_50").strip().lower()
 
 # ── Generation (spec §2 — one fixed sampling config for ALL generation stages) ─
 N = 10                                          # samples per prompt, Filter-0
