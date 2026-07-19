@@ -124,10 +124,10 @@ labels each response for hint-acknowledgement (Z).
 | 6 | `06_export_excel.py` | inference + monitor → `…/monitorability-results/{model}/{ds}/{hint}/qualitative_export.xlsx` |
 | 8 | `08_cot_token_analysis.py` | inference (all ds) → `…/monitorability-results/{model}/{ds}/{hint}/cot_token_stats.json` |
 | 9 | `09_generate_reports.py` | 04 + 08's JSON/CSV artifacts → all `.md` reports (see **Reports**) |
-| 10 | `10_length_bucket_gmean2.py` | inference + monitor (two hard-coded models, all ds/hint) → stdout table (see **Length-bucketed g-mean² comparison**) |
-| 11 | `11_length_cumulative_gmean2.py` | inference + monitor (two hard-coded models, all ds/hint) → stdout cumulative g-mean²@≤length table (see **Length-bucketed g-mean² comparison**) |
-| 12 | `12_length_standardized_gmean2.py` | inference + monitor (two hard-coded models, all ds/hint) → stdout length-standardized g-mean² + bootstrap-CI gap decomposition (see **Length-bucketed g-mean² comparison**) |
-| 13 | `13_length_standardized_withinslice_gmean2.py` | inference + monitor (two hard-coded models, all ds/hint) → stdout **within-slice** length-standardized g-mean² (length + dataset/hint held fixed) + bootstrap-CI gap decomposition (see **Length-bucketed g-mean² comparison**) |
+| 10 | `10_length_bucket_gmean2.py` | inference + monitor (two models — env-overridable via `LC_BASE_MODEL`/`LC_TRAINED_MODEL`, all ds/hint) → stdout table (see **Length-bucketed g-mean² comparison**) |
+| 11 | `11_length_cumulative_gmean2.py` | inference + monitor (two models — env-overridable via `LC_BASE_MODEL`/`LC_TRAINED_MODEL`, all ds/hint) → stdout cumulative g-mean²@≤length table (see **Length-bucketed g-mean² comparison**) |
+| 12 | `12_length_standardized_gmean2.py` | inference + monitor (two models — env-overridable via `LC_BASE_MODEL`/`LC_TRAINED_MODEL`, all ds/hint) → stdout length-standardized g-mean² + bootstrap-CI gap decomposition (see **Length-bucketed g-mean² comparison**) |
+| 13 | `13_length_standardized_withinslice_gmean2.py` | inference + monitor (two models — env-overridable via `LC_BASE_MODEL`/`LC_TRAINED_MODEL`, all ds/hint) → stdout **within-slice** length-standardized g-mean² (length + dataset/hint held fixed) + bootstrap-CI gap decomposition (see **Length-bucketed g-mean² comparison**) |
 
 Steps 2–6 and 8 take `--model` (an HF model ID or local model dir; `{model}` in the
 paths is its folder-safe name, `/` → `_`), plus a `--dataset` **and** a `--hint-type`
@@ -423,8 +423,12 @@ by `mean_cot_tokens_hinted` (mean token length of the 8 hinted responses), and
 prints a side-by-side table: `bucket (tok) | BASE n | BASE g² | HARM n | HARM g²`,
 plus an overall line (n, median length, g² per model). Within a bucket both
 models sit at ~the same length, so a within-bucket difference is closer to a
-pure training effect. The two compared models are hard-coded at the top
-(`BASE_MODEL`, `HARM_MODEL`); bucket width is the sole CLI arg (default 500 tok):
+pure training effect. The two compared models default to base vs
+harmless-DPO-735 and can be overridden with the `LC_BASE_MODEL` /
+`LC_TRAINED_MODEL` env vars (same for scripts 11–13; values are the model dir
+names under `outputs-and-results/`, e.g.
+`LC_TRAINED_MODEL=er-abd_anti-syc-dpo-qwen3-4B-step-520`); bucket width is the
+sole CLI arg (default 500 tok):
 
     python monitorability-eval/scripts/10_length_bucket_gmean2.py [BUCKET_WIDTH]
 

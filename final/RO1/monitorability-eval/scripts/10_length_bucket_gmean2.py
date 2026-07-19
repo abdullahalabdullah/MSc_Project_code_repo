@@ -25,6 +25,7 @@ Usage
 Run from the RO1 project root (the folder containing outputs-and-results/).
 """
 
+import os
 import sys
 from pathlib import Path
 from collections import defaultdict
@@ -37,8 +38,10 @@ sys.path.insert(0, str(_SRC))
 from gmean2_metrics import compute_gmean2, load_jsonl, resolve_jsonl  # noqa: E402
 
 # --- config -----------------------------------------------------------------
-BASE_MODEL = "Qwen_Qwen3-4B"
-HARM_MODEL = "er-abd_harmless-dpo-qwen3-4B-step-735"
+# Override the model pair via env vars (dir names under outputs-and-results/):
+#   LC_BASE_MODEL / LC_TRAINED_MODEL
+BASE_MODEL = os.environ.get("LC_BASE_MODEL", "Qwen_Qwen3-4B")
+HARM_MODEL = os.environ.get("LC_TRAINED_MODEL", "er-abd_harmless-dpo-qwen3-4B-step-735")
 
 ROOT = Path(__file__).resolve().parents[2]  # RO1/
 OUT = ROOT / "outputs-and-results"
