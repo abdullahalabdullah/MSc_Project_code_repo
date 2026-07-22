@@ -1,0 +1,131 @@
+% Requires: \usepackage{booktabs} \usepackage{makecell} \usepackage{graphicx}
+
+\begin{table}[htbp]
+\centering
+\caption{Monitorability of the base model (\texttt{Qwen/Qwen3-4B}), pooled over hint types, per dataset. \textsuperscript{a}\,Paired-bootstrap 95\% CI: paired cluster bootstrap over instances, one shared resample reused across the three hint types (professor, grader hacking, unethical; 10{,}000 resamples, seed 88); the point estimate is the unweighted mean of the three per-hint-type estimates. \textsuperscript{b}\,Plain percentile-bootstrap 95\% CI: the unhinted arm is a single condition shared verbatim by all hint types, so no pooling applies. $V$ = level-1-passing instances (TE $>$ 0 and $p_1 > 0$); $n = 200$ instances per dataset, 8 samples per arm.}
+\label{tab:monitorability-base}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lcccccccc}
+\toprule
+ & \multicolumn{2}{c}{Academic QA} & \multicolumn{2}{c}{Applied Reasoning} & \multicolumn{1}{c}{Expert Medical} & \multicolumn{1}{c}{Legal} & \multicolumn{1}{c}{Coding} & \multicolumn{1}{c}{Safety \& Security} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-6} \cmidrule(lr){7-7} \cmidrule(lr){8-8} \cmidrule(lr){9-9}
+Metric & \texttt{mmlu\_pro} & \texttt{gpqa\_diamond} & \texttt{lsat\_ar} & \texttt{lsat\_lr} & \texttt{medxpertqa} & \texttt{lexam} & \texttt{codemmlu} & \texttt{wmdp} \\
+\midrule
+$g$-mean$^2$ (mean of 3 hints)\textsuperscript{a} & \makecell{0.800 \\ \scriptsize[0.757, 0.843]} & \makecell{0.647 \\ \scriptsize[0.611, 0.684]} & \makecell{0.776 \\ \scriptsize[0.729, 0.821]} & \makecell{0.529 \\ \scriptsize[0.456, 0.604]} & \makecell{0.700 \\ \scriptsize[0.656, 0.743]} & \makecell{0.795 \\ \scriptsize[0.756, 0.832]} & \makecell{0.756 \\ \scriptsize[0.705, 0.807]} & \makecell{0.738 \\ \scriptsize[0.696, 0.780]} \\
+\addlinespace
+Mean TE on $V$ (mean of 3 hints)\textsuperscript{a} & \makecell{0.596 \\ \scriptsize[0.553, 0.639]} & \makecell{0.599 \\ \scriptsize[0.558, 0.640]} & \makecell{0.442 \\ \scriptsize[0.403, 0.480]} & \makecell{0.449 \\ \scriptsize[0.395, 0.505]} & \makecell{0.633 \\ \scriptsize[0.593, 0.673]} & \makecell{0.555 \\ \scriptsize[0.519, 0.590]} & \makecell{0.496 \\ \scriptsize[0.452, 0.541]} & \makecell{0.603 \\ \scriptsize[0.558, 0.649]} \\
+\addlinespace
+Mean $R_{\mathrm{effect}}$ on $V$ (mean of 3 hints)\textsuperscript{a} & \makecell{0.937 \\ \scriptsize[0.897, 0.971]} & \makecell{0.826 \\ \scriptsize[0.783, 0.866]} & \makecell{0.901 \\ \scriptsize[0.863, 0.936]} & \makecell{0.879 \\ \scriptsize[0.822, 0.932]} & \makecell{0.905 \\ \scriptsize[0.865, 0.941]} & \makecell{0.861 \\ \scriptsize[0.819, 0.899]} & \makecell{0.907 \\ \scriptsize[0.856, 0.952]} & \makecell{0.906 \\ \scriptsize[0.862, 0.946]} \\
+\addlinespace
+\% with TE $>$ 0 (mean of 3 hints) & 59\% & 70\% & 54\% & 36\% & 67\% & 69\% & 48\% & 58\% \\
+\addlinespace
+Hinted accuracy (mean of 3 hints)\textsuperscript{a} & \makecell{0.456 \\ \scriptsize[0.412, 0.499]} & \makecell{0.300 \\ \scriptsize[0.253, 0.347]} & \makecell{0.614 \\ \scriptsize[0.568, 0.659]} & \makecell{0.687 \\ \scriptsize[0.639, 0.735]} & \makecell{0.064 \\ \scriptsize[0.041, 0.088]} & \makecell{0.325 \\ \scriptsize[0.283, 0.367]} & \makecell{0.555 \\ \scriptsize[0.505, 0.603]} & \makecell{0.414 \\ \scriptsize[0.364, 0.465]} \\
+\addlinespace
+Unhinted accuracy (single arm)\textsuperscript{b} & \makecell{0.719 \\ \scriptsize[0.663, 0.772]} & \makecell{0.512 \\ \scriptsize[0.455, 0.567]} & \makecell{0.782 \\ \scriptsize[0.735, 0.825]} & \makecell{0.834 \\ \scriptsize[0.789, 0.877]} & \makecell{0.127 \\ \scriptsize[0.087, 0.169]} & \makecell{0.585 \\ \scriptsize[0.529, 0.641]} & \makecell{0.763 \\ \scriptsize[0.709, 0.816]} & \makecell{0.679 \\ \scriptsize[0.622, 0.736]} \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{Monitorability of the harmlessness DPO model (\texttt{er-abd/harmless-dpo-qwen3-4B-step-735}), pooled over hint types, per dataset. \textsuperscript{a}\,Paired-bootstrap 95\% CI: paired cluster bootstrap over instances, one shared resample reused across the three hint types (professor, grader hacking, unethical; 10{,}000 resamples, seed 88); the point estimate is the unweighted mean of the three per-hint-type estimates. \textsuperscript{b}\,Plain percentile-bootstrap 95\% CI: the unhinted arm is a single condition shared verbatim by all hint types, so no pooling applies. $V$ = level-1-passing instances (TE $>$ 0 and $p_1 > 0$); $n = 200$ instances per dataset, 8 samples per arm.}
+\label{tab:monitorability-harmless-dpo}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lcccccccc}
+\toprule
+ & \multicolumn{2}{c}{Academic QA} & \multicolumn{2}{c}{Applied Reasoning} & \multicolumn{1}{c}{Expert Medical} & \multicolumn{1}{c}{Legal} & \multicolumn{1}{c}{Coding} & \multicolumn{1}{c}{Safety \& Security} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-6} \cmidrule(lr){7-7} \cmidrule(lr){8-8} \cmidrule(lr){9-9}
+Metric & \texttt{mmlu\_pro} & \texttt{gpqa\_diamond} & \texttt{lsat\_ar} & \texttt{lsat\_lr} & \texttt{medxpertqa} & \texttt{lexam} & \texttt{codemmlu} & \texttt{wmdp} \\
+\midrule
+$g$-mean$^2$ (mean of 3 hints)\textsuperscript{a} & \makecell{0.843 \\ \scriptsize[0.801, 0.882]} & \makecell{0.684 \\ \scriptsize[0.646, 0.721]} & \makecell{0.796 \\ \scriptsize[0.749, 0.841]} & \makecell{0.550 \\ \scriptsize[0.474, 0.629]} & \makecell{0.746 \\ \scriptsize[0.700, 0.789]} & \makecell{0.855 \\ \scriptsize[0.822, 0.886]} & \makecell{0.722 \\ \scriptsize[0.662, 0.782]} & \makecell{0.799 \\ \scriptsize[0.759, 0.838]} \\
+\addlinespace
+Mean TE on $V$ (mean of 3 hints)\textsuperscript{a} & \makecell{0.590 \\ \scriptsize[0.545, 0.633]} & \makecell{0.605 \\ \scriptsize[0.560, 0.648]} & \makecell{0.412 \\ \scriptsize[0.373, 0.452]} & \makecell{0.453 \\ \scriptsize[0.397, 0.512]} & \makecell{0.664 \\ \scriptsize[0.627, 0.701]} & \makecell{0.519 \\ \scriptsize[0.483, 0.555]} & \makecell{0.464 \\ \scriptsize[0.417, 0.512]} & \makecell{0.610 \\ \scriptsize[0.563, 0.657]} \\
+\addlinespace
+Mean $R_{\mathrm{effect}}$ on $V$ (mean of 3 hints)\textsuperscript{a} & \makecell{0.954 \\ \scriptsize[0.924, 0.979]} & \makecell{0.845 \\ \scriptsize[0.803, 0.883]} & \makecell{0.914 \\ \scriptsize[0.877, 0.948]} & \makecell{0.865 \\ \scriptsize[0.797, 0.929]} & \makecell{0.921 \\ \scriptsize[0.885, 0.952]} & \makecell{0.862 \\ \scriptsize[0.816, 0.903]} & \makecell{0.869 \\ \scriptsize[0.810, 0.922]} & \makecell{0.903 \\ \scriptsize[0.858, 0.944]} \\
+\addlinespace
+\% with TE $>$ 0 (mean of 3 hints) & 56\% & 67\% & 53\% & 32\% & 67\% & 66\% & 44\% & 56\% \\
+\addlinespace
+Hinted accuracy (mean of 3 hints)\textsuperscript{a} & \makecell{0.490 \\ \scriptsize[0.441, 0.538]} & \makecell{0.305 \\ \scriptsize[0.256, 0.354]} & \makecell{0.652 \\ \scriptsize[0.608, 0.695]} & \makecell{0.710 \\ \scriptsize[0.663, 0.757]} & \makecell{0.066 \\ \scriptsize[0.043, 0.092]} & \makecell{0.338 \\ \scriptsize[0.293, 0.383]} & \makecell{0.587 \\ \scriptsize[0.535, 0.638]} & \makecell{0.421 \\ \scriptsize[0.368, 0.474]} \\
+\addlinespace
+Unhinted accuracy (single arm)\textsuperscript{b} & \makecell{0.735 \\ \scriptsize[0.679, 0.789]} & \makecell{0.507 \\ \scriptsize[0.447, 0.565]} & \makecell{0.814 \\ \scriptsize[0.770, 0.856]} & \makecell{0.847 \\ \scriptsize[0.803, 0.887]} & \makecell{0.135 \\ \scriptsize[0.096, 0.177]} & \makecell{0.567 \\ \scriptsize[0.510, 0.624]} & \makecell{0.756 \\ \scriptsize[0.702, 0.808]} & \makecell{0.673 \\ \scriptsize[0.614, 0.731]} \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{Monitorability of the anti-sycophancy DPO model (\texttt{er-abd/anti-syc-dpo-qwen3-4B-step-520}), pooled over hint types, per dataset. \textsuperscript{a}\,Paired-bootstrap 95\% CI: paired cluster bootstrap over instances, one shared resample reused across the three hint types (professor, grader hacking, unethical; 10{,}000 resamples, seed 88); the point estimate is the unweighted mean of the three per-hint-type estimates. \textsuperscript{b}\,Plain percentile-bootstrap 95\% CI: the unhinted arm is a single condition shared verbatim by all hint types, so no pooling applies. $V$ = level-1-passing instances (TE $>$ 0 and $p_1 > 0$); $n = 200$ instances per dataset, 8 samples per arm.}
+\label{tab:monitorability-antisyc-dpo}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lcccccccc}
+\toprule
+ & \multicolumn{2}{c}{Academic QA} & \multicolumn{2}{c}{Applied Reasoning} & \multicolumn{1}{c}{Expert Medical} & \multicolumn{1}{c}{Legal} & \multicolumn{1}{c}{Coding} & \multicolumn{1}{c}{Safety \& Security} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-6} \cmidrule(lr){7-7} \cmidrule(lr){8-8} \cmidrule(lr){9-9}
+Metric & \texttt{mmlu\_pro} & \texttt{gpqa\_diamond} & \texttt{lsat\_ar} & \texttt{lsat\_lr} & \texttt{medxpertqa} & \texttt{lexam} & \texttt{codemmlu} & \texttt{wmdp} \\
+\midrule
+$g$-mean$^2$ (mean of 3 hints)\textsuperscript{a} & \makecell{0.836 \\ \scriptsize[0.794, 0.875]} & \makecell{0.663 \\ \scriptsize[0.625, 0.699]} & \makecell{0.802 \\ \scriptsize[0.756, 0.847]} & \makecell{0.549 \\ \scriptsize[0.474, 0.628]} & \makecell{0.761 \\ \scriptsize[0.720, 0.803]} & \makecell{0.857 \\ \scriptsize[0.820, 0.892]} & \makecell{0.691 \\ \scriptsize[0.631, 0.750]} & \makecell{0.764 \\ \scriptsize[0.724, 0.806]} \\
+\addlinespace
+Mean TE on $V$ (mean of 3 hints)\textsuperscript{a} & \makecell{0.540 \\ \scriptsize[0.493, 0.587]} & \makecell{0.596 \\ \scriptsize[0.554, 0.637]} & \makecell{0.426 \\ \scriptsize[0.382, 0.471]} & \makecell{0.441 \\ \scriptsize[0.382, 0.504]} & \makecell{0.636 \\ \scriptsize[0.600, 0.672]} & \makecell{0.491 \\ \scriptsize[0.458, 0.525]} & \makecell{0.465 \\ \scriptsize[0.422, 0.507]} & \makecell{0.608 \\ \scriptsize[0.566, 0.651]} \\
+\addlinespace
+Mean $R_{\mathrm{effect}}$ on $V$ (mean of 3 hints)\textsuperscript{a} & \makecell{0.942 \\ \scriptsize[0.905, 0.975]} & \makecell{0.852 \\ \scriptsize[0.811, 0.889]} & \makecell{0.891 \\ \scriptsize[0.847, 0.931]} & \makecell{0.842 \\ \scriptsize[0.771, 0.909]} & \makecell{0.920 \\ \scriptsize[0.888, 0.949]} & \makecell{0.850 \\ \scriptsize[0.807, 0.891]} & \makecell{0.866 \\ \scriptsize[0.814, 0.913]} & \makecell{0.892 \\ \scriptsize[0.848, 0.934]} \\
+\addlinespace
+\% with TE $>$ 0 (mean of 3 hints) & 56\% & 68\% & 47\% & 32\% & 63\% & 63\% & 46\% & 54\% \\
+\addlinespace
+Hinted accuracy (mean of 3 hints)\textsuperscript{a} & \makecell{0.500 \\ \scriptsize[0.453, 0.547]} & \makecell{0.312 \\ \scriptsize[0.265, 0.360]} & \makecell{0.674 \\ \scriptsize[0.627, 0.718]} & \makecell{0.714 \\ \scriptsize[0.667, 0.762]} & \makecell{0.066 \\ \scriptsize[0.043, 0.092]} & \makecell{0.350 \\ \scriptsize[0.304, 0.397]} & \makecell{0.584 \\ \scriptsize[0.531, 0.635]} & \makecell{0.428 \\ \scriptsize[0.378, 0.480]} \\
+\addlinespace
+Unhinted accuracy (single arm)\textsuperscript{b} & \makecell{0.731 \\ \scriptsize[0.675, 0.785]} & \makecell{0.512 \\ \scriptsize[0.453, 0.570]} & \makecell{0.826 \\ \scriptsize[0.784, 0.866]} & \makecell{0.845 \\ \scriptsize[0.800, 0.887]} & \makecell{0.128 \\ \scriptsize[0.089, 0.169]} & \makecell{0.551 \\ \scriptsize[0.493, 0.608]} & \makecell{0.762 \\ \scriptsize[0.709, 0.813]} & \makecell{0.679 \\ \scriptsize[0.623, 0.736]} \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{Base vs.\ harmlessness DPO: change in monitorability after training, per dataset (\texttt{er-abd/harmless-dpo-qwen3-4B-step-735} $-$ \texttt{Qwen/Qwen3-4B}). Each cell is the difference of pooled point estimates (trained $-$ base) with a paired-bootstrap 95\% CI: one instance resample per replicate, shared across both models and all hint types (10{,}000 resamples, seed 88), so the shared-question covariance is propagated; a CI excluding 0 is a paired test at the 5\% level. The \% with TE $>$ 0 row is in percentage points (pp).}
+\label{tab:delta-harmless-dpo}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lcccccccc}
+\toprule
+ & \multicolumn{2}{c}{Academic QA} & \multicolumn{2}{c}{Applied Reasoning} & \multicolumn{1}{c}{Expert Medical} & \multicolumn{1}{c}{Legal} & \multicolumn{1}{c}{Coding} & \multicolumn{1}{c}{Safety \& Security} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-6} \cmidrule(lr){7-7} \cmidrule(lr){8-8} \cmidrule(lr){9-9}
+Metric & \texttt{mmlu\_pro} & \texttt{gpqa\_diamond} & \texttt{lsat\_ar} & \texttt{lsat\_lr} & \texttt{medxpertqa} & \texttt{lexam} & \texttt{codemmlu} & \texttt{wmdp} \\
+\midrule
+$\Delta$ $g$-mean$^2$ (mean of 3 hints) & \makecell{$+0.042$ \\ \scriptsize[$+0.005$, $+0.079$]} & \makecell{$+0.037$ \\ \scriptsize[$+0.001$, $+0.071$]} & \makecell{$+0.020$ \\ \scriptsize[$-0.034$, $+0.076$]} & \makecell{$+0.021$ \\ \scriptsize[$-0.058$, $+0.100$]} & \makecell{$+0.046$ \\ \scriptsize[$+0.012$, $+0.078$]} & \makecell{$+0.060$ \\ \scriptsize[$+0.024$, $+0.096$]} & \makecell{$-0.034$ \\ \scriptsize[$-0.096$, $+0.025$]} & \makecell{$+0.062$ \\ \scriptsize[$+0.021$, $+0.100$]} \\
+\addlinespace
+$\Delta$ Mean TE on $V$ (mean of 3 hints) & \makecell{$-0.006$ \\ \scriptsize[$-0.041$, $+0.030$]} & \makecell{$+0.006$ \\ \scriptsize[$-0.027$, $+0.038$]} & \makecell{$-0.030$ \\ \scriptsize[$-0.064$, $+0.006$]} & \makecell{$+0.004$ \\ \scriptsize[$-0.039$, $+0.049$]} & \makecell{$+0.031$ \\ \scriptsize[$+0.004$, $+0.058$]} & \makecell{$-0.036$ \\ \scriptsize[$-0.066$, $-0.005$]} & \makecell{$-0.032$ \\ \scriptsize[$-0.076$, $+0.015$]} & \makecell{$+0.007$ \\ \scriptsize[$-0.033$, $+0.048$]} \\
+\addlinespace
+$\Delta$ Mean $R_{\mathrm{effect}}$ on $V$ (mean of 3 hints) & \makecell{$+0.017$ \\ \scriptsize[$-0.007$, $+0.046$]} & \makecell{$+0.019$ \\ \scriptsize[$-0.016$, $+0.054$]} & \makecell{$+0.013$ \\ \scriptsize[$-0.025$, $+0.053$]} & \makecell{$-0.014$ \\ \scriptsize[$-0.059$, $+0.030$]} & \makecell{$+0.016$ \\ \scriptsize[$-0.004$, $+0.036$]} & \makecell{$+0.001$ \\ \scriptsize[$-0.037$, $+0.039$]} & \makecell{$-0.038$ \\ \scriptsize[$-0.089$, $+0.014$]} & \makecell{$-0.002$ \\ \scriptsize[$-0.045$, $+0.041$]} \\
+\addlinespace
+$\Delta$ \% with TE $>$ 0 (mean of 3 hints) & \makecell{$-3$ pp \\ \scriptsize[$-6$, $-0$]} & \makecell{$-3$ pp \\ \scriptsize[$-6$, $+1$]} & \makecell{$-1$ pp \\ \scriptsize[$-4$, $+3$]} & \makecell{$-4$ pp \\ \scriptsize[$-7$, $-1$]} & \makecell{$-1$ pp \\ \scriptsize[$-3$, $+2$]} & \makecell{$-3$ pp \\ \scriptsize[$-7$, $+1$]} & \makecell{$-4$ pp \\ \scriptsize[$-7$, $-1$]} & \makecell{$-1$ pp \\ \scriptsize[$-5$, $+2$]} \\
+\addlinespace
+$\Delta$ Hinted accuracy (mean of 3 hints) & \makecell{$+0.035$ \\ \scriptsize[$+0.021$, $+0.048$]} & \makecell{$+0.005$ \\ \scriptsize[$-0.006$, $+0.016$]} & \makecell{$+0.038$ \\ \scriptsize[$+0.024$, $+0.052$]} & \makecell{$+0.023$ \\ \scriptsize[$+0.010$, $+0.036$]} & \makecell{$+0.002$ \\ \scriptsize[$-0.003$, $+0.008$]} & \makecell{$+0.013$ \\ \scriptsize[$-0.001$, $+0.027$]} & \makecell{$+0.033$ \\ \scriptsize[$+0.021$, $+0.045$]} & \makecell{$+0.007$ \\ \scriptsize[$-0.008$, $+0.023$]} \\
+\addlinespace
+$\Delta$ Unhinted accuracy (single arm) & \makecell{$+0.016$ \\ \scriptsize[$-0.001$, $+0.035$]} & \makecell{$-0.005$ \\ \scriptsize[$-0.029$, $+0.019$]} & \makecell{$+0.033$ \\ \scriptsize[$+0.013$, $+0.052$]} & \makecell{$+0.013$ \\ \scriptsize[$-0.005$, $+0.031$]} & \makecell{$+0.008$ \\ \scriptsize[$-0.009$, $+0.025$]} & \makecell{$-0.018$ \\ \scriptsize[$-0.044$, $+0.008$]} & \makecell{$-0.007$ \\ \scriptsize[$-0.021$, $+0.007$]} & \makecell{$-0.006$ \\ \scriptsize[$-0.030$, $+0.016$]} \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{Base vs.\ anti-sycophancy DPO: change in monitorability after training, per dataset (\texttt{er-abd/anti-syc-dpo-qwen3-4B-step-520} $-$ \texttt{Qwen/Qwen3-4B}). Each cell is the difference of pooled point estimates (trained $-$ base) with a paired-bootstrap 95\% CI: one instance resample per replicate, shared across both models and all hint types (10{,}000 resamples, seed 88), so the shared-question covariance is propagated; a CI excluding 0 is a paired test at the 5\% level. The \% with TE $>$ 0 row is in percentage points (pp).}
+\label{tab:delta-antisyc-dpo}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lcccccccc}
+\toprule
+ & \multicolumn{2}{c}{Academic QA} & \multicolumn{2}{c}{Applied Reasoning} & \multicolumn{1}{c}{Expert Medical} & \multicolumn{1}{c}{Legal} & \multicolumn{1}{c}{Coding} & \multicolumn{1}{c}{Safety \& Security} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-6} \cmidrule(lr){7-7} \cmidrule(lr){8-8} \cmidrule(lr){9-9}
+Metric & \texttt{mmlu\_pro} & \texttt{gpqa\_diamond} & \texttt{lsat\_ar} & \texttt{lsat\_lr} & \texttt{medxpertqa} & \texttt{lexam} & \texttt{codemmlu} & \texttt{wmdp} \\
+\midrule
+$\Delta$ $g$-mean$^2$ (mean of 3 hints) & \makecell{$+0.036$ \\ \scriptsize[$-0.004$, $+0.076$]} & \makecell{$+0.015$ \\ \scriptsize[$-0.020$, $+0.049$]} & \makecell{$+0.026$ \\ \scriptsize[$-0.029$, $+0.081$]} & \makecell{$+0.020$ \\ \scriptsize[$-0.056$, $+0.094$]} & \makecell{$+0.061$ \\ \scriptsize[$+0.023$, $+0.098$]} & \makecell{$+0.062$ \\ \scriptsize[$+0.024$, $+0.101$]} & \makecell{$-0.064$ \\ \scriptsize[$-0.116$, $-0.016$]} & \makecell{$+0.026$ \\ \scriptsize[$-0.011$, $+0.063$]} \\
+\addlinespace
+$\Delta$ Mean TE on $V$ (mean of 3 hints) & \makecell{$-0.056$ \\ \scriptsize[$-0.096$, $-0.017$]} & \makecell{$-0.003$ \\ \scriptsize[$-0.034$, $+0.027$]} & \makecell{$-0.016$ \\ \scriptsize[$-0.049$, $+0.019$]} & \makecell{$-0.008$ \\ \scriptsize[$-0.051$, $+0.036$]} & \makecell{$+0.003$ \\ \scriptsize[$-0.027$, $+0.034$]} & \makecell{$-0.063$ \\ \scriptsize[$-0.097$, $-0.031$]} & \makecell{$-0.031$ \\ \scriptsize[$-0.066$, $+0.003$]} & \makecell{$+0.005$ \\ \scriptsize[$-0.033$, $+0.043$]} \\
+\addlinespace
+$\Delta$ Mean $R_{\mathrm{effect}}$ on $V$ (mean of 3 hints) & \makecell{$+0.006$ \\ \scriptsize[$-0.018$, $+0.032$]} & \makecell{$+0.026$ \\ \scriptsize[$-0.008$, $+0.061$]} & \makecell{$-0.010$ \\ \scriptsize[$-0.051$, $+0.029$]} & \makecell{$-0.037$ \\ \scriptsize[$-0.089$, $+0.010$]} & \makecell{$+0.015$ \\ \scriptsize[$-0.014$, $+0.045$]} & \makecell{$-0.011$ \\ \scriptsize[$-0.045$, $+0.025$]} & \makecell{$-0.041$ \\ \scriptsize[$-0.090$, $+0.003$]} & \makecell{$-0.013$ \\ \scriptsize[$-0.055$, $+0.029$]} \\
+\addlinespace
+$\Delta$ \% with TE $>$ 0 (mean of 3 hints) & \makecell{$-3$ pp \\ \scriptsize[$-5$, $+0$]} & \makecell{$-2$ pp \\ \scriptsize[$-5$, $+2$]} & \makecell{$-7$ pp \\ \scriptsize[$-10$, $-3$]} & \makecell{$-4$ pp \\ \scriptsize[$-7$, $-1$]} & \makecell{$-4$ pp \\ \scriptsize[$-7$, $-1$]} & \makecell{$-6$ pp \\ \scriptsize[$-10$, $-1$]} & \makecell{$-2$ pp \\ \scriptsize[$-5$, $+1$]} & \makecell{$-3$ pp \\ \scriptsize[$-7$, $+0$]} \\
+\addlinespace
+$\Delta$ Hinted accuracy (mean of 3 hints) & \makecell{$+0.045$ \\ \scriptsize[$+0.030$, $+0.060$]} & \makecell{$+0.012$ \\ \scriptsize[$+0.002$, $+0.023$]} & \makecell{$+0.060$ \\ \scriptsize[$+0.046$, $+0.073$]} & \makecell{$+0.027$ \\ \scriptsize[$+0.015$, $+0.039$]} & \makecell{$+0.002$ \\ \scriptsize[$-0.003$, $+0.008$]} & \makecell{$+0.025$ \\ \scriptsize[$+0.008$, $+0.042$]} & \makecell{$+0.029$ \\ \scriptsize[$+0.017$, $+0.041$]} & \makecell{$+0.014$ \\ \scriptsize[$-0.002$, $+0.030$]} \\
+\addlinespace
+$\Delta$ Unhinted accuracy (single arm) & \makecell{$+0.012$ \\ \scriptsize[$-0.005$, $+0.030$]} & \makecell{$0.000$ \\ \scriptsize[$-0.025$, $+0.025$]} & \makecell{$+0.045$ \\ \scriptsize[$+0.025$, $+0.066$]} & \makecell{$+0.010$ \\ \scriptsize[$-0.004$, $+0.026$]} & \makecell{$+0.001$ \\ \scriptsize[$-0.012$, $+0.014$]} & \makecell{$-0.034$ \\ \scriptsize[$-0.067$, $-0.003$]} & \makecell{$-0.001$ \\ \scriptsize[$-0.017$, $+0.015$]} & \makecell{$0.000$ \\ \scriptsize[$-0.020$, $+0.019$]} \\
+\bottomrule
+\end{tabular}}
+\end{table}

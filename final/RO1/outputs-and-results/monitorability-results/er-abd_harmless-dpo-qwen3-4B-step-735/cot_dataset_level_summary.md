@@ -6,20 +6,20 @@
 
 `token_count` is the full completion (thinking trace + final answer). Condition tables use valid runs only (not truncated, answer parsed), so followed + not-followed partition hinted exactly; bucket tables use every response. Use the truncation rate to set `max_new_tokens`.
 
-## mmlu_pro (pooled over 2 hint types)
+## mmlu_pro (pooled over 3 hint types)
 
 | Condition | Mean | Std | Median | Min | Max | Runs | Instances |
 |-----------|------|-----|--------|-----|-----|------|-----------|
-| Hinted (X=1, all) | 3152.9 | 3104.8 | 1976 | 322 | 16285 | 3190 | 400 |
-| Unhinted (X=0, all) | 2411.6 | 2680.7 | 1350 | 268 | 16173 | 3180 | 400 |
-| Hinted, followed (X=1, Y=1) | 3885.0 | 3650.7 | 2430 | 382 | 16285 | 714 | 156 |
-| Hinted, not followed (X=1, Y=0) | 2941.8 | 2895.2 | 1860 | 322 | 16186 | 2476 | 356 |
+| Hinted (X=1, all) | 3350.9 | 3186.4 | 2115 | 322 | 16332 | 4775 | 600 |
+| Unhinted (X=0, all) | 2411.6 | 2680.6 | 1350 | 268 | 16173 | 4770 | 600 |
+| Hinted, followed (X=1, Y=1) | 3658.1 | 3387.5 | 2244 | 322 | 16285 | 1899 | 347 |
+| Hinted, not followed (X=1, Y=0) | 3148.2 | 3029.9 | 2016 | 322 | 16332 | 2876 | 460 |
 
 Responses per token-length bucket (every response, both arms; truncated responses count in the top bucket):
 
 | 0-512 | 512-1024 | 1024-2048 | 2048-4096 | 4096-8192 | 8192-16384 | 16384-32768 | 32768+ | Total | Truncated (rate) | Max |
 |---|---|---|---|---|---|---|---|---|---|---|
-| 227 | 1836 | 1660 | 1361 | 791 | 495 | 0 | 30 | 6400 | 30 (0.5%) | 16384 |
+| 314 | 2615 | 2508 | 2044 | 1281 | 783 | 0 | 55 | 9600 | 55 (0.6%) | 16384 |
 
 ## gpqa_diamond (pooled over 3 hint types)
 
@@ -130,7 +130,7 @@ Responses per token-length bucket (every response, both arms; truncated response
 
 | Dataset | Hinted (mean (std) · median) | Unhinted (mean (std) · median) | Hinted & followed (mean (std) · median) | Hinted & not followed (mean (std) · median) | Gap (Hinted mean − Unhinted mean) |
 |---|---|---|---|---|---|
-| mmlu_pro | 3152.9 (3104.8) · 1976 | 2411.6 (2680.7) · 1350 | 3885.0 (3650.7) · 2430 | 2941.8 (2895.2) · 1860 | 741.3 |
+| mmlu_pro | 3350.9 (3186.4) · 2115 | 2411.6 (2680.6) · 1350 | 3658.1 (3387.5) · 2244 | 3148.2 (3029.9) · 2016 | 939.4 |
 | gpqa_diamond | 6013.4 (3305.5) · 5713 | 5518.1 (3242.5) · 5203 | 6245.1 (3223.4) · 5830 | 5708.6 (3387.1) · 5425 | 495.3 |
 | wmdp | 2085.7 (2609.3) · 1237 | 1861.5 (2548.8) · 1018 | 2264.6 (2673.8) · 1356 | 1923.3 (2539.1) · 1102 | 224.2 |
 | codemmlu | 3308.6 (2912.1) · 2318 | 2693.3 (2812.7) · 1484 | 4376.1 (3004.7) · 3822 | 2787.4 (2718.0) · 1758 | 615.3 |

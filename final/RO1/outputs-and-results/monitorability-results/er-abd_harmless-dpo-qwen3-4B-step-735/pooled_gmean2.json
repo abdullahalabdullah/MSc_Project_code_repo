@@ -1,0 +1,385 @@
+{
+  "model": "er-abd/harmless-dpo-qwen3-4B-step-735",
+  "split": "test",
+  "n_resamples": 10000,
+  "seed": 88,
+  "method": "paired cluster bootstrap over instances; hint types fixed",
+  "datasets": {
+    "mmlu_pro": {
+      "gmean2_pooled": 0.842662006532067,
+      "ci95": [
+        0.8013458756165582,
+        0.882246025572465
+      ],
+      "ci95_width": 0.08090014995590677,
+      "bootstrap_se": 0.020524838887704643,
+      "n_resamples": 10000,
+      "seed": 88,
+      "n_pool": 200,
+      "hint_types": [
+        "grader_hacking",
+        "professor",
+        "unethical"
+      ],
+      "per_hint_gmean2": {
+        "grader_hacking": 0.7792507067831398,
+        "professor": 0.80452011491727,
+        "unethical": 0.944215197895791
+      },
+      "per_hint_ci95": {
+        "grader_hacking": [
+          0.7065414601782356,
+          0.8477609997407359
+        ],
+        "professor": [
+          0.7273544430134985,
+          0.8748701001951739
+        ],
+        "unethical": [
+          0.9212514953757078,
+          0.9641983643257815
+        ]
+      },
+      "per_hint_n_defined": {
+        "grader_hacking": 85,
+        "professor": 62,
+        "unethical": 187
+      },
+      "hint_range": [
+        0.7792507067831398,
+        0.944215197895791
+      ],
+      "n_hint_types": 3,
+      "missing_hint_types": []
+    },
+    "gpqa_diamond": {
+      "gmean2_pooled": 0.6838694187896118,
+      "ci95": [
+        0.6457447009373907,
+        0.7207913698451792
+      ],
+      "ci95_width": 0.07504666890778855,
+      "bootstrap_se": 0.019246632681082818,
+      "n_resamples": 10000,
+      "seed": 88,
+      "n_pool": 198,
+      "hint_types": [
+        "grader_hacking",
+        "professor",
+        "unethical"
+      ],
+      "per_hint_gmean2": {
+        "grader_hacking": 0.36921727792416426,
+        "professor": 0.7933083796623682,
+        "unethical": 0.8890825987823028
+      },
+      "per_hint_ci95": {
+        "grader_hacking": [
+          0.29405722103838533,
+          0.4449639087556288
+        ],
+        "professor": [
+          0.7273202020476133,
+          0.8530226600087876
+        ],
+        "unethical": [
+          0.8566344036646254,
+          0.9192867638543505
+        ]
+      },
+      "per_hint_n_defined": {
+        "grader_hacking": 114,
+        "professor": 112,
+        "unethical": 172
+      },
+      "hint_range": [
+        0.36921727792416426,
+        0.8890825987823028
+      ],
+      "n_hint_types": 3,
+      "missing_hint_types": []
+    },
+    "wmdp": {
+      "gmean2_pooled": 0.7991259537942824,
+      "ci95": [
+        0.7587281862885178,
+        0.8380929214205189
+      ],
+      "ci95_width": 0.07936473513200115,
+      "bootstrap_se": 0.020171804988364038,
+      "n_resamples": 10000,
+      "seed": 88,
+      "n_pool": 197,
+      "hint_types": [
+        "grader_hacking",
+        "professor",
+        "unethical"
+      ],
+      "per_hint_gmean2": {
+        "grader_hacking": 0.5596264367816092,
+        "professor": 0.8839821932804919,
+        "unethical": 0.9537692313207464
+      },
+      "per_hint_ci95": {
+        "grader_hacking": [
+          0.4699184993146195,
+          0.6502078018707482
+        ],
+        "professor": [
+          0.8339404953023877,
+          0.9273445369960377
+        ],
+        "unethical": [
+          0.9343164995124384,
+          0.9706611110170246
+        ]
+      },
+      "per_hint_n_defined": {
+        "grader_hacking": 87,
+        "professor": 84,
+        "unethical": 161
+      },
+      "hint_range": [
+        0.5596264367816092,
+        0.9537692313207464
+      ],
+      "n_hint_types": 3,
+      "missing_hint_types": []
+    },
+    "codemmlu": {
+      "gmean2_pooled": 0.7219110121857701,
+      "ci95": [
+        0.6618684932516041,
+        0.7820178153027231
+      ],
+      "ci95_width": 0.12014932205111895,
+      "bootstrap_se": 0.03090442193230004,
+      "n_resamples": 10000,
+      "seed": 88,
+      "n_pool": 200,
+      "hint_types": [
+        "grader_hacking",
+        "professor",
+        "unethical"
+      ],
+      "per_hint_gmean2": {
+        "grader_hacking": 0.4559240852501722,
+        "professor": 0.7654903301274414,
+        "unethical": 0.9443186211796969
+      },
+      "per_hint_ci95": {
+        "grader_hacking": [
+          0.3247543313256501,
+          0.5836976171305881
+        ],
+        "professor": [
+          0.6669030313836889,
+          0.8559497843441323
+        ],
+        "unethical": [
+          0.9192622841368548,
+          0.9653881164588805
+        ]
+      },
+      "per_hint_n_defined": {
+        "grader_hacking": 50,
+        "professor": 58,
+        "unethical": 155
+      },
+      "hint_range": [
+        0.4559240852501722,
+        0.9443186211796969
+      ],
+      "n_hint_types": 3,
+      "missing_hint_types": []
+    },
+    "lsat_ar": {
+      "gmean2_pooled": 0.7957825112906945,
+      "ci95": [
+        0.749025067532962,
+        0.8405564922700175
+      ],
+      "ci95_width": 0.09153142473705544,
+      "bootstrap_se": 0.023179123315180492,
+      "n_resamples": 10000,
+      "seed": 88,
+      "n_pool": 200,
+      "hint_types": [
+        "grader_hacking",
+        "professor",
+        "unethical"
+      ],
+      "per_hint_gmean2": {
+        "grader_hacking": 0.750076288589213,
+        "professor": 0.761365737794559,
+        "unethical": 0.8759055074883115
+      },
+      "per_hint_ci95": {
+        "grader_hacking": [
+          0.6665092804363125,
+          0.8293437832617551
+        ],
+        "professor": [
+          0.6766870685558973,
+          0.8376105219034661
+        ],
+        "unethical": [
+          0.838428726540412,
+          0.9107693925570883
+        ]
+      },
+      "per_hint_n_defined": {
+        "grader_hacking": 83,
+        "professor": 73,
+        "unethical": 164
+      },
+      "hint_range": [
+        0.750076288589213,
+        0.8759055074883115
+      ],
+      "n_hint_types": 3,
+      "missing_hint_types": []
+    },
+    "lsat_lr": {
+      "gmean2_pooled": 0.5502963483007649,
+      "ci95": [
+        0.47436771426689184,
+        0.6293816838124352
+      ],
+      "ci95_width": 0.15501396954554336,
+      "bootstrap_se": 0.03886837909918409,
+      "n_resamples": 10000,
+      "seed": 88,
+      "n_pool": 200,
+      "hint_types": [
+        "grader_hacking",
+        "professor",
+        "unethical"
+      ],
+      "per_hint_gmean2": {
+        "grader_hacking": 0.4301190476190476,
+        "professor": 0.4414473684210526,
+        "unethical": 0.7793226288621943
+      },
+      "per_hint_ci95": {
+        "grader_hacking": [
+          0.30418191056910565,
+          0.561032162865146
+        ],
+        "professor": [
+          0.30113176406926406,
+          0.5808826518412243
+        ],
+        "unethical": [
+          0.7221492331541046,
+          0.8337041902562805
+        ]
+      },
+      "per_hint_n_defined": {
+        "grader_hacking": 40,
+        "professor": 38,
+        "unethical": 114
+      },
+      "hint_range": [
+        0.4301190476190476,
+        0.7793226288621943
+      ],
+      "n_hint_types": 3,
+      "missing_hint_types": []
+    },
+    "medxpertqa": {
+      "gmean2_pooled": 0.7455472540768199,
+      "ci95": [
+        0.7004648587836798,
+        0.7886355774269354
+      ],
+      "ci95_width": 0.08817071864325554,
+      "bootstrap_se": 0.022591379879382496,
+      "n_resamples": 10000,
+      "seed": 88,
+      "n_pool": 200,
+      "hint_types": [
+        "grader_hacking",
+        "professor",
+        "unethical"
+      ],
+      "per_hint_gmean2": {
+        "grader_hacking": 0.5685377871607421,
+        "professor": 0.7642568534891482,
+        "unethical": 0.9038471215805696
+      },
+      "per_hint_ci95": {
+        "grader_hacking": [
+          0.4896463873350184,
+          0.6481096105919181
+        ],
+        "professor": [
+          0.7017864023816015,
+          0.8227224778674014
+        ],
+        "unethical": [
+          0.8749317794594359,
+          0.9300760638204872
+        ]
+      },
+      "per_hint_n_defined": {
+        "grader_hacking": 108,
+        "professor": 104,
+        "unethical": 189
+      },
+      "hint_range": [
+        0.5685377871607421,
+        0.9038471215805696
+      ],
+      "n_hint_types": 3,
+      "missing_hint_types": []
+    },
+    "lexam": {
+      "gmean2_pooled": 0.8546469884914747,
+      "ci95": [
+        0.821637926006444,
+        0.8855494080723523
+      ],
+      "ci95_width": 0.06391148206590824,
+      "bootstrap_se": 0.01635456915674899,
+      "n_resamples": 10000,
+      "seed": 88,
+      "n_pool": 200,
+      "hint_types": [
+        "grader_hacking",
+        "professor",
+        "unethical"
+      ],
+      "per_hint_gmean2": {
+        "grader_hacking": 0.7351665955542331,
+        "professor": 0.8543031583214681,
+        "unethical": 0.974471211598723
+      },
+      "per_hint_ci95": {
+        "grader_hacking": [
+          0.6667029756140497,
+          0.7988676875396629
+        ],
+        "professor": [
+          0.7976681633434957,
+          0.905496824116988
+        ],
+        "unethical": [
+          0.9587350516806136,
+          0.9870801903336062
+        ]
+      },
+      "per_hint_n_defined": {
+        "grader_hacking": 116,
+        "professor": 97,
+        "unethical": 185
+      },
+      "hint_range": [
+        0.7351665955542331,
+        0.974471211598723
+      ],
+      "n_hint_types": 3,
+      "missing_hint_types": []
+    }
+  }
+}
