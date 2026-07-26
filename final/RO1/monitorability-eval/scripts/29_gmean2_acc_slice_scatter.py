@@ -58,7 +58,7 @@ from src.hints import HINT_TYPES
 DEFAULT_MODEL = "Qwen/Qwen3-4B"
 
 # Domain-table order with the validated 8-slot categorical palette
-# (same binding as 24_length_gmean2_curve_by_dataset.py).
+# (same binding as the other per-dataset multi-line steps).
 DATASET_COLORS = [
     ("mmlu_pro", "#2a78d6"),      # blue
     ("gpqa_diamond", "#eb6834"),  # orange

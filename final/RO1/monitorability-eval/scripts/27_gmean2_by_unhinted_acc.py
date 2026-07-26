@@ -21,8 +21,8 @@ levels — the resolution the pooled n can support.
 pooled analysis showed actually matter (the effect is a threshold at
 always-correct): never correct (0/8), sometimes correct (1-7/8), always
 correct (8/8). One axes, x = the 8 datasets, three light -> dark blue dots
-per dataset with CI whiskers — the same visual language as step 25's
-terciles, with each dot averaging ~20-310 questions.
+per dataset with CI whiskers — the same visual language as step 32's
+accuracy bands, with each dot averaging ~20-310 questions.
 
 Stdout prints the per-level or per-group table (n / mean / CI) and
 Pearson r + Spearman rho per plotted unit; the pooled run also prints two
@@ -77,11 +77,11 @@ N_RUNS = 8  # unhinted runs per question -> 9 accuracy levels k/8
 DATASETS = ["mmlu_pro", "gpqa_diamond", "lsat_ar", "lsat_lr",
             "medxpertqa", "lexam", "codemmlu", "wmdp"]
 
-DARK_BLUE = "#1B3A6B"  # matches steps 22/25
+DARK_BLUE = "#1B3A6B"  # darkest step of the ordinal blue ramp below
 
 # 3 accuracy groups for --per-dataset mode — the groups the pooled
-# threshold effect motivates. Light -> dark shades of one blue (same ramp
-# as step 25's terciles) so the ordering survives grayscale and CVD.
+# threshold effect motivates. Light -> dark shades of one blue (the same
+# ordinal ramp step 32 uses) so the ordering survives grayscale and CVD.
 ACC_GROUPS = [
     ("Never correct (0/8)", "#9DC3E6", -0.25,
      lambda lev: lev == 0.0),

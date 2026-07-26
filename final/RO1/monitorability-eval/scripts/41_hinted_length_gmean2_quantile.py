@@ -13,7 +13,7 @@ Key structural difference from step 37: the hinted arm is generated
 SEPARATELY for each hint type, so `mean_cot_tokens_hinted` and `gmean2_i` are
 both per-(question, hint) SLICE and pair directly — no per-question collapse,
 no averaging over hints. The unit is therefore the SLICE (base: 2750 slices
-from 1383 unique questions x 3 hint types), the same pooling steps 22/27/28/31
+from 1383 unique questions x 3 hint types), the same pooling steps 27/28/31
 use. (Slices from one question share the question, so they are clustered, not
 fully independent — a mild caveat on the CI width; unlike step 37 there is no
 pseudoreplication of identical length values, because the model reasons a

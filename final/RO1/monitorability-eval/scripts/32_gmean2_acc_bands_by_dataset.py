@@ -9,8 +9,8 @@ Each ENTERING question (level-1 pass, gmean2_i defined) has an unhinted
 correct-run count k in 0..N (N=8, so k in 0..8). A band is any set of k
 values; per (dataset, band) the mean gmean2_i is drawn with a percentile-
 bootstrap 95% CI. One axes, x = the 8 datasets, one light->dark dot per
-band per dataset (same visual language as step 25's terciles / step 27's
---per-dataset), with per-band n printed to stdout.
+band per dataset (same visual language as step 27's --per-dataset), with
+per-band n printed to stdout.
 
 Two presets (--scheme):
     1 : {0} {1,2} {3,4} {5,6} {7,8} {9}

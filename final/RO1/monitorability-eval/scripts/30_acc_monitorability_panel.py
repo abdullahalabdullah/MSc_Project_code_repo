@@ -25,7 +25,7 @@ Stdout additionally prints a CoT-LENGTH ROBUSTNESS CHECK — the
 always-correct vs rest contrast recomputed within unhinted-CoT-length
 terciles — because the natural objection to panel (a) is that
 always-correct questions are simply the short-CoT ones, and this project
-documents a separate length effect (steps 22/25).
+documents a separate length effect (steps 37/39).
 
 Usage:
     python scripts/30_acc_monitorability_panel.py                  # base

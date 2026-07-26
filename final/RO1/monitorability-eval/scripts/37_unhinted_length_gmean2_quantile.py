@@ -3,7 +3,7 @@
 Step 37: Does UNHINTED response length correlate with monitorability?
 Pooled over all datasets, equal-count (quantile) bins.
 
-This is the weaker-signal half of the length question. Step 22 bins by the
+This is the weaker-signal half of the length question. Step 41 bins by the
 HINTED arm's length (what the monitor reads); here we bin by the UNHINTED
 arm's length (the model's intrinsic reasoning verbosity, run once per
 question and shared across hint types).

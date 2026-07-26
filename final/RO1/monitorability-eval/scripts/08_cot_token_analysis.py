@@ -14,6 +14,15 @@ Each JSON contains:
     compute_gmean2(...)["cot_tokens"].
   - cot_token_pools: the raw valid-run token counts per condition, so roll-up
     reports can pool across datasets/hint types without re-reading inference.
+  - length_pools: the ENRICHED per-condition pools for length analysis — per-run
+    (instance_id, token_count, truncated) parallel arrays, INCLUDING truncated
+    runs (kept at their observed token_count, which equals max_new_tokens — the
+    cap — since truncation is caused by length; dropping them would bias length
+    down). "hinted"/"unhinted" hold every run with a token_count (incl.
+    truncated/unparsed); "hint_followed"/"hint_not_followed" hold only runs with
+    a parsed_answer (== / != hint_target), so a few truncated-before-answering
+    runs sit in the "all" pools but not the followed split. instance_id enables
+    exact distinct-instance counts and per-instance pairing downstream (step 44).
   - buckets / truncation / raw_stats: over EVERY response (both arms, including
     truncated/unparsed) — truncated responses count in the open-ended top
     bucket (their true length is censored above the cap).
@@ -43,6 +52,33 @@ from src.gmean2_metrics import load_jsonl, resolve_jsonl, compute_gmean2
 from src.dataset import SPLITS, model_dir_name, resolve_paths
 from src.hints import HINT_TYPES
 from src.cot_tokens import bucket_counts, raw_token_stats, truncation_stats
+
+
+def build_length_pools(hinted, unhinted):
+    """Enriched per-condition pools for length analysis: per-run
+    (instance_id, token_count, truncated) parallel arrays, INCLUDING truncated
+    runs at their observed (capped) token_count. followed/not-followed require a
+    parsed_answer (== / != hint_target); "all" pools include every run that has a
+    token_count (so truncated-before-answering runs land only in "all")."""
+    pools = {"hinted": [], "unhinted": [], "hint_followed": [],
+             "hint_not_followed": []}
+    for r in unhinted:
+        if r.get("token_count") is None:
+            continue
+        pools["unhinted"].append(r)
+    for r in hinted:
+        if r.get("token_count") is None:
+            continue
+        pools["hinted"].append(r)
+        pa = r.get("parsed_answer")
+        if pa is None:
+            continue  # unclassifiable (e.g. truncated before answering)
+        key = "hint_followed" if pa == r.get("hint_target") else "hint_not_followed"
+        pools[key].append(r)
+    return {k: {"instance_id": [r.get("instance_id") for r in v],
+                "token_count": [r["token_count"] for r in v],
+                "truncated": [int(bool(r.get("truncated", False))) for r in v]}
+            for k, v in pools.items()}
 
 
 def main():
@@ -98,6 +134,7 @@ def main():
             "hint_type": hint_type,
             "condition_stats": result["cot_tokens"],
             "cot_token_pools": result["cot_token_pools"],
+            "length_pools": build_length_pools(hinted, unhinted),
             "buckets": bucket_counts(all_records),
             "truncation": truncation_stats(all_records),
             "raw_stats": raw_token_stats(all_records),
