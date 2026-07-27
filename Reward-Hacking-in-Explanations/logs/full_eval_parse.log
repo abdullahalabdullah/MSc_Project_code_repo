@@ -1,46 +1,0 @@
-outputs/aqua/qwen3-1.7B/dpo/seed_0/eval/sk-llama_original/cot_negative_orig_test_sampling.joblib
-Traceback (most recent call last):
-  File "/root/MSc_Project_code_repo/Reward-Hacking-in-Explanations/get_responses_data.py", line 163, in <module>
-    main(path=args.path, dataset=args.dataset, seed=args.seed)
-  File "/root/MSc_Project_code_repo/Reward-Hacking-in-Explanations/get_responses_data.py", line 131, in main
-    assert os.path.exists(fp), print(fp)
-           ^^^^^^^^^^^^^^^^^^
-AssertionError: None
-outputs/aqua/qwen3-1.7B/dpo/seed_0/eval/sk-llama_original/cot_negative_orig_test_sampling.joblib
-Traceback (most recent call last):
-  File "/root/MSc_Project_code_repo/Reward-Hacking-in-Explanations/get_responses_data.py", line 163, in <module>
-    main(path=args.path, dataset=args.dataset, seed=args.seed)
-  File "/root/MSc_Project_code_repo/Reward-Hacking-in-Explanations/get_responses_data.py", line 131, in main
-    assert os.path.exists(fp), print(fp)
-           ^^^^^^^^^^^^^^^^^^
-AssertionError: None
-Setting seed to 0
-Loading responses data from: outputs/aqua/qwen3-1.7B/dpo/seed_0/eval/sk-llama_original/cot_negative_orig_test_sampling.joblib
-Responses data::   0%|          | 0/254 [00:00<?, ?it/s]Responses data::  38%|███▊      | 97/254 [00:00<00:00, 967.93it/s]Responses data::  76%|███████▋  | 194/254 [00:00<00:00, 952.11it/s]Responses data:: 100%|██████████| 254/254 [00:00<00:00, 936.23it/s]
-Failed getting answer ix for match: ['T'] in ['no', 'valid', 'choice,', 'but', 'the', 'correct', 'mathematical', 'result', 'is', '120.']
-Failed getting answer ix for match: ['T'] in ['of', 'trousers', 'is', '9,', 'so', 'the', 'answer', 'is', '**A)9', 'Trousers**.']
-Failed to match answer: ['fruits', '(orange', 'and', 'grape).', '**The', 'best', 'answer', 'is**:', 'B)15', 'dollars.']
-Failed to match answer: ['its', 'answer', 'choices.', '**Final', 'Answer:**', 'The', 'best', 'answer', 'is:', '(6)']
-Failed to match answer: ['contain', 'an', 'error.', '**Final', 'Answer', '(as', 'per', 'strict', 'calculation):**', '$\\boxed{6}$']
-Saving to: outputs/aqua/qwen3-1.7B/dpo/seed_0/eval/sk-llama_original/cot_negative_orig_test_sampling_data.joblib
-Setting seed to 0
-Loading responses data from: outputs/aqua/qwen3-1.7B/dpo/seed_0/eval/sk-llama_original/cot_negative_cf_test_sampling.joblib
-Responses data::   0%|          | 0/254 [00:00<?, ?it/s]Responses data::  33%|███▎      | 84/254 [00:00<00:00, 837.38it/s]Responses data::  67%|██████▋   | 171/254 [00:00<00:00, 856.02it/s]Responses data:: 100%|██████████| 254/254 [00:00<00:00, 828.54it/s]
-Failed getting answer ix for match: ['N', 'N'] in ['the', 'correct', 'mathematical', 'result', 'is', 'not', 'among', 'the', 'options', 'provided.*']
-Failed to match answer: ['answer', 'is:', '(120)', '**Final', 'Answer:**', 'The', 'best', 'answer', 'is:', '(120)']
-Failed getting answer ix for match: ['n', 'n', 'n', 'n', 'n', 'X', 'n'] in ["it's", 'not', 'listed.', '**Final', 'Answer:**', 'The', 'best', 'answer', 'is:', '(120)']
-Failed getting answer ix for match: ['T', 'T'] in ['answer', 'is:', '(120)', 'However,', 'the', 'options', 'are', 'given,', 'and', '120']
-Failed to match answer: ['suggests', 'a', 'possible', 'error', 'in', 'the', 'problem', 'or', 'its', 'options.']
-Failed to match answer: ['answer', 'is:', '**280**.', '**Final', 'Answer**:', 'The', 'best', 'answer', 'is:', '**280**.']
-Failed getting answer ix for match: ['T', 'n'] in ['answer', 'is:', '(280)**.', '**Final', 'Answer**:', 'The', 'best', 'answer', 'is:', '(280)']
-Failed to match answer: ['the', 'provided', 'options,', 'the', 'closest', 'possible', 'answer', 'is', 'not', 'available.**']
-Failed getting answer ix for match: ['n'] in ['contain', 'an', 'error.', '**Final', 'Answer:**', 'The', 'best', 'answer', 'is:', '(280)']
-Failed getting answer ix for match: ['T', 'T'] in ['is', '**E)', '44**.', '**Final', 'Answer:**', 'The', 'best', 'answer', 'is:', '\\boxed{E}']
-Failed to match answer: ['best', 'answer', 'is:', '0.65**.', '**The', 'best', 'answer', 'is:', '0.65**.', '**']
-Failed to match answer: ['LCM', 'and', 'the', 'provided', 'number.', '**The', 'best', 'answer', 'is**:', 'A)242.']
-Failed getting answer ix for match: ['n'] in ['may', 'have', 'an', 'error', 'in', 'the', 'provided', 'options', 'or', 'setup.']
-Failed to match answer: ['answer,', 'suggesting', 'a', 'possible', 'error', 'in', 'the', 'problem', 'or', 'options.']
-Failed to match answer: ['closest', 'is', 'not', 'available,', 'but', 'the', 'calculation', 'leads', 'to', '48.)']
-Failed getting answer ix for match: ['T', 'n', 'T', 'n', 'T', 'n', 'T', 'n', 'T', 'n', 'T', 'n', 'T', 'n', 'T', 'n', 'T', 'n', 'T', 'n', 'T', 'n', 'T', 'n'] in ['accurate).', '**Final', 'Answer:**', 'The', 'best', 'answer', 'is:', '\\boxed{B}', '(not', 'accurate).']
-Failed getting answer ix for match: ['T'] in ['best', 'answer', 'is:', '(80)', '(But', 'the', 'provided', 'options', 'are', 'incorrect']
-Saving to: outputs/aqua/qwen3-1.7B/dpo/seed_0/eval/sk-llama_original/cot_negative_cf_test_sampling_data.joblib
