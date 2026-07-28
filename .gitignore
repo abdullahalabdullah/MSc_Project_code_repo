@@ -43,3 +43,25 @@ Thumbs.db
 # versions are tracked (see commit 43d2e07). Keeps git add -A from re-adding them.
 Full-Codebase/RO1/outputs-and-results/inference-outputs/Qwen_Qwen3-4B/lsat_ar/professor/hinted.jsonl
 Full-Codebase/RO1/outputs-and-results/inference-outputs/Qwen_Qwen3-4B/lsat_ar/professor/unhinted.jsonl
+
+# ── Bulk regenerable pipeline artifacts ───────────────────────────────────────
+# Raw inference/eval payloads are large (individually up to ~90MB, ~5.9GB total)
+# and regenerable from the pipelines. Tracking them pushed the repo against
+# GitHub's 100MB-per-file and push-size limits.
+#
+# Deliberately still tracked, so results stay reviewable in git:
+#   *.png (plots), *.json / *.csv (metrics), *.md (notes)  — ~70MB combined
+#   *.jsonl.gz (compressed inference archives, see note above)
+#   curated eval/DPO inputs, which live outside these outputs dirs
+**/outputs-and-results/**/*.jsonl
+**/outputs-and-results/**/*.xlsx
+**/outputs-and-results/**/*.arrow
+**/outputs-and-results/**/*.joblib
+**/outputs/**/*.jsonl
+**/outputs/**/*.xlsx
+**/outputs/**/*.arrow
+**/outputs/**/*.joblib
+
+# Keep the curated DPO/SFT training datasets. These sit under an outputs/ dir
+# but are training *inputs*, not disposable inference payloads (~129MB total).
+!**/*DPO-train-dataset-curation/outputs/**
