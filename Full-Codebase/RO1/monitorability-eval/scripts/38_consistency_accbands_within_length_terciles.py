@@ -157,6 +157,10 @@ def main():
             with fh:
                 for line in fh:
                     r = json.loads(line)
+                    # Truncated runs are fragments, not answers — excluded to
+                    # match the pipeline's u_valid rule (rationale in step 31).
+                    if r.get("truncated", False):
+                        continue
                     pa = r.get("parsed_answer")
                     if pa in (None, "", "N/A"):
                         continue

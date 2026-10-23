@@ -67,6 +67,11 @@ import yaml
 from src.dataset import SPLITS, model_dir_name, resolve_paths
 from src.hints import HINT_TYPES
 
+# Type sizes match step 51 (the length panel): set for the PRINTED size,
+# since this canvas lands at ~6.3in of LaTeX \textwidth and is scaled by
+# ~0.57 in the PDF.
+FS_TITLE, FS_LABEL, FS_TICK, FS_N, FS_BOX, FS_LEG = 15, 12, 13, 10, 11, 10
+
 DEFAULT_MODEL = "Qwen/Qwen3-4B"
 N_RUNS = 8
 
@@ -170,6 +175,12 @@ def main():
     parser.add_argument("--model", default=DEFAULT_MODEL)
     parser.add_argument("--resamples", type=int, default=5000)
     parser.add_argument("--seed", type=int, default=88)
+    parser.add_argument("--show-threshold-delta", action="store_true",
+                        help="annotate panel (a) with the always-correct vs "
+                             "rest contrast. Off by default: the contrast is "
+                             "the hand-off to the consistency analysis, not "
+                             "part of the accuracy result this panel reports. "
+                             "The numbers are printed to stdout either way.")
     parser.add_argument("--out", default=None)
     args = parser.parse_args()
 
@@ -279,7 +290,11 @@ def main():
         print("insufficient CoT-token data — skipped")
 
     # ---------------- figure ----------------
-    fig, (axa, axb) = plt.subplots(1, 2, figsize=(13.5, 5.4))
+    # Panel order: the configuration-level view is drawn on the LEFT and the
+    # question-level view on the RIGHT, so the (a)/(b) labels follow reading
+    # order. axa/axb below still name the CONTENT (a = question level,
+    # b = configuration level); only their positions on the canvas swap.
+    fig, (axb, axa) = plt.subplots(1, 2, figsize=(11, 4.8))
 
     # (a)
     axa.set_axisbelow(True)
@@ -290,37 +305,54 @@ def main():
     axa.errorbar(lv_x, lv_mean, yerr=[lo_err, hi_err], fmt="o",
                  color=DOT_COLOR, ecolor=DOT_COLOR, elinewidth=1.4,
                  capsize=3.5, markersize=7, zorder=3)
-    # highlight the threshold: flat region vs the always-correct point
+    # Reference line for the flat region. It spans ONLY the levels it is
+    # computed from (0/8 to 7/8) and stops short of the 8/8 level, so the
+    # exclusion is visible in the geometry: a line running under the excluded
+    # point reads as a fit that point fails, rather than as a baseline the
+    # point is being compared against.
     flat_mean = float(rest.mean())
-    axa.axhline(flat_mean, color=THRESHOLD_COLOR, linestyle=":",
-                linewidth=1.4, zorder=2)
-    # flat-region label: far right, just under the line (no error bar there)
-    axa.annotate(f"mean of 0/8–7/8 = {flat_mean:.3f}",
-                 xy=(1.04, flat_mean), xytext=(0, -4),
-                 textcoords="offset points",
-                 fontsize=9, color=THRESHOLD_COLOR, va="top", ha="right")
-    # threshold contrast: upper-left, the one empty corner of the panel
+    flat_xmax = (N_RUNS - 1) / N_RUNS + 0.03   # just past the 7/8 level
+    axa.hlines(flat_mean, xmin=-0.04, xmax=flat_xmax, color=THRESHOLD_COLOR,
+               linestyle=":", linewidth=1.4, zorder=2)
+    # flat-region label: upper-left corner. It cannot sit under the line any
+    # more — now that the line stops at 7/8 the label would lie over the data
+    # and be crossed by the error bars.
     axa.text(0.03, 0.97,
-             f"always-correct vs rest:\nΔ = {d_thr:+.3f} "
-             f"[{lo_thr:+.3f}, {hi_thr:+.3f}]",
-             transform=axa.transAxes, fontsize=9, color=THRESHOLD_COLOR,
+             f"dotted line: mean of 0/8 to 7/8 = {flat_mean:.3f}",
+             transform=axa.transAxes, fontsize=FS_BOX, color=THRESHOLD_COLOR,
              va="top", ha="left",
              bbox=dict(facecolor="white", alpha=0.85, edgecolor="none",
                        pad=2))
+    # threshold contrast: upper-left, the one empty corner of the panel
+    if args.show_threshold_delta:
+        axa.text(0.03, 0.97,
+                 f"always-correct vs rest:\nΔ = {d_thr:+.3f} "
+                 f"[{lo_thr:+.3f}, {hi_thr:+.3f}]",
+                 transform=axa.transAxes, fontsize=FS_BOX, color=THRESHOLD_COLOR,
+                 va="top", ha="left",
+                 bbox=dict(facecolor="white", alpha=0.85, edgecolor="none",
+                           pad=2))
     axa.set_ylim(min(lv_lo) - 0.02, max(lv_hi) + 0.045)
     for x, n in zip(lv_x, lv_n):
         axa.annotate(f"{n}", xy=(x, 0), xycoords=("data", "axes fraction"),
                      xytext=(0, 4), textcoords="offset points",
-                     ha="center", va="bottom", fontsize=7.5, color="#777777")
+                     ha="center", va="bottom", fontsize=FS_N, color="#333333")
     axa.set_xlim(-0.06, 1.06)
     axa.set_xticks([k / N_RUNS for k in range(N_RUNS + 1)])
-    axa.set_xticklabels([f"{k}/8" for k in range(N_RUNS + 1)], fontsize=9)
-    axa.set_xlabel("Unhinted task accuracy of the question (correct runs / 8)")
-    axa.set_ylabel("Mean per-question g-mean²")
-    axa.set_title("(a) Question level: a reliability threshold\n"
-                  f"per-question r = {r_q:+.2f}"
-                  + (f", p < 0.001" if p_q < 0.001 else f", p = {p_q:.3f}"),
-                  fontsize=11)
+    axa.set_xticklabels([f"{k}/8" for k in range(N_RUNS + 1)],
+                    fontsize=FS_TICK)
+    axa.set_xlabel("Unhinted accuracy per question (correct k/8 runs)",
+                   fontsize=FS_LABEL)
+    # y-label is drawn ONCE, on the left-hand panel: both panels plot the same
+    # quantity. The SCALES stay independent, though — forcing a shared range
+    # would squash the question panel's 8/8 step into the configuration
+    # panel's much wider spread. Each panel keeps its own ticks, so the
+    # single label is not ambiguous.
+    # No correlation coefficient in this subtitle. The relationship here is a
+    # step, and any single coefficient (r = +0.13, rho = +0.14) compresses
+    # eight flat levels plus one jump into a number that reads as a gradient —
+    # the opposite of what the panel shows. Both are printed to stdout.
+    axa.set_title("(b) Question level", fontsize=FS_TITLE)
     for spine in ("top", "right"):
         axa.spines[spine].set_visible(False)
     for spine in ("left", "bottom"):
@@ -335,21 +367,15 @@ def main():
         axb.scatter(a_, g_, s=70, color=color_of[dataset],
                     marker=marker_of[hint], edgecolors="#333333",
                     linewidths=0.6, zorder=3)
-    slope, intercept = np.polyfit(xs, ys, 1)
-    fx = np.array([xs.min(), xs.max()])
-    axb.plot(fx, slope * fx + intercept, color=LINE_COLOR, linewidth=2.0,
-             linestyle="--", zorder=2)
-    p_txt = f"p = {p_s:.3f}" if p_s >= 0.001 else "p < 0.001"
-    axb.text(0.03, 0.03, f"OLS fit; Pearson r = {r_s:+.2f}, {p_txt}",
-             transform=axb.transAxes, fontsize=9, color="#333333",
-             va="bottom", ha="left",
-             bbox=dict(facecolor="white", alpha=0.85, edgecolor="none",
-                       pad=2))
+    # No OLS fit and no on-panel Pearson r: the scatter is shown as-is, and the
+    # slice-level correlation is reported to stdout (and in the write-up text)
+    # rather than drawn over the points.
     axb.set_xlim(0, 1)
-    axb.set_xlabel("Mean unhinted task accuracy of the slice")
-    axb.set_ylabel("g-mean²")
-    axb.set_title("(b) Slice level: no association\n"
-                  "one point per dataset × hint type", fontsize=11)
+    axb.set_xlabel("Mean unhinted task accuracy\n"
+                   "of the configuration", fontsize=FS_LABEL)
+    axb.set_ylabel("Monitorability (g-mean²)", fontsize=FS_LABEL)
+    axb.set_title("(a) Configuration level", fontsize=FS_TITLE)
+    axb.tick_params(labelsize=FS_TICK)
     for spine in ("top", "right"):
         axb.spines[spine].set_visible(False)
     for spine in ("left", "bottom"):
@@ -363,11 +389,14 @@ def main():
                          color="#888888", markeredgecolor="#333333",
                          markeredgewidth=0.6, markersize=8, label=lbl)
                   for _, m, lbl in HINT_MARKERS])
-    axb.legend(handles=handles, loc="upper left", bbox_to_anchor=(1.005, 1.0),
-               frameon=True, edgecolor="#CCCCCC", fontsize=8.5)
+    # The legend describes the configuration-level markers but is anchored to
+    # the RIGHT-hand axes: that keeps it outside the figure's right edge. On the
+    # (now left-hand) configuration panel it would sit in the gap between the
+    # two panels and overlap the question-level axis.
+    axa.legend(handles=handles, loc="upper left", bbox_to_anchor=(1.005, 1.0),
+               frameon=True, edgecolor="#CCCCCC", fontsize=FS_LEG)
 
-    fig.suptitle(f"Task performance vs monitorability — {model_name}",
-                 fontsize=13)
+    # No figure-level title: the caption carries the model.
 
     out = args.out
     if out is None:
@@ -378,7 +407,7 @@ def main():
             plots_dir = plots_dir / args.data
         plots_dir.mkdir(parents=True, exist_ok=True)
         out = plots_dir / f"acc_vs_monitorability_panel_{model_name}.png"
-    fig.tight_layout(rect=[0, 0, 1, 0.96])
+    fig.tight_layout()
     fig.savefig(out, dpi=200, bbox_inches="tight")
     print(f"\nWrote {out}")
 

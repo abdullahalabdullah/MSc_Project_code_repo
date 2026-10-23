@@ -50,12 +50,20 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FixedLocator, NullLocator
 import numpy as np
 from scipy import stats
 import yaml
 
 from src.dataset import SPLITS, model_dir_name, resolve_paths
 from src.hints import HINT_TYPES
+
+# Type sizes are set for the PRINTED size: this canvas lands at
+# ~6.3in of LaTeX \textwidth, so everything is scaled by ~0.63 in the
+# PDF. An 8-panel figure is dense — if it still reads small on paper,
+# a sideways (landscape) float buys ~1.4x.
+TICKS = (500, 2000, 8000)   # sparse: panels are ~2.4in wide
+FS_PANEL, FS_LABEL, FS_TICK, FS_BOX = 12, 11, 10, 9
 
 DEFAULT_MODEL = "Qwen/Qwen3-4B"
 DATASETS = ["mmlu_pro", "gpqa_diamond", "lsat_ar", "lsat_lr",
@@ -162,15 +170,21 @@ def main():
         sys.exit(1)
 
     ylo, yhi = min(all_bounds) - 0.03, max(all_bounds) + 0.03
-    xlo, xhi = min(all_len) * 0.85, max(all_len) * 1.15
+    # clamp to the plotted dots (bin medians), not the raw data extent:
+    # edge-based limits leave a wide empty band at both ends
+    _dots = [r[0] for _p in panels.values() if _p and _p['drawn']
+             for r in _p['drawn']]
+    xlo, xhi = min(_dots) / 1.4, max(_dots) * 1.4
 
-    fig, axes = plt.subplots(2, 4, figsize=(16, 7.5), sharex=True, sharey=True)
+    fig, axes = plt.subplots(2, 4, figsize=(11, 6.0), sharex=True, sharey=True)
     for ax, dataset in zip(axes.flat, DATASETS):
         ax.set_axisbelow(True)
         if use_log:
             ax.set_xscale("log")
         ax.grid(True, color="#EEEEEE", linewidth=0.8)
-        ax.set_title(dataset, fontsize=11, fontweight="bold")
+        ax.set_title(dataset, fontsize=FS_PANEL, fontweight="bold",
+                     pad=18)
+        ax.tick_params(labelsize=FS_TICK)
         p = panels.get(dataset)
         if not p or not p["drawn"]:
             ax.text(0.5, 0.5, "insufficient data", transform=ax.transAxes,
@@ -185,33 +199,32 @@ def main():
                     marker="o", markersize=6, markeredgecolor="#333333",
                     markeredgewidth=0.4, ecolor=PLUM, elinewidth=1.2,
                     capsize=3, capthick=1.2, zorder=3)
-        sig = "" if (p["rlo"] < 0 < p["rhi"]) else " ✓"
-        ax.text(0.96, 0.95,
-                f"ρ = {p['rho']:+.2f}{sig}\n[{p['rlo']:+.2f}, {p['rhi']:+.2f}]"
-                f"\nn = {p['n']}",
-                transform=ax.transAxes, ha="right", va="top", fontsize=8,
-                color=PLUM,
-                bbox=dict(boxstyle="round,pad=0.3", fc="#F4F1F8", ec="#C9BEDD"))
+        ax.text(0.5, 1.015,
+                f"ρ = {p['rho']:+.2f}  [{p['rlo']:+.2f}, {p['rhi']:+.2f}]"
+                f"  n={p['n']}",
+                transform=ax.transAxes, ha="center", va="bottom",
+                fontsize=FS_BOX, color=PLUM)
         for spine in ("top", "right"):
             ax.spines[spine].set_visible(False)
         for spine in ("left", "bottom"):
             ax.spines[spine].set_color("#999999")
 
     axes.flat[0].set_xlim(xlo, xhi)
+    if use_log:
+        _ticks = [v for v in TICKS if xlo <= v <= xhi]
+        for ax in axes.flat:
+            ax.xaxis.set_major_locator(FixedLocator(_ticks))
+            ax.xaxis.set_major_formatter(lambda v, _: f"{int(v):,}")
+            ax.xaxis.set_minor_locator(NullLocator())
     axes.flat[0].set_ylim(ylo, yhi)
     for ax in axes[:, 0]:
-        ax.set_ylabel("Monitorability (g-mean²)\nbars: bootstrap 95% CI",
-                      fontsize=9)
-    xlab = ("HINTED response length — per-question mean over 8 runs × 3 hints "
-            f"(tokens{', log scale' if use_log else ''}; dots at bin median)")
-    fig.supxlabel(xlab, fontsize=10, y=0.02)
+        ax.set_ylabel("Monitorability (g-mean²)", fontsize=FS_LABEL)
+    xlab = ("Hinted response length in tokens"
+            f"{' (log scale)' if use_log else ''}")
+    fig.supxlabel(xlab, fontsize=FS_LABEL, y=0.02)
 
-    fig.suptitle("Monitorability by HINTED length (what the monitor reads), "
-                 f"per dataset — {model_name}\n"
-                 "per-question unit; per-dataset slopes scatter in BOTH "
-                 "directions (no consistent sign) — contrast step 39 "
-                 "(unhinted): negative in all 8 datasets",
-                 fontsize=13)
+    # No figure-level title: the caption carries the model, the
+    # construction and the meaning of the check mark.
 
     out = args.out
     if out is None:

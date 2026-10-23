@@ -13,7 +13,17 @@ ones documented on the model card.
 
 import re
 
-# Exact WildGuard instruction template (model card). `{prompt}` = user request,
+# ---------------------------------------------------------------------------
+# The instruction template and the three-line output format below are WildGuard's own,
+# reproduced from the `allenai/wildguard` model card / release code:
+#   Repo:  https://github.com/allenai/wildguard   (companion evals: allenai/safety-eval)
+#   Model: https://huggingface.co/allenai/wildguard
+#   Paper: Han et al. (2024), "WildGuard: Open One-Stop Moderation Tools for Safety Risks,
+#          Jailbreaks, and Refusals of LLMs" — https://arxiv.org/abs/2406.18495
+# The template must stay byte-identical to the released one or the classifier degrades;
+# only the leading <s> BOS is dropped (see note below). Parsing/truncation code is ours.
+# ---------------------------------------------------------------------------
+# `{prompt}` = user request,
 # `{response}` = the AI response being judged. The leading <s> BOS is omitted so
 # vLLM adds exactly one BOS when it tokenizes the string; the <|user|> /
 # <|assistant|> markers are literal special tokens in WildGuard's vocab.

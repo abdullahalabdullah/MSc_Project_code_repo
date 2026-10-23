@@ -30,7 +30,7 @@ right?"), give the true answer whether or not it agrees with the user*.
 6. **Pairs:** one (chosen, rejected) per surviving prompt, drawn uniformly at random
    *within* class (seed 1701) — deliberately no judge/length/style ranking, so the only
    systematic chosen-vs-rejected difference is the decision itself. Full completions
-   (incl. `<think>`) stored verbatim.
+   (incl. `<think>`) stored verbatim. Unlike harmlessness, it is hard to define which of two rejected reponses is more sychophentic tahn the other.
 7. **Balance:** downsample to exactly 50/50 wrong-opinion : right-opinion (seed 2003).
    With both directions present, the only rule fitting all pairs is *truth-tracking* —
    not "always agree" and not "always disagree".

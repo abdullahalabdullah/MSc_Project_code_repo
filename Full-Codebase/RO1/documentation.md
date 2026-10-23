@@ -53,7 +53,8 @@ bash anti-sycophancy-eval/run_antisyc_compare.sh Qwen/Qwen3-4B <trained_model_id
   [Cross-model figures (16–18, 23–24, 46)](#cross-model-figures-steps-1618-2324-46) ·
   [Task performance vs monitorability (25–35)](#task-performance-vs-monitorability-steps-2535) ·
   [Consistency & CoT-length analyses (36–43, 47–49)](#consistency--cot-length-analyses-steps-3643-4749) ·
-  [Response-length tables (44–45)](#response-length-tables-steps-4445) ·
+  [Response-length tables (44–45, 53–54)](#response-length-tables-steps-4445-5354) ·
+  [Experiment: uncertainty-vs-monitorability (58–59)](#experiment-uncertainty-vs-monitorability-steps-5859) ·
   [Utilities](#utilities) ·
   [Source files](#source-files-monitorability-evalsrc) ·
   [Key conventions](#key-conventions) ·
@@ -228,12 +229,20 @@ contiguous 01–49).
 | 41 | `41_hinted_length_gmean2_quantile.py` | g-mean² vs HINTED CoT length, quantile bins → `gmean2_by_hinted_length_quantile_{model}.png`. §[Consistency & CoT-length analyses](#consistency--cot-length-analyses-steps-3643-4749) |
 | 42 | `42_hinted_length_gmean2_quantile_by_dataset.py` | Step 41 per dataset (8 panels) → `gmean2_by_hinted_length_quantile_panels_{model}.png`. §[Consistency & CoT-length analyses](#consistency--cot-length-analyses-steps-3643-4749) |
 | 43 | `43_te_gmean2_quantile.py` | Does hint susceptibility (TE) predict monitorability? → `gmean2_by_te_quantile_{model}.png`. §[Consistency & CoT-length analyses](#consistency--cot-length-analyses-steps-3643-4749) |
-| 44 | `44_length_summary_tables.py` | Response-length tables for one model (3 levels + skew companion) → `length_*_tables.md`. §[Response-length tables](#response-length-tables-steps-4445) |
-| 45 | `45_length_model_comparison_tables.py` | Response-length model-comparison tables (3 models, paired GMRs) → `length_*_model_comparison.md`. §[Response-length tables](#response-length-tables-steps-4445) |
+| 44 | `44_length_summary_tables.py` | Response-length tables for one model (3 levels + skew companion) → `length_*_tables.md`. §[Response-length tables](#response-length-tables-steps-4445-5354) |
+| 45 | `45_length_model_comparison_tables.py` | Response-length model-comparison tables (3 models, paired GMRs) → `length_*_model_comparison.md`. §[Response-length tables](#response-length-tables-steps-4445-5354) |
 | 46 | `46_length_barcharts.py` | Length analogues of the cross-model bar charts → `length_{by_hint,pooled,by_arm}_3models.png`. §[Cross-model figures](#cross-model-figures-steps-1618-2324-46) |
 | 47 | `47_hinted_length_gmean2_quantile_by_hint.py` | Step 41 within each hint condition (1×3 panels) → `gmean2_by_hinted_length_quantile_by_hint_{model}.png`. §[Consistency & CoT-length analyses](#consistency--cot-length-analyses-steps-3643-4749) |
 | 48 | `48_hinted_length_gmean2_quantile_by_hint_dataset.py` | Hinted length × g-mean², 3×8 grid (hint × dataset) → `gmean2_by_hinted_length_quantile_panels_by_hint_{model}.png`. §[Consistency & CoT-length analyses](#consistency--cot-length-analyses-steps-3643-4749) |
 | 49 | `49_hinted_length_gmean2_quantile_by_dataset_nocollapse.py` | Step 47's no-averaging construction per dataset (2×4) → `gmean2_by_hinted_length_quantile_by_dataset_{model}.png`. §[Consistency & CoT-length analyses](#consistency--cot-length-analyses-steps-3643-4749) |
+| 50 | `50_gmean2_by_consistency_level.py` | Consistency analogue of step 27: monitorability by modal-answer share (12.5%→100%), correctness ignored → `gmean2_by_consistency_level_{model}.png`. §[Consistency & CoT-length analyses](#consistency--cot-length-analyses-steps-3643-4749) |
+| 53 | `53_per_question_hint_length_change.py` | Per-question hinted/unhinted length ratio, one figure per dataset (one model, default base) → `extra-plots/hint-effect-on-length/{model}/length_change_per_question_{dataset}_{model}.png`. §[Response-length tables](#response-length-tables-steps-4445-5354) |
+| 54 | `54_length_change_vs_gmean2.py` | Dataset-level step-53 length change vs g-mean² (pooled + per hint, Spearman ρ) → `extra-plots/hint-effect-on-length/{model}/length_change_vs_gmean2_{model}.png`. §[Response-length tables](#response-length-tables-steps-4445-5354) |
+| 55 | `55_consistency_controlled.py` | Consistency effect with controls (dataset, hint, length, p0; question-cluster bootstrap) → `consistency_controlled_regression_{model}.md`; within-dataset length-tercile appendix figure → `consistency_within_dataset_length_terciles_{model}.png`. §[Consistency & CoT-length analyses](#consistency--cot-length-analyses-steps-3643-4749) |
+| 56 | `56_gmean2_by_p0_level.py` | Monitorability by p0 level (unhinted runs of 8 that picked the hinted answer), consistent dot split out at 0/8, question-cluster bootstrap → `gmean2_by_p0_level_{model}.png`. §[Consistency & CoT-length analyses](#consistency--cot-length-analyses-steps-3643-4749) |
+| 57 | `57_gmean2_by_answer_entropy.py` | Monitorability by Shannon entropy of the 8 unhinted answers (5 bins), question-cluster bootstrap; `--by-hint` 1×3 → `gmean2_by_answer_entropy[_by_hint]_{model}.png`. §[Consistency & CoT-length analyses](#consistency--cot-length-analyses-steps-3643-4749) |
+| 58 | `58_uvm_answers_and_parse_report.py` | uncertainty-vs-monitorability (N = 30): per-run chosen answer → `answers_per_run.csv`; answer-parse failure counts per dataset × arm → `parse_report_{hint}.{csv,md}`. §[Experiment: uncertainty-vs-monitorability](#experiment-uncertainty-vs-monitorability-steps-5859) |
+| 59 | `59_uvm_gmean2_by_answer_entropy.py` | uncertainty-vs-monitorability (N = 30): g-mean² by entropy of the unhinted answers (≥ 27/30 valid), equal-width bins + H = 0 bin, pooled + per-dataset panels → `gmean2_by_answer_entropy_{hint}.png`, `entropy_per_question_{hint}.csv`, `entropy_bins_{hint}.csv`. §[Experiment: uncertainty-vs-monitorability](#experiment-uncertainty-vs-monitorability-steps-5859) |
 
 Non-numbered helpers in `scripts/` (`merge_and_push.py`, `archive_results.sh`)
 are documented under [Utilities](#utilities).
@@ -891,26 +900,29 @@ Reads step 08's `cot_token_stats.json` **`length_pools`** for the three models
 → THREE PNGs — the response-length analogues of the cross-model g-mean²
 figures, for summarising length in the paper as figures instead of tables:
 
-- `length_by_hint_3models.png` (like 16: x = 8 datasets, 3 hint-type sets × 3
-  model bars, both arms combined per bar);
+- `length_by_hint_3models.png` (like 16: x = 8 datasets, FOUR sets — the
+  shared **Unhinted** arm (light gray, 1600 runs) then each hint type's
+  **hinted** arm (1600 runs) — × 3 model bars; per-arm medians, so each hint
+  set compares directly against the unhinted set);
 - `length_pooled_3models.png` (like 17: x = 8 datasets, 3 model bars, hint
   types pooled, both arms combined per bar);
-- `length_by_arm_3models.png` (x = 8 datasets, TWO sets — **Hinted (3 hint
-  types pooled, 4800 runs)** vs **Unhinted (the one shared arm, 1600 runs)** —
+- `length_by_arm_3models.png` (x = 8 datasets, TWO sets, left to right —
+  **Unhinted (the one shared arm, 1600 runs)** then **Hinted (3 hint types
+  pooled, 4800 runs)** —
   × 3 model bars: the arm-split view showing whether the training-induced
   length increase appears in BOTH arms or only one; arm carried by color —
   light plum hinted / light blue unhinted — model by hatch).
 
-In the first two figures each bar = the **MEDIAN completion length (tokens)
-over that cell's hinted AND unhinted runs combined** (the separate per-arm
-medians live in the step 44/45 tables and the by-arm figure), value printed
+Each bar = the **MEDIAN completion length (tokens)** — per arm in the by-hint
+and by-arm figures, hinted AND unhinted runs combined in the pooled figure
+(the per-arm medians also live in the step 44/45 tables) — value printed
 above the bar, **no error bars** (descriptive, matching the length tables'
 no-CI convention) and no average reference line (the comparison is
 bar-vs-bar). There is deliberately NO hint-type-level figure (a
 datasets-pooled median mixes very different length regimes — lsat_ar ~5.5k vs
 wmdp ~0.9k — and mostly repeats the model effect three times). Pools include
-truncated runs at the 16384 cap; pooling follows steps 44/45 (by-hint cell =
-1600+1600 runs; per-dataset pooled = 3 hints' hinted 4800 + the ONE shared
+truncated runs at the 16384 cap; pooling follows steps 44/45 (by-hint sets =
+1600 runs each; per-dataset pooled = 3 hints' hinted 4800 + the ONE shared
 unhinted arm 1600, a 3:1 hinted-weighted mix — state both facts in the paper
 caption). Headline: the DPO bars are taller than base in EVERY dataset × hint
 cell and every pooled group (pooled: e.g. lsat_ar 5913→6982→7307, wmdp
@@ -1029,12 +1041,22 @@ create an accuracy trend.
 ### Step 30 — `30_acc_monitorability_panel.py`
 
 `acc_vs_monitorability_panel_{model}.png`: the write-up figure for "does task
-performance predict monitorability?" — panel (a) = question level, mean
-`gmean2_i` at each of the 9 accuracy levels k/8 with bootstrap 95% CIs, n
-under each dot, a dotted line at the 0/8–7/8 mean and the
-always-correct-vs-rest Δ annotated (base: flat 0.726 then 0.838 at 8/8; Δ as
-in step 28); panel (b) = slice level, the 24 (dataset × hint) points with a
-flat OLS fit (base r=−0.01, p=0.97). Combines 27's pooled panel and 29's
+performance predict monitorability?" — panel (b), drawn on the RIGHT, is the
+question level: mean `gmean2_i` at each of the 9 accuracy levels k/8 with
+bootstrap 95% CIs, n under each dot, and a dotted reference line at the
+0/8–7/8 mean (base: flat 0.726 then 0.838 at 8/8). The reference line **spans only the levels it is
+computed from** (0/8 to 7/8) and stops short of the 8/8 level, so the
+exclusion is visible in the geometry rather than needing a caption. The
+always-correct-vs-rest Δ is **no longer annotated by default** — it is the
+hand-off to the consistency analysis (step 31) rather than part of the
+accuracy result this panel reports, and annotating it invited the figure to
+be read as an accuracy effect. Pass `--show-threshold-delta` to restore it;
+the numbers print to stdout either way (Δ as in step 28); panel (a), on the
+LEFT, is the slice level — the 24 (dataset × hint) points plotted bare. The
+OLS fit and the on-panel Pearson r were removed: the relationship is null
+(base r=−0.01, p=0.97) and a drawn line invited it to be read as a trend; the
+coefficient still prints to stdout. The dataset/hint legend is anchored to the
+RIGHT-hand axes so it clears both panels. Combines 27's pooled panel and 29's
 slice scatter on one canvas so the two levels of aggregation read as a single
 contrast — reliability matters, task difficulty does not. Stdout also prints
 a **CoT-length robustness check** the other steps lack: the always-vs-rest Δ
@@ -1050,25 +1072,50 @@ answer". Defines `consistency_i` = modal-answer share over the valid unhinted
 runs (**no new inference** — the unhinted arm is shared across hint types, so
 it is read once per dataset and joined to all 3 hint slices, matching 27/28's
 pooling) and splits entering questions into inconsistent /
-consistent-but-WRONG / consistent-and-CORRECT, one dot + bootstrap CI each,
-with the two decisive contrasts bracketed. Base model: 0.710 (n=1477) / 0.807
-(n=281) / 0.843 (n=992) — the **consistency effect** (consistent-wrong −
-inconsistent) = +0.096 [+0.056, +0.137] is significant while the
-**correctness effect** (consistent-correct − consistent-wrong) = +0.037
-[−0.004, +0.078] is not, and Spearman(consistency, g-mean²)=+0.187 beats
+consistent-but-WRONG / consistent-and-CORRECT, one dot + 95% CI each (cluster bootstrap over questions — a question's up-to-3 hint rows are resampled together — 10,000 resamples),
+with the two decisive contrasts bracketed. Base model: 0.710 (n=1433) / 0.805
+(n=285) / 0.838 (n=1032) — the **consistency effect** (consistent-wrong −
+inconsistent) = +0.095 [+0.047, +0.143] is significant while the
+**correctness effect** (consistent-correct − consistent-wrong) = +0.033
+[−0.018, +0.083] is not, and Spearman(consistency, g-mean²)=+0.186 beats
 Spearman(accuracy, g-mean²)=+0.138. Conclusion: monitorability tracks
 COMMITMENT to an answer, not task correctness; 27/28's accuracy threshold is
 largely a determinism proxy. Layout: above a dashed separator, the three
 groups — Inconsistent (grey), Consistent-WRONG (red), Consistent-CORRECT
 (navy) — with the two effects bracketed between them; below the line, the
-merged Consistency dot (0.835, teal, n=1273) pooling both consistent groups.
-Stdout flags the ~1.5% of question-slices that are "always correct" but not
-fully consistent — a known mismatch between `acc_u_i`'s valid-run set and the
-runs with a parseable answer. `--merge-consistent` collapses the two
-consistent groups into one (inconsistent 0.710 n=1477 vs consistent 0.835
-n=1273; consistency effect +0.125 [+0.100, +0.149]) →
+merged Consistency dot (0.831, teal, n=1317) pooling both consistent groups.
+Runs that hit the generation cap are excluded from the answer set, matching
+`u_valid` in `src/gmean2_metrics.py`: the denominator is then identical to
+`acc_u_i`'s, so "always correct" implies "consistent" and the
+consistent-and-CORRECT group is exactly the 8/8 level of step 30's question
+panel (n=1032 in both). `--merge-consistent` collapses the two
+consistent groups into one (inconsistent 0.710 n=1433 vs consistent 0.831
+n=1317; consistency effect +0.121 [+0.092, +0.150]) →
 `consistency_vs_correctness_2group_{model}.png` — the simpler two-dot
 headline when the correctness decomposition is not needed.
+`--arm hinted` computes consistency (and accuracy) from the HINTED runs
+pooled over all 3 hint types (up to 24 per question) instead of the unhinted
+arm; rows and g-mean² values are unchanged, only the grouping →
+`consistency_vs_correctness_hinted_{model}.png`. Always two-group:
+consistent-and-correct is empty by construction (an entering question has
+p1 > 0 in every hint slice, so some hinted run picked the wrong hint target),
+and every consistent question picked the hint target in all its hinted runs.
+Base result reverses the unhinted pattern: inconsistent 0.791 (n=2438) vs
+consistent 0.591 (n=312), Δ −0.200 [−0.252, −0.147].
+`--adjusted` replaces every dot and bracket with its dataset- and
+hint-adjusted counterpart → `consistency_vs_correctness_adjusted_{model}.png`
+(combines with `--merge-consistent` → `…_2group_adjusted_…`). Fits OLS
+`g-mean² ~ group + dataset FE + hint-type FE` jointly over the plotted groups
+and evaluates each group on the pooled dataset × hint mix (adjusted means),
+so each bracket equals the difference of the two dots it joins; the pooled
+consistent dot uses a separate two-group model. CIs use the same cluster bootstrap
+over questions as the raw figure (10,000 resamples, script default). Base result: inconsistent 0.725 [0.705, 0.746],
+consistent-WRONG 0.807 [0.764, 0.850], consistent-CORRECT 0.816
+[0.793, 0.839], pooled consistent 0.814 [0.794, 0.834]; consistency effect
++0.082 [+0.035, +0.128], correctness effect +0.009 [−0.040, +0.060]. (The
+correctness effect from a model fitted on the two consistent groups alone is
++0.019 [−0.037, +0.075]; the joint model estimates the dataset and hint
+terms from all three groups, hence the small difference.)
 
 ### Step 32 — `32_gmean2_acc_bands_by_dataset.py`
 
@@ -1088,23 +1135,59 @@ guards n.
 ### Step 33 — `33_consistency_vs_correctness_by_dataset.py`
 
 `consistency_vs_correctness_by_dataset_{model}.png`: per-dataset (8-panel 2×4
-small multiple, shared x) version of step 31's pooled three-group figure —
-same groups, colours and vertical order, one mean `gmean2_i` dot + bootstrap
-95% CI per group per dataset, n annotated. Same no-new-inference join as 31.
-Groups with n<`--min-n` (default 8) dropped per panel — consistent-WRONG is
-the thin group (pooled n=281; lsat_ar n=8, lsat_lr/codemmlu n=13, so wide CIs
-there). Stdout prints per dataset the group table + the two step-31 contrasts
-with CIs. Base model: in all 8 datasets both consistent groups sit above
-inconsistent, and consistent-WRONG ≈ or > consistent-CORRECT in 4/8
-(medxpertqa, codemmlu, wmdp, gpqa within CI) — the "commitment, not
-correctness" pattern is not carried by a few datasets. `--merge-consistent`
+small multiple, shared x) version of step 31's pooled figure — same groups,
+colours and vertical order, one mean `gmean2_i` dot + 95% CI per group per
+dataset (cluster bootstrap over questions — a question's up-to-3 hint rows are
+resampled together, all groups in a dataset sharing the same draws — 10,000
+resamples), annotated `n=<rows> (<questions>q)`. Like step 31, each panel carries **four
+rows**: the three contrast groups above a dashed divider, and below it the
+pooled Consistency dot (consistent-WRONG + consistent-CORRECT together, teal),
+which shows where the whole committed group lands per dataset. That row is not
+a fourth contrast — it is rows 2 and 3 combined and deliberately double-counts
+them, so it is excluded from the printed contrasts. Same no-new-inference join
+as 31. Group means are raw (not adjusted for the within-dataset hint mix), so
+the figure is descriptive.
+Groups with fewer than `--min-n` (default 8) distinct QUESTIONS are dropped
+per panel — consistent-WRONG is the thin group (pooled 285 rows / 146
+questions); base model drops it in lsat_ar (4q) and lsat_lr (6q), and keeps
+very thin cells in codemmlu (9q), mmlu_pro (12q), medxpertqa's
+consistent-CORRECT (15q), gpqa_diamond (16q), wmdp (17q) and lexam (18q), so
+the red-vs-navy split should not be read per dataset. Stdout prints per
+dataset the group table + the two step-31 contrasts with CIs. Base model: the
+pooled consistent dot sits above inconsistent in all 8 datasets, but
+consistent-WRONG does not everywhere (mmlu_pro 0.758 vs 0.774, gpqa_diamond
+0.641 vs 0.648, both with wide CIs); consistent-WRONG ≥ consistent-CORRECT in
+medxpertqa, codemmlu and wmdp. `--merge-consistent`
 collapses the two consistent groups → `…_by_dataset_2group_{model}.png` — the
 well-powered per-dataset split (adequate n in every dataset): base model
 shows consistent > inconsistent in all 8 datasets, consistency effect
-+0.11…+0.18. Division of labour for the paper: the pooled step-31 figure
++0.06…+0.17 (lsat_ar's CI includes zero: +0.064 [−0.013, +0.139]; lsat_lr's lower bound is +0.002). Division of labour for the paper: the pooled step-31 figure
 carries the 3-group decomposition (needs the power); this 2-group
 per-dataset figure shows the consistency effect generalises across domains
 (needs robustness).
+`--adjusted` replaces every dot and contrast with its hint-adjusted
+counterpart within each dataset → `…_by_dataset_adjusted_{model}.png`
+(combines with `--merge-consistent` → `…_2group_adjusted_…`). Per dataset,
+OLS `g-mean² ~ group + hint-type FE` is fitted jointly over the contrast
+groups and each group is evaluated on that dataset's hint mix (adjusted
+means), so contrasts = differences of the dots; the pooled consistent row uses
+a separate two-group model. Groups below `--min-n` stay in the model but are
+not drawn; same cluster bootstrap. Base model: pooled consistent − inconsistent
+is positive in all 8 datasets (+0.034 lsat_ar … +0.114 lsat_lr/codemmlu,
+matching the per-dataset hint-adjusted gaps), while consistent-WRONG ≈
+inconsistent in mmlu_pro (0.754 vs 0.789) and gpqa_diamond (0.655 vs 0.653)
+and clearly above it in medxpertqa (+0.117), codemmlu (+0.161) and wmdp
+(+0.171). Cells with < ~20 questions are unstable under adjustment.
+`--by hint` draws one panel per hint type instead (1×3, all datasets pooled)
+→ `consistency_vs_correctness_by_hint{_2group}{_adjusted}_{model}.png`; with
+`--adjusted` the adjustment is for the dataset mix within each hint type.
+Each question appears once per hint panel, so n = questions. Base model,
+dataset-adjusted, consistent − inconsistent: professor +0.022 [−0.030,
++0.073] (n.s.), grader-hacking +0.218 [+0.158, +0.277], unethical +0.055
+[+0.032, +0.078] — the consistency effect is hint-type specific: large for
+grader-hacking, small but significant for unethical, absent for professor.
+Consistent-WRONG − inconsistent: +0.056 [−0.019, +0.129] / +0.175 [+0.068,
++0.282] / +0.049 [+0.011, +0.086]; correctness effect n.s. under every hint.
 
 ### Step 34 — `34_acc_monitorability_inconsistent.py`
 
@@ -1114,7 +1197,7 @@ COMMITTED questions removed, does accuracy predict monitorability? Level plot
 line) of mean `gmean2_i` at each retained unhinted-accuracy level k/8, with
 Pearson/Spearman over the retained per-question points. `--filter
 inconsistent` (default) keeps questions with consistency<1 (drops "always
-correct" 8/8 and "always same wrong answer") — base: n=1437, flat around
+correct" 8/8 and "always same wrong answer") — base: n=1433, flat around
 0.71, Pearson r=+0.06 (p=0.02, negligible), Spearman ρ=+0.04 (p=0.10, n.s.).
 `--filter partial-acc` instead keeps accuracy strictly in 1/8..7/8 (drops
 BOTH endpoints regardless of consistency) — base: n=1033, r=+0.03 (p=0.29).
@@ -1131,6 +1214,10 @@ consistency-filtered); levels with n<`--min-n` (default 8) dropped per panel
 some levels vanish; the same power caveat that made 27's `--per-dataset`
 collapse to 3 groups). Base model: the pooled shape (flat 0/8–7/8, up at 8/8)
 is visible but noisy per dataset; the 8/8 dot is the highest in most panels.
+Each panel carries step 30's red dotted reference line — the question-level
+mean g-mean² over ALL 0/8–7/8 questions of that dataset (dropped levels
+included, not a mean of the dots), drawn only across the 0/8–7/8 levels —
+with its value printed under the dataset name.
 Use 27 `--per-dataset` / 32 for the powered per-dataset views; this is the
 full-resolution companion. `--bands "0,1,2,3|4,5,6,7|8"` groups accuracy
 levels into bands per panel (k-lists split by `|`, same syntax as 32) to
@@ -1172,11 +1259,19 @@ gmean2) ≈ −0.14; tercile means 0.823/0.750/0.730). This step splits question
 into short/medium/long unhinted-CoT terciles and, within each, contrasts
 consistent vs inconsistent `gmean2_i` (grey inconsistent, navy consistent,
 bootstrap 95% CI, n, Δ per tercile). Base model: consistent beats
-inconsistent in ALL three terciles (Δ = +0.176 / +0.097 / +0.059, every CI
-clear of zero), so the consistency effect survives conditioning on length —
+inconsistent in ALL three terciles (Δ = +0.176 / +0.098 / +0.049; the short
+and medium CIs clear zero, the long-tercile CI marginally spans it at
+[−0.002, +0.098]), so the consistency effect survives conditioning on length —
 it is not a length artifact (the gap attenuates with length but never closes;
 the length→monitorability effect itself is concentrated among consistent
-questions, Spearman −0.21 vs +0.02 n.s. among inconsistent). Variants:
+questions, Spearman −0.21 vs +0.02 n.s. among inconsistent). Caveat: the pooled
+groups mix hint types unevenly (unethical ≈ 59% of consistent vs 42% of
+inconsistent rows, since slice entry depends on the hint), so part of the
+pooled gap is composition. `--by-hint` → `…_by_hint_{model}.png`, one panel
+per hint type (pooled tercile cuts): grader-hacking +0.321/+0.171/+0.080,
+unethical +0.092/+0.045/+0.008, professor +0.075/+0.025/−0.016 (no professor
+CI clears zero; no long-tercile CI clears zero) — the effect is hint-dependent
+and confined to short/medium responses. Variants:
 `--style two-dot` renders the step-31 horizontal two-dot look instead — among
 the retained questions, mostly-incorrect (k<`--acc-split`, default 4 → 0–3/8)
 vs mostly-correct (4–7/8), with the contrast bracket
@@ -1190,6 +1285,65 @@ line, Pearson/Spearman box) → `…_levels_h_{model}.png` — base/inconsistent
 flat around 0.71 across all 8 levels (0/8 and 2/8 lowest at 0.675, 6/8
 highest at 0.744), CIs all overlapping — the honest "no graded accuracy
 trend" view the two-dot median split obscures.
+
+### Step 55 — `55_consistency_controlled.py`
+
+Follow-up to step 36 that controls for everything at once. (a) A ladder of
+OLS regressions of `gmean2_i` on `consistent` (same answer in all valid
+unhinted runs) on the question × hint rows, 95% CIs from a cluster bootstrap
+over QUESTIONS (rows of one question share hint types) →
+`monitorability-results/consistency_controlled_regression_{model}.md`. Base
+model: (1) no controls +0.121 [+0.092, +0.151]; (2) + dataset + hint type
+fixed effects +0.089 [+0.061, +0.117]; (3) + log unhinted length +0.081
+[+0.050, +0.112]; (4) + p0 > 0 +0.044 [+0.010, +0.077]. (4) is a bound, not a
+missing correction: TPR_mc already divides by R_effect, but that is estimated
+from 8 runs and capped at 1. (b) Appendix figure
+`consistency_within_dataset_length_terciles_{model}.png`: 2×4 panels, length
+terciles cut separately per dataset so no comparison mixes datasets; groups
+with fewer than `--min-n` (default 10) rows on a side drawn hollow with no Δ.
+Base: consistent higher in 19 of 22 comparable groups (exceptions lsat_ar
+short/long, lexam long).
+
+### Step 56 — `56_gmean2_by_p0_level.py`
+
+`gmean2_by_p0_level_{model}.png`: mean per-question g-mean² (95% cluster
+bootstrap over questions, 10,000 resamples) at each p0 level k/8 = number of
+the 8 valid unhinted runs that picked the hint target. Only questions with
+exactly 8 valid unhinted runs (exact k/8; base 2,618 of 2,750 retained rows).
+8/8 cannot occur (p0 = 1 → TE ≤ 0). At 0/8 the rows are split into consistent
+(p0 = 0 by construction) and inconsistent-never-picked; all k ≥ 1 rows are
+inconsistent. Hints and datasets pooled row-wise; dotted line = overall mean.
+Base: consistent 0.835 [0.814, 0.855] (754q), inconsistent 0/8 0.762 [0.737,
+0.788] (351q), then a sharp drop at 1/8 (0.584, 74q) and a noisy plateau
+0.59–0.70 through 5/8, recovering to ~0.75 at 6/8–7/8 (18–21q each, wide CIs)
+— no dose–response; the drop starts as soon as the hinted answer appears once.
+
+### Step 57 — `57_gmean2_by_answer_entropy.py`
+
+`gmean2_by_answer_entropy_{model}.png`: monitorability by the model's
+uncertainty, measured as the Shannon entropy (bits) of its 8 valid unhinted
+answers (H = 0 consistent; 7:1 = 0.54; 4:4 = 1.00; 4:2:1:1 = 1.75). With 8
+runs only 16 distinct values occur, so rows are binned: consistent (H = 0),
+very low (0–0.6, i.e. 7:1), low (0.6–1.0, two answers), medium (1.0–1.5),
+high (> 1.5). Mean g-mean² per bin with a question-cluster bootstrap CI
+(10,000 resamples); stdout adds the per-pattern table and Spearman(H, g-mean²)
+over inconsistent rows only. Same sample as step 56 (exactly 8 valid unhinted
+runs). Max H is 2 bits for 4-option datasets, 3 bits with ≥ 8 options, so bins
+are on raw bits. `--by-hint` → 1×3 per-hint panels (`…_by_hint_…`).
+Base, pooled: consistent 0.835 (754q), very low 0.734 (157q), low 0.747
+(231q), medium 0.658 (136q), high 0.649 (51q); Spearman over inconsistent rows
+−0.103 (p < 0.001). Reading: the largest step is consistent → any
+uncertainty; among two-answer patterns the balance of the split (7:1 … 4:4)
+barely matters; a second, smaller drop comes with a third distinct answer.
+Per hint: grader-hacking 0.666 → 0.495 / 0.480 → 0.347 / 0.391 (the gradient
+lives here); unethical 0.921 → 0.876 / 0.882 → 0.837 / 0.818; professor flat
+(0.76 / 0.75 / 0.80 / 0.73 / 0.68, ρ n.s.).
+`--fine` replaces the five entropy bins with eight answer-count groups
+(consistent | 7:1 | 6:2 | 5:3 | 4:4 | 3 answers 6:1:1/5:2:1 | 3 answers
+4:3:1/4:2:2/3:3:2 | 4+ answers) → `…_fine_…` (combines with `--by-hint`).
+Base, pooled: 0.835 (754q) | 0.734 (157q) | 0.740 (106q) | 0.763 (92q) |
+0.729 (33q) | 0.664 (88q) | 0.632 (65q) | 0.678 (34q) — flat across all
+two-answer splits, lower once a third answer appears, no further fall at 4+.
 
 ### Step 37 — `37_unhinted_length_gmean2_quantile.py`
 
@@ -1229,9 +1383,10 @@ their pooled mean reproduces 36's inconsistent dot and the per-tercile Δ
 (printed in the docstring): consistent-but-WRONG questions (same wrong answer
 8/8) are consistent, so they sit in the navy dot NOT the 0/8 dot — the 0/8
 dot is inconsistent-and-never-correct only. A handful of inconsistent
-questions round to k=8 (a parsed run dropped from grading, so `acc_u_i` is
-over fewer valid runs than the answer set); the top band selector is `k≥4`
-(not 4–7) to fold them in and keep the partition exact. Base model: within
+questions could once round to k=8 (when `acc_u_i`'s valid-run set differed
+from the answer set); since step 31's alignment both use the same rule and the
+class is empty, but the top band selector stays `k≥4` (not 4–7) so the
+partition is exact by construction. Base model: within
 the inconsistent group accuracy has at most a weak, noisy graded effect
 (0/8→4–7/8 rises ~0.671→0.744 in the long tercile but bands overlap heavily
 in short/medium), while the consistent dot sits well above all three
@@ -1269,11 +1424,11 @@ shared unhinted arm), length = `mean_cot_tokens_unhinted`. Binned by
 `--linear-x`; dots at bin median) with **mean consistency on y** + bootstrap
 95% CI; corner box reports pooled Spearman ρ + bootstrap CI. Base model
 (test, n=1595, ~319/bin): mean consistency declines monotonically as
-reasoning lengthens — 0.989 (262–777 tok) → 0.913 → 0.852 → 0.844 → **0.768**
+reasoning lengthens — 0.989 (262–777 tok) → 0.913 → 0.852 → 0.847 → **0.785**
 (4232–15691 tok), tight mostly-non-overlapping CIs;
-**Spearman(consistency, length) = −0.445 [−0.482, −0.406]**, and consistent
-(mode=1) questions are ~2.4× shorter than inconsistent ones (median 1122 vs
-2690 tok). So the shortest, most-monitorable questions are disproportionately
+**Spearman(consistency, length) = −0.414 [−0.453, −0.375]**, and consistent
+(mode=1) questions are ~2.2× shorter than inconsistent ones (median 1147 vs
+2570 tok). So the shortest, most-monitorable questions are disproportionately
 the consistent ones — unhinted length is an indirect symptom of commitment,
 not an independent axis; pair with 36 (which shows the consistency effect
 survives conditioning on length).
@@ -1425,7 +1580,97 @@ and lsat_ar −0.177 [−0.299,−0.061], with gpqa_diamond/lsat_lr/lexam/wmdp
 straddling zero — the same per-dataset signs step 48 finds hint-by-hint, here
 at ~2× the n per panel. Same ties caveat as every ρ in this theme.
 
-## Response-length tables (steps 44–45)
+### Step 50 — `50_gmean2_by_consistency_level.py`
+
+`gmean2_by_consistency_level_{model}.png`: the **consistency analogue of step
+27**. Step 27 plots monitorability against unhinted accuracy level k/8; this
+plots it against the full consistency scale, answering what 31/33/36 leave
+open — is commitment a threshold like accuracy, or a gradient? Correctness
+plays no part: the only variable is `consistency_i` = modal unhinted answer
+share, shown as a percentage. Note the floor is **1/8 = 12.5%**, not 0: the
+modal count is at least 1, so 0% is unattainable (and 12.5%, all eight
+answers distinct, is empty for the base model). Unit, population and snapping
+match step 27 — entering observations (level-1 pass, `gmean2_i` defined) over
+8 datasets × 3 hints, consistency read once per dataset from the shared
+unhinted arm and joined to each of that question's entering slices, questions
+with <8 valid runs snapped to the nearest k/8. Per level: mean `gmean2_i`,
+percentile-bootstrap 95% CI, n under the axis; `--min-n` (default 5) drops
+thin levels and the connecting line breaks across the gap. Base model (test,
+2750 observations): **both** — a shallow gradient from 0.628 at 37.5% to a
+plateau of ≈0.72–0.73 across 62.5–87.5%, then a clear step to 0.831 at 100%
+(Pearson r = +0.174, Spearman ρ = +0.186; fully-consistent vs rest Δ = +0.121
+[+0.095, +0.146]). ⚠️ the 25% level rests on n=6 with a CI spanning 0.11–0.61,
+which stretches the y-axis; `--min-n 20` drops it and renders the gradient far
+more legibly. That Δ is the pooled-consistent vs inconsistent contrast, so it
+is **not** step 31's consistency effect (+0.095), which compares
+consistent-but-WRONG with inconsistent — different groups, both correct.
+
+## Experiment: uncertainty-vs-monitorability (steps 58–59)
+
+Does monitorability fall gradually with the model's uncertainty, measured as
+the Shannon entropy of its unhinted answers? Step 57 asks this on the main
+N = 8 run, where entropy takes only a handful of values; this experiment
+re-runs a slice of the base model at **N = 30 runs per question per arm** so
+entropy is measured finely.
+
+**Design.** Base `Qwen/Qwen3-4B`; datasets `gpqa_diamond`, `lexam`, `wmdp`
+(the only datasets where every question has exactly 4 options, so entropy is
+on one 0–2-bit scale, and the three with the most unhinted-answer variation
+among them); hint `grader_hacking` only (the hint with the largest
+consistent-vs-inconsistent g-mean² gap at N = 8, in every one of the three
+datasets). Same 200-question test split and hint targets as the main run.
+Entropy, p0 and TNR_X=0 all use the full set of valid unhinted runs.
+
+**Config.** `config/uncertainty_vs_monitorability.yaml` is a copy of
+`config/mvp_config.yaml` with only three changes: `qwen_inference.n_samples:
+30`, `checkpoint_every: 50`, and every result path moved under
+`outputs-and-results/uncertainty-vs-monitorability/` (`data_dir` is
+unchanged, so the prepared indexes are reused). Steps 02–06 run unchanged with
+`--config config/uncertainty_vs_monitorability.yaml`; nothing in the main
+N = 8 tree is touched. The seeds are the same scheme as the main run (unhinted
+3^(s+1), hinted 2^(s+1)), so runs 0–7 reuse the N = 8 run's seeds and runs
+8–29 are new.
+
+### Step 58 — `58_uvm_answers_and_parse_report.py`
+
+Needs inference outputs only (run it on the GPU box). Writes
+`{analysis}/{model}/{ds}/grader_hacking/answers_per_run.csv`: one row per run
+with the parsed answer letter, correct answer, hint target, correctness,
+hint-following, truncation, token count and `valid` (parsed and not
+truncated). Writes `{analysis}/{model}/parse_report_grader_hacking.{csv,md}`:
+per dataset × arm (plus an `ALL` row per arm), the number of runs whose answer
+letter could not be parsed, split into truncated / not truncated, plus runs
+truncated but still parsed (excluded from analysis), and the number of
+questions with fewer than `--min-valid` (27) valid runs.
+
+### Step 59 — `59_uvm_gmean2_by_answer_entropy.py`
+
+The N = 30 counterpart of step 57 (step 57 itself is unchanged). Per question,
+H = entropy (bits) of its valid unhinted answers; questions with fewer than
+`--min-valid` (27) valid runs are dropped (count printed per dataset). Bins
+are equal-width (`--bin-width`, default 0.5 bits, up to `--max-h` 2 bits) with
+H = 0 kept as its own bin; at N = 30 one stray answer (29:1) already gives
+H ≈ 0.21, so "consistent" is stricter than at N = 8. One row per question
+(single hint); mean g-mean² per bin with a 95% bootstrap CI over questions;
+bins with fewer than `--min-q` (8) g-mean²-defined questions are not drawn.
+Each bin also reports its Level-1 pass rate, which rises with entropy
+(consistent questions resist the hint more often), so the g-mean² means sit
+on different subsets. Stdout: bin tables + Spearman(H, g-mean²) over H > 0.
+Outputs: `{plots}/{model}/gmean2_by_answer_entropy_grader_hacking.png`
+(pooled + one panel per dataset), `{analysis}/{model}/entropy_per_question_
+grader_hacking.csv` (n_valid, H, bin, answer counts, modal answer/share, p0,
+p1, TE, Level-1 pass, g-mean², …), `{analysis}/{model}/entropy_bins_
+grader_hacking.csv`.
+
+**Run order** (from `Full-Codebase/RO1/`; `C=config/uncertainty_vs_monitorability.yaml`):
+GPU — `02_run_inference_qwen.py --config $C --model Qwen/Qwen3-4B --datasets
+gpqa_diamond lexam wmdp --hint-type grader_hacking`, then
+`08_cot_token_analysis.py` and step 58 with the same `--config`; CPU — per
+dataset `03_run_monitor.py`, `04_compute_gmean2.py`, `05_analyze_gmean2.py`,
+`06_export_excel.py` with `--config $C --dataset <ds> --hint-type
+grader_hacking`, then step 59.
+
+## Response-length tables (steps 44–45, 53–54)
 
 The response-length analogues of the main-results level tables; both read
 step 08's **`length_pools`** (see [Reports (step 09)](#reports-step-09)) and
@@ -1555,6 +1800,43 @@ dataset/arm, and hinted ≈ unhinted inflation in most datasets (the verbosity
 shift is largely arm-independent, hinted only slightly larger). Requires all
 three models' stats to carry `length_pools` — re-run step 08 per model first
 if they predate the enrichment.
+
+### Step 53 — `53_per_question_hint_length_change.py`
+
+The paired, per-question view of the hint effect on length (the median bars of
+step 46 are marginal). For ONE model (`--model`, default base Qwen3-4B), per
+question: **ratio = median hinted length / median unhinted length** over that
+question's runs (8 runs per arm per hint type; arms paired by `instance_id`).
+One PNG per dataset →
+`extra-plots/hint-effect-on-length/{model}/length_change_per_question_{dataset}_{model}.png`,
+four columns: professor / grader-hacking / unethical (200 questions each) and
+**All hints pooled** (median over the 24 hinted runs vs the same 8 unhinted
+runs). Each column = violin + box (median, IQR, whiskers 5th–95th pct) + one
+jittered dot per question, on a log2 y-axis with a dashed no-change line at
+×1; annotated with the median per-question % change and the share of questions
+that got longer. Reads step 08's `length_pools`; includes truncated runs.
+Headline (base, test): pooled median change is +0–2% in gpqa_diamond,
+medxpertqa, lexam and wmdp but +9–25% in mmlu_pro, lsat_lr, codemmlu and
+lsat_ar; the unethical hint drives the large shifts (+42–56% in mmlu_pro,
+codemmlu, lsat_ar) and is slightly negative in four datasets.
+
+### Step 54 — `54_length_change_vs_gmean2.py`
+
+Do the datasets whose length changes most when the hint is introduced also
+have the lowest monitorability? One model (`--model`, default base). 1×4
+panels, one point per dataset (n = 8): x = step 53's median per-question %
+length change (imported from step 53, so the numbers match its figures);
+y = g-mean². **A** all hints pooled (y = unweighted mean of the 3 hint types'
+g-mean²); **B–D** each hint type (y = cell g-mean² with 95% CI). Spearman ρ
+and p in each panel title (n = 8 → indicative only). Hint types are kept in
+separate panels rather than pooled into 24 points because hint type moves
+both variables (unethical: largest length shifts AND highest g-mean²). →
+`extra-plots/hint-effect-on-length/{model}/length_change_vs_gmean2_{model}.png`.
+Headline (base, test): no negative relationship — every ρ is positive (pooled
++0.60, p = 0.12; professor +0.07; grader-hacking +0.90, p = 0.002; unethical
++0.52, p = 0.18): datasets with larger hint-induced length increases tend to be
+MORE monitorable, not less; lsat_lr (moderate change, lowest g-mean²) is the
+main exception.
 
 ## Utilities
 

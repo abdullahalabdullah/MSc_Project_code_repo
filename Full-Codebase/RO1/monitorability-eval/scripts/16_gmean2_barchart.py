@@ -8,7 +8,8 @@ hint-type sets (professor, grader_hacking, unethical), each set = base bar
 (solid) + harmlessness-DPO bar (striped hatch) + anti-sycophancy-DPO bar
 (dotted hatch), with the point estimate printed above each error bar. Error
 bars are the per-hint-type bootstrap 95% CIs from results_summary.json
-(ci95.gmean2 — per-hint, NOT the pooled paired bootstrap). Colors are fixed
+(ci95.gmean2 — per-hint, NOT the pooled paired bootstrap); there is no
+cross-figure average line. Colors are fixed
 per hint type (light blue / light pink / light green; shades tuned so all
 pairs clear normal-vision and CVD separation floors); model identity is
 carried by the hatch, so it survives grayscale.
@@ -41,7 +42,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 import yaml
 
@@ -110,7 +110,7 @@ def main():
     ax.set_ylim(0, 1)
     ax.set_yticks([i / 10 for i in range(11)])
 
-    missing, bar_values = [], []
+    missing = []
     for d_idx, dataset in enumerate(DATASETS):
         for (hint, _, color), h_off in zip(HINTS, HINT_OFFSETS):
             for m_idx, (model_name, _, hatch) in enumerate(models):
@@ -120,7 +120,6 @@ def main():
                     missing.append(f"{model_name}/{dataset}/{hint}")
                     continue
                 est, (lo, hi) = got
-                bar_values.append(est)
                 x = d_idx + h_off + (m_idx - 1) * (BAR_W + 0.012)
                 ax.bar(x, est, width=BAR_W, color=color, hatch=hatch,
                        edgecolor=EDGE, linewidth=0.6, zorder=3)
@@ -133,17 +132,13 @@ def main():
                         ha="center", va="bottom", fontsize=6.5,
                         color="black", zorder=5, clip_on=False)
 
-    # Reference line: unweighted mean of every bar drawn in this figure.
-    avg = sum(bar_values) / len(bar_values)
-    ax.axhline(avg, color="red", linestyle="--", linewidth=1.2, zorder=4)
-
     ax.set_xticks(range(len(DATASETS)))
     ax.set_xticklabels(DATASETS)
     ax.set_xlim(-0.55, len(DATASETS) - 0.45)
     ax.set_xlabel("Dataset")
-    ax.set_ylabel("g-mean²")
-    ax.set_title("g-mean² per dataset and hint type — "
-                 + " vs ".join(m[1] for m in models), pad=22)
+    ax.set_ylabel("Monitorability (g-mean²)")
+    ax.set_title("Monitorability per dataset and hint type: Base vs "
+                 "Harmlessness DPO vs Anti-sycophancy DPO", pad=22)
     for spine in ("top", "right"):
         ax.spines[spine].set_visible(False)
     for spine in ("left", "bottom"):
@@ -153,9 +148,7 @@ def main():
                 for _, lbl, c in HINTS]
                + [Patch(facecolor="white", edgecolor=EDGE, linewidth=0.8,
                         hatch=hatch, label=lbl)
-                  for _, lbl, hatch in models]
-               + [Line2D([], [], color="red", linestyle="--", linewidth=1.2,
-                         label=f"Average ({avg * 100:.1f}%)")])
+                  for _, lbl, hatch in models])
     # Anchored to the top-right, fully outside the axes so it can never sit on
     # a column (bars reach ~0.97 with ylim capped at 1).
     ax.legend(handles=handles, loc="upper left", bbox_to_anchor=(1.005, 1.0),

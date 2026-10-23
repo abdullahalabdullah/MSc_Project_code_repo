@@ -69,6 +69,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FixedLocator, NullLocator
 import numpy as np
 from scipy import stats
 import yaml
@@ -203,9 +204,22 @@ def main():
     ax.set_axisbelow(True)
     if use_log:
         ax.set_xscale("log")
-        # clamp to the data range — else the log axis auto-pads down to ~10^0
-        # and squeezes every dot into the right half
-        ax.set_xlim(edges[0] * 0.85, edges[-1] * 1.15)
+        # Clamp to the PLOTTED points, not the bin edges. Dots sit at bin
+        # MEDIANS, so edge-based limits leave a wide empty band at each end
+        # (the first median is ~2x the lowest edge, the last ~0.4x the highest)
+        # and squeeze the data into the middle of the panel. Padding is
+        # symmetric in log space; the bin ranges printed under the axis still
+        # carry the full extents.
+        x_lo, x_hi = min(xs) / 1.4, max(xs) * 1.4
+        ax.set_xlim(x_lo, x_hi)
+        # The tightened range spans barely one decade, so the default log
+        # locator leaves a single "10^3" label. Use round token values instead,
+        # written in full — the reader is thinking in tokens, not powers.
+        ticks = [t for t in (250, 500, 1000, 2000, 4000, 8000, 16000)
+                 if x_lo <= t <= x_hi]
+        ax.xaxis.set_major_locator(FixedLocator(ticks))
+        ax.xaxis.set_major_formatter(lambda v, _: f"{int(v):,}")
+        ax.xaxis.set_minor_locator(NullLocator())
     ax.grid(True, color="#EEEEEE", linewidth=0.8)
     ax.errorbar(xs, ys, yerr=[elo, ehi], color=DARK_BLUE, linewidth=2.0,
                 marker="o", markersize=8, markeredgecolor="#333333",
@@ -216,9 +230,10 @@ def main():
         ax.annotate(f"n={n}", xy=(x, y + eh), xytext=(0, 6),
                     textcoords="offset points", ha="center", va="bottom",
                     fontsize=8.5, color="#555555")
-        ax.annotate(rg, xy=(x, 0), xycoords=("data", "axes fraction"),
-                    xytext=(0, 4), textcoords="offset points", ha="center",
-                    va="bottom", fontsize=7.5, color="#999999")
+        # bin token-RANGES deliberately not drawn: the axis is clamped to
+        # the plotted dots (bin medians), so a label like "4494-15691" names a
+        # value past the end of the axis and reads as a contradictory tick.
+        # The axis carries real token ticks; bin extents belong in the caption.
 
     ax.text(0.97, 0.93,
             f"Spearman ρ = {rho:+.3f}\n[{rlo:+.3f}, {rhi:+.3f}]",
@@ -226,14 +241,13 @@ def main():
             color=DARK_BLUE,
             bbox=dict(boxstyle="round,pad=0.4", fc="#F4F6F9", ec="#CCD3DB"))
 
-    ax.set_xlabel("Unhinted response length — per-question mean of 8 runs "
-                  f"(tokens{', log scale' if use_log else ''}; dots at bin "
-                  "median)")
-    ax.set_ylabel("Monitorability (g-mean²)  ·  error bars: bootstrap 95% CI")
-    ax.set_title("Monitorability vs unhinted (intrinsic) reasoning length — "
-                 f"{model_name}\n"
-                 f"pooled over {len(DATASETS)} datasets, {len(L)} questions; "
-                 f"{nb} equal-count bins (~{len(L)//nb}/bin)")
+    # Minimal chrome: this is a dissertation figure and its caption carries the
+    # model, the pooling, the bin construction and the CI method, so repeating
+    # them on the canvas is noise. The same facts are printed to stdout.
+    ax.set_xlabel(f"Unhinted response length{' (log scale)' if use_log else ''}"
+                  " - Per-question mean of 8 runs, in tokens "
+                  "(dots at bin median)")
+    ax.set_ylabel("Monitorability (g-mean²)")
     for spine in ("top", "right"):
         ax.spines[spine].set_visible(False)
     for spine in ("left", "bottom"):

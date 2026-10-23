@@ -18,9 +18,9 @@ not mean) with a bootstrap 95% CI, on a log y-axis. The pooled Spearman on the
 raw per-question values is shown in a corner box.
 
 Base model (test): median unhinted length falls monotonically as consistency
-rises — 3/8: ~3260 tok ... 7/8: ~2390 ... 8/8: ~1120 — Spearman(consistency,
-length) = -0.445 (p ~ 1e-78); consistent (mode=1) questions are ~2.4x shorter
-than inconsistent ones (median 1122 vs 2690 tok). So the shortest, most-
+rises — Spearman(consistency, length) = -0.414; consistent (mode=1) questions
+are ~2.2x shorter than inconsistent ones (median 1147 vs 2570 tok). So the
+shortest, most-
 monitorable questions are disproportionately the consistent ones: unhinted
 length is an indirect symptom of commitment, not an independent axis.
 
@@ -61,12 +61,18 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FixedLocator, NullLocator
 import numpy as np
 from scipy import stats
 import yaml
 
 from src.dataset import SPLITS, model_dir_name, resolve_paths
 from src.hints import HINT_TYPES
+
+# Type sizes set for the PRINTED size (canvas ~9in -> ~6.3in of
+# \textwidth, so ~0.7 scaling in the PDF).
+TICKS = (250, 500, 1000, 2000, 4000, 8000, 16000)
+FS_TITLE, FS_LABEL, FS_TICK, FS_N, FS_BOX = 13, 12, 11, 10, 11
 
 DEFAULT_MODEL = "Qwen/Qwen3-4B"
 N_RUNS = 8
@@ -130,6 +136,10 @@ def main():
             with fh:
                 for line in fh:
                     r = json.loads(line)
+                    # Truncated runs are fragments, not answers — excluded to
+                    # match the pipeline's u_valid rule (rationale in step 31).
+                    if r.get("truncated", False):
+                        continue
                     pa = r.get("parsed_answer")
                     if pa in (None, "", "N/A"):
                         continue
@@ -205,11 +215,17 @@ def main():
 
     # ---------------- figure ----------------
     use_log = not args.linear_x
-    fig, ax = plt.subplots(figsize=(9.5, 5.6))
+    fig, ax = plt.subplots(figsize=(9, 4.8))
     ax.set_axisbelow(True)
     if use_log:
         ax.set_xscale("log")
-        ax.set_xlim(edges[0] * 0.85, edges[-1] * 1.15)
+        # clamp to the plotted dots (bin medians), not the bin edges
+        x_lo, x_hi = min(xs) / 1.4, max(xs) * 1.4
+        ax.set_xlim(x_lo, x_hi)
+        _ticks = [v for v in TICKS if x_lo <= v <= x_hi]
+        ax.xaxis.set_major_locator(FixedLocator(_ticks))
+        ax.xaxis.set_major_formatter(lambda v, _: f"{int(v):,}")
+        ax.xaxis.set_minor_locator(NullLocator())
     ax.grid(True, color="#EEEEEE", linewidth=0.8)
     ax.errorbar(xs, ys, yerr=[elo, ehi], color=TEAL, linewidth=2.0,
                 marker="o", markersize=9, markeredgecolor="#333333",
@@ -218,26 +234,20 @@ def main():
     for x, y, eh, nn, rg in zip(xs, ys, ehi, ns, ranges):
         ax.annotate(f"n={nn}", xy=(x, y + eh), xytext=(0, 6),
                     textcoords="offset points", ha="center", va="bottom",
-                    fontsize=8.5, color="#555555")
-        ax.annotate(rg, xy=(x, 0), xycoords=("data", "axes fraction"),
-                    xytext=(0, 4), textcoords="offset points", ha="center",
-                    va="bottom", fontsize=7.5, color="#999999")
+                    fontsize=FS_N, color="#333333")
 
     ax.text(0.03, 0.06,
             f"n = {n}\nSpearman ρ = {rho:+.3f} [{rlo:+.3f}, {rhi:+.3f}]",
-            transform=ax.transAxes, ha="left", va="bottom", fontsize=9.5,
-            color="#333333",
-            bbox=dict(boxstyle="round,pad=0.45", fc="#F4F6F9", ec="#CCD3DB"))
+            transform=ax.transAxes, ha="left", va="bottom", fontsize=FS_BOX,
+            color=TEAL,
+            bbox=dict(boxstyle="round,pad=0.4", fc="#F4F6F9", ec="#CCD3DB"))
 
-    ax.set_xlabel("Unhinted response length — per-question mean of 8 runs "
-                  f"(tokens{', log scale' if use_log else ''}; dots at bin "
-                  "median)")
-    ax.set_ylabel("Answer consistency — modal-answer share over 8 runs\n"
-                  "mean per bin · bars: bootstrap 95% CI")
-    ax.set_title("Longer reasoning is LESS consistent — "
-                 f"{model_name}\n"
-                 "pooled over 8 datasets; the length↔monitorability effect is "
-                 "confounded with consistency")
+    ax.set_xlabel(f"Unhinted response length in tokens"
+                  f"{' (log scale)' if use_log else ''}", fontsize=FS_LABEL)
+    ax.set_ylabel("Mean answer consistency\n(share of the 8 runs giving the same answer)",
+                  fontsize=FS_LABEL)
+    ax.set_title("Consistency vs Response Length", fontsize=FS_TITLE)
+    ax.tick_params(labelsize=FS_TICK)
     for spine in ("top", "right"):
         ax.spines[spine].set_visible(False)
     for spine in ("left", "bottom"):

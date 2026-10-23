@@ -66,6 +66,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FixedLocator, NullLocator
 import numpy as np
 from scipy import stats
 import yaml
@@ -195,7 +196,18 @@ def main():
     ax.set_axisbelow(True)
     if use_log:
         ax.set_xscale("log")
-        ax.set_xlim(edges[0] * 0.85, edges[-1] * 1.15)
+        # Clamp to the PLOTTED points, not the bin edges — dots sit at bin
+        # MEDIANS, so edge-based limits leave a wide empty band at each end.
+        # Matches step 37 so the two figures can be shown side by side.
+        x_lo, x_hi = min(xs) / 1.4, max(xs) * 1.4
+        ax.set_xlim(x_lo, x_hi)
+        # Round token values rather than powers of ten: the tightened range
+        # spans barely one decade, so the default locator leaves a lone 10^3.
+        ticks = [t for t in (250, 500, 1000, 2000, 4000, 8000, 16000)
+                 if x_lo <= t <= x_hi]
+        ax.xaxis.set_major_locator(FixedLocator(ticks))
+        ax.xaxis.set_major_formatter(lambda v, _: f"{int(v):,}")
+        ax.xaxis.set_minor_locator(NullLocator())
     ax.grid(True, color="#EEEEEE", linewidth=0.8)
     ax.errorbar(xs, ys, yerr=[elo, ehi], color=PLUM, linewidth=2.0,
                 marker="o", markersize=8, markeredgecolor="#333333",
@@ -205,25 +217,26 @@ def main():
         ax.annotate(f"n={nn}", xy=(x, y + eh), xytext=(0, 6),
                     textcoords="offset points", ha="center", va="bottom",
                     fontsize=8.5, color="#555555")
-        ax.annotate(rg, xy=(x, 0), xycoords=("data", "axes fraction"),
-                    xytext=(0, 4), textcoords="offset points", ha="center",
-                    va="bottom", fontsize=7.5, color="#999999")
+        # bin token-RANGES deliberately not drawn: the axis is clamped to
+        # the plotted dots (bin medians), so a label like "4494-15691" names a
+        # value past the end of the axis and reads as a contradictory tick.
+        # The axis carries real token ticks; bin extents belong in the caption.
 
+    # The box states the statistic only. The comparison against the unhinted
+    # figure and the reading of it belong to the prose that shows the two side
+    # by side, not to an annotation on one of them.
     ax.text(0.97, 0.93,
-            f"Spearman ρ = {rho:+.3f}\n[{rlo:+.3f}, {rhi:+.3f}]\n"
-            f"negligible — vs −0.29 unhinted",
+            f"Spearman ρ = {rho:+.3f}\n[{rlo:+.3f}, {rhi:+.3f}]",
             transform=ax.transAxes, ha="right", va="top", fontsize=10,
             color=PLUM,
             bbox=dict(boxstyle="round,pad=0.4", fc="#F4F1F8", ec="#C9BEDD"))
 
-    ax.set_xlabel("HINTED response length — per-question mean over 8 runs × 3 "
-                  f"hints (tokens{', log scale' if use_log else ''}; dots at "
-                  "bin median)")
-    ax.set_ylabel("Monitorability (g-mean²)  ·  error bars: bootstrap 95% CI")
-    ax.set_title("Monitorability vs HINTED length (what the monitor reads) — "
-                 f"{model_name}\n"
-                 f"{n} questions (parity with the unhinted figure); negligible "
-                 "relationship — the length effect is intrinsic, not transcript length")
+    # Minimal chrome, matching step 37: the caption carries the model, the
+    # pooling, the bin construction and the CI method.
+    ax.set_xlabel(f"Hinted response length{' (log scale)' if use_log else ''}"
+                  " - Per-question mean over 8 runs × 3 hints, in tokens "
+                  "(dots at bin median)")
+    ax.set_ylabel("Monitorability (g-mean²)")
     for spine in ("top", "right"):
         ax.spines[spine].set_visible(False)
     for spine in ("left", "bottom"):

@@ -17,9 +17,20 @@ If the consistency gap survives at every length, it is not a length artifact.
     length_i      = mean unhinted CoT tokens (mean_cot_tokens_unhinted)
 
 Base model: consistent beats inconsistent in ALL three terciles
-(Δ = +0.176 / +0.097 / +0.059, every CI clear of zero), so consistency
-predicts monitorability after conditioning on length. (The gap shrinks with
-length — the two interact — but never closes.)
+(Δ = +0.176 / +0.098 / +0.049; short and medium CIs clear zero, the long
+tercile's marginally spans it at [−0.002, +0.098]), so consistency predicts
+monitorability after conditioning on length. (The gap shrinks with length —
+the two interact — but never closes.)
+
+CAVEAT — hint-type composition: entry into a (dataset, hint) slice depends on
+the hint, so the pooled groups mix hint types unevenly (unethical, the most
+monitorable hint, is ~59% of consistent rows vs ~42% of inconsistent ones) and
+part of the pooled gap is composition. --by-hint draws one panel per hint type
+(tercile cuts still from the pooled lengths, shared across panels). Base:
+grader-hacking +0.321 / +0.171 / +0.080 (short, medium CIs clear zero),
+unethical +0.092 / +0.045 / +0.008 (short clears, medium borderline),
+professor +0.075 / +0.025 / −0.016 (no CI clears zero). So the effect is
+hint-dependent and vanishes in the long tercile within every hint type.
 
 Figure: x = 3 length terciles; per tercile two dots (grey inconsistent,
 navy consistent) with bootstrap 95% CI and n; Δ annotated per tercile.
@@ -32,11 +43,12 @@ Usage:
       --config     path to config YAML (default: config/mvp_config.yaml)
       --data       split: test (default) | eval
       --model      model/adapter HF id (default: Qwen/Qwen3-4B)
+      --by-hint    one panel per hint type instead of pooling
       --resamples  bootstrap replicates per CI (default: 5000)
       --seed       bootstrap seed (default: 88)
       --out        output PNG path (default:
                    {plots_dir}/task-performance-vs-monitorability/
-                   consistency_within_length_terciles_{model}.png)
+                   consistency_within_length_terciles[_by_hint]_{model}.png)
 
 Input:
     {outputs_dir}/{model}/{dataset}/{hint}/unhinted.jsonl[.gz]
@@ -45,6 +57,7 @@ Input:
 Output:
     {plots_dir}/task-performance-vs-monitorability/
         consistency_within_length_terciles_{model}.png
+        consistency_within_length_terciles_by_hint_{model}.png   (--by-hint)
 """
 
 import argparse
@@ -74,6 +87,10 @@ DATASETS = ["mmlu_pro", "gpqa_diamond", "lsat_ar", "lsat_lr",
 
 GREY = "#9AA7B4"   # inconsistent
 NAVY = "#1B3A6B"   # consistent
+
+HINT_LABELS = {"professor": "Professor hint",
+               "grader_hacking": "Grader-hacking hint",
+               "unethical": "Unethical hint"}
 
 
 def boot_ci(v, n_resamples, rng):
@@ -112,6 +129,9 @@ def main():
     parser.add_argument("--model", default=DEFAULT_MODEL)
     parser.add_argument("--resamples", type=int, default=5000)
     parser.add_argument("--seed", type=int, default=88)
+    parser.add_argument("--by-hint", action="store_true",
+                        help="one panel per hint type instead of pooling; "
+                             "writes …_by_hint_… .png")
     parser.add_argument("--out", default=None)
     args = parser.parse_args()
 
@@ -138,6 +158,10 @@ def main():
             with fh:
                 for line in fh:
                     r = json.loads(line)
+                    # Truncated runs are fragments, not answers — excluded to
+                    # match the pipeline's u_valid rule (rationale in step 31).
+                    if r.get("truncated", False):
+                        continue
                     pa = r.get("parsed_answer")
                     if pa in (None, "", "N/A"):
                         continue
@@ -164,7 +188,8 @@ def main():
                     iid = int(row["instance_id"])
                     if iid not in consistency:
                         continue
-                    recs.append((consistency[iid], float(tok), float(g)))
+                    recs.append((consistency[iid], float(tok), float(g),
+                                 hint))
     if missing:
         print("WARNING: missing inputs skipped: " + ", ".join(missing))
     if not recs:
@@ -174,8 +199,11 @@ def main():
     cons = np.array([r[0] for r in recs])
     length = np.array([r[1] for r in recs])
     gm = np.array([r[2] for r in recs])
+    hints = np.array([r[3] for r in recs])
     determ = cons >= 0.999
 
+    # Tercile cuts from the POOLED lengths, also in --by-hint, so the three
+    # hint panels share one length axis and are directly comparable.
     t1, t2 = np.percentile(length, [100 / 3, 200 / 3])
     terciles = [
         (f"Short\n(≤{t1:.0f} tok)", length <= t1),
@@ -184,89 +212,125 @@ def main():
     ]
 
     print(f"n = {len(recs)} question-slices; length tercile cuts at "
-          f"{t1:.0f} and {t2:.0f} unhinted CoT tokens\n")
-    print(f"{'tercile':>8} | {'consistent':>18} | {'inconsistent':>18} | "
-          f"{'Delta':>7} | 95% CI")
-    print("-" * 78)
+          f"{t1:.0f} and {t2:.0f} unhinted CoT tokens")
 
-    rows = []  # (label, con_mean, con_ci, inc_mean, inc_ci, n_con, n_inc, d, dci)
-    for label, mask in terciles:
-        con = gm[mask & determ]
-        inc = gm[mask & ~determ]
-        con_ci = boot_ci(con, args.resamples, rng)
-        inc_ci = boot_ci(inc, args.resamples, rng)
-        d = float(con.mean() - inc.mean())
-        dlo, dhi = boot_diff_ci(con, inc, args.resamples, rng)
-        flat = label.replace("\n", " ")
-        print(f"{flat[:8]:>8} | {con.mean():.3f} (n={len(con):>4}) | "
-              f"{inc.mean():.3f} (n={len(inc):>4}) | {d:>+7.3f} | "
-              f"[{dlo:+.3f}, {dhi:+.3f}]")
-        rows.append((label, con.mean(), con_ci, inc.mean(), inc_ci,
-                     len(con), len(inc), d, (dlo, dhi)))
+    def tercile_rows(subset, name):
+        """(label, con_mean, con_ci, inc_mean, inc_ci, n_con, n_inc, d, dci)
+        per tercile, restricted to rows where `subset` is True."""
+        print(f"\n[{name}]")
+        print(f"{'tercile':>8} | {'consistent':>18} | {'inconsistent':>18} | "
+              f"{'Delta':>7} | 95% CI")
+        print("-" * 78)
+        out_rows = []
+        for label, mask in terciles:
+            con = gm[subset & mask & determ]
+            inc = gm[subset & mask & ~determ]
+            con_ci = boot_ci(con, args.resamples, rng)
+            inc_ci = boot_ci(inc, args.resamples, rng)
+            d = float(con.mean() - inc.mean())
+            dlo, dhi = boot_diff_ci(con, inc, args.resamples, rng)
+            flat = label.replace("\n", " ")
+            print(f"{flat[:8]:>8} | {con.mean():.3f} (n={len(con):>4}) | "
+                  f"{inc.mean():.3f} (n={len(inc):>4}) | {d:>+7.3f} | "
+                  f"[{dlo:+.3f}, {dhi:+.3f}]")
+            out_rows.append((label, con.mean(), con_ci, inc.mean(), inc_ci,
+                             len(con), len(inc), d, (dlo, dhi)))
+        return out_rows
 
-    # ---- figure ----
-    fig, ax = plt.subplots(figsize=(9, 5.4))
-    ax.set_axisbelow(True)
-    ax.yaxis.grid(True, color="#DDDDDD", linewidth=0.8)
+    def bounds(rows):
+        return [b for r in rows for b in (*r[2], *r[4])]
 
-    off = 0.16
-    all_b = []
-    for i, (label, cm, cci, im, ici, ncon, ninc, d, dci) in enumerate(rows):
-        # inconsistent (grey, left), consistent (navy, right); dashed link
-        ax.plot([i - off, i + off], [im, cm], color="#BBBBBB", linewidth=1.0,
-                linestyle="--", zorder=2)
-        ax.errorbar(i - off, im, yerr=[[im - ici[0]], [ici[1] - im]],
-                    fmt="o", color=GREY, ecolor=GREY, markersize=9,
-                    markeredgecolor="#333333", markeredgewidth=0.5,
-                    elinewidth=1.8, capsize=4, capthick=1.8, zorder=3)
-        ax.errorbar(i + off, cm, yerr=[[cm - cci[0]], [cci[1] - cm]],
-                    fmt="o", color=NAVY, ecolor=NAVY, markersize=9,
-                    markeredgecolor="#333333", markeredgewidth=0.5,
-                    elinewidth=1.8, capsize=4, capthick=1.8, zorder=3)
-        ax.text(i - off, ici[1] + 0.006, f"{im:.3f}", ha="center",
-                va="bottom", fontsize=8.5, color=GREY)
-        ax.text(i + off, cci[1] + 0.006, f"{cm:.3f}", ha="center",
-                va="bottom", fontsize=8.5, color=NAVY, fontweight="bold")
-        ax.text(i - off, ici[0] - 0.010, f"n={ninc}", ha="center", va="top",
-                fontsize=7.5, color="#999999")
-        ax.text(i + off, cci[0] - 0.010, f"n={ncon}", ha="center", va="top",
-                fontsize=7.5, color="#999999")
-        all_b.extend([ici[0], ici[1], cci[0], cci[1]])
-
-    ymax = max(all_b)
-    ymin = min(all_b)
-    # Δ labels in a clear row along the top
-    for i, r in enumerate(rows):
-        d, (dlo, dhi) = r[7], r[8]
-        ax.text(i, ymax + 0.055, f"Δ = {d:+.3f}\n[{dlo:+.3f}, {dhi:+.3f}]",
-                ha="center", va="bottom", fontsize=8.5, color="#333333")
-
-    ax.set_xticks(range(len(rows)))
-    ax.set_xticklabels([r[0] for r in rows], fontsize=9.5)
-    ax.set_xlim(-0.6, len(rows) - 0.4)
-    ax.set_ylim(ymin - 0.045, ymax + 0.10)
-    ax.set_xlabel("Unhinted response length (CoT-token tercile)")
-    ax.set_ylabel("Mean per-question g-mean²")
-    ax.set_title("Consistency raises monitorability within every "
-                 f"response-length band — {model_name}\n"
-                 "(so the consistency effect is not a length artifact; "
-                 "consistent responses are in fact shorter)", fontsize=11)
-    for spine in ("top", "right"):
-        ax.spines[spine].set_visible(False)
-    for spine in ("left", "bottom"):
-        ax.spines[spine].set_color("#999999")
+    def draw(ax, rows, ymin, ymax):
+        ax.set_axisbelow(True)
+        ax.yaxis.grid(True, color="#DDDDDD", linewidth=0.8)
+        off = 0.16
+        for i, (label, cm, cci, im, ici, ncon, ninc, d, dci) in enumerate(rows):
+            # inconsistent (grey, left), consistent (navy, right); dashed link
+            ax.plot([i - off, i + off], [im, cm], color="#BBBBBB",
+                    linewidth=1.0, linestyle="--", zorder=2)
+            ax.errorbar(i - off, im, yerr=[[im - ici[0]], [ici[1] - im]],
+                        fmt="o", color=GREY, ecolor=GREY, markersize=9,
+                        markeredgecolor="#333333", markeredgewidth=0.5,
+                        elinewidth=1.8, capsize=4, capthick=1.8, zorder=3)
+            ax.errorbar(i + off, cm, yerr=[[cm - cci[0]], [cci[1] - cm]],
+                        fmt="o", color=NAVY, ecolor=NAVY, markersize=9,
+                        markeredgecolor="#333333", markeredgewidth=0.5,
+                        elinewidth=1.8, capsize=4, capthick=1.8, zorder=3)
+            ax.text(i - off, ici[1] + 0.006, f"{im:.3f}", ha="center",
+                    va="bottom", fontsize=8.5, color=GREY)
+            ax.text(i + off, cci[1] + 0.006, f"{cm:.3f}", ha="center",
+                    va="bottom", fontsize=8.5, color=NAVY, fontweight="bold")
+            ax.text(i - off, ici[0] - 0.010, f"n={ninc}", ha="center",
+                    va="top", fontsize=7.5, color="#999999")
+            ax.text(i + off, cci[0] - 0.010, f"n={ncon}", ha="center",
+                    va="top", fontsize=7.5, color="#999999")
+        # Δ labels in a clear row along the top
+        for i, r in enumerate(rows):
+            d, (dlo, dhi) = r[7], r[8]
+            ax.text(i, ymax + 0.055, f"Δ = {d:+.3f}\n[{dlo:+.3f}, {dhi:+.3f}]",
+                    ha="center", va="bottom", fontsize=8.5, color="#333333")
+        ax.set_xticks(range(len(rows)))
+        ax.set_xticklabels([r[0] for r in rows], fontsize=9.5)
+        ax.set_xlim(-0.6, len(rows) - 0.4)
+        ax.set_ylim(ymin - 0.045, ymax + 0.10)
+        for spine in ("top", "right"):
+            ax.spines[spine].set_visible(False)
+        for spine in ("left", "bottom"):
+            ax.spines[spine].set_color("#999999")
 
     handles = [
         Line2D([], [], marker="o", linestyle="none", color=NAVY,
                markeredgecolor="#333333", markeredgewidth=0.5, markersize=9,
-               label="Consistent (same answer in all 8 runs)"),
+               label="Consistent (same answer in all valid runs)"),
         Line2D([], [], marker="o", linestyle="none", color=GREY,
                markeredgecolor="#333333", markeredgewidth=0.5, markersize=9,
                label="Inconsistent (answers vary)"),
     ]
-    ax.legend(handles=handles, loc="upper center", ncol=2,
-              bbox_to_anchor=(0.5, -0.13), frameon=True,
-              edgecolor="#CCCCCC", fontsize=9)
+
+    if args.by_hint:
+        # One panel per hint type. The pooled figure mixes hint types
+        # unevenly (unethical — the most monitorable hint — is ~59% of
+        # consistent rows vs ~42% of inconsistent ones, because entry into a
+        # slice depends on the hint), so the pooled gap is partly composition;
+        # these panels show the within-hint contrast.
+        panel_rows = [(HINT_LABELS.get(h, h), tercile_rows(hints == h, h))
+                      for h in HINT_TYPES]
+        all_b = [b for _, rows in panel_rows for b in bounds(rows)]
+        ymin, ymax = min(all_b), max(all_b)
+        fig, axes = plt.subplots(1, len(panel_rows), figsize=(18, 5.6),
+                                 sharey=True)
+        for ax, (title, rows) in zip(axes, panel_rows):
+            draw(ax, rows, ymin, ymax)
+            ax.set_title(title, fontsize=11, fontweight="bold", pad=34)
+            ax.set_xlabel("Unhinted response length (CoT-token tercile)")
+        axes[0].set_ylabel("Mean per-question g-mean²")
+        fig.suptitle("Consistent vs inconsistent questions within each "
+                     "response-length tercile, per hint type — "
+                     f"{model_name}\n(tercile cuts from the pooled lengths, "
+                     "shared across panels)", fontsize=12)
+        fig.legend(handles=handles, loc="lower center", ncol=2,
+                   bbox_to_anchor=(0.5, -0.04), frameon=True,
+                   edgecolor="#CCCCCC", fontsize=9.5)
+        stem = "consistency_within_length_terciles_by_hint"
+        fig.tight_layout(rect=[0, 0.03, 1, 1])
+    else:
+        rows = tercile_rows(np.ones(len(recs), bool), "all hint types pooled")
+        all_b = bounds(rows)
+        fig, ax = plt.subplots(figsize=(9, 5.4))
+        draw(ax, rows, min(all_b), max(all_b))
+        ax.set_xlabel("Unhinted response length (CoT-token tercile)")
+        ax.set_ylabel("Mean per-question g-mean²")
+        # Descriptive, not causal; the long tercile's CI spans zero, and the
+        # pooled gap is partly hint-type composition (see --by-hint).
+        ax.set_title("Consistent questions are more monitorable in short and "
+                     "medium-length responses; the gap narrows for long ones\n"
+                     f"{model_name} — hint types pooled (unevenly mixed "
+                     "between groups; see the per-hint figure)", fontsize=11)
+        ax.legend(handles=handles, loc="upper center", ncol=2,
+                  bbox_to_anchor=(0.5, -0.13), frameon=True,
+                  edgecolor="#CCCCCC", fontsize=9)
+        stem = "consistency_within_length_terciles"
+        fig.tight_layout()
 
     out = args.out
     if out is None:
@@ -275,9 +339,7 @@ def main():
         if args.data != "test":
             plots_dir = plots_dir / args.data
         plots_dir.mkdir(parents=True, exist_ok=True)
-        out = (plots_dir /
-               f"consistency_within_length_terciles_{model_name}.png")
-    fig.tight_layout()
+        out = plots_dir / f"{stem}_{model_name}.png"
     fig.savefig(out, dpi=200, bbox_inches="tight")
     print(f"\nWrote {out}")
 

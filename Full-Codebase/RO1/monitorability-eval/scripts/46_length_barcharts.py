@@ -5,12 +5,14 @@ anti-sycophancy DPO — the length analogues of the three cross-model g-mean²
 figures (16/17/18), for summarising response length in the paper as figures
 instead of tables.
 
-Two PNGs, mirroring the g-mean² figures' layout/colors/hatches:
+Three PNGs, mirroring the g-mean² figures' layout/colors/hatches:
 
-    length_by_hint_3models.png      (like 16: x = 8 datasets, 3 hint-type
-                                     sets x 3 model bars per dataset)
+    length_by_hint_3models.png      (like 16: x = 8 datasets, an unhinted set
+                                     + 3 hint-type sets, x 3 model bars each)
     length_pooled_3models.png       (like 17: x = 8 datasets, 3 model bars,
                                      hint types pooled)
+    length_by_arm_3models.png       (x = 8 datasets, unhinted set + hinted
+                                     set (3 hint types pooled) x 3 model bars)
 
 (No hint-type-level figure: a datasets-pooled median mixes very different
 length regimes — lsat_ar ~5.5k vs wmdp ~0.9k median tokens — and mostly
@@ -18,22 +20,21 @@ repeats the model effect three times, so it was dropped; likewise no red
 average-of-all-bars reference line — the comparison is bar-vs-bar and the
 all-bar mean corresponds to no citable quantity.)
 
-Each bar = the MEDIAN completion length in tokens over that cell's hinted AND
-unhinted runs combined (both arms in one pool; the arms' separate medians live
-in the length_*_level_tables). NO error bars — descriptive summaries of
-observed runs, matching the length tables' no-CI convention. The value is
-printed above each bar.
+Each bar = the MEDIAN completion length in tokens. NO error bars —
+descriptive summaries of observed runs, matching the length tables' no-CI
+convention. The value is printed above each bar.
 
 Pools come from step 08's length_pools and INCLUDE truncated runs at the
 16384-token cap (truncation is caused by length; dropping the longest runs
-would bias length down). Pooling follows step 44/45: the by-hint figure pools
-that cell's hinted (1600) + unhinted (1600) runs; the per-dataset pooled
-figure pools the 3 hint types' hinted runs (4800) + the ONE shared unhinted
-arm (1600, not tripled — a 3:1 hinted-weighted mix).
+would bias length down). The by-hint figure uses per-arm medians: the ONE
+shared unhinted arm (1600) and each hint type's hinted arm (1600). The
+per-dataset pooled figure pools the 3 hint types' hinted runs (4800) + the
+ONE shared unhinted arm (1600, not tripled — a 3:1 hinted-weighted mix).
 
-Colors/hatches match 16/17: hint types light blue/pink/green in the by-hint
-figure with model identity carried by hatch (base solid, harmlessness DPO
-striped, anti-sycophancy DPO dotted); the same trio of colors is bound to
+Colors/hatches match 16/17: unhinted light gray and hint types light
+blue/pink/green in the by-hint figure, with model identity carried by hatch
+(base solid, harmlessness DPO striped, anti-sycophancy DPO dotted); the same
+trio of colors is bound to
 MODELS in the pooled figure, hatches unchanged, so both figures survive
 grayscale.
 
@@ -56,6 +57,7 @@ needs the enriched length_pools):
 Output:
     {out_dir}/length_by_hint_3models.png
     {out_dir}/length_pooled_3models.png
+    {out_dir}/length_by_arm_3models.png
 """
 
 import argparse
@@ -95,6 +97,9 @@ COLOR_ANTISYC = "#9ED973"   # light green
 # (hinted = plum, unhinted = blue — steps 37/41).
 COLOR_HINTED = "#C7ADE6"    # light plum
 COLOR_UNHINTED = "#92C5E8"  # light blue
+# Unhinted set in the by-hint figure: gray, so it can't be confused with the
+# light-blue professor hint.
+COLOR_UNHINTED_GRAY = "#D3D3D3"  # light gray
 EDGE = "#555555"
 
 
@@ -119,16 +124,6 @@ def load_all(root, config, model_name, split):
     return data, missing
 
 
-def combined_median(pools_list):
-    """Median over the union of hinted + unhinted token counts of the given
-    (hinted_lp, unhinted_lp) pairs (both arms in one pool)."""
-    tokens = []
-    for h_lp, u_lp in pools_list:
-        tokens += h_lp["token_count"]
-        tokens += u_lp["token_count"]
-    return float(np.median(tokens)) if tokens else None
-
-
 def style_axes(ax, top):
     ax.set_axisbelow(True)
     ax.yaxis.grid(True, color="#DDDDDD", linewidth=0.8)
@@ -145,19 +140,29 @@ def add_legend(ax, handles):
 
 
 def fig_by_hint(models, out):
-    """Like 16: x = datasets, 3 hint sets x 3 model bars; hint colors, model
-    hatches. Bar = median over the cell's hinted + unhinted runs (1600+1600)."""
-    BAR_W, HINT_OFFSETS = 0.085, [-0.3, 0.0, 0.3]
-    fig, ax = plt.subplots(figsize=(16, 5.5))
+    """Like 16: x = datasets, 4 sets x 3 model bars — the shared unhinted arm
+    (gray, 1600 runs) then the 3 hint types' hinted arms (1600 runs each);
+    set carried by color, model by hatch. Bars are per-arm medians (not the
+    combined hinted + unhinted pool) so each hint set compares directly
+    against the unhinted set."""
+    BAR_W, SET_OFFSETS = 0.065, [-0.375, -0.125, 0.125, 0.375]
+    sets = [(None, "Unhinted", COLOR_UNHINTED_GRAY)] + HINTS
+    fig, ax = plt.subplots(figsize=(19, 5.5))
     bars = []  # (x, value, color, hatch)
     for d_idx, ds in enumerate(DATASETS):
-        for (hint, _, color), h_off in zip(HINTS, HINT_OFFSETS):
+        for (hint, _, color), s_off in zip(sets, SET_OFFSETS):
             for m_idx, (label, mdata, hatch, _mcolor) in enumerate(models):
-                lp = mdata[ds].get(hint)
-                if not lp:
+                hints = [h for h in HINT_TYPES if mdata[ds].get(h)]
+                if not hints:
                     continue
-                med = combined_median([(lp["hinted"], lp["unhinted"])])
-                x = d_idx + h_off + (m_idx - 1) * (BAR_W + 0.012)
+                if hint is None:  # the one shared unhinted arm
+                    tokens = mdata[ds][hints[0]]["unhinted"]["token_count"]
+                elif mdata[ds].get(hint):
+                    tokens = mdata[ds][hint]["hinted"]["token_count"]
+                else:
+                    continue
+                med = float(np.median(tokens))
+                x = d_idx + s_off + (m_idx - 1) * (BAR_W + 0.01)
                 bars.append((x, med, color, hatch))
     top = max(v for _, v, _, _ in bars) * 1.28
     style_axes(ax, top)
@@ -172,11 +177,11 @@ def fig_by_hint(models, out):
     ax.set_xlim(-0.55, len(DATASETS) - 0.45)
     ax.set_xlabel("Dataset")
     ax.set_ylabel("Median response length (tokens)")
-    ax.set_title("Median response length per dataset and hint type "
-                 "(hinted + unhinted runs) — "
+    ax.set_title("Median response length per dataset: unhinted arm vs each "
+                 "hint type's hinted arm — "
                  + " vs ".join(m[0] for m in models), pad=22)
     handles = ([Patch(facecolor=c, edgecolor=EDGE, linewidth=0.6, label=lbl)
-                for _, lbl, c in HINTS]
+                for _, lbl, c in sets]
                + [Patch(facecolor="white", edgecolor=EDGE, linewidth=0.8,
                         hatch=hatch, label=label)
                   for label, _, hatch, _ in models])
@@ -229,23 +234,23 @@ def fig_pooled(models, out):
 
 
 def fig_by_arm(models, out):
-    """x = datasets, TWO sets (Hinted / Unhinted) x 3 model bars — shows
+    """x = datasets, TWO sets (Unhinted / Hinted, left to right) x 3 model bars — shows
     whether the training-induced length increase appears in both arms or only
     one. Hinted set pools the 3 hint types' hinted runs (4800); unhinted set
     is the ONE shared arm (1600). Arm carried by color (plum/blue, matching
     the 37/41 arm hues), model by hatch."""
     BAR_W, ARM_OFFSETS = 0.11, [-0.2, 0.2]
-    arms = [("Hinted (3 hint types pooled)", COLOR_HINTED),
-            ("Unhinted", COLOR_UNHINTED)]
+    arms = [("Unhinted", COLOR_UNHINTED, False),
+            ("Hinted (3 hint types pooled)", COLOR_HINTED, True)]
     fig, ax = plt.subplots(figsize=(16, 5.5))
     bars = []
     for d_idx, ds in enumerate(DATASETS):
-        for a_idx, ((_, color), a_off) in enumerate(zip(arms, ARM_OFFSETS)):
+        for (_, color, is_hinted), a_off in zip(arms, ARM_OFFSETS):
             for m_idx, (label, mdata, hatch, _mcolor) in enumerate(models):
                 hints = [h for h in HINT_TYPES if mdata[ds].get(h)]
                 if not hints:
                     continue
-                if a_idx == 0:
+                if is_hinted:
                     tokens = []
                     for h in hints:
                         tokens += mdata[ds][h]["hinted"]["token_count"]
@@ -270,7 +275,7 @@ def fig_by_arm(models, out):
     ax.set_title("Median response length per dataset, hinted vs unhinted arm — "
                  + " vs ".join(m[0] for m in models), pad=22)
     handles = ([Patch(facecolor=c, edgecolor=EDGE, linewidth=0.6, label=lbl)
-                for lbl, c in arms]
+                for lbl, c, _ in arms]
                + [Patch(facecolor="white", edgecolor=EDGE, linewidth=0.8,
                         hatch=hatch, label=label)
                   for label, _, hatch, _ in models])

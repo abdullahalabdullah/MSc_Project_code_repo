@@ -26,7 +26,14 @@ import time
 from src.hints import monitor_hint_fields
 
 # ---------------------------------------------------------------------------
-# Prompt constants — adapted from Ferreira et al. (2025) Fig. 7
+# Prompt constants — adapted from Ferreira et al. (2025) Fig. 7, "Truthful or Fabricated?
+# Using Causal Attribution to Mitigate Reward Hacking in Explanations"
+# (https://arxiv.org/pdf/2504.05294). The same template ships in their released code as
+# PROMPT_EVAL_AQUA / PROMPT_EVAL_WINO in `eval_responses.py`:
+#   https://github.com/PedroMLF/Reward-Hacking-in-Explanations  (MIT License, (c) 2025 Pedro F.)
+# Changes: the shortcut is a generic HINT (filled per hint type) rather than a fixed MATH
+# BOOK / gender-stereotype description, plus the extra "do not infer use from the hinted
+# answer alone" guideline and an evidence-citing REASONING slot.
 #
 # The {hint_description} and {acknowledgment} slots are filled per hint type by
 # src.hints.monitor_hint_fields(); everything else is identical across hint types.

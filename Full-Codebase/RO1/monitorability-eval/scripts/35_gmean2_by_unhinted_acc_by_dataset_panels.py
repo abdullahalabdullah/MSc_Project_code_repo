@@ -63,6 +63,7 @@ DATASETS = ["mmlu_pro", "gpqa_diamond", "lsat_ar", "lsat_lr",
             "medxpertqa", "lexam", "codemmlu", "wmdp"]
 
 DARK_BLUE = "#1B3A6B"
+THRESHOLD_COLOR = "#C1462F"  # step 30's red dotted flat-region line
 
 
 def band_label(ks):
@@ -150,6 +151,7 @@ def main():
 
     # ---- per-dataset per-unit stats ----
     panels = {}
+    flat_means = {}  # dataset -> mean gmean2_i over ALL 0/8..7/8 questions
     all_bounds = []
     for dataset in DATASETS:
         A = np.array(per_ds[dataset][0])
@@ -160,6 +162,13 @@ def main():
             continue
         lev = np.clip(np.round(A * N_RUNS).astype(int), 0, N_RUNS)
         print(f"\n{dataset} — {len(G)} entering questions")
+        # As in step 30: a question-level mean over every 0/8..7/8 question
+        # (including levels dropped for n < --min-n), not a mean of the dots.
+        rest = G[lev < N_RUNS]
+        if len(rest):
+            flat_means[dataset] = float(rest.mean())
+            print(f"   mean of 0/8 to 7/8 = {flat_means[dataset]:.3f} "
+                  f"(n={len(rest)})")
         drawn = []  # (x, mean, lo, hi, n)
         for (label, kset), x in zip(units, x_pos):
             m = np.isin(lev, list(kset))
@@ -187,7 +196,23 @@ def main():
     for ax, dataset in zip(axes.flat, DATASETS):
         ax.set_axisbelow(True)
         ax.yaxis.grid(True, color="#EEEEEE", linewidth=0.8)
-        ax.set_title(dataset, fontsize=10, fontweight="bold")
+        flat = flat_means.get(dataset)
+        ax.set_title(dataset, fontsize=10, fontweight="bold",
+                     pad=16 if flat is not None else 6)
+        if flat is not None:
+            # Red dotted line over the levels it is computed from only,
+            # stopping short of the 8/8 unit (as in step 30), with its value
+            # printed under the dataset name.
+            flat_units = [x for (_, kset), x in zip(units, x_pos)
+                          if max(kset) < N_RUNS]
+            if flat_units:
+                ext = 0.3 if args.bands else 0.03
+                ax.hlines(flat, xmin=flat_units[0] - ext,
+                          xmax=flat_units[-1] + ext, color=THRESHOLD_COLOR,
+                          linestyle=":", linewidth=1.4, zorder=2)
+            ax.text(0.5, 1.01, f"dotted line: mean of 0/8 to 7/8 = {flat:.3f}",
+                    transform=ax.transAxes, ha="center", va="bottom",
+                    fontsize=8, color=THRESHOLD_COLOR)
         drawn = panels.get(dataset)
         if not drawn:
             ax.text(0.5, 0.5, "insufficient data", transform=ax.transAxes,
@@ -233,7 +258,8 @@ def main():
     fig.suptitle("Monitorability by unhinted task accuracy, per dataset — "
                  f"{model_name}\n(entering questions, hint types pooled; "
                  f"{band_note}; groups with n < {args.min_n} dropped; "
-                 "bootstrap 95% CI; n under each dot)", fontsize=12)
+                 "bootstrap 95% CI; n under each dot;\nred dotted line = "
+                 "mean over all 0/8–7/8 questions)", fontsize=12)
 
     out = args.out
     if out is None:
@@ -245,7 +271,7 @@ def main():
         suffix = "_banded" if args.bands else ""
         out = (plots_dir /
                f"gmean2_by_unhinted_acc_panels{suffix}_{model_name}.png")
-    fig.tight_layout(rect=[0, 0, 1, 0.94])
+    fig.tight_layout(rect=[0, 0, 1, 0.97])
     fig.savefig(out, dpi=200, bbox_inches="tight")
     print(f"\nWrote {out}")
 
