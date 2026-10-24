@@ -1663,9 +1663,12 @@ p1, TE, Level-1 pass, g-mean², …), `{analysis}/{model}/entropy_bins_
 grader_hacking.csv`.
 
 **Run order** (from `Full-Codebase/RO1/`; `C=config/uncertainty_vs_monitorability.yaml`):
-GPU — `02_run_inference_qwen.py --config $C --model Qwen/Qwen3-4B --datasets
-gpqa_diamond lexam wmdp --hint-type grader_hacking`, then
-`08_cot_token_analysis.py` and step 58 with the same `--config`; CPU — per
+GPU — `export HF_TOKEN=…; bash monitorability-eval/run_uvm_inference.sh`
+(runs 02 → 08 → 58; preflights deps, HF token and `git push --dry-run` before
+the model loads; restores `.jsonl` from committed `.gz` so a fresh clone
+resumes from `progress.json`; a background watcher gzips + commits + pushes
+each dataset after every saved checkpoint, so deleting the pod loses at most
+the checkpoint in flight). CPU — per
 dataset `03_run_monitor.py`, `04_compute_gmean2.py`, `05_analyze_gmean2.py`,
 `06_export_excel.py` with `--config $C --dataset <ds> --hint-type
 grader_hacking`, then step 59.
