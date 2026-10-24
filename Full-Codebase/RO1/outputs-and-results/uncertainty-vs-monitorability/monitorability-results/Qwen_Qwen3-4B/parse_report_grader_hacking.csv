@@ -1,0 +1,5 @@
+dataset,arm,runs,valid,unparsed,unparsed_pct,unparsed_truncated,unparsed_not_truncated,truncated_but_parsed,questions,questions_lt_min_valid
+lexam,unhinted,6000,5989,0,0.0,0,0,11,200,0
+lexam,hinted,6000,5993,0,0.0,0,0,7,200,0
+ALL,unhinted,6000,5989,0,0.0,0,0,11,200,0
+ALL,hinted,6000,5993,0,0.0,0,0,7,200,0
