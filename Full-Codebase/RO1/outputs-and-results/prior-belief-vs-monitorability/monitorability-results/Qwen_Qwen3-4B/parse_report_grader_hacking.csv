@@ -1,0 +1,7 @@
+dataset,arm,runs,valid,unparsed,unparsed_pct,unparsed_truncated,unparsed_not_truncated,truncated_but_parsed,questions,questions_lt_min_valid
+lexam_priorA,unhinted,1960,1957,0,0.0,0,0,3,98,0
+lexam_priorA,hinted,1960,1960,0,0.0,0,0,0,98,0
+lexam_priorB,unhinted,1960,1957,0,0.0,0,0,3,98,0
+lexam_priorB,hinted,1960,1957,0,0.0,0,0,3,98,0
+ALL,unhinted,3920,3914,0,0.0,0,0,6,196,0
+ALL,hinted,3920,3917,0,0.0,0,0,3,196,0
