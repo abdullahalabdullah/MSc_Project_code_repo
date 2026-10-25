@@ -55,6 +55,7 @@ bash anti-sycophancy-eval/run_antisyc_compare.sh Qwen/Qwen3-4B <trained_model_id
   [Consistency & CoT-length analyses (36–43, 47–49)](#consistency--cot-length-analyses-steps-3643-4749) ·
   [Response-length tables (44–45, 53–54)](#response-length-tables-steps-4445-5354) ·
   [Experiment: uncertainty-vs-monitorability (58–59)](#experiment-uncertainty-vs-monitorability-steps-5859) ·
+  [Experiment: prior-belief-vs-monitorability (61–63)](#experiment-prior-belief-vs-monitorability-steps-6163) ·
   [Utilities](#utilities) ·
   [Source files](#source-files-monitorability-evalsrc) ·
   [Key conventions](#key-conventions) ·
@@ -242,6 +243,10 @@ contiguous 01–49).
 | 56 | `56_gmean2_by_p0_level.py` | Monitorability by p0 level (unhinted runs of 8 that picked the hinted answer), consistent dot split out at 0/8, question-cluster bootstrap → `gmean2_by_p0_level_{model}.png`. §[Consistency & CoT-length analyses](#consistency--cot-length-analyses-steps-3643-4749) |
 | 57 | `57_gmean2_by_answer_entropy.py` | Monitorability by Shannon entropy of the 8 unhinted answers (5 bins), question-cluster bootstrap; `--by-hint` 1×3 → `gmean2_by_answer_entropy[_by_hint]_{model}.png`. §[Consistency & CoT-length analyses](#consistency--cot-length-analyses-steps-3643-4749) |
 | 58 | `58_uvm_answers_and_parse_report.py` | uncertainty-vs-monitorability (N = 30): per-run chosen answer → `answers_per_run.csv`; answer-parse failure counts per dataset × arm → `parse_report_{hint}.{csv,md}`. §[Experiment: uncertainty-vs-monitorability](#experiment-uncertainty-vs-monitorability-steps-5859) |
+| 60 | `60_uvm_bias_variance_incoherence.py` | uncertainty-vs-monitorability: bias-variance decomposition and error-incoherence (Hägele et al. 2026; code adapted from github.com/haeggee/hot-mess-of-ai, MIT → `src/hot_mess_bias_variance.py`), error rate, g-mean² by error-incoherence bin → `gmean2_by_error_incoherence_{hint}_{arm}.png`. §[Experiment: uncertainty-vs-monitorability](#experiment-uncertainty-vs-monitorability-steps-5859) |
+| 61 | `61_pbm_select_questions.py` | prior-belief-vs-monitorability: select lexam questions from the 30 unhinted uvm runs and assign hint targets A (own modal wrong answer) / B (never-chosen wrong option) → `lexam_prior{A,B}/dataset_index.json`, `selection.csv`. §[Experiment: prior-belief-vs-monitorability](#experiment-prior-belief-vs-monitorability-steps-6163) |
+| 62 | `62_pbm_run_inference.py` | prior-belief-vs-monitorability (GPU): fresh unhinted (new seeds) + hinted A + hinted B, 20 runs each, in the 02 record schema. §[Experiment: prior-belief-vs-monitorability](#experiment-prior-belief-vs-monitorability-steps-6163) |
+| 63 | `63_pbm_analysis.py` | prior-belief-vs-monitorability: paired A-vs-B g-mean² (H1), p0 dose-response (H2), acknowledgement rate (H3), sanity checks → `pbm_summary.{md,json}`, 3 figures. §[Experiment: prior-belief-vs-monitorability](#experiment-prior-belief-vs-monitorability-steps-6163) |
 | 59 | `59_uvm_gmean2_by_answer_entropy.py` | uncertainty-vs-monitorability (N = 30): g-mean² by entropy of the unhinted answers (≥ 27/30 valid), equal-width bins + H = 0 bin, pooled + per-dataset panels → `gmean2_by_answer_entropy_{hint}.png`, `entropy_per_question_{hint}.csv`, `entropy_bins_{hint}.csv`. §[Experiment: uncertainty-vs-monitorability](#experiment-uncertainty-vs-monitorability-steps-5859) |
 
 Non-numbered helpers in `scripts/` (`merge_and_push.py`, `archive_results.sh`)
@@ -1668,10 +1673,117 @@ GPU — `export HF_TOKEN=…; bash monitorability-eval/run_uvm_inference.sh`
 the model loads; restores `.jsonl` from committed `.gz` so a fresh clone
 resumes from `progress.json`; a background watcher gzips + commits + pushes
 each dataset after every saved checkpoint, so deleting the pod loses at most
-the checkpoint in flight). CPU — per
-dataset `03_run_monitor.py`, `04_compute_gmean2.py`, `05_analyze_gmean2.py`,
+the checkpoint in flight; dataset keys as arguments, e.g. `… lexam`). CPU —
+`export OPENAI_API_KEY=…; bash monitorability-eval/run_uvm_monitor_and_results.sh
+[datasets]` (default `lexam`): `git pull`, then per dataset
+`03_run_monitor.py`, `04_compute_gmean2.py`, `05_analyze_gmean2.py`,
 `06_export_excel.py` with `--config $C --dataset <ds> --hint-type
-grader_hacking`, then step 59.
+grader_hacking`, then step 59 over the same datasets. A one-call preflight
+checks the key against `OPENAI_BASE_URL` (or api.openai.com) with the config's
+monitor model. 03 is repeated (up to `UVM_MAX_PASSES`, default 10, with a
+`UVM_PASS_PAUSE` 60 s cool-down) until a pass reports 0 calls remaining, since
+03 skips calls that exhaust their retries (e.g. 429 rate limits); stops at the
+first failing step, and a rerun resumes the monitor where it stopped.
+
+### Step 60 — `60_uvm_bias_variance_incoherence.py`
+
+Bias-variance decomposition of the model's errors over its N = 30 runs and the
+**error-incoherence** of Hägele et al. (2026), *The Hot Mess of AI*
+(arXiv:2601.23045). The decomposition code is adapted from the paper's release
+(github.com/haeggee/hot-mess-of-ai, `scripts/utils.py`, MIT) into
+`monitorability-eval/src/hot_mess_bias_variance.py`, whose header records the
+per-function provenance and the MIT notice; it reproduces the original's
+outputs exactly (checked on 400 random 30-sample questions, incl. unparsed
+answers). Each sampled answer is a one-hot vector; per question KL Error =
+Bias + Variance with Bias = KL(y‖f̄), Variance = E[KL(f̄‖f)], f̄ the
+normalised geometric mean (EPS = 1e-12 smoothing); also the 0/1 and Brier
+decompositions. Headline: **KL-Error-incoherence = Σ variance / Σ error**
+(paper Eq. 2). Defaults: unhinted arm (`--arm hinted` available), valid runs
+only, ≥ 27/30 per question. Writes `bias_variance_per_question_{hint}_{arm}.csv`,
+`bias_variance_summary_{hint}_{arm}.{json,md}` (error rate, pooled
+incoherences) and `incoherence_bins_{hint}_{arm}.csv` under
+`{analysis}/{model}/`, and `gmean2_by_error_incoherence_{hint}_{arm}.png`:
+g-mean² by per-question KL-incoherence — no error | `--n-bins` (3)
+equal-width bins on [0, 1) for questions whose modal answer is wrong | ≈ 1
+(modal answer correct; defined by 0/1 bias = 0, as the EPS smoothing puts these
+at 0.95–1.0). Absolute KL values scale with −log(EPS) per wrong run, so only KL
+ratios are interpretable. Also `gmean2_by_error_variance_{hint}_{arm}.png` +
+`variance_bins_{hint}_{arm}.csv`: g-mean² by the paper's KL-Variance — a zero
+bin (all runs identical), then `--var-edges` (default 0.15 0.30 0.45) given as
+the share of runs off the modal answer, since with one-hot samples KL-Variance
+= (1 − P(modal)) × −log(EPS). Likewise `gmean2_by_error_bias_{hint}_{arm}.png`
++ `bias_bins_{hint}_{arm}.csv`: g-mean² by the paper's KL-Bias, ≈ 0 split into
+no error / modal answer correct with some errors, then `--bias-edges` (default
+1/3 2/3) on the gap P(modal) − P(correct), since KL-Bias ≈ that gap × −log(EPS)
+when the modal answer is wrong. Run automatically by
+`run_uvm_monitor_and_results.sh` after step 59.
+
+## Experiment: prior-belief-vs-monitorability (steps 61–63)
+
+Does the model's **prior belief** in the hinted answer change monitorability?
+Same questions, two hint targets: **Version A** = the model's own most common
+wrong answer (prior belief present), **Version B** = a wrong option it never
+chose (no prior belief). Base `Qwen/Qwen3-4B`, lexam, `grader_hacking`, **20
+runs per question per arm**; everything else as the main run.
+
+**Config.** `config/prior_belief_vs_monitorability.yaml` = `mvp_config.yaml`
+with `n_samples: 20`, `checkpoint_every: 25`, all paths (incl. `data_dir`)
+under `outputs-and-results/prior-belief-vs-monitorability/`, and a
+`prior_belief:` block (selection source + rules, seeds, version keys). The two
+versions are separate dataset keys, `lexam_priorA` / `lexam_priorB`, so the
+**unchanged** steps 03 (monitor), 04 (g-mean²) and 58 (parse report) run on
+them with `--config config/prior_belief_vs_monitorability.yaml --dataset <key>`.
+
+**Step 61 — `61_pbm_select_questions.py`.** Reads the uncertainty-vs-
+monitorability run's 30 unhinted lexam runs (the *selection runs*; valid =
+parsed, not truncated, ≥ 27 per question). Drops questions always answered
+correctly; keeps those whose modal wrong answer was chosen in ≥ 6 runs and
+that have ≥ 1 wrong option chosen 0 times (98 of 200: 55 always correct, 28
+modal wrong < 6, 19 without a never-chosen option). A = modal wrong answer
+(ties at random); B = a never-chosen wrong option (at random if several); RNG
+`default_rng([selection_seed, instance_id])`. Writes
+`data/lexam_prior{A,B}/dataset_index.json` (lexam items, `hint_target`
+replaced), `data/selection.csv`, `data/selection_summary.md`; refuses to
+overwrite without `--force`. The selection runs are used only here.
+
+**Step 62 — `62_pbm_run_inference.py` (GPU).** One pass per checkpoint, all
+requests in one vLLM call: **fresh unhinted** with new seeds
+`unhinted_seed_base + s` (1,000,003 + s, disjoint from earlier runs, so p0 is
+not biased by selection), **hinted A** and **hinted B** with the usual hinted
+seeds 2^(s+1). The fresh unhinted generations are written to BOTH version
+directories with that version's `hint_target` / `followed_hint` (the monitor
+prompt names the target even for unhinted runs, so each version is monitored
+against its own target). Reuses `src/inference_qwen.py` helpers unchanged;
+same record schema plus `pbm_version` / `pbm_shared_unhinted`. Resumes from
+`progress.json` (written to both versions after both are on disk).
+
+**Step 63 — `63_pbm_analysis.py`.** H1 (primary): paired g-mean² A vs B on
+questions passing Level 1 in both; mean A − B with a 95% bootstrap CI over
+questions and a Wilcoxon signed-rank test; plus unpaired and fresh
+p0(A) ≥ 0.2 robustness rows, per-version Level-1 / p0 / p1 / TE / accuracy and
+the Level-1 drop pattern. H2: within A, Spearman and p0 bins of fresh p0(A)
+vs g-mean² **and** vs acknowledgement rate. H3: paired acknowledgement rate
+(hint-following runs whose CoT the monitor flags; `n_foll_ack /
+(n_foll_ack + n_foll_noack)` from step 04). Sanity: fresh p0(B), selection vs
+fresh p0(A). **Interpretation note:** TPR_mc = ack rate / R_effect with
+R_effect = TE / p1, which falls as p0 rises — g-mean² deliberately discounts
+hint-following that would have happened anyway; in a simulation with a
+constant ack rate g-mean² still rose with p0 (ρ ≈ +0.65) and the A-vs-B gap
+shrank — so read g-mean² and the acknowledgement rate together. Outputs:
+`monitorability-results/{model}/pbm_per_question.csv`,
+`pbm_summary.{md,json}`; `plots/{model}/pbm_paired_gmean2.png`,
+`pbm_gmean2_by_p0.png` (g-mean² and ack-rate panels),
+`pbm_paired_ack_rate.png`.
+
+**Run.** GPU: `export HF_TOKEN=…; bash monitorability-eval/run_pbm_inference.sh`
+(preflight incl. `git push --dry-run` and the committed selection; restores
+`.jsonl` from `.gz` on a fresh clone; a watcher gzips + commits + pushes both
+version directories after every checkpoint; then 58). CPU:
+`export OPENAI_API_KEY=… [OPENAI_BASE_URL=…]; bash
+monitorability-eval/run_pbm_monitor_and_results.sh` (one-call API preflight,
+`git pull`, per version 03 repeated until 0 calls remain (`PBM_MAX_PASSES`,
+`PBM_PASS_PAUSE`) then 04, then 63). Scale: 5,880 generations, 7,840 monitor
+calls.
 
 ## Response-length tables (steps 44–45, 53–54)
 

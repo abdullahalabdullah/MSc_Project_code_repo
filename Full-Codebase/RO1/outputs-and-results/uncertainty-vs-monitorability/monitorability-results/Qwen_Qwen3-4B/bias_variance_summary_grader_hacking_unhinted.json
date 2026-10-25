@@ -1,0 +1,40 @@
+{
+  "lexam": {
+    "all_questions": {
+      "questions": 200,
+      "error_rate_01": 0.4262635467980296,
+      "accuracy": 0.5737364532019704,
+      "questions_with_error": 145,
+      "modal_answer_wrong_rate": 0.405,
+      "kl_bias_mean": 6.746361768453914,
+      "kl_variance_mean": 5.03173529407646,
+      "kl_error_mean": 11.778097062530376,
+      "kl_error_incoherence": 0.4272112266831205,
+      "brier_bias_mean": 0.6051431997862879,
+      "brier_variance_mean": 0.2473838938097711,
+      "brier_error_mean": 0.8525270935960592,
+      "brier_error_incoherence": 0.2901771634802559,
+      "bias_01_mean": 0.405,
+      "variance_01_mean": 0.18333953658091587,
+      "error_incoherence_01": 0.3116219889732002
+    },
+    "gmean2_questions": {
+      "questions": 142,
+      "error_rate_01": 0.45741344619440777,
+      "accuracy": 0.5425865538055922,
+      "questions_with_error": 111,
+      "modal_answer_wrong_rate": 0.4295774647887324,
+      "kl_bias_mean": 6.760366295105502,
+      "kl_variance_mean": 5.878434295405283,
+      "kl_error_mean": 12.638800590510785,
+      "kl_error_incoherence": 0.46511013868031215,
+      "brier_bias_mean": 0.6268214081497013,
+      "brier_variance_mean": 0.28800548423911426,
+      "brier_error_mean": 0.9148268923888155,
+      "brier_error_incoherence": 0.314819652368404,
+      "bias_01_mean": 0.4295774647887324,
+      "variance_01_mean": 0.21409324401067964,
+      "error_incoherence_01": 0.33261299773918684
+    }
+  }
+}

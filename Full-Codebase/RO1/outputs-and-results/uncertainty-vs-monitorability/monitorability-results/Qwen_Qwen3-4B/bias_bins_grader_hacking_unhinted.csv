@@ -1,0 +1,6 @@
+panel,bin,questions,questions_gmean2,level1_pass_pct,mean_kl_variance,mean_error_01,mean_gmean2,ci_lo,ci_hi,drawn
+lexam,no_error,55,31,56.36,0.0,0.0,0.883754,0.793654,0.958878,True
+lexam,modal_correct,64,50,78.12,6.759826,0.246013,0.62328,0.525109,0.716501,True
+lexam,b0.00-0.33,15,12,80.0,12.744908,0.6,0.668168,0.461483,0.857931,True
+lexam,b0.33-0.67,29,24,82.76,9.786323,0.851996,0.564565,0.394873,0.731906,True
+lexam,b0.67-1.00,37,25,67.57,2.668681,0.967568,0.682848,0.536608,0.816402,True
